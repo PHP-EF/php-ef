@@ -37,7 +37,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Save file
     $oWriterPPTX = IOFactory::createWriter($objPHPPowerPoint, 'PowerPoint2007');
-    $oWriterPPTX->save(__DIR__ . "/presentation.pptx");
+    $oWriterPPTX->save(__DIR__ . "../files/presentation.pptx");
+    header("Location: /files/presentation.pptx");
 
     echo "PowerPoint presentation created successfully!";
 }
