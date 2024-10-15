@@ -1,3 +1,4 @@
 vendor/*
 files/reports/*
 composer.lock
+!files/reports/placeholder.txt
