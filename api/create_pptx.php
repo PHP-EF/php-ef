@@ -13,8 +13,8 @@ use Label305\PptxExtractor\Basic\BasicInjector;
 
 $extractor = new BasicExtractor();
 $mapping = $extractor->extractStringsAndCreateMappingFile(
-    __DIR__.'/files/template-sept-24.pptx',
-    __DIR__.'/files/reports/report-'.$Rand.'-extracted.pptx'
+    __DIR__.'/../files/template-sept-24.pptx',
+    __DIR__.'/../files/reports/report-'.$Rand.'-extracted.pptx'
 );
 
 // Customer Name
@@ -28,8 +28,8 @@ $mapping[$TAG_CustomerName] = $AccountName;
 $injector = new BasicInjector();
 $injector->injectMappingAndCreateNewFile(
     $mapping,
-    __DIR__.'/files/reports/report-'.$Rand.'-extracted.pptx',
-    __DIR__.'/files/reports/report-'.$Rand.'.pptx'
+    __DIR__.'/../files/reports/report-'.$Rand.'-extracted.pptx',
+    __DIR__.'/../files/reports/report-'.$Rand.'.pptx'
 );
 
 ## Generate Response
