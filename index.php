@@ -1,5 +1,5 @@
 <?php
-  require_once 'scripts/inc/inc.php';
+  require_once(__DIR__.'/scripts/inc/inc.php');
 ?>
 
 <!DOCTYPE html>
