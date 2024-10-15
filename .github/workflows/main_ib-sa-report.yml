@@ -71,5 +71,5 @@ jobs:
         with:
           app-name: 'ib-sa-report'
           slot-name: 'Production'
-          package: './html'
+          package: .
           

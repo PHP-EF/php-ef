@@ -1,9 +1,0 @@
-{
-    "require": {
-        "phpoffice/phppresentation": "dev-master",
-        "cristal/pptx": "1.0.8",
-        "mustache/mustache": "2.14.2",
-        "rmccue/requests": "^2.0.12",
-        "label305/pptx-extractor": "0.2.*"
-    }
-}
