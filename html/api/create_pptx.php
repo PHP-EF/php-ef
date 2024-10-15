@@ -1,7 +1,6 @@
 <?php
 $SkipCSS = true;
-require '../../scripts/inc/inc.php';
-require '../vendor/autoload.php';
+require '/home/site/wwwroot/scripts/inc/inc.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     require 'csp-functions.php';
