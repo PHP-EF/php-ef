@@ -50,6 +50,7 @@
 function download(url) {
   const a = document.createElement('a')
   a.href = url
+  console.log(url)
   a.download = url.split('/').pop()
   document.body.appendChild(a)
   a.click()
@@ -66,7 +67,6 @@ function hideLoading() {
 $("#Generate").click(function(){
   showLoading()
   $.post( "api/create_pptx.php", { APIKey: $('#APIKey')[0].value}).done(function( data ) {
-    console.log(data['Path'])
     download(data['Path'])
     hideLoading()
   });

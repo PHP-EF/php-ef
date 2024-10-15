@@ -49,6 +49,3 @@ if (!(isset($SkipCSS))) {
     </div>
     ';
 }
-
-?>
-
