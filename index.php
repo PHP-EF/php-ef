@@ -47,6 +47,10 @@
             display: none;
             margin-top: 10px;
         }
+        input[type="password"] {
+            width: 500px;
+            display: inline-block;
+        }
         input[type="datetime-local"] {
             width: 200px;
             display: inline-block;
@@ -55,7 +59,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Infoblox Report Generator</h1>
+        <h2>Infoblox Security Assessment Report Generator</h2>
         <input id="APIKey" type="password" placeholder="Enter API Key">
         <br>
         <input type="datetime-local" id="startDate" placeholder="Start Date/Time">
