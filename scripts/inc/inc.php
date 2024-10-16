@@ -1,5 +1,6 @@
 <?php
-#require_once(__DIR__.'/../functions/global-functions.php');
+require_once(__DIR__.'/../functions/general-functions.php');
+require_once(__DIR__.'/../functions/csp-functions.php');
 require_once(__DIR__.'/../../vendor/autoload.php');
 if (!(isset($SkipCSS))) {
 	
