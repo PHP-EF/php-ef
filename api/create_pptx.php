@@ -77,6 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Data Exfiltration Events
     $DataExfilEvents = QueryCubeJS('{"measures":["PortunusAggInsight.requests"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"equals","values":["4"]},{"member":"PortunusAggInsight.tclass","operator":"equals","values":["TI-DNST"]}],"ungrouped":false}');
 
+    // Zero Day DNS Events
+    $ZeroDayDNSEvents = QueryCubeJS('{"measures":["PortunusAggInsight.requests"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"equals","values":["2","3"]},{"member":"PortunusAggInsight.tclass","operator":"equals","values":["Zero Day DNS"]}],"ungrouped":false}');
     // ** ** //
 
     ##// Slide 2 - Title Page
@@ -89,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $mapping = replaceTag($mapping,'#TAG03',"TBC"); // High-Risk Websites
     $mapping = replaceTag($mapping,'#TAG04',number_abbr($DataExfilEvents->result->data[0]->{'PortunusAggInsight.requests'})); // Data Exfil / Tunneling
     $mapping = replaceTag($mapping,'#TAG05',number_abbr($LookalikeDomainCounts->results->count_threats)); // Lookalike Domains
-    $mapping = replaceTag($mapping,'#TAG06',"TBC"); // Zero Day DNS
+    $mapping = replaceTag($mapping,'#TAG06',number_abbr($ZeroDayDNSEvents->result->data[0]->{'PortunusAggInsight.requests'})); // Zero Day DNS
     $mapping = replaceTag($mapping,'#TAG07',"TBC"); // Suspicious Domains
 
 
@@ -100,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $mapping = replaceTag($mapping,'#TAG11',number_abbr($TotalInsights)); // Insights
     $mapping = replaceTag($mapping,'#TAG12',number_abbr($LookalikeDomainCounts->results->count_threats)); // Custom Lookalike Domains
     $mapping = replaceTag($mapping,'#TAG13',"TBC"); // DoH
-    $mapping = replaceTag($mapping,'#TAG14',"TBC"); // Zero Day DNS
+    $mapping = replaceTag($mapping,'#TAG14',number_abbr($ZeroDayDNSEvents->result->data[0]->{'PortunusAggInsight.requests'})); // Zero Day DNS
     $mapping = replaceTag($mapping,'#TAG15',"TBC"); // Suspicious Domains
     $mapping = replaceTag($mapping,'#TAG16',"TBC"); // Newly Observed Domains
     $mapping = replaceTag($mapping,'#TAG17',"TBC"); // Domain Generated Algorithms
