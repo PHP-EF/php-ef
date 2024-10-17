@@ -21,18 +21,7 @@ if (!(isset($SkipCSS))) {
       <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
       <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.min.css" rel="stylesheet">
       <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.min.js">
-
-
-
-    <!-- Bootstrap-Table -->
-      <script src="https://unpkg.com/bootstrap-table@1.22.0/dist/bootstrap-table.min.js"></script>
-      <script type="text/javascript" src="https://unpkg.com/bootstrap-table@1.22.0/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
-      <script type="text/javascript" src="https://unpkg.com/bootstrap-table@1.22.0/dist/extensions/export/bootstrap-table-export.js"></script>
-      <script src="https://unpkg.com/jquery-resizable-columns@0.2.3/dist/jquery.resizableColumns.min.js"></script>
-      <!--<script type="text/javascript" src="https://unpkg.com/bootstrap-table@1.22.0/dist/extensions/cookie/bootstrap-table-cookie.js"></script>-->
-
-      <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.0/dist/bootstrap-table.min.css">
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.min.js"></script>
 
     <!-- FontAwesome -->
       <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet" type="text/css"/>
