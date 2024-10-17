@@ -68,17 +68,12 @@ input[type="password"] {
 .form-select {
     display: inline-block!important;
     width: 10%!important;
+    padding: .575rem 2.5rem .575rem .75rem!important;
 }
 input[type="datetime-local"] {
     width: 200px!important;
     display: inline-block;
     margin-right: 10px;
-}
-.toast {
-
-}
-.toast-header {
-
 }
 .toast-body {
     color: #000;
