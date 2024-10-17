@@ -121,6 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $AccountInfo = QueryCSP("get","v2/current_user/accounts");
             $CurrentAccount = $AccountInfo->results[array_search($UserInfo->result->account_id, array_column($AccountInfo->results, 'id'))];
             $mapping = replaceTag($mapping,'#TAG01',$CurrentAccount->name);
+            $mapping = replaceTag($mapping,'#DATE',date("dS F Y"));
             $mapping = replaceTag($mapping,'#NAME',$UserInfo->result->name);
             $mapping = replaceTag($mapping,'#EMAIL',$UserInfo->result->email);
 
