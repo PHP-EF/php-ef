@@ -19,7 +19,7 @@
           </div>
           <br>
           <div class="alert alert-info genInfo" role="alert">
-            It can take up to 2 minutes to generate the report. Please be patient and do not click Generate again until it has completed.
+            It can take up to 2 minutes to generate the report, please be patient.
           </div>
           <button class="btn btn-success" id="Generate">Generate Report</button>
           <div class="loading-icon">
@@ -75,6 +75,7 @@ function hideLoading() {
 
 $("#Generate").click(function(){
 
+  $("#Generate").prop('disabled', true)
   if(!$('#APIKey')[0].value){
     toast("Error","Missing Required Fields","The API Key is a required field.","danger","30000");
     return null;
@@ -95,14 +96,18 @@ $("#Generate").click(function(){
     APIKey: $('#APIKey')[0].value,
     StartDateTime: startDateTime.toISOString(),
     EndDateTime: endDateTime.toISOString()
-  }).done(function( data ) {
+  }).done(function( data, status ) {
     if (data['Status'] == 'Success') {
       toast("Success","","The report has been successfully generated.","success","30000");
       download(data['Path'])
     } else {
       toast(data['Status'],"",data['Error'],"danger","30000");
     }
-    hideLoading()
+  }).fail(function( data, status ) {
+      toast("API Error","","Unknown API Error","danger","30000");
+  }).always(function() {
+      hideLoading()
+      $("#Generate").prop('disabled', false)
   });
 });
 </script>
