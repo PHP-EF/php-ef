@@ -9,8 +9,17 @@ function QueryCSP($Method, $Uri, $Data = "") {
 
   $ErrorOnEmpty = true;
 
-  if (strpos($Uri,"https://csp.infoblox.com/") === FALSE) {
-    $Url = "https://csp.infoblox.com/".$Uri;
+  $Realm = $_POST['Realm'];
+
+  if (strpos($Uri,"https://csp.") === FALSE) {
+    if ($Realm == "US") {
+      $Url = "https://csp.infoblox.com/".$Uri;
+    } elseif ($Realm == "EU") {
+      $Url = "https://csp.eu.infoblox.com/".$Uri;
+    } else {
+      echo 'Error. Invalid Realm';
+      return false;
+    }
   } else {
     $Url = $Uri;
   }

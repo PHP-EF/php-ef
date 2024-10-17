@@ -65,6 +65,10 @@ input[type="password"] {
     width: 50%!important;
     display: inline-block;
 }
+.form-select {
+    display: inline-block!important;
+    width: 10%!important;
+}
 input[type="datetime-local"] {
     width: 200px!important;
     display: inline-block;

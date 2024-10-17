@@ -12,6 +12,10 @@
       <div class="container">
           <h2>Infoblox Security Assessment Report Generator</h2>
           <input id="APIKey" type="password" placeholder="Enter API Key" required>
+          <select id="Realm" class="form-select" aria-label="Realm Selection">
+            <option value="US" selected>US Realm</option>
+            <option value="EU">EU Realm</option>
+          </select>
           <br>
           <div class="calendar">
             <h5>Start:&nbsp;</h5><input type="datetime-local" id="startDate" placeholder="Start Date/Time">
@@ -95,7 +99,8 @@ $("#Generate").click(function(){
   $.post( "api/create_pptx.php", {
     APIKey: $('#APIKey')[0].value,
     StartDateTime: startDateTime.toISOString(),
-    EndDateTime: endDateTime.toISOString()
+    EndDateTime: endDateTime.toISOString(),
+    Realm: $('#Realm').find(":selected").val()
   }).done(function( data, status ) {
     if (data['Status'] == 'Success') {
       toast("Success","","The report has been successfully generated.","success","30000");

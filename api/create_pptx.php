@@ -21,7 +21,7 @@ function replaceTag($Mapping,$TagName,$Value) {
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
-    if (isset($_POST['APIKey']) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime'])) {
+    if (isset($_POST['APIKey']) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
 
         // Check API Key is valid & get User Info
         $UserInfo = QueryCSP("get","v2/current_user");
