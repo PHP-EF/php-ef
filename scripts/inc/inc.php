@@ -39,15 +39,15 @@ if (!(isset($SkipCSS))) {
     </head>
     ';
     
-    if(!isset($_COOKIE["theme"])) {
-      echo "<body>";
-    } else {
-      if ($_COOKIE["theme"] == "dark") {
-        echo '<body class="dark-theme">';
-      } else {
-        echo '<body>';
-      }
-    }
+    // if(!isset($_COOKIE["theme"])) {
+    //   echo "<body>";
+    // } else {
+    //   if ($_COOKIE["theme"] == "dark") {
+    //     echo '<body class="dark-theme">';
+    //   } else {
+    //     echo '<body>';
+    //   }
+    // }
 
     echo '
     <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999999" id="toastContainer">

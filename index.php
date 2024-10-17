@@ -26,6 +26,19 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
+        .footnote {
+            text-align: center;
+            background-color: #333333; /* Slightly lighter dark color for contrast */
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        .footnote a {
+          color: white;
+        }
         input, button {
             margin: 10px 0;
             padding: 10px;
@@ -58,23 +71,28 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Infoblox Security Assessment Report Generator</h2>
-        <input id="APIKey" type="password" placeholder="Enter API Key">
-        <br>
-        <input type="datetime-local" id="startDate" placeholder="Start Date/Time">
-        <input type="datetime-local" id="endDate" placeholder="End Date/Time">
-        <br>
-        <div class="alert alert-info" role="alert">
-          It can take up to 2 minutes to generate the report. Please be patient and do not click Generate again until it has completed.
-        </div>
-        <button id="Generate">Generate Report</button>
-        <div class="loading-icon">
-          <hr>
-          <div class="spinner-border text-primary" role="status">
-            <span class="sr-only">Loading...</span>
+    <div class="mainContainer">
+      <div class="container">
+          <h2>Infoblox Security Assessment Report Generator</h2>
+          <input id="APIKey" type="password" placeholder="Enter API Key">
+          <br>
+          <input type="datetime-local" id="startDate" placeholder="Start Date/Time">
+          <input type="datetime-local" id="endDate" placeholder="End Date/Time">
+          <br>
+          <div class="alert alert-info" role="alert">
+            It can take up to 2 minutes to generate the report. Please be patient and do not click Generate again until it has completed.
           </div>
-        </div>
+          <button id="Generate">Generate Report</button>
+          <div class="loading-icon">
+            <hr>
+            <div class="spinner-border text-primary" role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
+          </div>
+      </div>
+      <div class="footnote">
+        <a href="https://github.com/TehMuffinMoo"><i class="fab fa-github fa-lg"></i> &copy; 2024 Mat Cox.</a>
+      </div>
     </div>
 </body>
 </html>
