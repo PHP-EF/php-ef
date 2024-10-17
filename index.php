@@ -18,8 +18,8 @@
           </select>
           <br>
           <div class="calendar">
-            <h5>Start:&nbsp;</h5><input type="datetime-local" id="startDate" placeholder="Start Date/Time">
-            <h5>End:&nbsp;</h5><input type="datetime-local" id="endDate" placeholder="End Date/Time">
+            <h5>Start:&nbsp;</h5><input type="datetime-local" id="startDate" placeholder="Start Date/Time" onchange="setEndDateMax()">
+            <h5>End:&nbsp;</h5><input type="datetime-local" id="endDate" placeholder="End Date/Time" onchange="setStartDateMin()">
           </div>
           <br>
           <div class="alert alert-info genInfo" role="alert">
@@ -41,6 +41,20 @@
 </html>
 
 <script>
+function setEndDateMax() {
+    const startDate = new Date(document.getElementById('startDate').value);
+    const maxEndDate = new Date(startDate);
+    maxEndDate.setDate(startDate.getDate() + 30);
+    document.getElementById('endDate').max = maxEndDate.toISOString().slice(0, 16);
+}
+
+function setStartDateMin() {
+    const endDate = new Date(document.getElementById('endDate').value);
+    const minStartDate = new Date(endDate);
+    minStartDate.setDate(endDate.getDate() - 30);
+    document.getElementById('startDate').min = minStartDate.toISOString().slice(0, 16);
+}
+
 function toast(title,note,body,theme,delay = "8000") {
   $('#toastContainer').append(`
       <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="`+delay+`">
@@ -79,7 +93,6 @@ function hideLoading() {
 
 $("#Generate").click(function(){
 
-  $("#Generate").prop('disabled', true)
   if(!$('#APIKey')[0].value){
     toast("Error","Missing Required Fields","The API Key is a required field.","danger","30000");
     return null;
@@ -93,6 +106,7 @@ $("#Generate").click(function(){
     return null;
   }
 
+  $("#Generate").prop('disabled', true)
   showLoading()
   const startDateTime = new Date($('#startDate')[0].value)
   const endDateTime = new Date($('#endDate')[0].value)
