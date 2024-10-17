@@ -65,6 +65,9 @@
         <input type="datetime-local" id="startDate" placeholder="Start Date/Time">
         <input type="datetime-local" id="endDate" placeholder="End Date/Time">
         <br>
+        <div class="alert alert-info" role="alert">
+          It can take up to 2 minutes to generate the report. Please be patient and do not click Generate again until it has completed.
+        </div>
         <button id="Generate">Generate Report</button>
         <div class="loading-icon">
           <hr>

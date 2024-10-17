@@ -32,7 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Debug
     // file_put_contents(__DIR__.'/../files/template-arr.txt', var_export($mapping, true));
 
-    // TODO - Time Dimension - Needs input from WebUI
+    // Set Time Dimensions
+    // TODO - Set defaults
     $StartDimension = str_replace('Z','',$_POST['StartDateTime']);
     $EndDimension = str_replace('Z','',$_POST['EndDateTime']);
 
@@ -64,11 +65,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $MediumInsightsId = array_search('MEDIUM', array_column($SOCInsights->result->data, 'InsightsAggregated.priorityText'));
     $HighInsightsId = array_search('HIGH', array_column($SOCInsights->result->data, 'InsightsAggregated.priorityText'));
     $CriticalInsightsId = array_search('CRITICAL', array_column($SOCInsights->result->data, 'InsightsAggregated.priorityText'));
-    $InfoInsights = $SOCInsights->result->data[$InfoInsightsId]->{'InsightsAggregated.count'};
-    $LowInsights = $SOCInsights->result->data[$LowInsightsId]->{'InsightsAggregated.count'};
-    $MediumInsights = $SOCInsights->result->data[$MediumInsightsId]->{'InsightsAggregated.count'};
-    $HighInsights = $SOCInsights->result->data[$HighInsightsId]->{'InsightsAggregated.count'};
-    $CriticalInsights = $SOCInsights->result->data[$CriticalInsightsId]->{'InsightsAggregated.count'};
+    if (!isset($InfoInsightsId)) {$InfoInsights = $SOCInsights->result->data[$InfoInsightsId]->{'InsightsAggregated.count'};} else {$InfoInsights = 0;}
+    if (!isset($LowInsightsId)) {$LowInsights = $SOCInsights->result->data[$LowInsightsId]->{'InsightsAggregated.count'};} else {$LowInsights = 0;}
+    if (!isset($MediumInsightsId)) {$MediumInsights = $SOCInsights->result->data[$MediumInsightsId]->{'InsightsAggregated.count'};} else {$MediumInsights = 0;}
+    if (!isset($HighInsightsId)) {$HighInsights = $SOCInsights->result->data[$HighInsightsId]->{'InsightsAggregated.count'};} else {$HighInsights = 0;}
+    if (!isset($CriticalInsightsId)) {$CriticalInsights = $SOCInsights->result->data[$CriticalInsightsId]->{'InsightsAggregated.count'};} else {$CriticalInsights = 0;}
     $TotalInsights = $InfoInsights+$LowInsights+$MediumInsights+$HighInsights+$CriticalInsights;
 
     // Security Activity
@@ -79,20 +80,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Zero Day DNS Events
     $ZeroDayDNSEvents = QueryCubeJS('{"measures":["PortunusAggInsight.requests"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"equals","values":["2","3"]},{"member":"PortunusAggInsight.tclass","operator":"equals","values":["Zero Day DNS"]}],"ungrouped":false}');
+
+    // Suspicious Domains
+    $Suspicious = QueryCubeJS('{"measures":["PortunusAggInsight.requests"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"equals","values":["2"]},{"member":"PortunusAggInsight.tclass","operator":"equals","values":["Suspicious"]}],"ungrouped":false}');
+
+    // High Risk Websites
+    $HighRiskWebsites = QueryCubeJS('{"timeDimensions":[{"dimension":"PortunusAggWebContentDiscovery.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"measures":["PortunusAggWebContentDiscovery.count","PortunusAggWebContentDiscovery.deviceCount"],"dimensions":["PortunusAggWebContentDiscovery.domain_category"],"order":{"PortunusAggWebContentDiscovery.count":"desc"},"filters":[{"member":"PortunusAggWebContentDiscovery.domain_category","operator":"equals","values":["Risky Activity","Suspicious and Malicious Software","Uncategorized","Adult","Abortion","Abortion Pro Choice","Abortion Pro Life","Child Inappropriate","Gambling","Gay","Lingerie","Nudity","Pornography","Profanity","R-Rated","Sex & Erotic","Sex Education","Tobacco","Anonymizer","Criminal Skills","Self Harm","Criminal Activities - Other","Illegal Drugs","Marijuana","Child Abuse Images","Hacking","Hate Speech","Piracy & Copyright Theft","Torrent Repository","Terrorism","Peer-to-Peer","Violence","Weapons","School Cheating","Ad Fraud","Botnet","Command and Control Centers","Compromised & Links To Malware","Malware Call-Home","Malware Distribution Point","Phishing/Fraud","Spam URLs","Spyware & Questionable Software","Cryptocurrency Mining","Sexuality","Parked & For Sale Domains"]}]}');
+
     // ** ** //
 
-    ##// Slide 2 - Title Page
-    // Get & Inject Customer Name
+    ##// Slide 2 / 45 - Title Page & Contact Page
+    // Get & Inject Customer Name, Contact Name & Email
+    $UserInfo = QueryCSP("get","v2/current_user");
     $AccountInfo = QueryCSP("get","v2/current_user/accounts");
-    $mapping = replaceTag($mapping,'#TAG01',$AccountInfo->results[0]->name);
+    $CurrentAccount = $AccountInfo->results[array_search($UserInfo->result->account_id, array_column($AccountInfo->results, 'id'))];
+    $mapping = replaceTag($mapping,'#TAG01',$CurrentAccount->name);
+    $mapping = replaceTag($mapping,'#NAME',$UserInfo->result->name);
+    $mapping = replaceTag($mapping,'#EMAIL',$UserInfo->result->email);
 
     ##// Slide 5 - Executive Summary
     $mapping = replaceTag($mapping,'#TAG02',number_abbr($HighEventsCount)); // High-Risk Events
-    $mapping = replaceTag($mapping,'#TAG03',"TBC"); // High-Risk Websites
+    $mapping = replaceTag($mapping,'#TAG03',number_abbr(array_sum(array_column($HighRiskWebsites->result->data, 'PortunusAggWebContentDiscovery.count')))); // High-Risk Websites
     $mapping = replaceTag($mapping,'#TAG04',number_abbr($DataExfilEvents->result->data[0]->{'PortunusAggInsight.requests'})); // Data Exfil / Tunneling
     $mapping = replaceTag($mapping,'#TAG05',number_abbr($LookalikeDomainCounts->results->count_threats)); // Lookalike Domains
     $mapping = replaceTag($mapping,'#TAG06',number_abbr($ZeroDayDNSEvents->result->data[0]->{'PortunusAggInsight.requests'})); // Zero Day DNS
-    $mapping = replaceTag($mapping,'#TAG07',"TBC"); // Suspicious Domains
+    $mapping = replaceTag($mapping,'#TAG07',number_abbr($Suspicious->result->data[0]->{'PortunusAggInsight.requests'})); // Suspicious Domains
 
 
     ##// Slide 6 - Security Indicator Summary
@@ -101,15 +113,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $mapping = replaceTag($mapping,'#TAG10',number_abbr($MediumEventsCount)); // Medium-Risk Events
     $mapping = replaceTag($mapping,'#TAG11',number_abbr($TotalInsights)); // Insights
     $mapping = replaceTag($mapping,'#TAG12',number_abbr($LookalikeDomainCounts->results->count_threats)); // Custom Lookalike Domains
-    $mapping = replaceTag($mapping,'#TAG13',"TBC"); // DoH
+    $DOH = QueryCubeJS('{"measures":["PortunusAggInsight.requests"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"equals","values":["2"]},{"member":"PortunusAggInsight.tproperty","operator":"equals","values":["DoHService"]}],"ungrouped":false}');
+    $mapping = replaceTag($mapping,'#TAG13',number_abbr($DOH->result->data[0]->{'PortunusAggInsight.requests'})); // DoH
     $mapping = replaceTag($mapping,'#TAG14',number_abbr($ZeroDayDNSEvents->result->data[0]->{'PortunusAggInsight.requests'})); // Zero Day DNS
-    $mapping = replaceTag($mapping,'#TAG15',"TBC"); // Suspicious Domains
-    $mapping = replaceTag($mapping,'#TAG16',"TBC"); // Newly Observed Domains
-    $mapping = replaceTag($mapping,'#TAG17',"TBC"); // Domain Generated Algorithms
+    $mapping = replaceTag($mapping,'#TAG15',number_abbr($Suspicious->result->data[0]->{'PortunusAggInsight.requests'})); // Suspicious Domains
+    $NOD = QueryCubeJS('{"measures":["PortunusAggInsight.requests"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"equals","values":["2"]},{"member":"PortunusAggInsight.tproperty","operator":"equals","values":["NewlyObservedDomains"]}],"ungrouped":false}');
+    $mapping = replaceTag($mapping,'#TAG16',number_abbr($NOD->result->data[0]->{'PortunusAggInsight.requests'})); // Newly Observed Domains
+    $DGAs = QueryCubeJS('{"measures":["PortunusAggInsight.requests"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"equals","values":["2"]},{"member":"PortunusAggInsight.tclass","operator":"equals","values":["DGA"]}],"ungrouped":false}');
+    $mapping = replaceTag($mapping,'#TAG17',number_abbr($DGAs->result->data[0]->{'PortunusAggInsight.requests'})); // Domain Generated Algorithms
     $mapping = replaceTag($mapping,'#TAG18',number_abbr($DataExfilEvents->result->data[0]->{'PortunusAggInsight.requests'})); // DNS Tunnelling
-    $mapping = replaceTag($mapping,'#TAG19',"TBC"); // Unique Applications
-    $mapping = replaceTag($mapping,'#TAG20',"TBC"); // High-Risk Web Categories
-    $mapping = replaceTag($mapping,'#TAG21',"TBC"); // Threat Actors
+    $UniqueApplications = QueryCubeJS('{"measures":["PortunusAggAppDiscovery.requests"],"dimensions":["PortunusAggAppDiscovery.app_name","PortunusAggAppDiscovery.app_approval"],"timeDimensions":[{"dimension":"PortunusAggAppDiscovery.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggAppDiscovery.app_name","operator":"set"},{"member":"PortunusAggAppDiscovery.app_name","operator":"notEquals","values":[""]}],"order":{}}');
+    $mapping = replaceTag($mapping,'#TAG19',number_abbr(count($UniqueApplications->result->data))); // Unique Applications
+    $mapping = replaceTag($mapping,'#TAG20',count($HighRiskWebsites->result->data)); // High-Risk Web Categories
+    $ThreatActors = QueryCubeJS('{"timeDimensions":[{"dateRange":["'.$StartDimension.'","'.$EndDimension.'"],"dimension":"PortunusAggIPSummary.timestamp","granularity":null}],"measures":["PortunusAggIPSummary.count"],"dimensions":["PortunusAggIPSummary.threat_indicator","PortunusAggIPSummary.actor_id"],"filters":[{"and":[{"member":"PortunusAggIPSummary.threat_indicator","operator":"set"},{"member":"PortunusAggIPSummary.actor_id","operator":"set"}]}],"order":{"PortunusAggIPSummary.timestampMax":"desc"}}');
+    $mapping = replaceTag($mapping,'#TAG21',number_abbr(count(array_unique(array_column($ThreatActors->result->data, 'PortunusAggIPSummary.actor_id'))))); // Threat Actors
 
     ##// Slide 9 - Traffic Usage Analysis
     // Total DNS Activity
