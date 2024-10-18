@@ -3,6 +3,8 @@ $SkipCSS = true;
 require_once(__DIR__.'/../scripts/inc/inc.php');
 use Label305\PptxExtractor\Basic\BasicExtractor;
 use Label305\PptxExtractor\Basic\BasicInjector;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 function array_search_partial($keyword,$arr) {
     foreach($arr as $index => $string) {
@@ -28,20 +30,110 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($UserInfo) {
             $Rand = rand();
 
-            // Extract Powerpoint Template
+            // Set Time Dimensions
+            $StartDimension = str_replace('Z','',$_POST['StartDateTime']);
+            $EndDimension = str_replace('Z','',$_POST['EndDateTime']);
+
+            // Extract Powerpoint Template Strings
+            // ** Using external library to save re-writing the string replacement functions manually. Will probably pull this in as native code at some point.
             $extractor = new BasicExtractor();
             $mapping = $extractor->extractStringsAndCreateMappingFile(
                 __DIR__.'/../files/template-sept-24.pptx',
                 __DIR__.'/../files/reports/report-'.$Rand.'-extracted.pptx'
             );
 
-            // Debug
-            // file_put_contents(__DIR__.'/../files/template-arr.txt', var_export($mapping, true));
+            // Extract Powerpoint Template Zip
+            extractZip(__DIR__.'/../files/reports/report-'.$Rand.'-extracted.pptx',__DIR__.'/../files/reports/report-'.$Rand);
 
-            // Set Time Dimensions
-            // TODO - Set defaults
-            $StartDimension = str_replace('Z','',$_POST['StartDateTime']);
-            $EndDimension = str_replace('Z','',$_POST['EndDateTime']);
+            //
+            // Do Chart, Spreadsheet & Image Stuff Here ....
+            // Top threat feeds
+            $TopThreatFeeds = QueryCubeJS('{"measures":["PortunusAggSecurity.feednameCount"],"dimensions":["PortunusAggSecurity.feed_name"],"timeDimensions":[{"dimension":"PortunusAggSecurity.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggSecurity.type","operator":"equals","values":["2"]},{"member":"PortunusAggSecurity.severity","operator":"equals","values":["High"]}],"limit":"10","ungrouped":false}');
+            $TopThreatFeedsSS = IOFactory::load(__DIR__.'/../files/reports/report-'.$Rand.'/ppt/embeddings/Microsoft_Excel_Worksheet.xlsx');
+            $RowNo = 2;
+            foreach ($TopThreatFeeds->result->data as $TopThreatFeed) {
+                $TopThreatFeedsS = $TopThreatFeedsSS->getActiveSheet();
+                $TopThreatFeedsS->setCellValue('A'.$RowNo, $TopThreatFeed->{'PortunusAggSecurity.feed_name'});
+                $TopThreatFeedsS->setCellValue('B'.$RowNo, $TopThreatFeed->{'PortunusAggSecurity.feednameCount'});
+                $RowNo++;
+            }
+            $TopThreatFeedsW = IOFactory::createWriter($TopThreatFeedsSS, 'Xlsx');
+            $TopThreatFeedsW->save(__DIR__.'/../files/reports/report-'.$Rand.'/ppt/embeddings/Microsoft_Excel_Worksheet.xlsx');
+
+            // Top detected properties
+            $TopDetectedProperties = QueryCubeJS('{"measures":["PortunusDnsLogs.tpropertyCount"],"dimensions":["PortunusDnsLogs.tproperty"],"timeDimensions":[{"dimension":"PortunusDnsLogs.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusDnsLogs.type","operator":"equals","values":["2"]},{"member":"PortunusDnsLogs.feed_name","operator":"notEquals","values":["Public_DOH","public-doh","Public_DOH_IP","public-doh-ip"]},{"member":"PortunusDnsLogs.severity","operator":"notEquals","values":["Low","Info"]}],"limit":"10","ungrouped":false}');
+            $TopDetectedPropertiesSS = IOFactory::load(__DIR__.'/../files/reports/report-'.$Rand.'/ppt/embeddings/Microsoft_Excel_Worksheet1.xlsx');
+            $RowNo = 2;
+            foreach ($TopDetectedProperties->result->data as $TopDetectedProperty) {
+                $TopDetectedPropertiesS = $TopDetectedPropertiesSS->getActiveSheet();
+                $TopDetectedPropertiesS->setCellValue('A'.$RowNo, $TopDetectedProperty->{'PortunusDnsLogs.tproperty'});
+                $TopDetectedPropertiesS->setCellValue('B'.$RowNo, $TopDetectedProperty->{'PortunusDnsLogs.tpropertyCount'});
+                $RowNo++;
+            }
+            $TopDetectedPropertiesW = IOFactory::createWriter($TopDetectedPropertiesSS, 'Xlsx');
+            $TopDetectedPropertiesW->save(__DIR__.'/../files/reports/report-'.$Rand.'/ppt/embeddings/Microsoft_Excel_Worksheet1.xlsx');
+
+            // Content filtration
+            $ContentFiltration = QueryCubeJS('{"measures":["PortunusAggWebcontent.categoryCount"],"dimensions":["PortunusAggWebcontent.category"],"timeDimensions":[{"dimension":"PortunusAggWebcontent.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[],"limit":"10","ungrouped":false}');
+            $ContentFiltrationSS = IOFactory::load(__DIR__.'/../files/reports/report-'.$Rand.'/ppt/embeddings/Microsoft_Excel_Worksheet2.xlsx');
+            $RowNo = 2;
+            foreach ($ContentFiltration->result->data as $ContentFilter) {
+                $ContentFiltrationS = $ContentFiltrationSS->getActiveSheet();
+                $ContentFiltrationS->setCellValue('A'.$RowNo, $ContentFilter->{'PortunusAggWebcontent.category'});
+                $ContentFiltrationS->setCellValue('B'.$RowNo, $ContentFilter->{'PortunusAggWebcontent.categoryCount'});
+                $RowNo++;
+            }
+            $ContentFiltrationW = IOFactory::createWriter($ContentFiltrationSS, 'Xlsx');
+            $ContentFiltrationW->save(__DIR__.'/../files/reports/report-'.$Rand.'/ppt/embeddings/Microsoft_Excel_Worksheet2.xlsx');
+
+            // Insight Distribution by Threat Type - Sheet 3
+            $InsightDistribution = QueryCubeJS('{"measures":["InsightsAggregated.count"],"dimensions":["InsightsAggregated.threatType"],"filters":[{"member":"InsightsAggregated.insightStatus","operator":"equals","values":["Active"]}]}');
+            $InsightDistributionSS = IOFactory::load(__DIR__.'/../files/reports/report-'.$Rand.'/ppt/embeddings/Microsoft_Excel_Worksheet3.xlsx');
+            $RowNo = 2;
+            foreach ($InsightDistribution->result->data as $InsightThreatType) {
+                $InsightDistributionS = $InsightDistributionSS->getActiveSheet();
+                $InsightDistributionS->setCellValue('A'.$RowNo, $InsightThreatType->{'InsightsAggregated.threatType'});
+                $InsightDistributionS->setCellValue('B'.$RowNo, $InsightThreatType->{'InsightsAggregated.count'});
+                $RowNo++;
+            }
+            $InsightDistributionW = IOFactory::createWriter($InsightDistributionSS, 'Xlsx');
+            $InsightDistributionW->save(__DIR__.'/../files/reports/report-'.$Rand.'/ppt/embeddings/Microsoft_Excel_Worksheet3.xlsx');
+            
+            // Threat Types (Lookalikes) - Sheet 4
+            $LookalikeThreatCountUri = urlencode('/api/atclad/v1/lookalike_threat_counts?_filter=detected_at>="'.$StartDimension.'" and detected_at<="'.$EndDimension.'"');
+            $LookalikeThreatCounts = QueryCSP("get",$LookalikeThreatCountUri);
+            $LookalikeThreatCountsSS = IOFactory::load(__DIR__.'/../files/reports/report-'.$Rand.'/ppt/embeddings/Microsoft_Excel_Worksheet4.xlsx');
+            $LookalikeThreatCountsS = $LookalikeThreatCountsSS->getActiveSheet();
+            $RowNo = 2;
+            if (isset($LookalikeThreatCounts->results->suspicious_count)) {
+                $LookalikeThreatCountsS->setCellValue('A'.$RowNo, 'Suspicious');
+                $LookalikeThreatCountsS->setCellValue('B'.$RowNo, $LookalikeThreatCounts->results->suspicious_count);
+                $RowNo++;
+            }
+            if (isset($LookalikeThreatCounts->results->malware_count)) {
+                $LookalikeThreatCountsS->setCellValue('A'.$RowNo, 'Malware');
+                $LookalikeThreatCountsS->setCellValue('B'.$RowNo, $LookalikeThreatCounts->results->malware_count);
+                $RowNo++;
+            }
+            if (isset($LookalikeThreatCounts->results->phishing_count)) {
+                $LookalikeThreatCountsS->setCellValue('A'.$RowNo, 'Phishing');
+                $LookalikeThreatCountsS->setCellValue('B'.$RowNo, $LookalikeThreatCounts->results->phishing_count);
+                $RowNo++;
+            }
+            if (isset($LookalikeThreatCounts->results->others_count)) {
+                $LookalikeThreatCountsS->setCellValue('A'.$RowNo, 'Others');
+                $LookalikeThreatCountsS->setCellValue('B'.$RowNo, $LookalikeThreatCounts->results->others_count);
+                $RowNo++;
+            }
+            $LookalikeThreatCountsW = IOFactory::createWriter($LookalikeThreatCountsSS, 'Xlsx');
+            $LookalikeThreatCountsW->save(__DIR__.'/../files/reports/report-'.$Rand.'/ppt/embeddings/Microsoft_Excel_Worksheet4.xlsx');
+            //
+
+            // Rebuild Powerpoint Template Zip
+            compressZip(__DIR__.'/../files/reports/report-'.$Rand.'-extracted.pptx',__DIR__.'/../files/reports/report-'.$Rand);
+
+            // Cleanup Extracted Zip
+            rmdirRecursive(__DIR__.'/../files/reports/report-'.$Rand);
 
             // ** Reusable Metrics ** //
             // DNS Firewall Activity - Used on Slides 2, 5 & 6
@@ -133,7 +225,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $mapping = replaceTag($mapping,'#TAG06',number_abbr($ZeroDayDNSEvents->result->data[0]->{'PortunusAggInsight.requests'})); // Zero Day DNS
             $mapping = replaceTag($mapping,'#TAG07',number_abbr($Suspicious->result->data[0]->{'PortunusAggInsight.requests'})); // Suspicious Domains
 
-
             ##// Slide 6 - Security Indicator Summary
             $mapping = replaceTag($mapping,'#TAG08',number_abbr($DNSActivity->result->data[0]->{'PortunusAggInsight.requests'})); // DNS Requests
             $mapping = replaceTag($mapping,'#TAG09',number_abbr($HighEventsCount)); // High-Risk Events
@@ -182,7 +273,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $mapping = replaceTag($mapping,'#TAG36',number_abbr($SecurityEvents->result->data[0]->{'PortunusAggInsight.requests'})); // Events
             $mapping = replaceTag($mapping,'#TAG37',number_abbr($TotalInsights)); // Key Insights
 
-
             ##// Slide 24 - Lookalike Domains
             $mapping = replaceTag($mapping,'#TAG38',number_abbr($LookalikeTotalCount)); // Total Lookalikes
             $mapping = replaceTag($mapping,'#TAG39',number_abbr($LookalikeTotalPercentage)); // Total Percentage Increase
@@ -219,6 +309,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $mapping = replaceTag($mapping,'#TAG52',number_abbr($Sources->result->data[0]->{'PortunusAggSecurity.networkCount'}));
 
             // Rebuild Powerpoint
+            // ** Using external library to save re-writing the string replacement functions manually. Will probably pull this in as native code at some point.
             $injector = new BasicInjector();
             $injector->injectMappingAndCreateNewFile(
                 $mapping,
