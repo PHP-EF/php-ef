@@ -33,8 +33,18 @@
             </div>
           </div>
       </div>
+
+      <div id="changelog-modal" class="modal fade changelog-modal" tabindex="-1" role="dialog" aria-labelledby="Change Log" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content changelog-modal">
+              <iframe src="api?function=getChangelog"></iframe>
+            </div>
+          </div>
+      </div>
+
       <div class="footnote">
-        <a href="https://github.com/TehMuffinMoo" target="_blank"><i class="fab fa-github fa-lg"></i> &copy; 2024 Mat Cox.</a>
+        <a href="https://github.com/TehMuffinMoo" target="_blank"><i class="fab fa-github fa-lg"></i> &copy; 2024 Mat Cox.</a>&nbsp;
+        <a id="changelog-modal-button" href="#">Change Log</button>
       </div>
     </div>
 </body>
@@ -91,6 +101,10 @@ function hideLoading() {
   document.querySelector('.loading-icon').style.display = 'none';
 }
 
+$("#changelog-modal-button").click(function(){
+  $("#changelog-modal").modal('show')
+})
+
 $("#Generate").click(function(){
 
   if(!$('#APIKey')[0].value){
@@ -110,7 +124,7 @@ $("#Generate").click(function(){
   showLoading()
   const startDateTime = new Date($('#startDate')[0].value)
   const endDateTime = new Date($('#endDate')[0].value)
-  $.post( "api/create_pptx.php", {
+  $.post( "api?function=createReport", {
     APIKey: $('#APIKey')[0].value,
     StartDateTime: startDateTime.toISOString(),
     EndDateTime: endDateTime.toISOString(),
@@ -118,7 +132,7 @@ $("#Generate").click(function(){
   }).done(function( data, status ) {
     if (data['Status'] == 'Success') {
       toast("Success","","The report has been successfully generated.","success","30000");
-      download(data['Path'])
+      download('/api?function=downloadReport&id='+data['id'])
     } else {
       toast(data['Status'],"",data['Error'],"danger","30000");
     }

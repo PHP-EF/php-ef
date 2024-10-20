@@ -1,0 +1,11 @@
+body {
+    background-color: #3f3d3d!important; /* Dark background color */
+    color: #ffffff!important; /* Dark text color */
+    font-family: Arial, sans-serif!important;
+    justify-content: center!important;
+    align-items: center!important;
+    height: 100vh!important;
+}
+h2 {
+    margin-left: 20px;
+}

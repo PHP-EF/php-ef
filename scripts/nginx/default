@@ -8,6 +8,8 @@ server {
     server_name  example.com www.example.com; 
     port_in_redirect off;
 
+    rewrite ^/api$ /api/index.php?$query_string;
+
     location / {            
         index  index.php index.html index.htm hostingstart.html;
     }
@@ -19,8 +21,8 @@ server {
         root   /html/;
     }
     
-    # Disable .git directory
-    location ~ /\.git|scripts|vendor {
+    # Disable private directories
+    location ~ /\.git|scripts|vendor|files {
         deny all;
         access_log off;
         log_not_found off;

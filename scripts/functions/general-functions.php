@@ -1,4 +1,10 @@
 <?php
+function generate_markdown($file) {
+    $mkd = \FastVolt\Helper\Markdown::new();
+    $mkd -> setFile( $file );
+    return $mkd -> toHtml();
+}
+
 function number_abbr($number)
 {
     if (isset($number)) {
@@ -70,4 +76,43 @@ function rmdirRecursive($dir)
         (is_dir("$dir/$file")) ? rmdirRecursive("$dir/$file") : unlink("$dir/$file");
     }
     return rmdir($dir);
+}
+
+function array_search_partial($keyword,$arr) {
+    foreach($arr as $index => $string) {
+        if (strpos($string, $keyword) !== FALSE)
+            return $index;
+    }
+}
+
+function replaceTag($Mapping,$TagName,$Value) {
+    $TAG = array_search_partial($TagName,$Mapping);
+    if ($TAG) {
+        $Mapping[$TAG] = str_replace($TagName, $Value, $Mapping[$TAG]);
+    }
+    return $Mapping;
+}
+
+function checkRequestMethod($Method,$ReturnInfo = false) {
+    if ($_SERVER['REQUEST_METHOD'] == $Method) {
+        if ($ReturnInfo) {
+            return array(
+                'Matches' => true,
+                'MethodUsed' => $_SERVER['REQUEST_METHOD'],
+                'MethodRequested' => $Method
+            );
+        } else {
+            return true;
+        }
+    } else {
+        if ($ReturnInfo) {
+            return array(
+                'Matches' => false,
+                'MethodUsed' => $_SERVER['REQUEST_METHOD'],
+                'MethodRequested' => $Method
+            );
+        } else {
+            return false;
+        }
+    }
 }
