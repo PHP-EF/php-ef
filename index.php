@@ -28,6 +28,10 @@
           <button class="btn btn-success" id="Generate">Generate Report</button>
           <div class="loading-icon">
             <hr>
+            <div class="progress">
+              <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+            </div>
+            <br>
             <div class="spinner-border text-primary" role="status">
               <span class="sr-only">Loading...</span>
             </div>
@@ -43,14 +47,17 @@
       </div>
 
       <div class="footnote">
-        <a href="https://github.com/TehMuffinMoo" target="_blank"><i class="fab fa-github fa-lg"></i> &copy; 2024 Mat Cox.</a>&nbsp;
-        <a id="changelog-modal-button" href="#">Change Log</button>
+        <a href="https://github.com/TehMuffinMoo" target="_blank"><i class="fab fa-github fa-lg"></i> &copy; 2024 Mat Cox.</a>
+        <button class="btn btn-light float-end btn-sm changelog-btn" id="changelog-modal-button" href="#">v0.1.1</button>
       </div>
     </div>
 </body>
 </html>
 
 <script>
+
+let haltProgress = false;
+
 function setEndDateMax() {
     const startDate = new Date(document.getElementById('startDate').value);
     const maxEndDate = new Date(startDate);
@@ -94,11 +101,27 @@ function download(url) {
   document.body.removeChild(a)
 }
 
-function showLoading() {
+function showLoading(id) {
   document.querySelector('.loading-icon').style.display = 'block';
+  haltProgress = false;
+  updateProgress(id);
 }
 function hideLoading() {
   document.querySelector('.loading-icon').style.display = 'none';
+  $('#progress-bar').css('width', '0%').attr('aria-valuenow', 0).text('0%');
+  haltProgress = true;
+}
+
+function updateProgress(id) {
+  $.get('/api?function=getReportProgress&id='+id, function(data) {
+      var progress = parseFloat(data).toFixed(1); // Assuming the server returns a JSON object with a 'progress' field
+      $('#progress-bar').css('width', progress + '%').attr('aria-valuenow', progress).text(progress + '%');
+      if (progress < 100 && haltProgress == false) {
+        setTimeout(function() {
+          updateProgress(id);
+        }, 1000);
+      }
+  });
 }
 
 $("#changelog-modal-button").click(function(){
@@ -121,26 +144,29 @@ $("#Generate").click(function(){
   }
 
   $("#Generate").prop('disabled', true)
-  showLoading()
-  const startDateTime = new Date($('#startDate')[0].value)
-  const endDateTime = new Date($('#endDate')[0].value)
-  $.post( "api?function=createReport", {
-    APIKey: $('#APIKey')[0].value,
-    StartDateTime: startDateTime.toISOString(),
-    EndDateTime: endDateTime.toISOString(),
-    Realm: $('#Realm').find(":selected").val()
-  }).done(function( data, status ) {
-    if (data['Status'] == 'Success') {
-      toast("Success","","The report has been successfully generated.","success","30000");
-      download('/api?function=downloadReport&id='+data['id'])
-    } else {
-      toast(data['Status'],"",data['Error'],"danger","30000");
-    }
-  }).fail(function( data, status ) {
-      toast("API Error","","Unknown API Error","danger","30000");
-  }).always(function() {
-      hideLoading()
-      $("#Generate").prop('disabled', false)
+  $.get( "api?function=getUUID", function( id ) {
+    showLoading(id);
+    const startDateTime = new Date($('#startDate')[0].value)
+    const endDateTime = new Date($('#endDate')[0].value)
+    $.post( "api?function=createReport", {
+      APIKey: $('#APIKey')[0].value,
+      StartDateTime: startDateTime.toISOString(),
+      EndDateTime: endDateTime.toISOString(),
+      Realm: $('#Realm').find(":selected").val(),
+      id: id
+    }).done(function( data, status ) {
+      if (data['Status'] == 'Success') {
+        toast("Success","","The report has been successfully generated.","success","30000");
+        download('/api?function=downloadReport&id='+data['id'])
+      } else {
+        toast(data['Status'],"",data['Error'],"danger","30000");
+      }
+    }).fail(function( data, status ) {
+        toast("API Error","","Unknown API Error","danger","30000");
+    }).always(function() {
+        hideLoading()
+        $("#Generate").prop('disabled', false)
+    });
   });
 });
 </script>

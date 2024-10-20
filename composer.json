@@ -3,6 +3,7 @@
         "rmccue/requests": "^2.0.12",
         "label305/pptx-extractor": "0.2.*",
         "phpoffice/phpspreadsheet": "^3.3.0",
-        "fastvolt/markdown": "^0.2.1"
+        "fastvolt/markdown": "^0.2.1",
+        "ramsey/uuid": "^4.7.6"
     }
 }

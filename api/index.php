@@ -20,27 +20,45 @@ if (!($_REQUEST['function'])) {
                 echo '<h1><center>Change Log</center></h1>';
                 print_r($MD);
             }
-        break;
+            break;
+        case 'getUUID':
+            header('Content-type: text/plain');
+            echo \Ramsey\Uuid\Uuid::uuid4();
+            break;
         case 'createReport':
             if ($method = checkRequestMethod('POST')) {
-                if (isset($_POST['APIKey']) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
-                    $response = generateSecurityReport($_POST['APIKey'],$_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm']);
-                    echo json_encode($response,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                if (isset($_POST['APIKey']) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm']) AND isset($_POST['id'])) {
+                    if (isValidUuid($_POST['id'])) {
+                        $response = generateSecurityReport($_POST['APIKey'],$_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm'],$_POST['id']);
+                        echo json_encode($response,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                    }
                 }
             }
-        break;
+            break;
         case 'downloadReport':
             if ($method = checkRequestMethod('GET')) {
-                if (isset($_REQUEST['id']) AND is_numeric($_REQUEST['id'])) {
+                if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
                     $id = $_REQUEST['id'];
                     $File = __DIR__.'/../files/reports/report-'.$id.'.pptx';
-                    header('Content-type: application/pptx');
-                    header('Content-Disposition: inline; filename="report-'.$id.'.pptx"');
-                    header('Content-Transfer-Encoding: binary');
-                    header('Accept-Ranges: bytes');
-                    readfile($File);   
+                    if (file_exists($File)) {
+                        header('Content-type: application/pptx');
+                        header('Content-Disposition: inline; filename="report-'.$id.'.pptx"');
+                        header('Content-Transfer-Encoding: binary');
+                        header('Accept-Ranges: bytes');
+                        readfile($File);   
+                    } else {
+                        echo 'Invalid ID';
+                    }
                 }
             }
-        break;
+            break;
+        case 'getReportProgress':
+            if ($method = checkRequestMethod('GET')) {
+                if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
+                    $id = $_REQUEST['id'];
+                    echo getProgress($id,33); // Produces percentage for use on progress bar
+                }
+            }
+            break;
     }
 }

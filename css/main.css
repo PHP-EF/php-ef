@@ -86,3 +86,13 @@ iframe {
     height:40%;
     border-radius: 1.3rem!important;
 }
+.changelog-btn {
+    margin: 0%!important;
+}
+.progress {
+    width: 80%;
+    margin: auto;
+}
+.progress-bar {
+    background: -webkit-linear-gradient(left, #FDDD00 0%, #34C33D 25%, #00BD4D 50%, #00CD93 75%, #00E1E6 100%);
+}
