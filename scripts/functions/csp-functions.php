@@ -29,10 +29,6 @@ function QueryCSP($Method, $Uri, $Data = "") {
     'connect_timeout' => 30
   );
 
-  // if (getConfig("System","proxyurl") != "") {
-  //   $Options['proxy'] = getConfig("System","proxyurl");
-  // }
-
   switch ($Method) {
     case 'get':
       $Result = WpOrg\Requests\Requests::get($Url, $CSPHeaders, $Options);

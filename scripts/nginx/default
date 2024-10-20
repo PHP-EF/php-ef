@@ -5,12 +5,12 @@ server {
     listen [::]:8080;
     root /home/site/wwwroot;
     index  index.php index.html index.htm;
-    server_name  example.com www.example.com; 
+    server_name  example.com www.example.com;
     port_in_redirect off;
 
     rewrite ^/api$ /api/index.php?$query_string;
 
-    location / {            
+    location / {
         index  index.php index.html index.htm hostingstart.html;
     }
 
@@ -20,7 +20,7 @@ server {
     location = /50x.html {
         root   /html/;
     }
-    
+
     # Disable private directories
     location ~ /\.git|scripts|vendor|files {
         deny all;
@@ -38,8 +38,8 @@ server {
         fastcgi_param PATH_INFO $fastcgi_path_info;
         fastcgi_param QUERY_STRING $query_string;
         fastcgi_intercept_errors on;
-        fastcgi_connect_timeout         300; 
-        fastcgi_send_timeout           3600; 
+        fastcgi_connect_timeout         300;
+        fastcgi_send_timeout           3600;
         fastcgi_read_timeout           3600;
         fastcgi_buffer_size 128k;
         fastcgi_buffers 4 256k;

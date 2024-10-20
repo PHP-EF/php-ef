@@ -45,7 +45,7 @@ if (!($_REQUEST['function'])) {
                         header('Content-Disposition: inline; filename="report-'.$id.'.pptx"');
                         header('Content-Transfer-Encoding: binary');
                         header('Accept-Ranges: bytes');
-                        readfile($File);   
+                        readfile($File);
                     } else {
                         echo 'Invalid ID';
                     }

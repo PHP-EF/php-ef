@@ -94,7 +94,6 @@ function toast(title,note,body,theme,delay = "8000") {
 function download(url) {
   const a = document.createElement('a')
   a.href = url
-  console.log(url)
   a.download = url.split('/').pop()
   document.body.appendChild(a)
   a.click()

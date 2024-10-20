@@ -12,7 +12,7 @@ function generateSecurityReport($APIKey,$StartDateTime,$EndDateTime,$Realm,$UUID
         // Set Time Dimensions
         $StartDimension = str_replace('Z','',$StartDateTime);
         $EndDimension = str_replace('Z','',$EndDateTime);
-        
+
         // Set Directory
         $FilesDir = __DIR__.'/../../files';
 
@@ -181,7 +181,7 @@ function generateSecurityReport($APIKey,$StartDateTime,$EndDateTime,$Realm,$UUID
         if (isset($InfoInsightsId) AND $InfoInsightsId !== false) {$InfoInsights = $SOCInsights->result->data[$InfoInsightsId]->{'InsightsAggregated.count'};} else {$InfoInsights = 0;}
         if (isset($LowInsightsId) AND $LowInsightsId !== false) {$LowInsights = $SOCInsights->result->data[$LowInsightsId]->{'InsightsAggregated.count'};} else {$LowInsights = 0;}
         if (isset($MediumInsightsId) AND $MediumInsightsId !== false) {$MediumInsights = $SOCInsights->result->data[$MediumInsightsId]->{'InsightsAggregated.count'};} else {$MediumInsights = 0;}
-        if (isset($HighInsightsId) AND $HighInsightsId !== false) {$HighInsights = $SOCInsights->result->data[$HighInsightsId]->{'InsightsAggregated.count'};} else {$HighInsights = 0;}            
+        if (isset($HighInsightsId) AND $HighInsightsId !== false) {$HighInsights = $SOCInsights->result->data[$HighInsightsId]->{'InsightsAggregated.count'};} else {$HighInsights = 0;}
         if (isset($CriticalInsightsId) AND $CriticalInsightsId !== false) {$CriticalInsights = $SOCInsights->result->data[$CriticalInsightsId]->{'InsightsAggregated.count'};} else {$CriticalInsights = 0;}
         $Progress = writeProgress($UUID,$Progress);
 
