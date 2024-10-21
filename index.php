@@ -18,8 +18,8 @@
           </select>
           <br>
           <div class="calendar">
-            <h5>Start:&nbsp;</h5><input type="datetime-local" id="startDate" placeholder="Start Date/Time" onchange="setEndDateMax()">
-            <h5>End:&nbsp;</h5><input type="datetime-local" id="endDate" placeholder="End Date/Time" onchange="setStartDateMin()">
+            <h5>Start:&nbsp;</h5><input class="dateTimePicker" type="text" id="startDate" placeholder="Start Date/Time">
+            <h5>End:&nbsp;</h5><input class="dateTimePicker" type="text" id="endDate" placeholder="End Date/Time">
           </div>
           <br>
           <div class="alert alert-info genInfo" role="alert">
@@ -48,29 +48,49 @@
 
       <div class="footnote">
         <a href="https://github.com/TehMuffinMoo" target="_blank"><i class="fab fa-github fa-lg"></i> &copy; 2024 Mat Cox.</a>
-        <button class="btn btn-light float-end btn-sm changelog-btn" id="changelog-modal-button" href="#">v0.1.2</button>
+        <button class="btn btn-light float-end btn-sm changelog-btn" id="changelog-modal-button" href="#">v0.1.3</button>
       </div>
     </div>
 </body>
 </html>
 
 <script>
-
 let haltProgress = false;
 
-function setEndDateMax() {
-    const startDate = new Date(document.getElementById('startDate').value);
-    const maxEndDate = new Date(startDate);
-    maxEndDate.setDate(startDate.getDate() + 30);
-    document.getElementById('endDate').max = maxEndDate.toISOString().slice(0, 16);
-}
+document.addEventListener('DOMContentLoaded', function() {
+  const maxDaysApart = 30;
+  const today = new Date();
+  const maxPastDate = new Date(today);
+  maxPastDate.setDate(today.getDate() - maxDaysApart);
 
-function setStartDateMin() {
-    const endDate = new Date(document.getElementById('endDate').value);
-    const minStartDate = new Date(endDate);
-    minStartDate.setDate(endDate.getDate() - 30);
-    document.getElementById('startDate').min = minStartDate.toISOString().slice(0, 16);
-}
+  flatpickr("#startDate", {
+    enableTime: true,
+    dateFormat: "Y-m-d H:i",
+    minDate: maxPastDate,
+    maxDate: today,
+    onChange: function(selectedDates, dateStr, instance) {
+      const endDatePicker = document.getElementById('endDate')._flatpickr;
+      const maxEndDate = new Date(selectedDates[0]);
+      maxEndDate.setDate(maxEndDate.getDate() + maxDaysApart);
+      endDatePicker.set('minDate', dateStr);
+      endDatePicker.set('maxDate', maxEndDate > today ? today : maxEndDate);
+    }
+  });
+
+  flatpickr("#endDate", {
+    enableTime: true,
+    dateFormat: "Y-m-d H:i",
+    minDate: maxPastDate,
+    maxDate: today,
+    onChange: function(selectedDates, dateStr, instance) {
+      const startDatePicker = document.getElementById('startDate')._flatpickr;
+      const minStartDate = new Date(selectedDates[0]);
+      minStartDate.setDate(minStartDate.getDate() - maxDaysApart);
+      startDatePicker.set('maxDate', dateStr);
+      startDatePicker.set('minDate', minStartDate < maxPastDate ? maxPastDate : minStartDate);
+    }
+  });
+});
 
 function toast(title,note,body,theme,delay = "8000") {
   $('#toastContainer').append(`
