@@ -48,7 +48,7 @@
 
       <div class="footnote">
         <a href="https://github.com/TehMuffinMoo" target="_blank"><i class="fab fa-github fa-lg"></i> &copy; 2024 Mat Cox.</a>
-        <button class="btn btn-light float-end btn-sm changelog-btn" id="changelog-modal-button" href="#">v0.1.1</button>
+        <button class="btn btn-light float-end btn-sm changelog-btn" id="changelog-modal-button" href="#">v0.1.2</button>
       </div>
     </div>
 </body>

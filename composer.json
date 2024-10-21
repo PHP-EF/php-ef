@@ -4,6 +4,7 @@
         "label305/pptx-extractor": "0.2.*",
         "phpoffice/phpspreadsheet": "^3.3.0",
         "fastvolt/markdown": "^0.2.1",
-        "ramsey/uuid": "^4.7.6"
+        "ramsey/uuid": "^4.7.6",
+        "peppeocchi/php-cron-scheduler": "4.*"
     }
 }
