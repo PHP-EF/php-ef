@@ -279,45 +279,51 @@ function generateSecurityReport($APIKey,$StartDateTime,$EndDateTime,$Realm,$UUID
 
         ##// Slide 24 - Lookalike Domains
         $mapping = replaceTag($mapping,'#TAG38',number_abbr($LookalikeTotalCount)); // Total Lookalikes
-        $mapping = replaceTag($mapping,'#TAG39',number_abbr($LookalikeTotalPercentage)); // Total Percentage Increase
-        $mapping = replaceTag($mapping,'#TAG40',number_abbr($LookalikeCustomCount)); // Total Lookalikes from Custom Watched Domains
-        $mapping = replaceTag($mapping,'#TAG41',number_abbr($LookalikeCustomPercentage)); // Custom Percentage Increase
-        $mapping = replaceTag($mapping,'#TAG42',number_abbr($LookalikeThreatCount)); // Threats from Custom Watched Domains
-        $mapping = replaceTag($mapping,'#TAG43',number_abbr($LookalikeThreatPercentage)); // Threats Percentage Increase
+        if ($LookalikeTotalPercentage >= 0){$arrow='↑';} else {$arrow='↓';}
+        $mapping = replaceTag($mapping,'#TAG39',$arrow); // Arrow Up/Down
+        $mapping = replaceTag($mapping,'#TAG40',number_abbr($LookalikeTotalPercentage)); // Total Percentage Increase
+        $mapping = replaceTag($mapping,'#TAG41',number_abbr($LookalikeCustomCount)); // Total Lookalikes from Custom Watched Domains
+        if ($LookalikeCustomPercentage >= 0){$arrow='↑';} else {$arrow='↓';}
+        $mapping = replaceTag($mapping,'#TAG42',$arrow); // Arrow Up/Down
+        $mapping = replaceTag($mapping,'#TAG43',number_abbr($LookalikeCustomPercentage)); // Custom Percentage Increase
+        $mapping = replaceTag($mapping,'#TAG44',number_abbr($LookalikeThreatCount)); // Threats from Custom Watched Domains
+        if ($LookalikeThreatPercentage >= 0){$arrow='↑';} else {$arrow='↓';}
+        $mapping = replaceTag($mapping,'#TAG45',$arrow); // Arrow Up/Down
+        $mapping = replaceTag($mapping,'#TAG46',number_abbr($LookalikeThreatPercentage)); // Threats Percentage Increase
         $Progress = writeProgress($UUID,$Progress);
 
         ##// Slide 28 - Security Activities
         // Security Events
-        $mapping = replaceTag($mapping,'#TAG44',number_abbr($SecurityEvents->result->data[0]->{'PortunusAggInsight.requests'}));
+        $mapping = replaceTag($mapping,'#TAG47',number_abbr($SecurityEvents->result->data[0]->{'PortunusAggInsight.requests'}));
         // DNS Firewall
         $DNSFirewall = QueryCubeJS('{"measures":["PortunusAggInsight.requests"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"and":[{"member":"PortunusAggInsight.type","operator":"equals","values":["2"]},{"or":[{"member":"PortunusAggInsight.severity","operator":"equals","values":["High","Medium","Low"]},{"and":[{"member":"PortunusAggInsight.severity","operator":"equals","values":["Info"]},{"member":"PortunusAggInsight.policy_action","operator":"equals","values":["Block","Log"]}]}]},{"member":"PortunusAggInsight.confidence","operator":"equals","values":["High","Medium","Low"]}]}],"limit":"1","ungrouped":false}');
-        $mapping = replaceTag($mapping,'#TAG45',number_abbr($DNSFirewall->result->data[0]->{'PortunusAggInsight.requests'}));
+        $mapping = replaceTag($mapping,'#TAG48',number_abbr($DNSFirewall->result->data[0]->{'PortunusAggInsight.requests'}));
         $Progress = writeProgress($UUID,$Progress);
         // Web Content
         $WebContent = QueryCubeJS('{"measures":["PortunusAggWebcontent.requests"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggWebcontent.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggWebcontent.type","operator":"equals","values":["3"]},{"member":"PortunusAggWebcontent.category","operator":"notEquals","values":[null]}],"limit":"1","ungrouped":false}');
-        $mapping = replaceTag($mapping,'#TAG46',number_abbr($WebContent->result->data[0]->{'PortunusAggWebcontent.requests'}));
+        $mapping = replaceTag($mapping,'#TAG49',number_abbr($WebContent->result->data[0]->{'PortunusAggWebcontent.requests'}));
         $Progress = writeProgress($UUID,$Progress);
         // Devices
         $Devices = QueryCubeJS('{"measures":["PortunusAggInsight.deviceCount"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"contains","values":["2","3"]},{"member":"PortunusAggInsight.severity","operator":"contains","values":["High","Medium","Low"]}],"limit":"1","ungrouped":false}');
-        $mapping = replaceTag($mapping,'#TAG47',number_abbr($Devices->result->data[0]->{'PortunusAggInsight.deviceCount'}));
+        $mapping = replaceTag($mapping,'#TAG50',number_abbr($Devices->result->data[0]->{'PortunusAggInsight.deviceCount'}));
         $Progress = writeProgress($UUID,$Progress);
         // Users
         $Users = QueryCubeJS('{"measures":["PortunusAggInsight.userCount"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"contains","values":["2","3"]}],"limit":"1","ungrouped":false}');
-        $mapping = replaceTag($mapping,'#TAG48',number_abbr($Users->result->data[0]->{'PortunusAggInsight.userCount'}));
+        $mapping = replaceTag($mapping,'#TAG51',number_abbr($Users->result->data[0]->{'PortunusAggInsight.userCount'}));
         $Progress = writeProgress($UUID,$Progress);
         // Insights
-        $mapping = replaceTag($mapping,'#TAG49',number_abbr($TotalInsights));
+        $mapping = replaceTag($mapping,'#TAG52',number_abbr($TotalInsights));
         // Threat Insight
         $ThreatInsight = QueryCubeJS('{"measures":[],"dimensions":["PortunusDnsLogs.tproperty"],"timeDimensions":[{"dimension":"PortunusDnsLogs.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusDnsLogs.type","operator":"equals","values":["4"]}],"limit":"10000","ungrouped":false}');
-        $mapping = replaceTag($mapping,'#TAG50',number_abbr(count($ThreatInsight->result->data)));
+        $mapping = replaceTag($mapping,'#TAG53',number_abbr(count($ThreatInsight->result->data)));
         $Progress = writeProgress($UUID,$Progress);
         // Threat View
         $ThreatView = QueryCubeJS('{"measures":["PortunusAggInsight.tpropertyCount"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"equals","values":["2"]}],"limit":"1","ungrouped":false}');
-        $mapping = replaceTag($mapping,'#TAG51',number_abbr($ThreatView->result->data[0]->{'PortunusAggInsight.tpropertyCount'}));
+        $mapping = replaceTag($mapping,'#TAG54',number_abbr($ThreatView->result->data[0]->{'PortunusAggInsight.tpropertyCount'}));
         $Progress = writeProgress($UUID,$Progress);
         // Sources
         $Sources = QueryCubeJS('{"measures":["PortunusAggSecurity.networkCount"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggSecurity.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggSecurity.type","operator":"contains","values":["2","3"]}],"limit":"1","ungrouped":false}');
-        $mapping = replaceTag($mapping,'#TAG52',number_abbr($Sources->result->data[0]->{'PortunusAggSecurity.networkCount'}));
+        $mapping = replaceTag($mapping,'#TAG55',number_abbr($Sources->result->data[0]->{'PortunusAggSecurity.networkCount'}));
         $Progress = writeProgress($UUID,$Progress);
 
         // Rebuild Powerpoint

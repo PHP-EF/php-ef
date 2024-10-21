@@ -1,3 +1,6 @@
+## v0.1.4
+- Add dynamic up/down arrows to lookalike domain stats
+
 ## v0.1.3
 - Replace Date/Time picker from `datetime-local` to new library to ensure support for time entry across all browsers
 
