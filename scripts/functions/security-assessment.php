@@ -365,3 +365,8 @@ function getProgress($id,$Total) {
     $Current = fread($myfile,filesize(__DIR__.'/../../files/reports/report-'.$id.'.progress'));
     return (100 / $Total) * $Current;
 }
+
+function getReportFiles() {
+    $files = array_diff(scandir(__DIR__.'/../../files/reports/'),array('.', '..','placeholder.txt'));
+    return $files;
+  }
