@@ -367,9 +367,14 @@ function writeProgress($id,$Count) {
 }
 
 function getProgress($id,$Total) {
-    $myfile = fopen(__DIR__.'/../../files/reports/report-'.$id.'.progress', "r") or die("0");
-    $Current = fread($myfile,filesize(__DIR__.'/../../files/reports/report-'.$id.'.progress'));
-    return (100 / $Total) * $Current;
+    $ProgressFile = __DIR__.'/../../files/reports/report-'.$id.'.progress';
+    if (file_exists($ProgressFile)) {
+        $myfile = fopen($ProgressFile, "r") or die("0");
+        $Current = fread($myfile,filesize($ProgressFile));
+        return (100 / $Total) * $Current;
+    } else {
+        die("0");
+    }
 }
 
 function getReportFiles() {
