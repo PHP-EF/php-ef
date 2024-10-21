@@ -70,10 +70,19 @@ input[type="password"] {
     width: 10%!important;
     padding: .575rem 2.5rem .575rem .75rem!important;
 }
-input[type="datetime-local"] {
+.dateTimePicker {
     width: 200px!important;
     display: inline-block;
     margin-right: 10px;
+}
+.flatpickr-month div {
+    padding: 0!important;
+}
+.flatpickr-time > div > input {
+    padding: 0 0 20 0!important;
+}
+.flatpickr-current-month > .numInputWrapper span.arrowDown, .flatpickr-current-month > .numInputWrapper span.arrowUp {
+    display: none;
 }
 .toast-body {
     color: #000;
