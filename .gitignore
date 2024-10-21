@@ -1,4 +1,4 @@
 vendor/*
-files/reports/*
-composer.lock
+files/*
 !files/reports/placeholder.txt
+composer.lock
