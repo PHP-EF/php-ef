@@ -31,7 +31,7 @@ body {
 .footnote a {
   color: white;
 }
-.calendar h5 {
+.calendar > div, .calendar > div > h5 {
     display: inline-block;
 }
 .genInfo {
@@ -44,9 +44,6 @@ input, button {
     padding: 10px;
     border: none;
     border-radius: 5px;
-}
-input {
-    width: 80%!important;
 }
 button {
     background-color: #0078d4; /* Blue color */
@@ -61,19 +58,23 @@ button:hover {
     display: none;
     margin-top: 10px;
 }
-input[type="password"] {
-    width: 50%!important;
-    display: inline-block;
-}
 .form-select {
     display: inline-block!important;
-    width: 10%!important;
+    /* width: 10%!important; */
     padding: .575rem 2.5rem .575rem .75rem!important;
 }
-.dateTimePicker {
-    width: 200px!important;
+.apiKey {
+    padding-left: 25%;
+    padding-right: 5%;
+}
+.apiKey > input {
+    width: 100%;
+}
+.realm > select {
+    margin-top:10px;
+}
+.calendar > h5 {
     display: inline-block;
-    margin-right: 10px;
 }
 .flatpickr-month div {
     padding: 0!important;

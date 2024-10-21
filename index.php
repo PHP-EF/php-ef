@@ -10,32 +10,51 @@
 <body>
     <div class="mainContainer">
       <div class="container">
-          <h2>Infoblox Security Assessment Report Generator</h2>
-          <input id="APIKey" type="password" placeholder="Enter API Key" required>
-          <select id="Realm" class="form-select" aria-label="Realm Selection">
-            <option value="US" selected>US Realm</option>
-            <option value="EU">EU Realm</option>
-          </select>
-          <br>
+        <h2>Infoblox Security Assessment Report Generator</h2>
+        <div class="row justify-content-md-center">
+          <div class="col-md-4 ml-md-auto apiKey">
+            <input id="APIKey" type="password" placeholder="Enter API Key" required>
+          </div>
+          <div class="col-md-2 ml-md-auto realm">
+            <select id="Realm" class="form-select" aria-label="Realm Selection">
+              <option value="US" selected>US Realm</option>
+              <option value="EU">EU Realm</option>
+            </select>
+          </div>
+          <!-- <div class="col-md-2 ml-md-auto realm">
+            <input class="dateTimePicker" type="text" id="startDate" placeholder="Start Date/Time">&nbsp;
+          </div>
+          <div class="col-md-2 ml-md-auto realm">
+            <input class="dateTimePicker" type="text" id="endDate" placeholder="End Date/Time">
+          </div> -->
+        </div>
+        <div class="row justify-content-md-center">
           <div class="calendar">
-            <h5>Start:&nbsp;</h5><input class="dateTimePicker" type="text" id="startDate" placeholder="Start Date/Time">
-            <h5>End:&nbsp;</h5><input class="dateTimePicker" type="text" id="endDate" placeholder="End Date/Time">
+            <div class="col-sm ml-sm-auto">
+              <h5>Start:&nbsp;</h5><input class="dateTimePicker" type="text" id="startDate" placeholder="Start Date/Time">&nbsp;
+            </div>
+            <div class="col-sm">
+              <h5>End:&nbsp;</h5><input class="dateTimePicker" type="text" id="endDate" placeholder="End Date/Time">
+            </div>
+          </div>
+        </div>
+        <div class="calendar">
+        </div>
+        <br>
+        <div class="alert alert-info genInfo" role="alert">
+          It can take up to 2 minutes to generate the report, please be patient.
+        </div>
+        <button class="btn btn-success" id="Generate">Generate Report</button>
+        <div class="loading-icon">
+          <hr>
+          <div class="progress">
+            <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
           </div>
           <br>
-          <div class="alert alert-info genInfo" role="alert">
-            It can take up to 2 minutes to generate the report, please be patient.
+          <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
           </div>
-          <button class="btn btn-success" id="Generate">Generate Report</button>
-          <div class="loading-icon">
-            <hr>
-            <div class="progress">
-              <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-            </div>
-            <br>
-            <div class="spinner-border text-primary" role="status">
-              <span class="sr-only">Loading...</span>
-            </div>
-          </div>
+        </div>
       </div>
 
       <div id="changelog-modal" class="modal fade changelog-modal" tabindex="-1" role="dialog" aria-labelledby="Change Log" aria-hidden="true">
