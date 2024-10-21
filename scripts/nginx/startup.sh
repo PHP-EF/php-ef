@@ -8,5 +8,5 @@ rm /home/site/wwwroot/release.zip
 # Install, Configure & Start crontab
 apt-get update -y
 apt-get install -y cron
-echo "* * * * * /usr/local/bin/php /git/ib-sa-report/scripts/scheduler/scheduler.php 1>> /dev/null 2>&1" | crontab -
+echo "* * * * * /usr/local/bin/php /home/site/wwwroot/scripts/scheduler/scheduler.php 1>> /dev/null 2>&1" | crontab -
 service cron start
