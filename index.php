@@ -77,7 +77,7 @@
 let haltProgress = false;
 
 document.addEventListener('DOMContentLoaded', function() {
-  const maxDaysApart = 30;
+  const maxDaysApart = 31;
   const today = new Date();
   const maxPastDate = new Date(today);
   maxPastDate.setDate(today.getDate() - maxDaysApart);
