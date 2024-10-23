@@ -2,3 +2,5 @@ vendor/*
 files/*
 !files/reports/placeholder.txt
 composer.lock
+_archive
+.DS_Store
