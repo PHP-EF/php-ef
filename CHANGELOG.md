@@ -1,3 +1,6 @@
+## v0.2
+- Initial release of the new UI
+
 ## v0.1.4
 - Add dynamic up/down arrows to lookalike domain stats
 
