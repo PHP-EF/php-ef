@@ -137,25 +137,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-function toast(title,note,body,theme,delay = "8000") {
-  $('#toastContainer').append(`
-      <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="`+delay+`">
-        <div class="toast-header">
-          <img class="bg-`+theme+` p-2 rounded-2">&nbsp;
-          <strong class="me-auto">`+title+`</strong>
-          <small class="text-muted">`+note+`</small>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-          `+body+`
-        </div>
-      </div>
-  `);
-  $('.toast').toast('show').on('hidden.bs.toast', function (elem) {
-    $(elem.target).remove();
-  })
-};
-
 function download(url) {
   const a = document.createElement('a')
   a.href = url
