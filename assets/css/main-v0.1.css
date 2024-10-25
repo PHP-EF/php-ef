@@ -114,7 +114,7 @@ input {
     position: relative;
 	padding-bottom: 56.25%; /* 16:9 */
 	padding-top: 25px;
-	height: 0;
+	height: 100%;
 }
 .iframeWrapper iframe {
 	position: absolute;
@@ -137,3 +137,53 @@ input {
 .progress-bar {
     background: -webkit-linear-gradient(left, #FDDD00 0%, #34C33D 25%, #00BD4D 50%, #00CD93 75%, #00E1E6 100%);
 }
+/* On screens that are less than 991px wide, make the sidebar into a topbar */
+@media screen and (max-width: 991px) {
+    .sidebar {
+        display: block!important;
+    }
+
+    .main-panel {
+        width: calc(100% - 260px)!important;
+    }
+
+    .sidebar-wrapper {
+      width: 100%;
+      height: auto;
+      position: relative;
+    }
+    .sidebar-wrapper li {float: left;}
+    div.content {margin-left: 0;}
+  }
+  
+  @media screen and (max-width: 400px) {
+    .sidebar {
+        display: block!important;
+    }
+
+    .main-panel {
+        width: calc(100% - 260px)!important;
+    }
+
+    .sidebar-wrapper {
+      width: 100%;
+      height: auto;
+      position: relative;
+    }
+    .sidebar-wrapper li {float: left;}
+    div.content {margin-left: 0;}
+  }
+
+  /* On screens that are less than 400px, display the bar vertically, instead of horizontally */
+  @media screen and (max-width: 400px) {
+    .sidebar {
+        display: none!important;
+    }
+    .main-panel {
+        width: 100%!important;
+    }
+    .sidebar-wrapper li {
+      text-align: center;
+      float: none;
+    }
+  }

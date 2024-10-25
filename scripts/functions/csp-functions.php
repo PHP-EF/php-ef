@@ -1,6 +1,10 @@
 <?php
-function QueryCSP($Method, $Uri, $Data = "") {
-  $B1ApiKey = $_POST['APIKey'];
+function QueryCSP($Method, $Uri, $Data = "", $APIKey = "", $Realm = "US") {
+  if (isset($_POST['APIKey'])) {
+    $B1ApiKey = $_POST['APIKey'];
+  } else {
+    $B1ApiKey = $APIKey;
+  }
 
   $CSPHeaders = array(
   'Authorization' => "Token $B1ApiKey",
@@ -9,7 +13,9 @@ function QueryCSP($Method, $Uri, $Data = "") {
 
   $ErrorOnEmpty = true;
 
-  $Realm = $_POST['Realm'];
+  if (isset($_POST['Realm'])) {
+    $Realm = $_POST['Realm'];
+  }
 
   if (strpos($Uri,"https://csp.") === FALSE) {
     if ($Realm == "US") {
@@ -25,8 +31,8 @@ function QueryCSP($Method, $Uri, $Data = "") {
   }
 
   $Options = array(
-    'timeout' => 30,
-    'connect_timeout' => 30
+    'timeout' => 60,
+    'connect_timeout' => 60
   );
 
   switch ($Method) {
@@ -54,8 +60,8 @@ function QueryCSP($Method, $Uri, $Data = "") {
   }
 }
 
-function QueryCubeJS($Query) {
+function QueryCubeJS($Query,$APIKey = "", $Realm = "US") {
   $BuildQuery = urlencode($Query);
-  $Result = QueryCSP("get","/api/cubejs/v1/query?query=".$BuildQuery);
+  $Result = QueryCSP("get","/api/cubejs/v1/query?query=".$BuildQuery,null,$APIKey,$Realm);
   return $Result;
 }

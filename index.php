@@ -72,7 +72,7 @@
                 if (isset($iframe)) {
                     echo '<iframe id="mainFrame" name="mainFrame" height="100%" width="100%" frameborder="0" src="'.$iframe.'"></iframe>';
                 } else {
-                    echo '<iframe id="mainFrame" name="mainFrame" height="100%" width="100%" frameborder="0" src="pages/home.php"></iframe>';
+                    echo '<iframe id="mainFrame" name="mainFrame" height="100%" width="100%" frameborder="0" src="pages/security-assessment.php"></iframe>';
                 }
                 ?>
             </div>
@@ -103,7 +103,6 @@ $('.toggleThemeBtn').on('click', function () {
 
 $(document).ready(function() {
     $('.toggleFrame').click(function(element) {
-        console.log(element);
         $('li.active').removeClass('active');
         $(this).parent().addClass('active');
         loadiFrame(element.currentTarget.href);
