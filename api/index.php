@@ -1,7 +1,7 @@
 <?php
 
 $SkipCSS = true;
-require_once(__DIR__.'/../scripts/inc/inc.php');
+require_once(__DIR__.'/../inc/inc.php');
 header('Content-Type: application/json; charset=utf-8');
 
 if (!($_REQUEST['function'])) {
@@ -25,17 +25,17 @@ if (!($_REQUEST['function'])) {
             header('Content-type: text/plain');
             echo \Ramsey\Uuid\Uuid::uuid4();
             break;
-        case 'createReport':
+        case 'createSecurityReport':
             if ($method = checkRequestMethod('POST')) {
-                if (isset($_POST['APIKey']) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm']) AND isset($_POST['id'])) {
+                if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm']) AND isset($_POST['id'])) {
                     if (isValidUuid($_POST['id'])) {
-                        $response = generateSecurityReport($_POST['APIKey'],$_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm'],$_POST['id']);
+                        $response = generateSecurityReport($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm'],$_POST['id']);
                         echo json_encode($response,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                     }
                 }
             }
             break;
-        case 'downloadReport':
+        case 'downloadSecurityReport':
             if ($method = checkRequestMethod('GET')) {
                 if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
                     $id = $_REQUEST['id'];
@@ -52,12 +52,33 @@ if (!($_REQUEST['function'])) {
                 }
             }
             break;
-        case 'getReportProgress':
+        case 'getSecurityReportProgress':
             if ($method = checkRequestMethod('GET')) {
                 if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
                     $id = $_REQUEST['id'];
-                    echo getProgress($id,33); // Produces percentage for use on progress bar
+                    echo getProgress($id,41); // Produces percentage for use on progress bar
                 }
+            }
+            break;
+        case 'createLicenseReport':
+            if ($method = checkRequestMethod('POST')) {
+                if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
+                    $response = getLicenseCount($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm']);
+                    echo json_encode($response,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                }
+            }
+            break;
+        case 'crypt':
+            if ($method = checkRequestMethod('POST')) {
+                if (isset($_POST['key'])) {
+                    echo json_encode(array(encrypt($_POST['key'],getConfig("Security","salt"))));
+                }
+            }
+            break;
+        case 'getThreatActors':
+            if ($method = checkRequestMethod('GET')) {
+                $Actors = GetB1ThreatActors($_REQUEST['start'],$_REQUEST['end']);
+                echo json_encode(GetB1ThreatActorsById($Actors),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
             }
             break;
     }
