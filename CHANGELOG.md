@@ -1,3 +1,6 @@
+## v0.3
+- Refactor lots of code, add new Threat Actor page & ability to encrypt/save API keys for temporary re-use
+
 ## v0.2
 - Initial release of the new UI
 

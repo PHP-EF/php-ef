@@ -433,10 +433,23 @@ hr {
     border-radius: 6px;
     box-shadow: none;
   }
+  .main-child-panel[data-background-color="black"] .card .card-header{
+    background-color: #979696;
+    border-radius: 6px;
+    box-shadow: none;
+  }
+  .main-child-panel[data-background-color="black"] .card .card-body{
+    background-color: #dedede;
+    border-radius: 6px;
+    box-shadow: none;
+  }
   .main-child-panel[data-background-color="black"] .content{
     background-color: #656060;
     color: #FFF;
     border-radius: 6px;
+  }
+  .main-child-panel[data-background-color="black"] .content .loading-icon .spinner-border {
+    color: rgb(170 204 255) !important;
   }
   .main-child-panel[data-background-color="black"] .content > div > div > input, .main-child-panel[data-background-color="black"] .content > div > div > select, .main-child-panel[data-background-color="black"] .content > div > div > div > input{
     background-color: #656060;
@@ -856,7 +869,7 @@ hr {
   opacity: 1;
   filter: alpha(opacity=100); }
 
-.form-control {
+/* .form-control {
   background-color: #fffcf5;
   border: medium none;
   border-radius: 4px;
@@ -900,7 +913,7 @@ hr {
   .form-control.border-input {
     border: 1px solid #CCC5B9; }
   .open .form-control {
-    border-bottom-color: transparent; }
+    border-bottom-color: transparent; } */
 
 .input-lg {
   height: 55px;
@@ -1038,7 +1051,7 @@ textarea.form-control {
   background-color: #FF8F5E;
   color: #B33C12; }
 
-.table thead tr > th,
+/* .table thead tr > th,
 .table thead tr > td,
 .table tbody tr > th,
 .table tbody tr > td,
@@ -1091,7 +1104,7 @@ textarea.form-control {
 .table-striped > thead > tr > td,
 .table-striped > tbody > tr > td,
 .table-striped > tfoot > tr > td {
-  padding: 15px 8px; }
+  padding: 15px 8px; } */
 
 /*      Checkbox and radio         */
 .checkbox,
@@ -1433,7 +1446,7 @@ textarea.form-control {
   .footer .heart {
     color: #EB5E28; }
 
-.dropdown-menu {
+/* .dropdown-menu {
   background-color: #FFFCF5;
   border: 0 none;
   border-radius: 6px;
@@ -1519,7 +1532,7 @@ textarea.form-control {
   .dropdown-menu.dropdown-warning > li > a:hover, .dropdown-menu.dropdown-warning > li > a:focus {
     background-color: #F3BB45; }
   .dropdown-menu.dropdown-danger > li > a:hover, .dropdown-menu.dropdown-danger > li > a:focus {
-    background-color: #EB5E28; }
+    background-color: #EB5E28; } */
 
 .btn-group.select {
   overflow: hidden; }

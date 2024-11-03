@@ -1,5 +1,5 @@
 <?php
-  require_once(__DIR__.'/../scripts/inc/inc.php');
+  require_once(__DIR__.'/../inc/inc.php');
 ?>
 
 <!doctype html>
@@ -42,7 +42,8 @@
                             <div class="content">
                                   <div class="row justify-content-md-center">
                                   <div class="col-md-4 ml-md-auto apiKey">
-                                    <input id="APIKey" type="password" placeholder="Enter API Key" required>
+                                    <input onkeyup="checkInput(this.value)" id="APIKey" type="password" placeholder="Enter API Key" required>
+                                    <i class="fas fa-save saveBtn" id="saveBtn"></i>
                                   </div>
                                   <div class="col-md-2 ml-md-auto realm">
                                     <select id="Realm" class="form-select" aria-label="Realm Selection">
@@ -102,41 +103,6 @@
 <script>
 let haltProgress = false;
 
-document.addEventListener('DOMContentLoaded', function() {
-  const maxDaysApart = 31;
-  const today = new Date();
-  const maxPastDate = new Date(today);
-  maxPastDate.setDate(today.getDate() - maxDaysApart);
-
-  flatpickr("#startDate", {
-    enableTime: true,
-    dateFormat: "Y-m-d H:i",
-    minDate: maxPastDate,
-    maxDate: today,
-    onChange: function(selectedDates, dateStr, instance) {
-      const endDatePicker = document.getElementById('endDate')._flatpickr;
-      const maxEndDate = new Date(selectedDates[0]);
-      maxEndDate.setDate(maxEndDate.getDate() + maxDaysApart);
-      endDatePicker.set('minDate', dateStr);
-      endDatePicker.set('maxDate', maxEndDate > today ? today : maxEndDate);
-    }
-  });
-
-  flatpickr("#endDate", {
-    enableTime: true,
-    dateFormat: "Y-m-d H:i",
-    minDate: maxPastDate,
-    maxDate: today,
-    onChange: function(selectedDates, dateStr, instance) {
-      const startDatePicker = document.getElementById('startDate')._flatpickr;
-      const minStartDate = new Date(selectedDates[0]);
-      minStartDate.setDate(minStartDate.getDate() - maxDaysApart);
-      startDatePicker.set('maxDate', dateStr);
-      startDatePicker.set('minDate', minStartDate < maxPastDate ? maxPastDate : minStartDate);
-    }
-  });
-});
-
 function download(url) {
   const a = document.createElement('a')
   a.href = url
@@ -158,7 +124,7 @@ function hideLoading() {
 }
 
 function updateProgress(id) {
-  $.get('../api?function=getReportProgress&id='+id, function(data) {
+  $.get('../api?function=getSecurityReportProgress&id='+id, function(data) {
       var progress = parseFloat(data).toFixed(1); // Assuming the server returns a JSON object with a 'progress' field
       $('#progress-bar').css('width', progress + '%').attr('aria-valuenow', progress).text(progress + '%');
       if (progress < 100 && haltProgress == false) {
@@ -174,10 +140,11 @@ $("#changelog-modal-button").click(function(){
 })
 
 $("#Generate").click(function(){
-
-  if(!$('#APIKey')[0].value){
+  if (!$('#APIKey').is(':disabled')) {
+    if(!$('#APIKey')[0].value) {
     toast("Error","Missing Required Fields","The API Key is a required field.","danger","30000");
     return null;
+    }
   }
   if(!$('#startDate')[0].value){
     toast("Error","Missing Required Fields","The Start Date is a required field.","danger","30000");
@@ -193,16 +160,18 @@ $("#Generate").click(function(){
     showLoading(id);
     const startDateTime = new Date($('#startDate')[0].value)
     const endDateTime = new Date($('#endDate')[0].value)
-    $.post( "../api?function=createReport", {
-      APIKey: $('#APIKey')[0].value,
-      StartDateTime: startDateTime.toISOString(),
-      EndDateTime: endDateTime.toISOString(),
-      Realm: $('#Realm').find(":selected").val(),
-      id: id
-    }).done(function( data, status ) {
+    var postArr = {}
+    postArr.StartDateTime = startDateTime.toISOString()
+    postArr.EndDateTime = endDateTime.toISOString()
+    postArr.Realm = $('#Realm').find(":selected").val()
+    postArr.id = id
+    if ($('#APIKey')[0].value) {
+      postArr.APIKey = $('#APIKey')[0].value
+    }
+    $.post( "../api?function=createSecurityReport", postArr).done(function( data, status ) {
       if (data['Status'] == 'Success') {
         toast("Success","","The report has been successfully generated.","success","30000");
-        download('../api?function=downloadReport&id='+data['id'])
+        download('../api?function=downloadSecurityReport&id='+data['id'])
       } else {
         toast(data['Status'],"",data['Error'],"danger","30000");
       }

@@ -1,4 +1,15 @@
 <?php
+function getConfig($Section = null,$Option = null) {
+    $config_json = json_decode(file_get_contents(__DIR__.'/../config/config.json'),true); //Config file that has configurations for site.
+    if($Section && $Option) {
+      return $config_json[$Section][$Option];
+    } elseif($Section) {
+      return $config_json[$Section];
+    } else {
+      return $config_json;
+    }
+}
+
 function generate_markdown($file) {
     $mkd = \FastVolt\Helper\Markdown::new();
     $mkd -> setFile( $file );
@@ -120,4 +131,36 @@ function checkRequestMethod($Method,$ReturnInfo = false) {
 function isValidUuid(mixed $uuid): bool
 {
     return is_string($uuid) && preg_match('/^[a-f\d]{8}(-[a-f\d]{4}){4}[a-f\d]{8}$/i', $uuid);
+}
+
+function encrypt($data, $password){
+	$iv = substr(sha1(mt_rand()), 0, 16);
+	$password = sha1($password);
+
+	$salt = sha1(mt_rand());
+	$saltWithPassword = hash('sha256', $password.$salt);
+
+	$encrypted = openssl_encrypt(
+	  "$data", 'aes-256-cbc', "$saltWithPassword", null, $iv
+	);
+	$msg_encrypted_bundle = "$iv:$salt:$encrypted";
+	return $msg_encrypted_bundle;
+}
+
+
+function decrypt($msg_encrypted_bundle, $password){
+	$password = sha1($password);
+
+	$components = explode( ':', $msg_encrypted_bundle );
+	$iv            = $components[0];
+	$salt          = hash('sha256', $password.$components[1]);
+	$encrypted_msg = $components[2];
+
+	$decrypted_msg = openssl_decrypt(
+	  $encrypted_msg, 'aes-256-cbc', $salt, null, $iv
+	);
+
+	if ( $decrypted_msg === false )
+		return false;
+	return $decrypted_msg;
 }

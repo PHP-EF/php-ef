@@ -1,8 +1,9 @@
 <?php
-require_once(__DIR__.'/../../vendor/autoload.php');
-require_once(__DIR__.'/../functions/general-functions.php');
-require_once(__DIR__.'/../functions/csp-functions.php');
-require_once(__DIR__.'/../functions/security-assessment.php');
+require_once(__DIR__.'/../vendor/autoload.php');
+require_once(__DIR__.'/functions/general-functions.php');
+require_once(__DIR__.'/functions/csp-functions.php');
+require_once(__DIR__.'/functions/security-assessment.php');
+require_once(__DIR__.'/functions/license-usage.php');
 if (!(isset($SkipCSS))) {
 
     echo '
@@ -25,6 +26,12 @@ if (!(isset($SkipCSS))) {
       <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
       <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.min.css" rel="stylesheet">
 
+      <!-- Bootstrap-Table -->
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.23.5/dist/bootstrap-table.min.css">
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.23.5/dist/bootstrap-table.min.js"></script>
+      <script type="text/javascript" src="https://unpkg.com/bootstrap-table@1.23.5/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
+      <script type="text/javascript" src="https://unpkg.com/bootstrap-table@1.23.5/dist/extensions/export/bootstrap-table-export.js"></script>
+
       <!-- FontAwesome -->
       <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet" type="text/css"/>
 
@@ -34,7 +41,6 @@ if (!(isset($SkipCSS))) {
 
       <!-- Paper Dashboard -->
       <link href="/assets/css/paper.css" rel="stylesheet"/>
-      <link href="/assets/css/themify-icons.css" rel="stylesheet">
 
     </head>
     ';
@@ -50,7 +56,7 @@ if (!(isset($SkipCSS))) {
     // }
 
     echo '
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999999" id="toastContainer">
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999999" id="toastContainer">
     </div>
     ';
 }

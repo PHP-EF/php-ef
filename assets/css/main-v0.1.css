@@ -37,6 +37,13 @@ a {
     position: fixed;
     margin: auto;
 }
+.infoBtn-li {
+    bottom: 0;
+    left: 50px;
+    position: fixed;
+    margin: auto;
+    padding-bottom: 1px;
+}
 .footnote {
     text-align: center;
     background-color: #333333; /* Slightly lighter dark color for contrast */
@@ -77,6 +84,26 @@ button:hover {
     display: none;
     margin-top: 10px;
 }
+.saveBtn {
+  position: relative;
+  left: 0;
+  transition: left 0.3s;
+  visibility: hidden;
+}
+.show {
+  left: -25px;
+  visibility: visible;
+}
+.bootstrap-table {
+    padding: 10px;
+}
+.info-nav {
+    flex-wrap: nowrap!important;
+}
+.tab-content {
+    margin-left: 10px;
+    margin-top: 5px;
+}
 .form-select {
     display: inline-block!important;
     /* width: 10%!important; */
@@ -87,7 +114,7 @@ button:hover {
     padding-right: 5%;
 }
 .apiKey > input {
-    width: 100%;
+    width: 90%;
 }
 input {
     border: 1px solid #ced4da;
@@ -137,6 +164,10 @@ input {
 .progress-bar {
     background: -webkit-linear-gradient(left, #FDDD00 0%, #34C33D 25%, #00BD4D 50%, #00CD93 75%, #00E1E6 100%);
 }
+.license-card-group {
+    margin: 1% 10% 1% 10%;
+}
+
 /* On screens that are less than 991px wide, make the sidebar into a topbar */
 @media screen and (max-width: 991px) {
     .sidebar {
