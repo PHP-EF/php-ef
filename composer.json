@@ -7,6 +7,7 @@
         "ramsey/uuid": "^4.7.6",
         "peppeocchi/php-cron-scheduler": "4.*",
         "remotelyliving/php-dns": "^5.0",
-        "monolog/monolog": "^3.0"
+        "monolog/monolog": "^3.0",
+        "firebase/php-jwt": "^5.0"
     }
 }

@@ -1,4 +1,42 @@
 <?php
+use Firebase\JWT\JWT;
+
+function NewAuth($UN,$PW) {
+  session_start();
+  // Secret key for JWT
+  $secretKey = getConfig()['Security']['salt']; // Change this to a secure key
+
+  // Function to validate user credentials
+  function validateCredentials($username, $password) {
+      // Replace this with your actual user validation logic
+      // For demonstration, let's assume a single user
+      return $username === 'admin' && $password === getConfig()['Security']['AdminPassword'];
+  }
+
+  if (validateCredentials($UN, $PW)) {
+    // Generate JWT token
+    $payload = [
+        'iat' => time(), // Issued at
+        'exp' => time() + (86400 * 30), // Expiration time (30 days)
+        'username' => $username,
+    ];
+    $jwt = JWT::encode($payload, $secretKey);
+
+    // Set JWT as a cookie
+    setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
+    $_SESSION['username'] = $username; // Store username in session
+
+    return array(
+      'Status' => 'Success',
+      'Location' => '/'
+    );
+  } else {
+      return array(
+        'Status' => 'Error',
+        'Message' => 'Invalid Credentials'
+      );
+  }
+}
 
 function GetAuth() {
   if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
