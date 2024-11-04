@@ -1,5 +1,22 @@
 {
+    "System": {
+        "rbacjson": "/config/rbac.json",
+        "rbacinfo": "/config/rbac-info.json",
+        "logfilename": "ib-sa-tools",
+        "logdirectory": "logs/",
+        "loglevel": "Debug",
+        "logretention": "60",
+        "CURL-Timeout": "60",
+        "CURL-ConnectTimeout": "30"
+    },
     "Security": {
         "salt": "somesupersecurepasswordhere"
+    },
+    "SQL": {
+        "sqlserver": "fqdnofsqlserver",
+        "sqluser": "svc_username",
+        "sqlpass": "password",
+        "sqldb": "sqldatabasename",
+        "sqltable": "sqltablename"
     }
 }
