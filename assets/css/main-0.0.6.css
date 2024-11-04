@@ -876,6 +876,12 @@ height: 100%;
   margin: 1% 10% 1% 10%;
 }
 
+@media (min-width: 1800px) {
+  .container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl {
+      max-width: 1720px!important;
+  }
+}
+
 /* On screens that are less than 991px wide, make the sidebar into a topbar */
 /* @media screen and (max-width: 991px) {
   .sidebar {
