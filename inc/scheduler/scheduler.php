@@ -1,6 +1,6 @@
 <?php
 $SkipCSS = true;
-require_once(__DIR__.'/../inc/inc.php');
+require_once(__DIR__.'/../inc.php');
 use GO\Scheduler;
 // Create a new scheduler
 $scheduler = new Scheduler();
