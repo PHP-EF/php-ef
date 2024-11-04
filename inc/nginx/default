@@ -22,7 +22,7 @@ server {
     }
 
     # Disable private directories
-    location ~ /\.git|scripts|vendor|files {
+    location ~ /\.git|inc|vendor|files {
         deny all;
         access_log off;
         log_not_found off;

@@ -96,6 +96,10 @@ function updateProgress(id) {
           updateProgress(id);
         }, 1000);
       }
+  }).fail(function( data, status ) {
+    setTimeout(function() {
+      updateProgress(id);
+    }, 1000);
   });
 }
 
