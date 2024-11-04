@@ -1,0 +1,25 @@
+{
+	"Menus": {
+		"ADMIN-Menu": "Grants access to the Admin Menu."
+	},
+	"Resources": {
+		"ADMIN-RBAC": {
+			"description": "Grants the ability to view and manage Role Based Access",
+			"PermittedMenus": [
+				"ADMIN-Menu"
+			]
+		},
+		"ADMIN-LOGS": {
+			"description": "Grants access to view Logs",
+			"PermittedMenus": [
+				"ADMIN-Menu"
+			]
+		},
+		"ADMIN-CONFIG": {
+			"description": "Grants access to manage the Infoblox SA Tools Configuration",
+			"PermittedMenus": [
+				"ADMIN-Menu"
+			]
+		}
+	}
+}

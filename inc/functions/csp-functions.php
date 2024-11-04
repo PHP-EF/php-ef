@@ -55,8 +55,15 @@ function QueryCSP($Method, $Uri, $Data = "", $APIKey = "", $Realm = "US") {
       break;
   }
   if ($Result) {
-    $Output = json_decode($Result->body);
-    return $Output;
+    switch ($Result->status_code) {
+      case '401':
+        return array("Status" => "Error", "Error" => "Warning. Invalid API Key.");
+        break;
+      default:
+        $Output = json_decode($Result->body);
+        return $Output;
+        break;
+    }
   } elseif ($ErrorOnEmpty) {
     echo "Warning. No results from API.".$Url;
   }
@@ -74,6 +81,8 @@ function GetB1ThreatActors($StartDateTime,$EndDateTime,$APIKey = "", $Realm = "U
   $Actors = QueryCubeJS('{"segments":[],"timeDimensions":[{"dimension":"PortunusAggIPSummary.timestamp","granularity":null,"dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"ungrouped":false,"order":{"PortunusAggIPSummary.timestampMax":"desc"},"measures":["PortunusAggIPSummary.count"],"dimensions":["PortunusAggIPSummary.threat_indicator","PortunusAggIPSummary.actor_id"],"limit":1000,"filters":[{"and":[{"operator":"set","member":"PortunusAggIPSummary.threat_indicator"},{"operator":"set","member":"PortunusAggIPSummary.actor_id"}]}]}');
   if (isset($Actors->result->data)) {
     return $Actors->result->data;
+  } else {
+    return $Actors;
   }
 }
 
