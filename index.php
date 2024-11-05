@@ -265,7 +265,7 @@ pre code {
           </li>
           <?php if ($isAuth) { echo '
 	        <li>
-            <a href="/outpost.goauthentik.io/sign_out">
+            <a href="#" onclick="logout();" id="logoutBtn">
               <i class="fa fa-sign-out"></i>
               <span>Logout</span>
             </a>
@@ -430,8 +430,20 @@ pre code {
 loadiFrame();
 
 function login() {
-  toast("Warning","","Authentication is currently disabled.","warning");
-  //location = "https://auth.placeholder/?redirect_uri="+window.location.href.replace("#","?");
+  location = "/login.php?redirect_uri="+window.location.href.replace("#","?");
+}
+
+function logout() {
+  $.get('/api?function=logout', function(data) {
+      if (!data['Authenticated']) {
+        toast("Logged Out","","Successfully Logged Out.","success");
+      } else {
+        toast("Error","","Failed to Log Out. Your session may still be active.","danger");
+      }
+  }).fail(function( data, status ) {
+    toast("Error","","Unknown API Error","danger");
+  });
+  location.reload();
 }
 
 //$(document).ready(function() {
