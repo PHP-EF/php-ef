@@ -369,6 +369,7 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
         // Get & Inject Customer Name, Contact Name & Email
         $AccountInfo = QueryCSP("get","v2/current_user/accounts");
         $CurrentAccount = $AccountInfo->results[array_search($UserInfo->result->account_id, array_column($AccountInfo->results, 'id'))];
+        writeLog("SecurityAssessment",$UserInfo->result->name." requested a security assessment report for: ".$CurrentAccount->name,"info");
         $mapping = replaceTag($mapping,'#TAG01',$CurrentAccount->name);
         $mapping = replaceTag($mapping,'#DATE',date("dS F Y"));
         $mapping = replaceTag($mapping,'#NAME',$UserInfo->result->name);

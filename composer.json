@@ -5,6 +5,9 @@
         "phpoffice/phpspreadsheet": "^3.3.0",
         "fastvolt/markdown": "^0.2.1",
         "ramsey/uuid": "^4.7.6",
-        "peppeocchi/php-cron-scheduler": "4.*"
+        "peppeocchi/php-cron-scheduler": "4.*",
+        "remotelyliving/php-dns": "^5.0",
+        "monolog/monolog": "^3.0",
+        "firebase/php-jwt": "^5.0"
     }
 }

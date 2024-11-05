@@ -1,5 +1,5 @@
 <?php
-  require_once(__DIR__.'/../inc/inc.php');
+  require_once(__DIR__.'/../../inc/inc.php');
 ?>
 
 <!doctype html>
@@ -147,7 +147,7 @@ $("#Generate").click(function(){
       if ($('#APIKey')[0].value) {
         postArr.APIKey = $('#APIKey')[0].value
       }
-      $.post( "../api?function=createLicenseReport", postArr).done(function( data, status ) {
+      $.post( "/api?function=createLicenseReport", postArr).done(function( data, status ) {
       $('#ip_unique_dns').text(data['Unique']['DNS'])
       $('#ip_unique_dhcp').text(data['Unique']['DHCP'])
       $('#ip_unique_dfp').text(data['Unique']['DFP'])

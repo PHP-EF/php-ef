@@ -1,0 +1,18 @@
+{
+    "EVERYONE": {
+        "Description": "This group applies to any authenticated user",
+        "PermittedResources": [],
+        "PermittedMenus": []
+    },
+    "Administrators": {
+        "Description": "Infoblox SA Tools Admins",
+        "PermittedResources": [
+            "ADMIN-RBAC",
+            "ADMIN-LOGS",
+            "ADMIN-CONFIG"
+        ],
+        "PermittedMenus": [
+            "ADMIN-Menu"
+        ]
+    }
+}

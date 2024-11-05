@@ -1,7 +1,9 @@
 vendor/*
 files/*
+inc/logs/*
 !files/reports/placeholder.txt
 composer.lock
 config.json
+jwt-blacklist
 _archive
 .DS_Store
