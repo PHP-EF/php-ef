@@ -131,21 +131,30 @@ html {
 </div>
 
 <script>
-$('#login').click(function() {
-    $.post( "/api?function=login", {
-        un: $('#un').val(),
-        pw: $('#pw').val()
-    }).done(function( data, status ) {
-        if (data['Status'] == 'Error') {
-            toast("Authentication Error","",data['Message'],"danger","30000");
-        } else if (data['Status'] == 'Success') {
-            toast("Success!","","Successfully logged in.","success","30000");
-            location = "<?php echo $RedirectUri; ?>"
-        }
-    }).fail(function( data, status ) {
-        toast("Authentication Error","","Unknown Authentication Error","danger","30000");
-    }).always(function() {
+function login() {
+  $.post( "/api?function=login", {
+      un: $('#un').val(),
+      pw: $('#pw').val()
+  }).done(function( data, status ) {
+      if (data['Status'] == 'Error') {
+          toast("Authentication Error","",data['Message'],"danger","30000");
+      } else if (data['Status'] == 'Success') {
+          toast("Success!","","Successfully logged in.","success","30000");
+          location = "<?php echo $RedirectUri; ?>"
+      }
+  }).fail(function( data, status ) {
+      toast("Authentication Error","","Unknown Authentication Error","danger","30000");
+  }).always(function() {
 
-    });
+  });
+}
+
+$('#login').click(function() {
+    login();
 })
+$('#un,#pw').keypress(function(event) {
+  if (event.which == 13) {
+      login();
+  }
+});
 </script>
