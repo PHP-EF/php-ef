@@ -13,4 +13,5 @@ service cron start
 
 # Overwrite Redis Config File
 cp /home/site/wwwroot/inc/nginx/redis.conf /etc/redis/redis.conf
-service redis-server restart
+redis-cli shutdown
+service redis-server start
