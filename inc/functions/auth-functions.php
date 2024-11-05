@@ -1,10 +1,44 @@
 <?php
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use Predis\Client;
 
-$blacklist = [];
+class CoreJwt {
+    private $redis;
+
+    public function __construct() {
+        $this->redis = new Client(); // Connect to Redis
+    }
+
+    // Generate a JWT
+    public function generateToken($UN) {
+        $payload = [
+          'iat' => time(), // Issued at
+          'exp' => time() + (86400 * 30), // Expiration time (30 days)
+          'username' => $UN,
+          'name' => null,
+          'groups' => array()
+        ];
+        if ($UN === 'admin') {
+          $payload['groups'][] = 'Administrators';
+        }
+        return JWT::encode($payload, getConfig()['Security']['salt']);
+    }
+
+    // Revoke a token
+    public function revokeToken($token) {
+        $decoded = JWT::decode($token, getConfig()['Security']['salt'], ['HS256']);
+        $this->redis->set($token, json_encode($decoded), 'EX', (86400 * 30)); // Store token with expiration
+    }
+
+    // Check if a token is revoked
+    public function isRevoked($token) {
+        return $this->redis->exists($token);
+    }
+}
 
 function NewAuth($UN,$PW) {
+  $CoreJwt = new CoreJwt();
   // Secret key for JWT
   $secretKey = getConfig()['Security']['salt']; // Change this to a secure key
 
@@ -20,19 +54,7 @@ function NewAuth($UN,$PW) {
 
   if (validateCredentials($UN, $PW)) {
     // Generate JWT token
-    $payload = [
-        'iat' => time(), // Issued at
-        'exp' => time() + (86400 * 30), // Expiration time (30 days)
-        'username' => $UN,
-        'name' => null,
-        'groups' => array()
-    ];
-
-    if ($UN === 'admin') {
-      $payload['groups'][] = 'Administrators';
-    }
-    $jwt = JWT::encode($payload, $secretKey);
-
+    $jwt = $CoreJwt->generateToken($UN);
     // Set JWT as a cookie
     setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
 
@@ -49,14 +71,13 @@ function NewAuth($UN,$PW) {
 }
 
 function InvalidateAuth() {
-  $blacklistfile = __DIR__.'/../config/jwt-blacklist';
-  if ((strpos(file_get_contents($blacklistfile),$_COOKIE['jwt']) === false) OR !file_exists($blacklistfile)) {
-    file_put_contents($blacklistfile, $_COOKIE['jwt'].PHP_EOL , FILE_APPEND);
-  }
+  $CoreJwt = new CoreJwt();
+  $CoreJwt->revokeToken($_COOKIE['jwt']);
   return GetAuth();
 }
 
 function GetAuth() {
+  $CoreJwt = new CoreJwt();
   if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
     $IPAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
   } else if (isset($_SERVER['REMOTE_ADDR'])) {
@@ -67,7 +88,7 @@ function GetAuth() {
 
   if (isset($_COOKIE['jwt'])) {
     $secretKey = getConfig()['Security']['salt']; // Change this to a secure key
-    if (strpos(file_get_contents(__DIR__.'/../config/jwt-blacklist'),$_COOKIE['jwt']) !== false) {
+    if ($CoreJwt->isRevoked($_COOKIE['jwt']) == true) {
       // Token is invalid
       $AuthResult = array(
         'Authenticated' => false,
