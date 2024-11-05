@@ -435,15 +435,16 @@ function login() {
 
 function logout() {
   $.get('/api?function=logout', function(data) {
-      if (!data['Authenticated']) {
+  }).done(function (data, status) {
+    if (!data['Authenticated']) {
         toast("Logged Out","","Successfully Logged Out.","success");
       } else {
         toast("Error","","Failed to Log Out. Your session may still be active.","danger");
       }
+      location.reload();
   }).fail(function( data, status ) {
     toast("Error","","Unknown API Error","danger");
   });
-  location.reload();
 }
 
 //$(document).ready(function() {
