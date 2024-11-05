@@ -194,7 +194,7 @@ function GetAuthV1() {
 function signinRedirect() {
   if (GetAuth()['Authenticated']) {
   } else {
-    echo '<script>top.window.location = "https://auth.placeholder/?rd="+parent.window.location.href.replace("#","?")</script>';
+    echo '<script>top.window.location = "/login.php?redirect_uri="+parent.window.location.href.replace("#","?")</script>';
   }
 }
 
