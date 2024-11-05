@@ -1,3 +1,6 @@
+## v0.4.2
+- Minor fixes to session expiry redirect
+
 ## v0.4.1
 - Add initial admin authentication and framework ready for SAML/OAuth/LDAP
 

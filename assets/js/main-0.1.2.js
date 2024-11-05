@@ -175,7 +175,7 @@ async function heartBeat() {
 	      let response2 = await fetch('/api/?function=heartbeat', {cache: "no-cache"});
         if (response2.status == "301") {
       	  console.log("Session timed out.");
-          window.location.href = "https://auth.placeholder/";
+          window.location.href = "/login.php?redirect_uri="+window.location.href.replace("#","?");
 	      }
 	      await delay(10000);
       }
