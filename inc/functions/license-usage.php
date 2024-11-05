@@ -11,6 +11,9 @@ function getLicenseCount($StartDateTime,$EndDateTime,$Realm) {
     $offsetDNS = 0;
     $offsetDHCP = 0;
     $offsetDFP = 0;
+    $TotalDNSIPCount = 0;
+    $TotalDHCPIPCount = 0;
+    $TotalDFPIPCount = 0;
 
     while ($moreDNSIPs) {
         $UniqueDNSIPs = QueryCubeJS('{"measures":["NstarDnsActivity.total_query_count"],"segments":[],"dimensions":["NstarDnsActivity.device_ip","NstarDnsActivity.site_id"],"ungrouped":false,"limit":50000,"offset":'.$offsetDNS.',"timeDimensions":[{"dimension":"NstarDnsActivity.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"],"granularity":null}]}');

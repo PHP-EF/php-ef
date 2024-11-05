@@ -196,7 +196,7 @@ if (!($_REQUEST['function'])) {
             if ($method = checkRequestMethod('GET')) {
                 if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
                     $id = $_REQUEST['id'];
-                    echo getProgress($id,41); // Produces percentage for use on progress bar
+                    echo getProgress($id,40); // Produces percentage for use on progress bar
                 }
             }
             break;

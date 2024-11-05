@@ -147,82 +147,23 @@ pre code {
           </li>
           <?php if ($isAuth) { echo '
 	        <li class="header-menu">
-            <span>DDI/IPAM</span>
+            <span>Dev</span>
 	        </li>
-          <li class="sidebar-dropdown">
-            <a href="#" class="preventDefault">
-              <i class="fa fa-tachometer-alt"></i>
-              <span>Dashboards</span>
-            </a>
-            <div class="sidebar-submenu">
-              <ul>
-                <li>
-		              <a href="#page=bloxoneddi/dhcp" class="toggleFrame">DHCP Utilization</a>
-		            </li>
-
-                <li>
-                  <a href="#page=bloxoneddi/subnets" class="toggleFrame">Subnet Utilization</a>
-                </li>
-              </ul>
-            </div>
-	        </li>
-          <li class="sidebar-dropdown">
-            <a href="#" class="preventDefault">
-              <i class="fa fa-chart-simple"></i>
-              <span>Monitoring</span>
-              <!--<span class="badge rounded-pill bg-danger">3</span>-->
-	          </a>
-            <div class="sidebar-submenu">
-	            <ul>
-                <li>
-                  <a href="#page=pages/license-usage" class="toggleFrame">License Utilization</a>
-		            </li>
-	            </ul>
-	          </div>
-          </li>
           <li class="sidebar-dropdown">
             <a href="#" class="preventDefault">
               <i class="fa fa-toolbox"></i>
               <span>Tools</span>
-              <!--<span class="badge rounded-pill bg-danger">3</span>-->
-	          </a>
-	          <div class="sidebar-submenu">
-                <ul>
-                  <li>
-                    <a href="#page=bloxoneddi/iplookup" class="toggleFrame">IP Lookup</a>
-                  </li>
-                </ul>
-              
-                <ul>
-                  <li>
-                    <a href="#page=bloxoneddi/subnetlookup" class="toggleFrame">Subnet Lookup</a>
-                  </li>
-                </ul>
-            </div>
-          </li>
-          <li class="sidebar-dropdown">
-            <a href="#" class="preventDefault">
-              <i class="fa fa-magnifying-glass"></i>
-              <span>Query</span>
             </a>
-	          <div class="sidebar-submenu">
+            <div class="sidebar-submenu">
               <ul>
                 <li>
-		              <a href="#page=bloxoneddi/dnslogs" class="toggleFrame">DNS Logs</a>
+                  <a href="#page=uddi/license-usage" class="toggleFrame">License Utilization</a>
 		            </li>
-	            </ul>
-            </div>
-          </li>
 
-          <li class="header-menu">
-            <span>Help & Guidance</span>
-          </li>
-          <li>
-            <a href="#page=prx/docs/" class="toggleFrame">
-              <i class="fa fa-book"></i>
-              <span>Documentation</span>
-            </a>
-          </li>';}
+              </ul>
+            </div>
+	        </li>';}
+          
           if (CheckAccess(null,null,"ADMIN-Menu")) { echo '
           <li class="header-menu">
             <span>Admin</span>
@@ -245,20 +186,19 @@ pre code {
                     ';}
                   echo '
 		              </ul>
-		            </li>
+		            </li>';
+                if (CheckAccess(null,"ADMIN-LOGS")) { echo '
                 <li class="sidebar-subdropdown">
 		              <a href="#">Logs</a>
-                  <ul class="sidebar-subsubmenu">';
-                    if (CheckAccess(null,"ADMIN-LOGS")) { echo '
+                  <ul class="sidebar-subsubmenu">
                     <li><a href="#page=core/logs" class="toggleFrame">Portal Logs</a></li>
-                    ';}
-                  echo '
 		              </ul>
 		            </li>
+                ';}
+                echo '
 	            </ul>
 	          </div>
-	        </li>
-          ';}?>
+	        </li>';}?>
 
           <li class="header-menu">
             <span>Account</span>
