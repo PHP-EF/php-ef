@@ -1,5 +1,11 @@
 <?php
   require_once(__DIR__.'/inc/inc.php');
+
+  if (isset($_REQUEST['redirect_uri'])) {
+    $RedirectUri = $_REQUEST['redirect_uri'];
+  } else {
+    $RedirectUri = '/';
+  }
 ?>
 
 <style>
@@ -126,7 +132,7 @@ html {
 
 <script>
 $('#login').click(function() {
-    $.post( "/api?function=auth", {
+    $.post( "/api?function=login", {
         un: $('#un').val(),
         pw: $('#pw').val()
     }).done(function( data, status ) {
@@ -134,7 +140,7 @@ $('#login').click(function() {
             toast("Authentication Error","",data['Message'],"danger","30000");
         } else if (data['Status'] == 'Success') {
             toast("Success!","","Successfully logged in.","success","30000");
-            location = data['Location'];
+            location = "<?php echo $RedirectUri; ?>"
         }
     }).fail(function( data, status ) {
         toast("Authentication Error","","Unknown Authentication Error","danger","30000");

@@ -12,8 +12,11 @@ if (!($_REQUEST['function'])) {
     die();
 } else {
     switch ($_REQUEST['function']) {
-        case 'auth':
+        case 'login':
             echo json_encode(NewAuth($_POST['un'],$_POST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+            break;
+        case 'logout':
+            echo json_encode(InvalidateAuth(),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
             break;
         case 'heartbeat':
             if (GetAuth()['Authenticated'] == true) {

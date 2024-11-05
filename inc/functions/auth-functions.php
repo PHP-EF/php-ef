@@ -1,16 +1,21 @@
 <?php
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
+$blacklist = [];
 
 function NewAuth($UN,$PW) {
-  session_start();
   // Secret key for JWT
   $secretKey = getConfig()['Security']['salt']; // Change this to a secure key
 
   // Function to validate user credentials
   function validateCredentials($username, $password) {
-      // Replace this with your actual user validation logic
-      // For demonstration, let's assume a single user
-      return $username === 'admin' && $password === getConfig()['Security']['AdminPassword'];
+      // Replace this with actual user validation logic
+      if ($username === 'admin' && $password === getConfig()['Security']['AdminPassword']) {
+        return true;
+      } else if ($username === 'user' && $password === getConfig()['Security']['AdminPassword']) {
+        return true;
+      };
   }
 
   if (validateCredentials($UN, $PW)) {
@@ -18,13 +23,18 @@ function NewAuth($UN,$PW) {
     $payload = [
         'iat' => time(), // Issued at
         'exp' => time() + (86400 * 30), // Expiration time (30 days)
-        'username' => $username,
+        'username' => $UN,
+        'name' => null,
+        'groups' => array()
     ];
+
+    if ($UN === 'admin') {
+      $payload['groups'][] = 'Administrators';
+    }
     $jwt = JWT::encode($payload, $secretKey);
 
     // Set JWT as a cookie
     setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
-    $_SESSION['username'] = $username; // Store username in session
 
     return array(
       'Status' => 'Success',
@@ -38,7 +48,93 @@ function NewAuth($UN,$PW) {
   }
 }
 
+function InvalidateAuth() {
+  $blacklistfile = __DIR__.'/../config/jwt-blacklist';
+  if ((strpos(file_get_contents($blacklistfile),$_COOKIE['jwt']) === false) OR !file_exists($blacklistfile)) {
+    file_put_contents($blacklistfile, $_COOKIE['jwt'].PHP_EOL , FILE_APPEND);
+  }
+  return GetAuth();
+}
+
 function GetAuth() {
+  if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+    $IPAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
+  } else if (isset($_SERVER['REMOTE_ADDR'])) {
+    $IPAddress = $_SERVER['REMOTE_ADDR'];
+  } else {
+    $IPAddress = "N/A";
+  }
+
+  if (isset($_COOKIE['jwt'])) {
+    $secretKey = getConfig()['Security']['salt']; // Change this to a secure key
+    if (strpos(file_get_contents(__DIR__.'/../config/jwt-blacklist'),$_COOKIE['jwt']) !== false) {
+      // Token is invalid
+      $AuthResult = array(
+        'Authenticated' => false,
+        'IPAddress' => $IPAddress,
+      );
+      return $AuthResult;
+    } else {
+      try {
+        $decodedJWT = JWT::decode($_COOKIE['jwt'], new Key($secretKey, 'HS256'));
+      } catch (Exception $e) {
+        return array(
+          'Status' => 'Error',
+          'Message' => $e->getMessage()
+        );
+      }
+    }
+
+    if ($decodedJWT) {
+      if (isset($decodedJWT->username)) {
+        $Username = $decodedJWT->username;
+      } else {
+        $Username = null;
+      }
+
+      if (isset($decodedJWT->name)) {
+        $Name = $decodedJWT->name;
+      } else {
+        $Name = null;
+      }
+
+      if (isset($decodedJWT->groups)) {
+        $decodedJWT->groups[] = 'EVERYONE';
+        $Groups = join("|",$decodedJWT->groups);
+      } else {
+        $Groups = "EVERYONE";
+      }
+  
+      if (isset($decodedJWT->email)) {
+        $Email = $decodedJWT->email;
+      } else {
+        $Email = null;
+      }
+  
+      $AuthResult = array(
+        'Authenticated' => true,
+        'Username' => $Username,
+        'DisplayName' => $Name,
+        'EmailAddress' => $Email,
+        'IPAddress' => $IPAddress,
+        'Groups' => $Groups
+      );
+    } else {
+      $AuthResult = array(
+        'Authenticated' => false,
+        'IPAddress' => $IPAddress,
+      );
+    }
+  } else {
+    $AuthResult = array(
+      'Authenticated' => false,
+      'IPAddress' => $IPAddress,
+    );
+  }
+  return $AuthResult;
+}
+
+function GetAuthV1() {
   if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
     $IPAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
   } else if (isset($_SERVER['REMOTE_ADDR'])) {
@@ -119,11 +215,7 @@ function CheckAccess($User,$Service = null,$Menu = null) {
     $rbacJson = file_get_contents(__DIR__.'/../'.getConfig("System","rbacjson"));
     $rbac = json_decode($rbacJson, true);
     if (isset($User['Groups'])) {
-      if (isset($_SERVER['HTTP_X_AUTHENTIK_UID'])) {
-        $usergroups = explode('|',$User['Groups']);
-      } else {
-        $usergroups = explode(',',$User['Groups']);
-      }
+      $usergroups = explode('|',$User['Groups']);
       if ($Service != null) {
 	$Services = explode(',',$Service);
 	foreach ($Services as $ServiceToCheck) {
