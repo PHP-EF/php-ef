@@ -169,10 +169,10 @@ function getCookie(name) {
 async function heartBeat() {
   const delay = ms => new Promise(res => setTimeout(res, ms));
   try {
-    const response = await fetch('/api/?function=heartbeat', {cache: "no-cache"});
+    const response = await fetch('/api?function=heartbeat', {cache: "no-cache"});
     if (response.status == "200") {
       while (true) {
-	      let response2 = await fetch('/api/?function=heartbeat', {cache: "no-cache"});
+	      let response2 = await fetch('/api?function=heartbeat', {cache: "no-cache"});
         if (response2.status == "301") {
       	  console.log("Session timed out.");
           window.location.href = "/login.php?redirect_uri="+window.location.href.replace("#","?");

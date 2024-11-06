@@ -51,7 +51,7 @@ pre code {
             </ul>-->
             <h5 class="mb-0 mt-5">Role Based Access</h5>
             <p>Use the following to configure Role Based Access for Access Groups. This allows providing granular control over which areas of the Infoblox SA Tools Portal users have access to.</p>
-            <table  data-url="/api/?function=GetRBAC&action=listgroups"
+            <table  data-url="/api?function=GetRBAC&action=listgroups"
               data-toggle="table"
               data-search="true"
               data-filter-control="true" 
@@ -173,7 +173,7 @@ pre code {
     var div = document.getElementById('modalListGroup');
     var title = document.getElementById('editModalLabel');
     $('#editGroupDescription').val(row['Description']);
-    $.getJSON('/api/?function=GetRBAC&action=listroles', function(roleinfo) {
+    $.getJSON('/api?function=GetRBAC&action=listroles', function(roleinfo) {
       div.innerHTML = "";
       for (var key in roleinfo['Resources']) {
         div.innerHTML += `
@@ -192,7 +192,7 @@ pre code {
             </div>
           </div>`
       };
-      $.getJSON('/api/?function=GetRBAC&group='+encodeURIComponent(row.Group), function(grouproleinfo) {
+      $.getJSON('/api?function=GetRBAC&group='+encodeURIComponent(row.Group), function(grouproleinfo) {
         $('#editModalLabel').text(row.Group);
         for (var key in grouproleinfo.PermittedResources) {
           $("#"+grouproleinfo.PermittedResources[key]).prop("checked", "true");
@@ -202,7 +202,7 @@ pre code {
   }
 
   function roleQuery(data) {
-    $.getJSON('/api/?function=GetRBAC&group='+encodeURIComponent(data.Group), function(grouproleinfo) {
+    $.getJSON('/api?function=GetRBAC&group='+encodeURIComponent(data.Group), function(grouproleinfo) {
       for (var key in grouproleinfo.PermittedResources) {
         $("#"+grouproleinfo.PermittedResources[key]).prop("checked", "true");
       }
@@ -216,7 +216,7 @@ pre code {
     },
     'click .delete': function (e, value, row, index) {
       if(confirm("Are you sure you want to delete "+row.Group+" from Role Based Access? This is irriversible.") == true) {
-        $.getJSON('/api/?function=DeleteRBAC&group='+encodeURIComponent(row.Group), function(removeRBACResults) {
+        $.getJSON('/api?function=DeleteRBAC&group='+encodeURIComponent(row.Group), function(removeRBACResults) {
           if (removeRBACResults[row.Group]) {
             toast("Error","","Failed to delete "+row.Group+" from Role Based Access","danger");
 	  } else {
@@ -232,7 +232,7 @@ pre code {
     let toggle = $('#'+event.target.id).prop('checked');
     let group = $('#editModalLabel').text();
     let targetid = event.target.id
-    $.getJSON('/api/?function=SetRBAC&group='+encodeURIComponent(group)+'&key='+targetid+'&value='+toggle, function(setRBACResults) {
+    $.getJSON('/api?function=SetRBAC&group='+encodeURIComponent(group)+'&key='+targetid+'&value='+toggle, function(setRBACResults) {
       if (setRBACResults[group]['PermittedResources'].includes(targetid)) {
         if (toggle) {
           toast("Success","","Successfully added "+targetid+" to "+group,"success");
@@ -252,7 +252,7 @@ pre code {
   $('#groupDescriptionSaveButton').on('click', function(elem) {
     let group = $('#editModalLabel').text();
     let description = $('#editGroupDescription').val();
-    $.getJSON('/api/?function=SetRBAC&group='+encodeURIComponent(group)+'&description='+encodeURIComponent(description),function(setRBACResults) {
+    $.getJSON('/api?function=SetRBAC&group='+encodeURIComponent(group)+'&description='+encodeURIComponent(description),function(setRBACResults) {
       if (setRBACResults[group]['Description'] == description) {
         toast("Success","","Successfully edited "+group+" description to: "+description,"success");
 	$('#rbacTable').bootstrapTable('refresh');
@@ -270,7 +270,7 @@ pre code {
   $(document).on('click', '#newGroupSubmit', function(event) {
     let groupName = $('#groupName').val();
     let groupDescription = $('#groupDescription').val();
-    $.getJSON('/api/?function=SetRBAC&group='+encodeURIComponent(groupName)+'&description='+encodeURIComponent(groupDescription), function(newRBACGroupResults) {
+    $.getJSON('/api?function=SetRBAC&group='+encodeURIComponent(groupName)+'&description='+encodeURIComponent(groupDescription), function(newRBACGroupResults) {
     }); 
   });
 
