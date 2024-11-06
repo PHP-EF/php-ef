@@ -171,46 +171,54 @@ if (!($_REQUEST['function'])) {
             echo \Ramsey\Uuid\Uuid::uuid4();
             break;
         case 'createSecurityReport':
-            if ($method = checkRequestMethod('POST')) {
-                if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm']) AND isset($_POST['id'])) {
-                    if (isValidUuid($_POST['id'])) {
-                        $response = generateSecurityReport($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm'],$_POST['id']);
-                        echo json_encode($response,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+            if (CheckAccess(null,"B1-SECURITY-ASSESSMENT")) {
+                if ($method = checkRequestMethod('POST')) {
+                    if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm']) AND isset($_POST['id'])) {
+                        if (isValidUuid($_POST['id'])) {
+                            $response = generateSecurityReport($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm'],$_POST['id']);
+                            echo json_encode($response,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                        }
                     }
                 }
             }
             break;
         case 'downloadSecurityReport':
-            if ($method = checkRequestMethod('GET')) {
-                writeLog("SecurityAssessment","Downloaded security report","info",$LogArr);
-                if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
-                    $id = $_REQUEST['id'];
-                    $File = __DIR__.'/../files/reports/report-'.$id.'.pptx';
-                    if (file_exists($File)) {
-                        header('Content-type: application/pptx');
-                        header('Content-Disposition: inline; filename="report-'.$id.'.pptx"');
-                        header('Content-Transfer-Encoding: binary');
-                        header('Accept-Ranges: bytes');
-                        readfile($File);
-                    } else {
-                        echo 'Invalid ID';
+            if (CheckAccess(null,"B1-SECURITY-ASSESSMENT")) {
+                if ($method = checkRequestMethod('GET')) {
+                    writeLog("SecurityAssessment","Downloaded security report","info",$LogArr);
+                    if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
+                        $id = $_REQUEST['id'];
+                        $File = __DIR__.'/../files/reports/report-'.$id.'.pptx';
+                        if (file_exists($File)) {
+                            header('Content-type: application/pptx');
+                            header('Content-Disposition: inline; filename="report-'.$id.'.pptx"');
+                            header('Content-Transfer-Encoding: binary');
+                            header('Accept-Ranges: bytes');
+                            readfile($File);
+                        } else {
+                            echo 'Invalid ID';
+                        }
                     }
                 }
             }
             break;
         case 'getSecurityReportProgress':
-            if ($method = checkRequestMethod('GET')) {
-                if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
-                    $id = $_REQUEST['id'];
-                    echo getProgress($id,40); // Produces percentage for use on progress bar
+            if (CheckAccess(null,"B1-SECURITY-ASSESSMENT")) {
+                if ($method = checkRequestMethod('GET')) {
+                    if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
+                        $id = $_REQUEST['id'];
+                        echo getProgress($id,40); // Produces percentage for use on progress bar
+                    }
                 }
             }
             break;
         case 'createLicenseReport':
-            if ($method = checkRequestMethod('POST')) {
-                if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
-                    $response = getLicenseCount($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm']);
-                    echo json_encode($response,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+            if (CheckAccess(null,"B1-LICENSE-USAGE")) {
+                if ($method = checkRequestMethod('POST')) {
+                    if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
+                        $response = getLicenseCount($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm']);
+                        echo json_encode($response,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                    }
                 }
             }
             break;
@@ -222,16 +230,18 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'getThreatActors':
-            if ($method = checkRequestMethod('POST')) {
-                if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
-                    $UserInfo = GetCSPCurrentUser();
-                    writeLog("ThreatActors",$UserInfo->result->name." queried list of Threat Actors","info",$LogArr);
-                    $Actors = GetB1ThreatActors($_POST['StartDateTime'],$_POST['EndDateTime']);
-                    if (!isset($Actors['Error'])) {
-                        echo json_encode(GetB1ThreatActorsById($Actors),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                    } else {
-                        echo json_encode($Actors);
-                    };
+            if (CheckAccess(null,"B1-THREAT-ACTORS")) {
+                if ($method = checkRequestMethod('POST')) {
+                    if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
+                        $UserInfo = GetCSPCurrentUser();
+                        writeLog("ThreatActors",$UserInfo->result->name." queried list of Threat Actors","info",$LogArr);
+                        $Actors = GetB1ThreatActors($_POST['StartDateTime'],$_POST['EndDateTime']);
+                        if (!isset($Actors['Error'])) {
+                            echo json_encode(GetB1ThreatActorsById($Actors),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                        } else {
+                            echo json_encode($Actors);
+                        };
+                    }
                 }
             }
             break;

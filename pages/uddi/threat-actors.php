@@ -1,5 +1,8 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
+  if (CheckAccess(null,"B1-THREAT-ACTORS") == false) {
+    die();
+  }
 ?>
 
 <!doctype html>
