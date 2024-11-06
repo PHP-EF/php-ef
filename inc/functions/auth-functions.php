@@ -133,13 +133,13 @@ function GetAuth() {
       } else {
         $Groups = "Authenticated|Everyone";
       }
-  
+
       if (isset($decodedJWT->email)) {
         $Email = $decodedJWT->email;
       } else {
         $Email = null;
       }
-  
+
       $AuthResult = array(
         'Authenticated' => true,
         'Username' => $Username,
@@ -252,10 +252,10 @@ function setRBAC($Group,$Description = null,$Key = null,$Value = null) {
         if (in_array($Key,$rbac[$Group]['PermittedResources'])) {
           writeLog("RBAC","$Key is already assigned to $Group","error",$Key,$rbac[$Group]);
 	  return "Error. ".$Key." is already assigned to: ".$Group;
-	} else { 
+	} else {
 	  array_push($rbac[$Group]['PermittedResources'],$Key);
 	  file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbac, JSON_PRETTY_PRINT));
-          writeLog("RBAC","Added $Key to $Group","warning",$rbac[$Group]);	
+          writeLog("RBAC","Added $Key to $Group","warning",$rbac[$Group]);
 	}
 
 	## Add Menus to Array
@@ -277,7 +277,7 @@ function setRBAC($Group,$Description = null,$Key = null,$Value = null) {
 	    file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbac, JSON_PRETTY_PRINT));
             writeLog("RBAC","Removed $Key from $Group","warning",$rbac[$Group]);
           }
-        } else { 
+        } else {
           writeLog("RBAC","$Key is not assigned to $Group","error",$Key,$rbac[$Group]);
 	  return "Error. ".$Key." is not asssigned to: ".$Group;
 	}

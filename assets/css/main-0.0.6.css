@@ -344,6 +344,12 @@ body {
   top: 0;
 }
 
+.sidebar-footer .fa,
+.sidebar-footer .far,
+.sidebar-footer .fas {
+  line-height: unset;
+}
+
 .badge-sonar {
   display: inline-block;
   background: #980303;

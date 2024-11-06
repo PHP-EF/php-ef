@@ -77,7 +77,7 @@
 
             <div class="card-group license-card-group">
               <div class="card">
-                <div class="card-header">DNS</div> 
+                <div class="card-header">DNS</div>
                 <div class="card-body">
                   <!-- <h5 class="card-title">DNS</h5> -->
                   <p class="card-text" id="ip_unique_dns"></p>

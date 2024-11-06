@@ -1,6 +1,6 @@
 <?php
 function getVersion() {
-    return ['v0.4.4'];
+    return ['v0.4.5'];
 }
 
 function getConfig($Section = null,$Option = null) {
@@ -13,13 +13,13 @@ function getConfig($Section = null,$Option = null) {
       return $config_json;
     }
 }
-  
+
 function setConfig($Section,$Key,$Val) {
     $config = getConfig();
     $config[$Section][$Key] = $Val;
     file_put_contents(__DIR__.'/../config/config.json', json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
 }
-  
+
 function combineFilters($array) {
     $filterCount = count($array);
     $combinedFilter = null;
@@ -33,7 +33,7 @@ function combineFilters($array) {
     }
     return $combinedFilter;
 }
-  
+
 function endsWith($string, $endString) {
   $len = strlen($endString);
   if ($len == 0) {
@@ -41,11 +41,11 @@ function endsWith($string, $endString) {
   }
   return (substr($string, -$len) === $endString);
 }
-  
+
 use Monolog\Level;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
-  
+
 function writeLog($Logger, $Message, $Level, $Context = [], $LogFile = "") {
   $now = date("d-m-Y");
   if ($LogFile == "") {
@@ -96,12 +96,12 @@ function writeLog($Logger, $Message, $Level, $Context = [], $LogFile = "") {
     $log->$Level($Message);
   }
 }
-  
+
 function getLogFiles() {
   $files = array_diff(scandir(__DIR__.'/../'.getConfig("System","logdirectory")),array('.', '..'));
   return $files;
 }
-  
+
 function getLog($date = "") {
   writeLog("LOG","Queried logs","debug");
   if ($date == "") {
@@ -144,7 +144,7 @@ function getLog($date = "") {
   $files = array_diff(scandir(__DIR__.'/../'.getConfig("System","logdirectory")),array('.', '..'));
   return $matchArr;
 }
-  
+
 function querySQL($Query,$Action,$FetchArr = true) {
     $serverName = getConfig("SQL","sqlserver"); //serverName\instanceName, portNumber (default is 1433)
     $connectionInfo = array( "Database"=>getConfig("SQL","sqldb"), "UID"=>getConfig("SQL","sqluser"), "PWD"=>getConfig("SQL","sqlpass"), "Encrypt"=>"no");
@@ -213,7 +213,7 @@ function querySQL($Query,$Action,$FetchArr = true) {
         die( print_r( sqlsrv_errors(), true));
     }
 }
-  
+
 function compareByTimestamp($time1, $time2) {
     if (strtotime($time1) < strtotime($time2))
         return 1;
@@ -222,19 +222,19 @@ function compareByTimestamp($time1, $time2) {
     else
         return 0;
 }
-  
+
 function isJson($str) {
     $json = json_decode($str);
     return $json && $str != $json;
 }
-  
+
 function stripslashes_deep($value) {
     $value = is_array($value) ?
     array_map('stripslashes_deep', $value) :
         stripslashes($value);
         return $value;
 }
-  
+
 function searchForKeyValue($InKey, $InVal, $InArray) {
     foreach ($InArray as $key => $val) {
         if ($val->$InKey == $InVal) {

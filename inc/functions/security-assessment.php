@@ -317,7 +317,7 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
             $WebContentEventsCount = 0;
         }
         $Progress = writeProgress($UUID,$Progress);
-        
+
         // Device Count
         $Devices = QueryCubeJS('{"measures":["PortunusAggInsight.deviceCount"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"contains","values":["2","3"]},{"member":"PortunusAggInsight.severity","operator":"contains","values":["High","Medium","Low"]}],"limit":"1","ungrouped":false}');
         if (isset($Devices->result->data[0])) {
