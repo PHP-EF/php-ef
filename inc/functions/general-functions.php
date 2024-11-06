@@ -1,4 +1,8 @@
 <?php
+function getVersion() {
+    return ['v0.4.3'];
+}
+
 function getConfig($Section = null,$Option = null) {
     $config_json = json_decode(file_get_contents(__DIR__.'/../config/config.json'),true); //Config file that has configurations for site.
     if($Section && $Option) {

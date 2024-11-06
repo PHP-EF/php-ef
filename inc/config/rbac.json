@@ -8,8 +8,8 @@
         "Description": "Infoblox SA Tools Admins",
         "PermittedResources": [
             "ADMIN-RBAC",
-            "ADMIN-LOGS",
-            "ADMIN-CONFIG"
+            "ADMIN-CONFIG",
+            "ADMIN-LOGS"
         ],
         "PermittedMenus": [
             "ADMIN-Menu"

@@ -124,32 +124,37 @@ if (!($_REQUEST['function'])) {
             if (CheckAccess(null,"ADMIN-CONFIG")) {
                 $config = getConfig();
                 $config['Security']['salt'] = "********";
+                $config['Security']['AdminPassword'] = "********";
                 echo json_encode($config,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                 writeLog("Config","Queried Configuration","info",$_REQUEST);
             }
             break;
         case 'SetConfig':
-            if (CheckAccess(null,"ADMIN-CONFIG")) {
-                array_shift($_REQUEST);
-                $config = getConfig();
-                $config['Security']['salt'] = "********";
-                if (isset($_REQUEST['systemLogFileName'])) { setConfig("System","logfilename",$_REQUEST['systemLogFileName']); }
-                if (isset($_REQUEST['systemLogDirectory'])) { setConfig("System","logdirectory",$_REQUEST['systemLogDirectory']); }
-                if (isset($_REQUEST['systemLogLevel'])) { setConfig("System","loglevel",$_REQUEST['systemLogLevel']); }
-                if (isset($_REQUEST['systemLogRetention'])) { setConfig("System","logretention",$_REQUEST['systemLogRetention']); }
-                if (isset($_REQUEST['systemCURLTimeout'])) { setConfig("System","CURL-Timeout",$_REQUEST['systemCURLTimeout']); }
-                if (isset($_REQUEST['systemCURLTimeoutConnect'])) { setConfig("System","CURL-ConnectTimeout",$_REQUEST['systemCURLTimeoutConnect']); }
-                if (isset($_REQUEST['systemRBACFile'])) { setConfig("System","rbacjson",$_REQUEST['systemRBACFile']); }
-                if (isset($_REQUEST['systemRBACInfoFile'])) { setConfig("System","rbacinfo",$_REQUEST['systemRBACInfoFile']); }
-                if (isset($_REQUEST['securitySalt'])) { setConfig("Security","salt",$_REQUEST['securitySalt']); }
-                $newConfig = getConfig();
-                $newConfig['Security']['salt'] = "********";
-                echo json_encode($newConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                $logArr = array(
-                    "Old Configuration" => $config,
-                    "New Configuration" => $newConfig
-                );
-                writeLog("Config","Updated configuration","warning",$logArr);
+            if ($method = checkRequestMethod('POST')) {
+                if (CheckAccess(null,"ADMIN-CONFIG")) {
+                    $config = getConfig();
+                    $config['Security']['salt'] = "********";
+                    $config['Security']['AdminPassword'] = "********";
+                    if (isset($_POST['systemLogFileName'])) { setConfig("System","logfilename",$_POST['systemLogFileName']); }
+                    if (isset($_POST['systemLogDirectory'])) { setConfig("System","logdirectory",$_POST['systemLogDirectory']); }
+                    if (isset($_POST['systemLogLevel'])) { setConfig("System","loglevel",$_POST['systemLogLevel']); }
+                    if (isset($_POST['systemLogRetention'])) { setConfig("System","logretention",$_POST['systemLogRetention']); }
+                    if (isset($_POST['systemCURLTimeout'])) { setConfig("System","CURL-Timeout",$_POST['systemCURLTimeout']); }
+                    if (isset($_POST['systemCURLTimeoutConnect'])) { setConfig("System","CURL-ConnectTimeout",$_POST['systemCURLTimeoutConnect']); }
+                    if (isset($_POST['systemRBACFile'])) { setConfig("System","rbacjson",$_POST['systemRBACFile']); }
+                    if (isset($_POST['systemRBACInfoFile'])) { setConfig("System","rbacinfo",$_POST['systemRBACInfoFile']); }
+                    if (isset($_POST['securitySalt'])) { setConfig("Security","salt",$_POST['securitySalt']); }
+                    if (isset($_POST['securityAdminPW'])) { setConfig("Security","AdminPassword",$_POST['securityAdminPW']); }
+                    $newConfig = getConfig();
+                    $newConfig['Security']['salt'] = "********";
+                    $newConfig['Security']['AdminPassword'] = "********";
+                    echo json_encode($newConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                    $logArr = array(
+                        "Old Configuration" => $config,
+                        "New Configuration" => $newConfig
+                    );
+                    writeLog("Config","Updated configuration","warning",$logArr);
+                }
             }
             break;
         case 'getChangelog':
@@ -177,6 +182,7 @@ if (!($_REQUEST['function'])) {
             break;
         case 'downloadSecurityReport':
             if ($method = checkRequestMethod('GET')) {
+                writeLog("SecurityAssessment","Downloaded security report","info",$LogArr);
                 if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
                     $id = $_REQUEST['id'];
                     $File = __DIR__.'/../files/reports/report-'.$id.'.pptx';
@@ -218,6 +224,8 @@ if (!($_REQUEST['function'])) {
         case 'getThreatActors':
             if ($method = checkRequestMethod('POST')) {
                 if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
+                    $UserInfo = GetCSPCurrentUser();
+                    writeLog("ThreatActors",$UserInfo->result->name." queried list of Threat Actors","info",$LogArr);
                     $Actors = GetB1ThreatActors($_POST['StartDateTime'],$_POST['EndDateTime']);
                     if (!isset($Actors['Error'])) {
                         echo json_encode(GetB1ThreatActorsById($Actors),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);

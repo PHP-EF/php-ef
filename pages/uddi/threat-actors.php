@@ -41,6 +41,10 @@
             <button class="btn btn-success" id="Actors">Get Actors</button>
           </div>
       </div>
+      <br>
+      <div class="alert alert-info genInfo" role="alert">
+        <center>It can take up to 2 minutes to generate the list of Threat Actors, please be patient.</center>
+      </div>
       <div class="calendar"></div>
           <div class="loading-icon">
           <hr>
@@ -109,8 +113,9 @@
       sortable: true,
       pagination: true,
       search: true,
+      showExport: true,
+      exportTypes: ['json', 'xml', 'csv', 'txt', 'excel', 'sql'],
       showColumns: true,
-      showRefresh: true,
       columns: [{
         field: 'indicator',
         title: 'Indicator',
@@ -122,6 +127,10 @@
       },{
         field: 'te_customer_last_dns_query',
         title: 'Last Queried',
+        sortable: true
+      },{
+        field: 'vt_first_submission_date',
+        title: 'Virus Total Submitted',
         sortable: true
       }]
     });
@@ -171,8 +180,9 @@
           sortable: true,
           pagination: true,
           search: true,
+          showExport: true,
+          exportTypes: ['json', 'xml', 'csv', 'txt', 'excel', 'sql'],
           showColumns: true,
-          showRefresh: true,
           columns: [{
             field: 'actor_name',
             title: 'Name',

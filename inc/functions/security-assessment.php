@@ -6,7 +6,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
     // Check API Key is valid & get User Info
-    $UserInfo = QueryCSP("get","v2/current_user");
+    $UserInfo = GetCSPCurrentUser();
     if ($UserInfo) {
         $Progress = 0;
         // Set Time Dimensions
@@ -171,7 +171,7 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
         $Progress = writeProgress($UUID,$Progress);
 
         // Lookalike Domains - Used on Slides 5, 6 & 24
-        $LookalikeDomainCounts = QueryCSP("get","/api/atcfw/v1/lookalike_domain_counts");
+        $LookalikeDomainCounts = QueryCSP("get","api/atcfw/v1/lookalike_domain_counts");
         if (isset($LookalikeDomainCounts->results->count_total)) { $LookalikeTotalCount = $LookalikeDomainCounts->results->count_total; } else { $LookalikeTotalCount = 0; }
         if (isset($LookalikeDomainCounts->results->percentage_increase_total)) { $LookalikeTotalPercentage = $LookalikeDomainCounts->results->percentage_increase_total; } else { $LookalikeTotalPercentage = 0; }
         if (isset($LookalikeDomainCounts->results->count_custom)) { $LookalikeCustomCount = $LookalikeDomainCounts->results->count_custom; } else { $LookalikeCustomCount = 0; }

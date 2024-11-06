@@ -5,18 +5,12 @@
         "logfilename": "ib-sa-tools",
         "logdirectory": "logs/",
         "loglevel": "Debug",
-        "logretention": "60",
-        "CURL-Timeout": "60",
-        "CURL-ConnectTimeout": "30"
+        "logretention": "30",
+        "CURL-Timeout": "90",
+        "CURL-ConnectTimeout": "60"
     },
     "Security": {
         "salt": "somesupersecurepasswordhere"
-    },
-    "SQL": {
-        "sqlserver": "fqdnofsqlserver",
-        "sqluser": "svc_username",
-        "sqlpass": "password",
-        "sqldb": "sqldatabasename",
-        "sqltable": "sqltablename"
+        "AdminPassword": "secureadminpasswordhere"
     }
 }

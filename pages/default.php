@@ -26,8 +26,7 @@
       </div>
       <div class="mb-2">
         <small>
-          Created using Skeleton Framework made by - <a target="_blank" rel="noopener noreferrer" href="https://azouaoui.netlify.com">
-            Mohamed Azouaoui
+          Running Version: <?php echo getVersion()[0]; ?>
           </a>
         </small>
       </div>
