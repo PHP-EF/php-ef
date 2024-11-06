@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
 <?php
   if (isset($_REQUEST['page'])) {
     header('Location: /#'.$_SERVER['QUERY_STRING']);
@@ -14,6 +12,8 @@
     $isAuth = false;
   }
 ?>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
