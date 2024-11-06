@@ -173,7 +173,7 @@ pre code {
               echo '
             </div>
 	        </li>';}
-          
+
           if (CheckAccess(null,null,"ADMIN-Menu")) { echo '
           <li class="header-menu">
             <span>Admin</span>
@@ -348,7 +348,7 @@ pre code {
                   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
                   copies of the Software, and to permit persons to whom the Software is
                   furnished to do so, subject to the following conditions:
-                </p><p>	
+                </p><p>
                   The above copyright notice and this permission notice shall be included in all
                   copies or substantial portions of the Software.
                 </p><p>
@@ -433,8 +433,8 @@ $('.toggleThemeBtn').on('click', function () {
     setCookie('theme','dark',365);
     location.reload();
   } else {
-    setCookie('theme','light',365);    
-    location.reload();	  
+    setCookie('theme','light',365);
+    location.reload();
   };
 });
 
