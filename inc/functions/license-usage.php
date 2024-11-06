@@ -1,6 +1,7 @@
 <?php
 
 function getLicenseCount($StartDateTime,$EndDateTime,$Realm) {
+    if (!checkAccess())
     // Set Time Dimensions
     $StartDimension = str_replace('Z','',$StartDateTime);
     $EndDimension = str_replace('Z','',$EndDateTime);

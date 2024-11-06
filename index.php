@@ -1,4 +1,7 @@
 <?php
+  if ($_SERVER['REQUEST_URI'] == '/?') {
+    header('Location: /');
+  }
   if (isset($_REQUEST['page'])) {
     header('Location: /#'.$_SERVER['QUERY_STRING']);
   }
@@ -437,7 +440,7 @@ $('.toggleThemeBtn').on('click', function () {
 
 $('.infoBtn').on('click', function() {
   $('#infoModal').modal('show');
-  $.getJSON('/api/?function=whoami', function(whoami) {
+  $.getJSON('/api?function=whoami', function(whoami) {
     if (whoami.headers['X-Authentik-Uid'] != null) {
       if (whoami.Groups != null) {whoami.Groups = whoami.Groups.split('|')};
     } else {

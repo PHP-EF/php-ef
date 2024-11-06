@@ -45,7 +45,7 @@ pre code {
       <div class="my-4">
           <h5 class="mb-0 mt-5">Logs</h5>
           <p>The following table displays logs from the Infoblox SA Tools Portal.</p>
-          <table  data-url="/api/?function=GetLog"
+          <table  data-url="/api?function=GetLog"
             data-toggle="table"
             data-search="true"
             data-filter-control="true"
@@ -131,11 +131,11 @@ pre code {
   }
 
   $('#logDate').on('change', function(event) {
-    $('#logTable').bootstrapTable('refresh');  
+    $('#logTable').bootstrapTable('refresh');
   });
 
   function queryParams(params) {
-    var logDate = $('#logDate').find(":selected").val();    
+    var logDate = $('#logDate').find(":selected").val();
     params.date = logDate;
     return params;
   }
@@ -151,7 +151,7 @@ pre code {
   }
 
   window.actionEvents = {
-    'click .edit': function (e, value, row, index) { 
+    'click .edit': function (e, value, row, index) {
       var jsonPretty = JSON.stringify(JSON.parse(row.context),null,2);
       logData(jsonPretty);
       $('#logModal').modal('show');

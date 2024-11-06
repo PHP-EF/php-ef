@@ -155,7 +155,7 @@ require_once(__DIR__.'/../../inc/inc.php');
             </div>
           </footer>
         </div>
-      </div>        
+      </div>
     </div>
   </body>
 </html>

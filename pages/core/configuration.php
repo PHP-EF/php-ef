@@ -95,8 +95,8 @@
 
 <script>
 
-  function getConfig() { 
-    $.getJSON('/api/?function=GetConfig', function(config) {
+  function getConfig() {
+    $.getJSON('/api?function=GetConfig', function(config) {
       $("#systemLogFileName").val(config.System.logfilename);
       $("#systemLogDirectory").val(config.System.logdirectory);
       $("#systemLogLevel").val(config.System.loglevel);
@@ -111,7 +111,7 @@
   }
 
   getConfig();
-  
+
   $(".info-field").change(function() {
     $(this).addClass("changed");
   });
