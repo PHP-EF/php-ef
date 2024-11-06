@@ -22,12 +22,12 @@ class CoreJwt {
         if ($UN === 'admin') {
           $payload['groups'][] = 'Administrators';
         }
-        return JWT::encode($payload, getConfig()['Security']['salt']);
+        return JWT::encode($payload, getConfig()['Security']['salt'], 'HS256');
     }
 
     // Revoke a token
     public function revokeToken($token) {
-        $decoded = JWT::decode($token, getConfig()['Security']['salt'], ['HS256']);
+        $decoded = JWT::decode($token, new Key(getConfig()['Security']['salt'], 'HS256'));
         $this->redis->set($token, json_encode($decoded), 'EX', (86400 * 30)); // Store token with expiration
     }
 
