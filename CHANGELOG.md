@@ -1,3 +1,9 @@
+## v0.4.5
+- Minor url changes
+- Fix redirect bug when logging in from root site
+- Cleanup whitespace
+- Minor styling changes
+
 ## v0.4.4
 - RBAC changes to include a group for none-authenticated users
 
