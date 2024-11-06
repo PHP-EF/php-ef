@@ -100,6 +100,7 @@ function GetAuth() {
       $AuthResult = array(
         'Authenticated' => false,
         'IPAddress' => $IPAddress,
+        'Groups' => 'Everyone'
       );
       return $AuthResult;
     } else {
@@ -127,10 +128,10 @@ function GetAuth() {
       }
 
       if (isset($decodedJWT->groups)) {
-        $decodedJWT->groups[] = 'EVERYONE';
+        $decodedJWT->groups[] = 'Authenticated|Everyone';
         $Groups = join("|",$decodedJWT->groups);
       } else {
-        $Groups = "EVERYONE";
+        $Groups = "Authenticated|Everyone";
       }
   
       if (isset($decodedJWT->email)) {
@@ -151,12 +152,14 @@ function GetAuth() {
       $AuthResult = array(
         'Authenticated' => false,
         'IPAddress' => $IPAddress,
+        'Groups' => 'Everyone'
       );
     }
   } else {
     $AuthResult = array(
       'Authenticated' => false,
       'IPAddress' => $IPAddress,
+      'Groups' => 'Everyone'
     );
   }
   return $AuthResult;

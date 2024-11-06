@@ -128,25 +128,29 @@ pre code {
 	        <!-- <li class="header-menu">
             <span>Reports</span>
 	        </li> -->
+          <?php
+          if (CheckAccess(null,'DNS-TOOLBOX')) { echo '
           <li class="header-menu">
             <a href="#page=tools/dnstoolbox" class="toggleFrame">
               <i class="fa fa-toolbox"></i>
               <span>DNS Toolbox</span>
             </a>
-          </li>
+          </li>';}
+          if (CheckAccess(null,'B1-SECURITY-ASSESSMENT')) { echo '
           <li class="header-menu">
             <a href="#page=uddi/security-assessment" class="toggleFrame">
               <i class="fa fa-magnifying-glass-chart"></i>
               <span>Security Assessment</span>
             </a>
-          </li>
+          </li>';}
+          if (CheckAccess(null,'B1-THREAT-ACTORS')) { echo '
           <li class="header-menu">
             <a href="#page=uddi/threat-actors" class="toggleFrame">
               <i class="fa fa-skull"></i>
               <span>Threat Actors</span>
             </a>
-          </li>
-          <?php if ($isAuth) { echo '
+          </li>';}
+          if (CheckAccess(null,null,"DEV-Menu")) { echo '
 	        <li class="header-menu">
             <span>Dev</span>
 	        </li>
@@ -155,13 +159,15 @@ pre code {
               <i class="fa fa-toolbox"></i>
               <span>Tools</span>
             </a>
-            <div class="sidebar-submenu">
+            <div class="sidebar-submenu">';
+              if (CheckAccess(null,'B1-LICENSE-USAGE')) { echo '
               <ul>
                 <li>
                   <a href="#page=uddi/license-usage" class="toggleFrame">License Utilization</a>
 		            </li>
 
-              </ul>
+              </ul>';}
+              echo '
             </div>
 	        </li>';}
           

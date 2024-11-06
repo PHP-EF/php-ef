@@ -1,6 +1,6 @@
 <?php
 function getVersion() {
-    return ['v0.4.3'];
+    return ['v0.4.4'];
 }
 
 function getConfig($Section = null,$Option = null) {

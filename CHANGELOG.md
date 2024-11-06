@@ -1,3 +1,6 @@
+## v0.4.4
+- RBAC changes to include a group for none-authenticated users
+
 ## v0.4.3
 - Enable export of table data for Threat Actors
 - Minor changes to logging
