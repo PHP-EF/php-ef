@@ -10,15 +10,6 @@
 .card {
   padding: 10px;
 }
-
-.form-group{
-/  margin-bottom: 10px; /
-/  display: grid; /
-/  grid-template-columns: 1fr 2fr; /
-}
-.form-group small{
-/  grid-template-columns: 3fr!important; /
-}
 </style>
 
 <div class="container">
@@ -85,8 +76,13 @@
             </div>
             <div class="form-group">
               <label for="securitySalt">Salt</label>
-              <input type="text" class="form-control info-field" id="securitySalt" aria-describedby="securitySaltHelp" name="securitySalt">
+              <input type="password" class="form-control info-field" id="securitySalt" aria-describedby="securitySaltHelp" name="securitySalt">
               <small id="securitySaltHelp" class="form-text text-muted">The salt used to encrypt credentials.</small>
+	          </div>
+            <div class="form-group">
+              <label for="securityAdminPW">Admin Password</label>
+              <input type="password" class="form-control info-field" id="securityAdminPW" aria-describedby="securityAdminPWHelp" name="securityAdminPW">
+              <small id="securityAdminPWHelp" class="form-text text-muted">The password for the <b>admin</b> account.</small>
 	          </div>
           </div>
         </div>
@@ -110,6 +106,7 @@
       $("#systemRBACFile").val(config.System.rbacjson);
       $("#systemRBACInfoFile").val(config.System.rbacinfo);
       $("#securitySalt").val(config.Security.salt);
+      $("#securityAdminPW").val(config.Security.AdminPassword);
     });
   }
 
@@ -121,18 +118,20 @@
 
   $("#submitConfig").click(function(event) {
     event.preventDefault();
-    var kvpairs = [];
+    var kvpairs = {};
     var inspectForm = document.querySelector('#configurationForm').getElementsByClassName("changed");
     for ( var i = 0; i < inspectForm.length; i++ ) {
       var e = inspectForm[i];
-      kvpairs.push(encodeURIComponent(e.name) + "=" + encodeURIComponent(e.value));
+      kvpairs[e.name] = encodeURIComponent(e.value);
     }
-    var queryString = kvpairs.join("&");
-
-    $.getJSON('/api/?function=SetConfig&'+queryString, function(config) {
-      if (config != null) {
+    $.post( "/api?function=SetConfig", kvpairs).done(function( data, status ) {
+      if (data != null) {
         toast("Success","","Successfully saved configuration","success");
+      } else {
+        toast("Error","","Failed to save configuration","danger");
       }
-    });
+    }).fail(function( data, status ) {
+        toast("API Error","","Failed to save configuration","danger","30000");
+    })
   });
 </script>

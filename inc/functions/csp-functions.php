@@ -33,8 +33,8 @@ function QueryCSP($Method, $Uri, $Data = "", $APIKey = "", $Realm = "US") {
   }
 
   $Options = array(
-    'timeout' => 60,
-    'connect_timeout' => 60
+    'timeout' => getConfig("System","CURL-Timeout"),
+    'connect_timeout' => getConfig("System","CURL-ConnectTimeout")
   );
 
   switch ($Method) {
@@ -54,13 +54,23 @@ function QueryCSP($Method, $Uri, $Data = "", $APIKey = "", $Realm = "US") {
       $Result = WpOrg\Requests\Requests::delete($Url, $CSPHeaders, $Options);
       break;
   }
+
+  $LogArr = array(
+    "Method" => $Method,
+    "Url" => $Url,
+    "Options" => $Options
+  );
+
   if ($Result) {
     switch ($Result->status_code) {
       case '401':
+        $LogArr['Error'] = "Warning. Invalid API Key.";
+        writeLog("CSP","Failed to authenticate to the CSP","debug",$LogArr);
         return array("Status" => "Error", "Error" => "Warning. Invalid API Key.");
         break;
       default:
         $Output = json_decode($Result->body);
+        writeLog("CSP","Queried the CSP","debug",$LogArr);
         return $Output;
         break;
     }
@@ -71,8 +81,13 @@ function QueryCSP($Method, $Uri, $Data = "", $APIKey = "", $Realm = "US") {
 
 function QueryCubeJS($Query,$APIKey = "", $Realm = "US") {
   $BuildQuery = urlencode($Query);
-  $Result = QueryCSP("get","/api/cubejs/v1/query?query=".$BuildQuery,null,$APIKey,$Realm);
+  $Result = QueryCSP("get","api/cubejs/v1/query?query=".$BuildQuery,null,$APIKey,$Realm);
   return $Result;
+}
+
+function GetCSPCurrentUser($APIKey = "") {
+  $UserInfo = QueryCSP("get","v2/current_user",null,$APIKey);
+  return $UserInfo;
 }
 
 function GetB1ThreatActors($StartDateTime,$EndDateTime,$APIKey = "", $Realm = "US") {

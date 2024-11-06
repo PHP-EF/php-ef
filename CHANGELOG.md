@@ -1,3 +1,9 @@
+## v0.4.3
+- Enable export of table data for Threat Actors
+- Minor changes to logging
+- Update configuration via POST instead of GET
+- General cleanup
+
 ## v0.4.2
 - Minor fixes to session expiry redirect
 

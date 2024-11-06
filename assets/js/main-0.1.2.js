@@ -359,6 +359,19 @@ function checkInput(text) {
   }
 }
 
+function enableDateTime() {
+  $('.datetimepicker').datetimepicker({
+    onGenerate:function( ct ){
+      jQuery(this).find('.xdsoft_date')
+        .toggleClass('xdsoft_disabled');
+    },
+    formatDate:'d/m/Y H:i:s',
+    minDate:'-1970/01/02',//yesterday is minimum date(for today use 0 or -1970/01/01)
+    maxDate:'+1970/01/02',//tomorrow is maximum date calendar
+    timepicker:true
+  });
+}
+
 // END
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -396,6 +409,8 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
+
+
 $( document ).ready(function() {
   checkAPIKey();
   $('#saveBtn').click(function(){
@@ -405,4 +420,5 @@ $( document ).ready(function() {
       removeAPIKey();
     }
   });
+  enableDateTime();
 });

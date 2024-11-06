@@ -22,8 +22,9 @@
 </head>
 
 <style>
-#tabsJustifiedContent * p{
+#tabsJustifiedContent * p, #tabsJustifiedContent * small{
   text-align:center;
+  display:block;
 }
 pre {
   background-color: #000;
@@ -312,6 +313,17 @@ pre code {
                 <div class="tab-pane fade active show p-1" id="about">
                 <p>The Infoblox SA Tools Portal offers a place for the Infoblox SA Team to leverage some web based tools.</p>
                 <p>Designed by <i class="fa fa-code" style="color:red"></i> by - <a target="_blank" rel="noopener noreferrer" href="https://github.com/TehMuffinMoo">Mat Cox</a></p>
+                <small>
+                  Created using Skeleton Framework made by - <a target="_blank" rel="noopener noreferrer" href="https://github.com/azouaoui-med">
+                    Mohamed Azouaoui
+                  </a>
+                </small>
+                <hr>
+                <small>
+                  Running Version: <?php echo getVersion()[0]; ?>
+                  </a>
+                </small>
+                <br>
 		          </div>
               <div class="tab-pane fade" id="support">
                 <br>

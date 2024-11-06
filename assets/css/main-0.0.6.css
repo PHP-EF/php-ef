@@ -628,8 +628,13 @@ body.dark-theme table tr,
 body.dark-theme * td,
 body.dark-theme * th,
 body.dark-theme * pre,
-body.dark-theme * label{
+body.dark-theme * label,
+body.dark-theme .nav-link {
   color: #FFF;
+}
+
+body.dark-theme a {
+  color: #74acff;
 }
 
 body.dark-theme label.dropdown-item,
@@ -658,7 +663,8 @@ body.dark-theme .list-group-item {
 }
 
 body.dark-theme .form-control.search-input,
-body.dark-theme select[class^="form-control bootstrap-table-filter-control"] {
+body.dark-theme select[class^="form-control bootstrap-table-filter-control"],
+body.dark-theme select[class^="form-select bootstrap-table-filter-control"] {
   background-color:#2b2e34;
   color:#FFF;
 }
@@ -667,6 +673,11 @@ body.dark-theme .modal-content,
 body.dark-theme .modal-body {
   background-color:#2b2e34;
   color:#FFF;
+}
+
+body.dark-theme .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+  background-color: #eceef4;
 }
 
 hr.solid {
@@ -761,7 +772,7 @@ color: white;
   width: 70%;
   margin: auto;
 }
-input, button {
+.toolsMenu > div > input, button {
   margin-top: 10px!important;
   margin-bottom: 10px!important;
   padding: 10px;
@@ -874,6 +885,18 @@ height: 100%;
 }
 .license-card-group {
   margin: 1% 10% 1% 10%;
+}
+.btn-group-vertical>.btn, .btn-group>.btn {
+  position: static!important;
+}
+.btn-group>.btn-group:not(:first-child), .btn-group>.btn:not(:first-child) {
+  margin-left: 2px!important;
+}
+.form-control {
+  padding: 0.575rem!important;
+}
+.fixed-table-toolbar .btn-group .form-control {
+  margin-top: 7px;
 }
 
 @media (min-width: 1800px) {

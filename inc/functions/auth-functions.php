@@ -22,6 +22,7 @@ class CoreJwt {
         if ($UN === 'admin') {
           $payload['groups'][] = 'Administrators';
         }
+        writeLog("Authentication","Issued JWT token","debug",$payload);
         return JWT::encode($payload, getConfig()['Security']['salt'], 'HS256');
     }
 
@@ -29,6 +30,7 @@ class CoreJwt {
     public function revokeToken($token) {
         $decoded = JWT::decode($token, new Key(getConfig()['Security']['salt'], 'HS256'));
         $this->redis->set($token, json_encode($decoded), 'EX', (86400 * 30)); // Store token with expiration
+        writeLog("Authentication","Revoked JWT token","debug",$decoded);
     }
 
     // Check if a token is revoked
@@ -58,15 +60,19 @@ function NewAuth($UN,$PW) {
     // Set JWT as a cookie
     setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
 
-    return array(
+    $Arr = array(
       'Status' => 'Success',
       'Location' => '/'
     );
+    writeLog("Authentication",$UN." successfully logged in","info",$Arr);
+    return $Arr;
   } else {
-      return array(
-        'Status' => 'Error',
-        'Message' => 'Invalid Credentials'
-      );
+    $Arr = array(
+      'Status' => 'Error',
+      'Message' => 'Invalid Credentials'
+    );
+    writeLog("Authentication",$UN." failed to log in","warning",$Arr);
+    return $Arr;
   }
 }
 
@@ -85,6 +91,7 @@ function GetAuth() {
   } else {
     $IPAddress = "N/A";
   }
+  $IPAddress = explode(':',$IPAddress)[0];
 
   if (isset($_COOKIE['jwt'])) {
     $secretKey = getConfig()['Security']['salt']; // Change this to a secure key
@@ -155,42 +162,6 @@ function GetAuth() {
   return $AuthResult;
 }
 
-function GetAuthV1() {
-  if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-    $IPAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
-  } else if (isset($_SERVER['REMOTE_ADDR'])) {
-    $IPAddress = $_SERVER['REMOTE_ADDR'];
-  } else {
-    $IPAddress = "N/A";
-  }
-  if (isset($_SERVER['HTTP_REMOTE_USER'])) {
-    if (isset($_SERVER['HTTP_REMOTE_GROUPS'])) {
-      $RemoteGroups = $_SERVER['HTTP_REMOTE_GROUPS']."|EVERYONE";
-    } else {
-      $RemoteGroups = "EVERYONE";
-    }
-    if (isset($_SERVER['HTTP_REMOTE_EMAIL'])) {
-      $Email = $_SERVER['HTTP_REMOTE_EMAIL'];
-    } else {
-      $Email = null;
-    }
-    $AuthResult = array(
-      'Authenticated' => true,
-      'Username' => $_SERVER['HTTP_REMOTE_USER'],
-      'DisplayName' =>  $_SERVER['HTTP_REMOTE_NAME'],
-      'EmailAddress' => $Email,
-      'IPAddress' => $IPAddress,
-      'Groups' => $RemoteGroups
-    );
-  } else {
-    $AuthResult = array(
-      'Authenticated' => false,
-      'IPAddress' => $IPAddress,
-    );
-  } 
-  return $AuthResult;
-}
-
 function signinRedirect() {
   if (GetAuth()['Authenticated']) {
   } else {
@@ -198,37 +169,7 @@ function signinRedirect() {
   }
 }
 
-function CheckAccessV1($User,$Service) {
-  if ($User == null) {
-    $User = GetAuth();
-  }
-  if (isset($User['Authenticated'])) {
-    $rbacJson = file_get_contents(__DIR__.'/../'.getConfig("System","rbacjson"));
-    $rbac = json_decode($rbacJson, true);
-    if (isset($User['Groups'])) {
-      if (isset($_SERVER['HTTP_X_AUTHENTIK_UID'])) {
-        $usergroups = explode('|',$User['Groups']);
-      } else {
-        $usergroups = explode(',',$User['Groups']);
-      }
-      foreach ($usergroups as $usergroup) {
-        if (isset($rbac[$usergroup])) {
-          if (in_array($Service,$rbac[$usergroup]['PermittedResources'])) {
-            return true;
-          }
-        }
-      }
-    } else {
-      return false;
-    }
-  } else {
-    return false;
-  }
-  return false;
-}
-
 function CheckAccess($User,$Service = null,$Menu = null) {
-  // return true; // Remove
   if ($User == null) {
     $User = GetAuth();
   }
@@ -238,8 +179,8 @@ function CheckAccess($User,$Service = null,$Menu = null) {
     if (isset($User['Groups'])) {
       $usergroups = explode('|',$User['Groups']);
       if ($Service != null) {
-	$Services = explode(',',$Service);
-	foreach ($Services as $ServiceToCheck) {
+	      $Services = explode(',',$Service);
+	      foreach ($Services as $ServiceToCheck) {
           foreach ($usergroups as $usergroup) {
             if (isset($rbac[$usergroup])) {
               if (in_array($ServiceToCheck,$rbac[$usergroup]['PermittedResources'])) {
@@ -247,7 +188,7 @@ function CheckAccess($User,$Service = null,$Menu = null) {
               }
             }
           }
-	}
+	      }
       }
       if ($Menu != null) {
         foreach ($usergroups as $usergroup) {
