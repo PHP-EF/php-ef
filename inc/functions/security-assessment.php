@@ -7,7 +7,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
     // Check API Key is valid & get User Info
     $UserInfo = GetCSPCurrentUser();
-    if (!isset($UserInfo['Error'])) {
+    if (!isset($UserInfo->Error)) {
         $Progress = 0;
         // Set Time Dimensions
         $StartDimension = str_replace('Z','',$StartDateTime);
