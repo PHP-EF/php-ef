@@ -1,7 +1,6 @@
 <?php
 
 function getLicenseCount($StartDateTime,$EndDateTime,$Realm) {
-    if (!checkAccess())
     // Set Time Dimensions
     $StartDimension = str_replace('Z','',$StartDateTime);
     $EndDimension = str_replace('Z','',$EndDateTime);
@@ -26,6 +25,8 @@ function getLicenseCount($StartDateTime,$EndDateTime,$Realm) {
                 $moreDNSIPs = false;
             }
             $TotalDNSIPCount += $DNSIPCount;
+        } else if (isset($UniqueDNSIPs['Error'])) {
+            return $UniqueDNSIPs;
         } else {
             $TotalDNSIPCount = 0;
             $moreDNSIPs = false;
@@ -42,7 +43,9 @@ function getLicenseCount($StartDateTime,$EndDateTime,$Realm) {
                 $moreDHCPIPs = false;
             }
             $TotalDHCPIPCount += $DHCPIPCount;
-        } else {
+        } else if (isset($UniqueDHCPIPs['Error'])) {
+            return $UniqueDHCPIPs;
+        }  else {
             $TotalDHCPIPCount = 0;
             $moreDHCPIPs = false;
         }
@@ -58,7 +61,9 @@ function getLicenseCount($StartDateTime,$EndDateTime,$Realm) {
                 $moreDFPIPs = false;
             }
             $TotalDFPIPCount += $DFPIPCount;
-        } else {
+        } else if (isset($UniqueDFPIPs['Error'])) {
+            return $UniqueDFPIPs;
+        }  else {
             $TotalDFPIPCount = 0;
             $moreDFPIPs = false;
         }

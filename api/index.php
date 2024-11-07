@@ -234,7 +234,9 @@ if (!($_REQUEST['function'])) {
                 if ($method = checkRequestMethod('POST')) {
                     if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
                         $UserInfo = GetCSPCurrentUser();
-                        writeLog("ThreatActors",$UserInfo->result->name." queried list of Threat Actors","info",$LogArr);
+                        if (isset($UserInfo)) {
+                            writeLog("ThreatActors",$UserInfo->result->name." queried list of Threat Actors","info");
+                        }
                         $Actors = GetB1ThreatActors($_POST['StartDateTime'],$_POST['EndDateTime']);
                         if (!isset($Actors['Error'])) {
                             echo json_encode(GetB1ThreatActorsById($Actors),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
