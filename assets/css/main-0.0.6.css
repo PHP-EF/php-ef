@@ -639,6 +639,10 @@ body.dark-theme .nav-link {
   color: #FFF;
 }
 
+body.dark-theme .text-muted {
+  color: #8d99a4!important;
+}
+
 body.dark-theme a {
   color: #74acff;
 }
@@ -650,9 +654,13 @@ body.dark-theme .modal-body .fstlist {
 
 body.dark-theme,
 body.dark-theme .page-wrapper, 
-body.dark-theme .page-content,
-body.dark-theme .card {
+body.dark-theme .page-content {
   background-color: #292f38;
+}
+
+body.dark-theme .card {
+  background-color: #48505b;
+  color: #FFF;
 }
 
 body.dark-theme .page-wrapper .theme.chiller-theme {

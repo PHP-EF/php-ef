@@ -37,22 +37,29 @@ function QueryCSP($Method, $Uri, $Data = "", $APIKey = "", $Realm = "US") {
     'connect_timeout' => getConfig("System","CURL-ConnectTimeout")
   );
 
-  switch ($Method) {
-    case 'get':
-      $Result = WpOrg\Requests\Requests::get($Url, $CSPHeaders, $Options);
-      break;
-    case 'post':
-      $Result = WpOrg\Requests\Requests::post($Url, $CSPHeaders, json_encode($Data,JSON_UNESCAPED_SLASHES), $Options);
-      break;
-    case 'put':
-      $Result = WpOrg\Requests\Requests::put($Url, $CSPHeaders, json_encode($Data,JSON_UNESCAPED_SLASHES), $Options);
-      break;
-    case 'patch':
-      $Result = WpOrg\Requests\Requests::patch($Url, $CSPHeaders, json_encode($Data,JSON_UNESCAPED_SLASHES), $Options);
-      break;
-    case 'delete':
-      $Result = WpOrg\Requests\Requests::delete($Url, $CSPHeaders, $Options);
-      break;
+  try {
+    switch ($Method) {
+      case 'get':
+        $Result = WpOrg\Requests\Requests::get($Url, $CSPHeaders, $Options);
+        break;
+      case 'post':
+        $Result = WpOrg\Requests\Requests::post($Url, $CSPHeaders, json_encode($Data,JSON_UNESCAPED_SLASHES), $Options);
+        break;
+      case 'put':
+        $Result = WpOrg\Requests\Requests::put($Url, $CSPHeaders, json_encode($Data,JSON_UNESCAPED_SLASHES), $Options);
+        break;
+      case 'patch':
+        $Result = WpOrg\Requests\Requests::patch($Url, $CSPHeaders, json_encode($Data,JSON_UNESCAPED_SLASHES), $Options);
+        break;
+      case 'delete':
+        $Result = WpOrg\Requests\Requests::delete($Url, $CSPHeaders, $Options);
+        break;
+    }
+  } catch (Exception $e) {
+    return array(
+      'Status' => 'Error',
+      'Error' => $e->getMessage()
+    );
   }
 
   $LogArr = array(
@@ -64,9 +71,9 @@ function QueryCSP($Method, $Uri, $Data = "", $APIKey = "", $Realm = "US") {
   if ($Result) {
     switch ($Result->status_code) {
       case '401':
-        $LogArr['Error'] = "Warning. Invalid API Key.";
+        $LogArr['Error'] = "Invalid API Key.";
         writeLog("CSP","Failed to authenticate to the CSP","debug",$LogArr);
-        return array("Status" => "Error", "Error" => "Warning. Invalid API Key.");
+        return array("Status" => "Error", "Error" => "Invalid API Key.");
         break;
       default:
         $Output = json_decode($Result->body);
@@ -129,6 +136,8 @@ function GetB1ThreatActorsById($Actors) {
       foreach ($Cube->actor_responses as $AR) {
         array_push($Results,$AR);
       }
+    } else {
+      return $Cube;
     }
   }
   return $Results;

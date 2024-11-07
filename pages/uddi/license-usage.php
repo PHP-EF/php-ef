@@ -17,100 +17,74 @@
   <meta name="viewport" content="width=device-width" />
 </head>
 <body>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-12 col-xl-12 mx-auto">
+        <h2 class="h3 mb-4 page-title">License Usage</h2>
 
-<div class="wrapper">
-  <div class="main-child-panel main-panel-theme" data-background-color="white">
-		<nav class="navbar navbar-default">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <a class="navbar-brand" href="#">License Usage</a>
-        </div>
-        <div class="collapse navbar-collapse">
-          <ul class="nav navbar-nav navbar-right">
-          </ul>
-        </div>
-      </div>
-    </nav>
-
-
-    <div class="mainContainer">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-md-12">
-            <div class="card">
-              <!-- <div class="header">
-                  <h3 class="title">Header</h3>
-                  <p class="category"></p>
-              </div> -->
-              <div class="content">
-              <div class="row justify-content-md-center">
-                <div class="col-md-4 ml-md-auto apiKey">
-                  <input onkeyup="checkInput(this.value)" id="APIKey" type="password" placeholder="Enter API Key" required>
-                  <i class="fas fa-save saveBtn" id="saveBtn"></i>
-                </div>
-                <div class="col-md-2 ml-md-auto realm">
-                  <select id="Realm" class="form-select" aria-label="Realm Selection">
-                  <option value="US" selected>US Realm</option>
-                  <option value="EU">EU Realm</option>
-                  </select>
-                </div>
-              </div>
-              <div class="row justify-content-md-center">
-                <div class="calendar">
-                  <div class="col-sm ml-sm-auto">
-                    <h5>Start:&nbsp;</h5><input class="dateTimePicker" type="text" id="startDate" placeholder="Start Date/Time">&nbsp;
-                  </div>
-                  <div class="col-sm">
-                    <h5>End:&nbsp;</h5><input class="dateTimePicker" type="text" id="endDate" placeholder="End Date/Time">
-                  </div>
-                </div>
-              </div>
-              <div class="calendar"></div>
-              <button class="btn btn-success" id="Generate">Get Usage</button>
-              <div class="loading-icon">
-                <hr>
-                <div class="spinner-border text-primary" role="status">
-                  <span class="sr-only">Loading...</span>
-                </div>
-              </div>
+        <div class="row justify-content-md-center toolsMenu">
+            <div class="col-md-4 ml-md-auto apiKey">
+                <input onkeyup="checkInput(this.value)" id="APIKey" type="password" placeholder="Enter API Key" required>
+                <i class="fas fa-save saveBtn" id="saveBtn"></i>
             </div>
-
-            <div class="card-group license-card-group">
-              <div class="card">
-                <div class="card-header">DNS</div>
-                <div class="card-body">
-                  <!-- <h5 class="card-title">DNS</h5> -->
-                  <p class="card-text" id="ip_unique_dns"></p>
-                  <p class="card-text"><small class="text-muted">This is the number of unique DNS IPs.</small></p>
-                </div>
-              </div>
-              <div class="card">
-                <div class="card-header">DHCP</div>
-                <!-- <img class="card-img-top" src="..." alt="Card image cap"> -->
-                <div class="card-body">
-                  <!-- <h5 class="card-title">DHCP</h5> -->
-                  <p class="card-text" id="ip_unique_dhcp"></p>
-                  <p class="card-text"><small class="text-muted">This is the number of unique DHCP IPs.</small></p>
-                </div>
-              </div>
-              <div class="card">
-                <div class="card-header">DFP</div>
-                <!-- <img class="card-img-top" src="..." alt="Card image cap"> -->
-                <div class="card-body">
-                  <!-- <h5 class="card-title">DFP</h5> -->
-                  <p class="card-text" id="ip_unique_dfp"></p>
-                  <p class="card-text"><small class="text-muted">This is the number of unique DFP IPs.</small></p>
-                </div>
-              </div>
+            <div class="col-md-2 ml-md-auto realm">
+                <select id="Realm" class="form-select" aria-label="Realm Selection">
+                    <option value="US" selected>US Realm</option>
+                    <option value="EU">EU Realm</option>
+                </select>
+            </div>
+            <div class="col-md-2 ml-md-auto startDate">
+                <input class="dateTimePicker" type="text" id="startDate" placeholder="Start Date/Time">
+            </div>
+            <div class="col-md-2 ml-md-auto endDate">
+                <input class="dateTimePicker" type="text" id="endDate" placeholder="End Date/Time">
+            </div>
+            <div class="col-md-2 ml-md-auto actions">
+              <button class="btn btn-success" id="Generate">Get Usage</button>
+            </div>
+        </div>
+        <br>
+        <div class="alert alert-info genInfo" role="alert">
+          <center>It can take up to 2 minutes to generate the License Usage, please be patient.</center>
+        </div>
+        <div class="calendar"></div>
+            <div class="loading-icon">
+            <hr>
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+        <div class="card-group license-card-group">
+          <div class="card">
+            <div class="card-header">DNS</div>
+            <div class="card-body">
+              <!-- <h5 class="card-title">DNS</h5> -->
+              <p class="card-text" id="ip_unique_dns"></p>
+              <p class="card-text"><small class="text-muted">This is the number of unique DNS IPs.</small></p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">DHCP</div>
+            <!-- <img class="card-img-top" src="..." alt="Card image cap"> -->
+            <div class="card-body">
+              <!-- <h5 class="card-title">DHCP</h5> -->
+              <p class="card-text" id="ip_unique_dhcp"></p>
+              <p class="card-text"><small class="text-muted">This is the number of unique DHCP IPs.</small></p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">DFP</div>
+            <!-- <img class="card-img-top" src="..." alt="Card image cap"> -->
+            <div class="card-body">
+              <!-- <h5 class="card-title">DFP</h5> -->
+              <p class="card-text" id="ip_unique_dfp"></p>
+              <p class="card-text"><small class="text-muted">This is the number of unique DFP IPs.</small></p>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
-
-
 </body>
 
 </html>
@@ -151,10 +125,14 @@ $("#Generate").click(function(){
         postArr.APIKey = $('#APIKey')[0].value
       }
       $.post( "/api?function=createLicenseReport", postArr).done(function( data, status ) {
-      $('#ip_unique_dns').text(data['Unique']['DNS'])
-      $('#ip_unique_dhcp').text(data['Unique']['DHCP'])
-      $('#ip_unique_dfp').text(data['Unique']['DFP'])
-      toast("Success","","License Usage has been successfully generated.","success","30000");
+        if (data['Status'] == 'Error') {
+          toast(data['Status'],"",data['Error'],"danger","30000");
+        } else {
+          $('#ip_unique_dns').text(data['Unique']['DNS'])
+          $('#ip_unique_dhcp').text(data['Unique']['DHCP'])
+          $('#ip_unique_dfp').text(data['Unique']['DFP'])
+          toast("Success","","License Usage has been successfully generated.","success","30000");
+        }
     }).fail(function( data, status ) {
         toast("API Error","","Unknown API Error","danger","30000");
     }).always(function() {

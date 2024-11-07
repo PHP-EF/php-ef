@@ -1,3 +1,6 @@
+## v0.4.6
+- Fix bug where invalid API Keys would not always be reported
+
 ## v0.4.5
 - Minor url changes
 - Fix redirect bug when logging in from root site
