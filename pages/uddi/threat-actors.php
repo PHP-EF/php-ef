@@ -176,6 +176,8 @@
     $.post( "/api?function=getThreatActors", postArr).done(function( data, status ) {
       if (data['Status'] == 'Error') {
         toast(data['Status'],"",data['Error'],"danger","30000");
+      } else if (data['error']) {
+        toast('Error',"",data['error'][0]['message'],"danger","30000");
       } else {
         $('#threatActorTable').bootstrapTable('destroy');
         $('#threatActorTable').bootstrapTable({

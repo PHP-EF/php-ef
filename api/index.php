@@ -185,7 +185,7 @@ if (!($_REQUEST['function'])) {
         case 'downloadSecurityReport':
             if (CheckAccess(null,"B1-SECURITY-ASSESSMENT")) {
                 if ($method = checkRequestMethod('GET')) {
-                    writeLog("SecurityAssessment","Downloaded security report","info",$LogArr);
+                    writeLog("SecurityAssessment","Downloaded security report","info");
                     if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
                         $id = $_REQUEST['id'];
                         $File = __DIR__.'/../files/reports/report-'.$id.'.pptx';
@@ -207,7 +207,7 @@ if (!($_REQUEST['function'])) {
                 if ($method = checkRequestMethod('GET')) {
                     if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
                         $id = $_REQUEST['id'];
-                        echo getProgress($id,40); // Produces percentage for use on progress bar
+                        echo json_encode(getProgress($id,36)); // Produces percentage for use on progress bar
                     }
                 }
             }

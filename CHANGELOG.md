@@ -1,3 +1,9 @@
+## v0.5.0
+- Threat Actor slides are now automated when using the security assessment generator, with one slide created for each threat actor found.
+- Add additional error checking when Infoblox APIs timeout
+- Various bugfixes/cleanup
+- Add text based status to security assessment generator
+
 ## v0.4.6
 - Fix bug where invalid API Keys would not always be reported
 

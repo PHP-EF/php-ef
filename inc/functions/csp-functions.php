@@ -113,20 +113,46 @@ function GetB1ThreatActorsById($Actors) {
   $Results = array();
   $ActorInfo = array();
   foreach ($UniqueIds as $UniqueId) {
-    $Ids = array();
-    $Ids[] = array_keys(array_column($Actors, 'PortunusAggIPSummary.actor_id'),$UniqueId);
-    $Indicators = array();
-    foreach ($Ids as $Id) {
-      foreach ($Id as $Idsub) {
-        $Indicators[] = $Actors[$Idsub]->{'PortunusAggIPSummary.threat_indicator'};
-      }
-    }
-    $ActorInfo[] = array(
-      "actor_id" => $Actors[$Id[0]]->{'PortunusAggIPSummary.actor_id'},
-      "indicators" => $Indicators
+    // Workaround for problematic Threat Actors
+    // These timeout when using the 'batch_actor_summary_with_indicators' API Endpoint
+    $WorkaroundArr = array(
+      'c2303ad0-0f9e-4349-a71e-821794e202bd' // Revolver Rabbit
     );
+    if (in_array($UniqueId, $WorkaroundArr)) {
+      $ActorQuery = QueryCSP('get','tide-ng-threat-actor/v1/actor?_filter=id=="'.$UniqueId.'" and page==1');
+      if (isset($ActorQuery)) {
+        $NewArr = array(
+          'actor_id' => $ActorQuery->actor_id,
+          'actor_name' => $ActorQuery->actor_name,
+          'actor_description' => $ActorQuery->actor_description,
+          'related_count' => $ActorQuery->related_count,
+          'related_indicators_with_dates' => null,
+          'related_indicators' => $ActorQuery->related_indicators,
+        );
+        if (isset($ActorQuery->external_references)) {
+          $NewArr['external_references'] = $ActorQuery->external_references;
+        } else {
+          $NewArr['external_references'] = [];
+        }
+        array_push($Results,$NewArr);
+      }
+    // End of Workaround
+    } else {
+      $Ids = array();
+      $Ids[] = array_keys(array_column($Actors, 'PortunusAggIPSummary.actor_id'),$UniqueId);
+      $Indicators = array();
+      foreach ($Ids as $Id) {
+        foreach ($Id as $Idsub) {
+          $Indicators[] = $Actors[$Idsub]->{'PortunusAggIPSummary.threat_indicator'};
+        }
+      }
+      $ActorInfo[] = array(
+        "actor_id" => $Actors[$Id[0]]->{'PortunusAggIPSummary.actor_id'},
+        "indicators" => $Indicators
+      );
+    }
   }
-  $ArrayChunk = array_chunk($ActorInfo, 10);
+  $ArrayChunk = array_chunk($ActorInfo, 25);
   foreach ($ArrayChunk as $Chunk) {
     $Query = array(
       'actor_indicators' => $Chunk
@@ -134,7 +160,20 @@ function GetB1ThreatActorsById($Actors) {
     $Cube = QueryCSP('post','tide-ng-threat-actor/v1/batch_actor_summary_with_indicators',$Query);
     if (isset($Cube->actor_responses)) {
       foreach ($Cube->actor_responses as $AR) {
-        array_push($Results,$AR);
+        $NewArr = array(
+          'actor_id' => $AR->actor_id,
+          'actor_name' => $AR->actor_name,
+          'actor_description' => $AR->actor_description,
+          'related_count' => $AR->related_count,
+          'related_indicators_with_dates' => $AR->related_indicators_with_dates,
+          'related_indicators' => null,
+        );
+        if (isset($AR->external_references)) {
+          $NewArr['external_references'] = $AR->external_references;
+        } else {
+          $NewArr['external_references'] = [];
+        }
+        array_push($Results,$NewArr);
       }
     } else {
       return $Cube;

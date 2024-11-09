@@ -46,7 +46,7 @@
       </div>
       <br>
       <div class="alert alert-info genInfo" role="alert">
-        <center>It can take up to 2 minutes to generate the report, please be patient.</center>
+        <center>It can take up to 5 minutes to generate the report, please be patient.</center>
       </div>
       <div class="calendar"></div>
         <div class="loading-icon">
@@ -58,6 +58,7 @@
           <div class="spinner-border text-primary" role="status">
               <span class="sr-only">Loading...</span>
           </div>
+          <p class="progressAction" id="progressAction"></p>
         </div>
       </div>
 	  </div>
@@ -92,8 +93,9 @@ function hideLoading() {
 
 function updateProgress(id) {
   $.get('/api?function=getSecurityReportProgress&id='+id, function(data) {
-      var progress = parseFloat(data).toFixed(1); // Assuming the server returns a JSON object with a 'progress' field
+      var progress = parseFloat(data['Progress']).toFixed(1); // Assuming the server returns a JSON object with a 'progress' field
       $('#progress-bar').css('width', progress + '%').attr('aria-valuenow', progress).text(progress + '%');
+      $('#progressAction').text(data['Action'])
       if (progress < 100 && haltProgress == false) {
         setTimeout(function() {
           updateProgress(id);
