@@ -1,6 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
 <?php
+  if ($_SERVER['REQUEST_URI'] == '/?') {
+    header('Location: /');
+  }
   if (isset($_REQUEST['page'])) {
     header('Location: /#'.$_SERVER['QUERY_STRING']);
   }
@@ -14,6 +15,8 @@
     $isAuth = false;
   }
 ?>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -22,8 +25,9 @@
 </head>
 
 <style>
-#tabsJustifiedContent * p{
+#tabsJustifiedContent * p, #tabsJustifiedContent * small{
   text-align:center;
+  display:block;
 }
 pre {
   background-color: #000;
@@ -127,25 +131,29 @@ pre code {
 	        <!-- <li class="header-menu">
             <span>Reports</span>
 	        </li> -->
+          <?php
+          if (CheckAccess(null,'DNS-TOOLBOX')) { echo '
           <li class="header-menu">
             <a href="#page=tools/dnstoolbox" class="toggleFrame">
               <i class="fa fa-toolbox"></i>
               <span>DNS Toolbox</span>
             </a>
-          </li>
+          </li>';}
+          if (CheckAccess(null,'B1-SECURITY-ASSESSMENT')) { echo '
           <li class="header-menu">
             <a href="#page=uddi/security-assessment" class="toggleFrame">
               <i class="fa fa-magnifying-glass-chart"></i>
               <span>Security Assessment</span>
             </a>
-          </li>
+          </li>';}
+          if (CheckAccess(null,'B1-THREAT-ACTORS')) { echo '
           <li class="header-menu">
             <a href="#page=uddi/threat-actors" class="toggleFrame">
               <i class="fa fa-skull"></i>
               <span>Threat Actors</span>
             </a>
-          </li>
-          <?php if ($isAuth) { echo '
+          </li>';}
+          if (CheckAccess(null,null,"DEV-Menu")) { echo '
 	        <li class="header-menu">
             <span>Dev</span>
 	        </li>
@@ -154,16 +162,18 @@ pre code {
               <i class="fa fa-toolbox"></i>
               <span>Tools</span>
             </a>
-            <div class="sidebar-submenu">
+            <div class="sidebar-submenu">';
+              if (CheckAccess(null,'B1-LICENSE-USAGE')) { echo '
               <ul>
                 <li>
                   <a href="#page=uddi/license-usage" class="toggleFrame">License Utilization</a>
 		            </li>
 
-              </ul>
+              </ul>';}
+              echo '
             </div>
 	        </li>';}
-          
+
           if (CheckAccess(null,null,"ADMIN-Menu")) { echo '
           <li class="header-menu">
             <span>Admin</span>
@@ -312,6 +322,17 @@ pre code {
                 <div class="tab-pane fade active show p-1" id="about">
                 <p>The Infoblox SA Tools Portal offers a place for the Infoblox SA Team to leverage some web based tools.</p>
                 <p>Designed by <i class="fa fa-code" style="color:red"></i> by - <a target="_blank" rel="noopener noreferrer" href="https://github.com/TehMuffinMoo">Mat Cox</a></p>
+                <small>
+                  Created using Skeleton Framework made by - <a target="_blank" rel="noopener noreferrer" href="https://github.com/azouaoui-med">
+                    Mohamed Azouaoui
+                  </a>
+                </small>
+                <hr>
+                <small>
+                  Running Version: <?php echo getVersion()[0]; ?>
+                  </a>
+                </small>
+                <br>
 		          </div>
               <div class="tab-pane fade" id="support">
                 <br>
@@ -327,7 +348,7 @@ pre code {
                   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
                   copies of the Software, and to permit persons to whom the Software is
                   furnished to do so, subject to the following conditions:
-                </p><p>	
+                </p><p>
                   The above copyright notice and this permission notice shall be included in all
                   copies or substantial portions of the Software.
                 </p><p>
@@ -412,14 +433,14 @@ $('.toggleThemeBtn').on('click', function () {
     setCookie('theme','dark',365);
     location.reload();
   } else {
-    setCookie('theme','light',365);    
-    location.reload();	  
+    setCookie('theme','light',365);
+    location.reload();
   };
 });
 
 $('.infoBtn').on('click', function() {
   $('#infoModal').modal('show');
-  $.getJSON('/api/?function=whoami', function(whoami) {
+  $.getJSON('/api?function=whoami', function(whoami) {
     if (whoami.headers['X-Authentik-Uid'] != null) {
       if (whoami.Groups != null) {whoami.Groups = whoami.Groups.split('|')};
     } else {

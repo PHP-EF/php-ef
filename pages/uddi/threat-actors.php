@@ -1,5 +1,8 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
+  if (CheckAccess(null,"B1-THREAT-ACTORS") == false) {
+    die();
+  }
 ?>
 
 <!doctype html>
@@ -40,6 +43,10 @@
           <div class="col-md-2 ml-md-auto actions">
             <button class="btn btn-success" id="Actors">Get Actors</button>
           </div>
+      </div>
+      <br>
+      <div class="alert alert-info genInfo" role="alert">
+        <center>It can take up to 2 minutes to generate the list of Threat Actors, please be patient.</center>
       </div>
       <div class="calendar"></div>
           <div class="loading-icon">
@@ -109,8 +116,9 @@
       sortable: true,
       pagination: true,
       search: true,
+      showExport: true,
+      exportTypes: ['json', 'xml', 'csv', 'txt', 'excel', 'sql'],
       showColumns: true,
-      showRefresh: true,
       columns: [{
         field: 'indicator',
         title: 'Indicator',
@@ -122,6 +130,10 @@
       },{
         field: 'te_customer_last_dns_query',
         title: 'Last Queried',
+        sortable: true
+      },{
+        field: 'vt_first_submission_date',
+        title: 'Virus Total Submitted',
         sortable: true
       }]
     });
@@ -164,6 +176,8 @@
     $.post( "/api?function=getThreatActors", postArr).done(function( data, status ) {
       if (data['Status'] == 'Error') {
         toast(data['Status'],"",data['Error'],"danger","30000");
+      } else if (data['error']) {
+        toast('Error',"",data['error'][0]['message'],"danger","30000");
       } else {
         $('#threatActorTable').bootstrapTable('destroy');
         $('#threatActorTable').bootstrapTable({
@@ -171,8 +185,9 @@
           sortable: true,
           pagination: true,
           search: true,
+          showExport: true,
+          exportTypes: ['json', 'xml', 'csv', 'txt', 'excel', 'sql'],
           showColumns: true,
-          showRefresh: true,
           columns: [{
             field: 'actor_name',
             title: 'Name',

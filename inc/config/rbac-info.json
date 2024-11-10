@@ -1,8 +1,27 @@
 {
 	"Menus": {
-		"ADMIN-Menu": "Grants access to the Admin Menu."
+		"ADMIN-Menu": "Grants access to the Admin Menu.",
+		"DEV-Menu": "Grants access to the Dev Menu."
 	},
 	"Resources": {
+		"DNS-TOOLBOX": {
+			"description": "Grants the ability to use the DNS Toolbox",
+			"PermittedMenus": []
+		},
+		"B1-SECURITY-ASSESSMENT": {
+			"description": "Grants the ability to use the Security Assessment Tool",
+			"PermittedMenus": []
+		},
+		"B1-THREAT-ACTORS": {
+			"description": "Grants the ability to use the Threat Actors Tool",
+			"PermittedMenus": []
+		},
+		"B1-LICENSE-USAGE": {
+			"description": "Grants the ability to use the License Usage Tool",
+			"PermittedMenus": [
+				"DEV-Menu"
+			]
+		},
 		"ADMIN-RBAC": {
 			"description": "Grants the ability to view and manage Role Based Access",
 			"PermittedMenus": [

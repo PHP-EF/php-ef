@@ -39,64 +39,64 @@ pre code {
 
 
 <div class="container">
-<div class="row justify-content-center">
+  <div class="row justify-content-center">
     <div class="col-14 col-lg-14 col-xl-14 mx-auto">
-        <h2 class="h3 mb-4 page-title">Logs</h2>
-        <div class="my-4">
-            <h5 class="mb-0 mt-5">Logs</h5>
-            <p>The following table displays logs from the Infoblox SA Tools Portal.</p>
-            <table  data-url="/api/?function=GetLog"
-              data-toggle="table"
-              data-search="true"
-	      data-filter-control="true"
-              data-show-filter-control-switch="true"
-	      data-filter-control-visible="false"
-              data-filter-control-multiple-search="true"
-	      data-show-export="true"
-	      data-show-refresh="true"
-              data-show-columns="true"
-              data-pagination="true"
-	      data-toolbar="#toolbar"
-              data-query-params="queryParams"
-	      class="table table-striped"
-	      id="logTable">
+      <h2 class="h3 mb-4 page-title">Logs</h2>
+      <div class="my-4">
+          <h5 class="mb-0 mt-5">Logs</h5>
+          <p>The following table displays logs from the Infoblox SA Tools Portal.</p>
+          <table  data-url="/api?function=GetLog"
+            data-toggle="table"
+            data-search="true"
+            data-filter-control="true"
+            data-show-filter-control-switch="true"
+            data-filter-control-visible="false"
+            data-filter-control-multiple-search="true"
+            data-show-export="true"
+            data-export-data-type='json, xml, csv, txt, excel, sql'
+            data-show-refresh="true"
+            data-show-columns="true"
+            data-pagination="true"
+            data-toolbar="#toolbar"
+            data-query-params="queryParams"
+            class="table table-striped"
+            id="logTable">
 
-              <div id="toolbar" class="select">
-		<select class="form-select" id="logDate">
-                  <?php
-                    $LogFiles = array_reverse(getLogFiles());
-                    $LogFileArr = array();
-		    foreach ($LogFiles as $LogFile) {
+            <div id="toolbar" class="select">
+              <select class="form-select" id="logDate">
+                <?php
+                  $LogFiles = array_reverse(getLogFiles());
+                  $LogFileArr = array();
+                    foreach ($LogFiles as $LogFile) {
                       $LogFileShort = explode(".log",explode(getConfig("System","logfilename")."-",$LogFile)[1]);
                       if ($LogFileShort[0] != null) {
                         array_push($LogFileArr,$LogFileShort[0]);
                       }
-		    }
-		    usort($LogFileArr, "compareByTimestamp");
-		    foreach ($LogFileArr as $LogFileItem) {
+                    }
+                    usort($LogFileArr, "compareByTimestamp");
+                    foreach ($LogFileArr as $LogFileItem) {
                       echo '<option value="'.$LogFileItem.'">'.date('d/m/Y',strtotime($LogFileItem)).'</option>';
-		    }
-                  ?>
-                </select>
-              </div>
-              <thead>
-                <tr>
-                  <th data-field="date" data-sortable="true" data-formatter="dateFormatter" data-filter-control="input">Date</th>
-		  <th data-field="logger" data-sortable="true" data-filter-control="select">Logger</th>
-                  <th data-field="level" data-sortable="true" data-filter-control="select">Level</th>
-		  <th data-field="message" data-sortable="true" data-filter-control="input">Message</th>
-		  <th data-field="displayname" data-sortable="true" data-filter-control="select">Display Name</th>
-		  <th data-field="username" data-sortable="true" data-filter-control="select" data-visible="false">Username</th>
-                  <th data-field="ipaddress" data-sortable="true" data-filter-control="input">IP Address</th>
-                  <th data-formatter="actionFormatter" data-events="actionEvents">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="rbacgroups">
-	      </tbody>
-	    </table>
-        </div>
+                    }
+                ?>
+              </select>
+            </div>
+            <thead>
+              <tr>
+                <th data-field="date" data-sortable="true" data-formatter="dateFormatter" data-filter-control="input">Date</th>
+                <th data-field="logger" data-sortable="true" data-filter-control="select">Logger</th>
+                <th data-field="level" data-sortable="true" data-filter-control="select">Level</th>
+                <th data-field="message" data-sortable="true" data-filter-control="input">Message</th>
+                <th data-field="displayname" data-sortable="true" data-filter-control="select" data-visible="false">Display Name</th>
+                <th data-field="username" data-sortable="true" data-filter-control="select">Username</th>
+                <th data-field="ipaddress" data-sortable="true" data-filter-control="input">IP Address</th>
+                <th data-formatter="actionFormatter" data-events="actionEvents">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="rbacgroups"></tbody>
+          </table>
+      </div>
     </div>
-</div>
+  </div>
 </div>
 
 <!-- Log Modal -->
@@ -131,11 +131,11 @@ pre code {
   }
 
   $('#logDate').on('change', function(event) {
-    $('#logTable').bootstrapTable('refresh');  
+    $('#logTable').bootstrapTable('refresh');
   });
 
   function queryParams(params) {
-    var logDate = $('#logDate').find(":selected").val();    
+    var logDate = $('#logDate').find(":selected").val();
     params.date = logDate;
     return params;
   }
@@ -151,7 +151,7 @@ pre code {
   }
 
   window.actionEvents = {
-    'click .edit': function (e, value, row, index) { 
+    'click .edit': function (e, value, row, index) {
       var jsonPretty = JSON.stringify(JSON.parse(row.context),null,2);
       logData(jsonPretty);
       $('#logModal').modal('show');

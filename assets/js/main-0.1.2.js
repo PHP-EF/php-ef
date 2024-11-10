@@ -169,13 +169,13 @@ function getCookie(name) {
 async function heartBeat() {
   const delay = ms => new Promise(res => setTimeout(res, ms));
   try {
-    const response = await fetch('/api/?function=heartbeat', {cache: "no-cache"});
+    const response = await fetch('/api?function=heartbeat', {cache: "no-cache"});
     if (response.status == "200") {
       while (true) {
-	      let response2 = await fetch('/api/?function=heartbeat', {cache: "no-cache"});
+	      let response2 = await fetch('/api?function=heartbeat', {cache: "no-cache"});
         if (response2.status == "301") {
       	  console.log("Session timed out.");
-          window.location.href = "https://auth.placeholder/";
+          window.location.href = "/login.php?redirect_uri="+window.location.href.replace("#","?");
 	      }
 	      await delay(10000);
       }
@@ -359,6 +359,19 @@ function checkInput(text) {
   }
 }
 
+function enableDateTime() {
+  $('.datetimepicker').datetimepicker({
+    onGenerate:function( ct ){
+      jQuery(this).find('.xdsoft_date')
+        .toggleClass('xdsoft_disabled');
+    },
+    formatDate:'d/m/Y H:i:s',
+    minDate:'-1970/01/02',//yesterday is minimum date(for today use 0 or -1970/01/01)
+    maxDate:'+1970/01/02',//tomorrow is maximum date calendar
+    timepicker:true
+  });
+}
+
 // END
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -396,6 +409,8 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
+
+
 $( document ).ready(function() {
   checkAPIKey();
   $('#saveBtn').click(function(){
@@ -405,4 +420,5 @@ $( document ).ready(function() {
       removeAPIKey();
     }
   });
+  enableDateTime();
 });

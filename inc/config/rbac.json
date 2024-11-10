@@ -1,18 +1,32 @@
 {
-    "EVERYONE": {
+    "Authenticated": {
         "Description": "This group applies to any authenticated user",
         "PermittedResources": [],
+        "PermittedMenus": []
+    },
+    "Everyone": {
+        "Description": "This group applies to any user, regardless of if they are logged in or not",
+        "PermittedResources": [
+            "DNS-TOOLBOX",
+            "B1-THREAT-ACTORS",
+            "B1-SECURITY-ASSESSMENT"
+        ],
         "PermittedMenus": []
     },
     "Administrators": {
         "Description": "Infoblox SA Tools Admins",
         "PermittedResources": [
             "ADMIN-RBAC",
+            "ADMIN-CONFIG",
             "ADMIN-LOGS",
-            "ADMIN-CONFIG"
+            "DNS-TOOLBOX",
+            "B1-SECURITY-ASSESSMENT",
+            "B1-THREAT-ACTORS",
+            "B1-LICENSE-USAGE"
         ],
         "PermittedMenus": [
-            "ADMIN-Menu"
+            "ADMIN-Menu",
+            "DEV-Menu"
         ]
     }
 }

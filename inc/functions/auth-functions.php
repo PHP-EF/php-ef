@@ -1,10 +1,46 @@
 <?php
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use Predis\Client;
 
-$blacklist = [];
+class CoreJwt {
+    private $redis;
+
+    public function __construct() {
+        $this->redis = new Client(); // Connect to Redis
+    }
+
+    // Generate a JWT
+    public function generateToken($UN) {
+        $payload = [
+          'iat' => time(), // Issued at
+          'exp' => time() + (86400 * 30), // Expiration time (30 days)
+          'username' => $UN,
+          'name' => null,
+          'groups' => array()
+        ];
+        if ($UN === 'admin') {
+          $payload['groups'][] = 'Administrators';
+        }
+        writeLog("Authentication","Issued JWT token","debug",$payload);
+        return JWT::encode($payload, getConfig()['Security']['salt'], 'HS256');
+    }
+
+    // Revoke a token
+    public function revokeToken($token) {
+        $decoded = JWT::decode($token, new Key(getConfig()['Security']['salt'], 'HS256'));
+        $this->redis->set($token, json_encode($decoded), 'EX', (86400 * 30)); // Store token with expiration
+        writeLog("Authentication","Revoked JWT token","debug",$decoded);
+    }
+
+    // Check if a token is revoked
+    public function isRevoked($token) {
+        return $this->redis->exists($token);
+    }
+}
 
 function NewAuth($UN,$PW) {
+  $CoreJwt = new CoreJwt();
   // Secret key for JWT
   $secretKey = getConfig()['Security']['salt']; // Change this to a secure key
 
@@ -20,43 +56,34 @@ function NewAuth($UN,$PW) {
 
   if (validateCredentials($UN, $PW)) {
     // Generate JWT token
-    $payload = [
-        'iat' => time(), // Issued at
-        'exp' => time() + (86400 * 30), // Expiration time (30 days)
-        'username' => $UN,
-        'name' => null,
-        'groups' => array()
-    ];
-
-    if ($UN === 'admin') {
-      $payload['groups'][] = 'Administrators';
-    }
-    $jwt = JWT::encode($payload, $secretKey);
-
+    $jwt = $CoreJwt->generateToken($UN);
     // Set JWT as a cookie
     setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
 
-    return array(
+    $Arr = array(
       'Status' => 'Success',
       'Location' => '/'
     );
+    writeLog("Authentication",$UN." successfully logged in","info",$Arr);
+    return $Arr;
   } else {
-      return array(
-        'Status' => 'Error',
-        'Message' => 'Invalid Credentials'
-      );
+    $Arr = array(
+      'Status' => 'Error',
+      'Message' => 'Invalid Credentials'
+    );
+    writeLog("Authentication",$UN." failed to log in","warning",$Arr);
+    return $Arr;
   }
 }
 
 function InvalidateAuth() {
-  $blacklistfile = __DIR__.'/../config/jwt-blacklist';
-  if ((strpos(file_get_contents($blacklistfile),$_COOKIE['jwt']) === false) OR !file_exists($blacklistfile)) {
-    file_put_contents($blacklistfile, $_COOKIE['jwt'].PHP_EOL , FILE_APPEND);
-  }
+  $CoreJwt = new CoreJwt();
+  $CoreJwt->revokeToken($_COOKIE['jwt']);
   return GetAuth();
 }
 
 function GetAuth() {
+  $CoreJwt = new CoreJwt();
   if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
     $IPAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
   } else if (isset($_SERVER['REMOTE_ADDR'])) {
@@ -64,14 +91,16 @@ function GetAuth() {
   } else {
     $IPAddress = "N/A";
   }
+  $IPAddress = explode(':',$IPAddress)[0];
 
   if (isset($_COOKIE['jwt'])) {
     $secretKey = getConfig()['Security']['salt']; // Change this to a secure key
-    if (strpos(file_get_contents(__DIR__.'/../config/jwt-blacklist'),$_COOKIE['jwt']) !== false) {
+    if ($CoreJwt->isRevoked($_COOKIE['jwt']) == true) {
       // Token is invalid
       $AuthResult = array(
         'Authenticated' => false,
         'IPAddress' => $IPAddress,
+        'Groups' => 'Everyone'
       );
       return $AuthResult;
     } else {
@@ -99,18 +128,18 @@ function GetAuth() {
       }
 
       if (isset($decodedJWT->groups)) {
-        $decodedJWT->groups[] = 'EVERYONE';
+        $decodedJWT->groups[] = 'Authenticated|Everyone';
         $Groups = join("|",$decodedJWT->groups);
       } else {
-        $Groups = "EVERYONE";
+        $Groups = "Authenticated|Everyone";
       }
-  
+
       if (isset($decodedJWT->email)) {
         $Email = $decodedJWT->email;
       } else {
         $Email = null;
       }
-  
+
       $AuthResult = array(
         'Authenticated' => true,
         'Username' => $Username,
@@ -123,91 +152,27 @@ function GetAuth() {
       $AuthResult = array(
         'Authenticated' => false,
         'IPAddress' => $IPAddress,
+        'Groups' => 'Everyone'
       );
     }
   } else {
     $AuthResult = array(
       'Authenticated' => false,
       'IPAddress' => $IPAddress,
+      'Groups' => 'Everyone'
     );
   }
-  return $AuthResult;
-}
-
-function GetAuthV1() {
-  if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-    $IPAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
-  } else if (isset($_SERVER['REMOTE_ADDR'])) {
-    $IPAddress = $_SERVER['REMOTE_ADDR'];
-  } else {
-    $IPAddress = "N/A";
-  }
-  if (isset($_SERVER['HTTP_REMOTE_USER'])) {
-    if (isset($_SERVER['HTTP_REMOTE_GROUPS'])) {
-      $RemoteGroups = $_SERVER['HTTP_REMOTE_GROUPS']."|EVERYONE";
-    } else {
-      $RemoteGroups = "EVERYONE";
-    }
-    if (isset($_SERVER['HTTP_REMOTE_EMAIL'])) {
-      $Email = $_SERVER['HTTP_REMOTE_EMAIL'];
-    } else {
-      $Email = null;
-    }
-    $AuthResult = array(
-      'Authenticated' => true,
-      'Username' => $_SERVER['HTTP_REMOTE_USER'],
-      'DisplayName' =>  $_SERVER['HTTP_REMOTE_NAME'],
-      'EmailAddress' => $Email,
-      'IPAddress' => $IPAddress,
-      'Groups' => $RemoteGroups
-    );
-  } else {
-    $AuthResult = array(
-      'Authenticated' => false,
-      'IPAddress' => $IPAddress,
-    );
-  } 
   return $AuthResult;
 }
 
 function signinRedirect() {
   if (GetAuth()['Authenticated']) {
   } else {
-    echo '<script>top.window.location = "https://auth.placeholder/?rd="+parent.window.location.href.replace("#","?")</script>';
+    echo '<script>top.window.location = "/login.php?redirect_uri="+parent.window.location.href.replace("#","?")</script>';
   }
-}
-
-function CheckAccessV1($User,$Service) {
-  if ($User == null) {
-    $User = GetAuth();
-  }
-  if (isset($User['Authenticated'])) {
-    $rbacJson = file_get_contents(__DIR__.'/../'.getConfig("System","rbacjson"));
-    $rbac = json_decode($rbacJson, true);
-    if (isset($User['Groups'])) {
-      if (isset($_SERVER['HTTP_X_AUTHENTIK_UID'])) {
-        $usergroups = explode('|',$User['Groups']);
-      } else {
-        $usergroups = explode(',',$User['Groups']);
-      }
-      foreach ($usergroups as $usergroup) {
-        if (isset($rbac[$usergroup])) {
-          if (in_array($Service,$rbac[$usergroup]['PermittedResources'])) {
-            return true;
-          }
-        }
-      }
-    } else {
-      return false;
-    }
-  } else {
-    return false;
-  }
-  return false;
 }
 
 function CheckAccess($User,$Service = null,$Menu = null) {
-  // return true; // Remove
   if ($User == null) {
     $User = GetAuth();
   }
@@ -217,8 +182,8 @@ function CheckAccess($User,$Service = null,$Menu = null) {
     if (isset($User['Groups'])) {
       $usergroups = explode('|',$User['Groups']);
       if ($Service != null) {
-	$Services = explode(',',$Service);
-	foreach ($Services as $ServiceToCheck) {
+	      $Services = explode(',',$Service);
+	      foreach ($Services as $ServiceToCheck) {
           foreach ($usergroups as $usergroup) {
             if (isset($rbac[$usergroup])) {
               if (in_array($ServiceToCheck,$rbac[$usergroup]['PermittedResources'])) {
@@ -226,7 +191,7 @@ function CheckAccess($User,$Service = null,$Menu = null) {
               }
             }
           }
-	}
+	      }
       }
       if ($Menu != null) {
         foreach ($usergroups as $usergroup) {
@@ -287,10 +252,10 @@ function setRBAC($Group,$Description = null,$Key = null,$Value = null) {
         if (in_array($Key,$rbac[$Group]['PermittedResources'])) {
           writeLog("RBAC","$Key is already assigned to $Group","error",$Key,$rbac[$Group]);
 	  return "Error. ".$Key." is already assigned to: ".$Group;
-	} else { 
+	} else {
 	  array_push($rbac[$Group]['PermittedResources'],$Key);
 	  file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbac, JSON_PRETTY_PRINT));
-          writeLog("RBAC","Added $Key to $Group","warning",$rbac[$Group]);	
+          writeLog("RBAC","Added $Key to $Group","warning",$rbac[$Group]);
 	}
 
 	## Add Menus to Array
@@ -312,7 +277,7 @@ function setRBAC($Group,$Description = null,$Key = null,$Value = null) {
 	    file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbac, JSON_PRETTY_PRINT));
             writeLog("RBAC","Removed $Key from $Group","warning",$rbac[$Group]);
           }
-        } else { 
+        } else {
           writeLog("RBAC","$Key is not assigned to $Group","error",$Key,$rbac[$Group]);
 	  return "Error. ".$Key." is not asssigned to: ".$Group;
 	}

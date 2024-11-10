@@ -37,49 +37,39 @@ pre code {
 </style>
 
 <div class="container">
-<div class="row justify-content-center">
+  <div class="row justify-content-center">
     <div class="col-12 col-lg-10 mx-auto">
-        <!-- <h2 class="h3 mb-4 page-title">Settings</h2> -->
-        <div class="my-4">
-<!--            <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Role Based Access</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Configuration</a>
-                </li>
-            </ul>-->
-            <h5 class="mb-0 mt-5">Role Based Access</h5>
-            <p>Use the following to configure Role Based Access for Access Groups. This allows providing granular control over which areas of the Infoblox SA Tools Portal users have access to.</p>
-            <table  data-url="/api/?function=GetRBAC&action=listgroups"
-              data-toggle="table"
-              data-search="true"
-              data-filter-control="true" 
-              data-show-refresh="true"
-              data-pagination="true"
-	      data-toolbar="#toolbar"
-	      data-sort-name="Group"
-	      data-sort-order="asc"
-              data-page-size="25"
-              class="table table-striped" id="rbacTable">
+      <div class="my-4">
+        <h5 class="mb-0 mt-5">Role Based Access</h5>
+        <p>Use the following to configure Role Based Access for Access Groups. This allows providing granular control over which areas of the Infoblox SA Tools Portal users have access to.</p>
+        <table  data-url="/api?function=GetRBAC&action=listgroups"
+          data-toggle="table"
+          data-search="true"
+          data-filter-control="true" 
+          data-show-refresh="true"
+          data-pagination="true"
+          data-toolbar="#toolbar"
+          data-sort-name="Group"
+          data-sort-order="asc"
+          data-page-size="25"
+          class="table table-striped" id="rbacTable">
 
-              <thead>
-                <tr>
-                  <th data-field="state" data-checkbox="true"></th>
-		  <th data-field="Group" data-sortable="true">Group Name</th>
-                  <th data-field="Description" data-sortable="true">Group Description</th>
-                  <th data-formatter="actionFormatter" data-events="actionEvents">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="rbacgroups">
-	      </tbody>
-            <div class="text-left">
-              <button class="btn btn-success" id="newgroup">New Group</button>
-            </div>
-	    </table>
-        </div>
+          <thead>
+            <tr>
+              <th data-field="state" data-checkbox="true"></th>
+              <th data-field="Group" data-sortable="true">Group Name</th>
+              <th data-field="Description" data-sortable="true">Group Description</th>
+              <th data-formatter="actionFormatter" data-events="actionEvents">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="rbacgroups"></tbody>
+          <div class="text-left">
+            <button class="btn btn-success" id="newgroup">New Group</button>
+          </div>
+        </table>
+      </div>
     </div>
-</div>
+  </div>
 </div>
 
 
@@ -95,22 +85,22 @@ pre code {
       </div>
       <div class="modal-body" id="editModelBody">
         <h4>Group Information</h4>
-	<div class="form-group">
+	      <div class="form-group">
           <label for="editGroupDescription">Group Description</label>
           <div class="input-group mb-1">
             <input type="text" class="form-control" id="editGroupDescription" aria-describedby="editGroupDescriptionHelp">
             <div class="input-group-append">
-	      <span class="input-group-text">
+	            <span class="input-group-text">
                 <button class="btn btn-primary" id="groupDescriptionSaveButton">Save</button>
-	      </span>
+	            </span>
             </div>
-	  </div>
+	        </div>
           <small id="editGroupDescriptionHelp" class="form-text text-muted">The group description.</small>
-	</div>
-	<hr>
+	      </div>
+	      <hr>
         <h4>Group Roles</h4>
         <p>Enable or Disable the following roles to provide granular control to specific areas of the Infoblox SA Tools Portal.</p>
-	<div class="list-group mb-5 shadow" id="modalListGroup"></div> 
+	      <div class="list-group mb-5 shadow" id="modalListGroup"></div> 
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -173,7 +163,7 @@ pre code {
     var div = document.getElementById('modalListGroup');
     var title = document.getElementById('editModalLabel');
     $('#editGroupDescription').val(row['Description']);
-    $.getJSON('/api/?function=GetRBAC&action=listroles', function(roleinfo) {
+    $.getJSON('/api?function=GetRBAC&action=listroles', function(roleinfo) {
       div.innerHTML = "";
       for (var key in roleinfo['Resources']) {
         div.innerHTML += `
@@ -192,7 +182,7 @@ pre code {
             </div>
           </div>`
       };
-      $.getJSON('/api/?function=GetRBAC&group='+encodeURIComponent(row.Group), function(grouproleinfo) {
+      $.getJSON('/api?function=GetRBAC&group='+encodeURIComponent(row.Group), function(grouproleinfo) {
         $('#editModalLabel').text(row.Group);
         for (var key in grouproleinfo.PermittedResources) {
           $("#"+grouproleinfo.PermittedResources[key]).prop("checked", "true");
@@ -202,7 +192,7 @@ pre code {
   }
 
   function roleQuery(data) {
-    $.getJSON('/api/?function=GetRBAC&group='+encodeURIComponent(data.Group), function(grouproleinfo) {
+    $.getJSON('/api?function=GetRBAC&group='+encodeURIComponent(data.Group), function(grouproleinfo) {
       for (var key in grouproleinfo.PermittedResources) {
         $("#"+grouproleinfo.PermittedResources[key]).prop("checked", "true");
       }
@@ -216,7 +206,7 @@ pre code {
     },
     'click .delete': function (e, value, row, index) {
       if(confirm("Are you sure you want to delete "+row.Group+" from Role Based Access? This is irriversible.") == true) {
-        $.getJSON('/api/?function=DeleteRBAC&group='+encodeURIComponent(row.Group), function(removeRBACResults) {
+        $.getJSON('/api?function=DeleteRBAC&group='+encodeURIComponent(row.Group), function(removeRBACResults) {
           if (removeRBACResults[row.Group]) {
             toast("Error","","Failed to delete "+row.Group+" from Role Based Access","danger");
 	  } else {
@@ -232,7 +222,7 @@ pre code {
     let toggle = $('#'+event.target.id).prop('checked');
     let group = $('#editModalLabel').text();
     let targetid = event.target.id
-    $.getJSON('/api/?function=SetRBAC&group='+encodeURIComponent(group)+'&key='+targetid+'&value='+toggle, function(setRBACResults) {
+    $.getJSON('/api?function=SetRBAC&group='+encodeURIComponent(group)+'&key='+targetid+'&value='+toggle, function(setRBACResults) {
       if (setRBACResults[group]['PermittedResources'].includes(targetid)) {
         if (toggle) {
           toast("Success","","Successfully added "+targetid+" to "+group,"success");
@@ -252,7 +242,7 @@ pre code {
   $('#groupDescriptionSaveButton').on('click', function(elem) {
     let group = $('#editModalLabel').text();
     let description = $('#editGroupDescription').val();
-    $.getJSON('/api/?function=SetRBAC&group='+encodeURIComponent(group)+'&description='+encodeURIComponent(description),function(setRBACResults) {
+    $.getJSON('/api?function=SetRBAC&group='+encodeURIComponent(group)+'&description='+encodeURIComponent(description),function(setRBACResults) {
       if (setRBACResults[group]['Description'] == description) {
         toast("Success","","Successfully edited "+group+" description to: "+description,"success");
 	$('#rbacTable').bootstrapTable('refresh');
@@ -270,7 +260,7 @@ pre code {
   $(document).on('click', '#newGroupSubmit', function(event) {
     let groupName = $('#groupName').val();
     let groupDescription = $('#groupDescription').val();
-    $.getJSON('/api/?function=SetRBAC&group='+encodeURIComponent(groupName)+'&description='+encodeURIComponent(groupDescription), function(newRBACGroupResults) {
+    $.getJSON('/api?function=SetRBAC&group='+encodeURIComponent(groupName)+'&description='+encodeURIComponent(groupDescription), function(newRBACGroupResults) {
     }); 
   });
 

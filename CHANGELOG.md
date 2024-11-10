@@ -1,3 +1,30 @@
+## v0.5.0
+- Threat Actor slides are now automated when using the security assessment generator, with one slide created for each threat actor found.
+- Add additional error checking when Infoblox APIs timeout
+- Various bugfixes/cleanup
+- Add text based status to security assessment generator
+
+## v0.4.6
+- Fix bug where invalid API Keys would not always be reported
+
+## v0.4.5
+- Minor url changes
+- Fix redirect bug when logging in from root site
+- Cleanup whitespace
+- Minor styling changes
+
+## v0.4.4
+- RBAC changes to include a group for none-authenticated users
+
+## v0.4.3
+- Enable export of table data for Threat Actors
+- Minor changes to logging
+- Update configuration via POST instead of GET
+- General cleanup
+
+## v0.4.2
+- Minor fixes to session expiry redirect
+
 ## v0.4.1
 - Add initial admin authentication and framework ready for SAML/OAuth/LDAP
 
