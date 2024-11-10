@@ -5,16 +5,12 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
-    // ** Stuff that may change when the template does ** //
-    // The Threat Actor PNG ID - Found in slideX.xml.rels
-    $ThreatActorPNGID = 'rId20';
-    // The Threat Actor SVG ID - Found in slideX.xml.rels
-    $ThreatActorSVGID = 'rId21';
-    // ** Stuff that may change when the template does ** //
-
     // Check API Key is valid & get User Info
     $UserInfo = GetCSPCurrentUser();
-    if (!isset($UserInfo->Error)) {
+    if (is_array($UserInfo) && isset($UserInfo['Error'])) {
+        $Status = $UserInfo['Status'];
+        $Error = $UserInfo['Error'];
+    } else {
         $Progress = 0;
         // Set Time Dimensions
         $StartDimension = str_replace('Z','',$StartDateTime);
@@ -399,6 +395,9 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
         // Set first slide number
         $SlideNumber = $SlidesCount++;
 
+        // Copy Blank Threat Actor Image
+        copy($AssetsDir.'/images/Threat Actors/Other/logo-only.png',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/logo-only.png');
+
         // Build new Threat Actor Slides & Update PPTX Resources
         $KnownActors = getThreatActorConfig();
         foreach  ($ThreatActorInfo as $TAI) {
@@ -418,6 +417,10 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
             // Update Tag Numbers
             $TASFile = file_get_contents($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/slide'.$SlideNumber.'.xml');
             $TASFile = str_replace('#TATAG00', '#TATAG'.$TagStart, $TASFile);
+
+            // Add Threat Actor Icon
+            $ThreatActorIconString = '<p:pic><p:nvPicPr><p:cNvPr id="36" name="Graphic 35"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{898E1A10-3ABF-AED0-2C71-1F26BBB6304B}"/></a:ext></a:extLst></p:cNvPr><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="rId115"><a:extLst><a:ext uri="{96DAC541-7B7A-43D3-8B79-37D633B846F1}"><asvg:svgBlip xmlns:asvg="http://schemas.microsoft.com/office/drawing/2016/SVG/main" r:embed="rId115"/></a:ext></a:extLst></a:blip><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="5522998" y="2349624"/><a:ext cx="1246722" cy="1582377"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic></p:spTree>';
+            $TASFile = str_replace('</p:spTree>',$ThreatActorIconString,$TASFile);
             
             // Append Virus Total Stuff if applicable to the slide
             if (isset($TAI['related_indicators_with_dates'])) {
@@ -438,12 +441,13 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
             // ** // Use the following code to link based on presence of 'infoblox_references' parameter
             // if (isset($TAI['infoblox_references'][0])) {
             // ** // Use the following code to link based on the Threat Actor config
-            $InfobloxReferenceFound = false;
+            //$InfobloxReferenceFound = false;
             if ((array_key_exists($TAI['actor_name'],$KnownActors)) && isset($KnownActors[$TAI['actor_name']]['URLStub'])) {
                 $ThreatActorExternalLinkString = '<p:sp><p:nvSpPr><p:cNvPr id="7" name="Text Placeholder 20"><a:hlinkClick r:id="rId122"/><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{4A652F23-47D6-59A0-1D85-972482B29234}"/></a:ext></a:extLst></p:cNvPr><p:cNvSpPr txBox="1"><a:spLocks/></p:cNvSpPr><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="5574269" y="3869404"/><a:ext cx="1168604" cy="271567"/></a:xfrm><a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val 20777"/></a:avLst></a:prstGeom><a:noFill/><a:ln w="19050"><a:solidFill><a:schemeClr val="accent1"/></a:solidFill></a:ln><a:effectLst><a:glow rad="63500"><a:srgbClr val="00B24C"><a:alpha val="40000"/></a:srgbClr></a:glow></a:effectLst></p:spPr><p:txBody><a:bodyPr lIns="0" tIns="0" rIns="0" bIns="0" anchor="ctr" anchorCtr="0"/><a:lstStyle><a:lvl1pPr marL="141755" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="620"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1736" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl1pPr><a:lvl2pPr marL="425265" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1488" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl2pPr><a:lvl3pPr marL="708774" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1240" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl3pPr><a:lvl4pPr marL="992284" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl4pPr><a:lvl5pPr marL="1275794" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl5pPr><a:lvl6pPr marL="1559303" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl6pPr><a:lvl7pPr marL="1842813" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl7pPr><a:lvl8pPr marL="2126323" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl8pPr><a:lvl9pPr marL="2409833" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl9pPr></a:lstStyle><a:p><a:pPr marL="0" indent="0" algn="ctr"><a:lnSpc><a:spcPct val="100000"/></a:lnSpc><a:spcBef><a:spcPts val="300"/></a:spcBef><a:spcAft><a:spcPts val="600"/></a:spcAft><a:buClr><a:schemeClr val="tx1"/></a:buClr><a:buNone/></a:pPr><a:r><a:rPr lang="en-US" sz="600" b="1" dirty="0"><a:solidFill><a:schemeClr val="bg1"/></a:solidFill><a:latin typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="77"/><a:ea typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="0"/><a:cs typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="0"/></a:rPr><a:t>THREAT ACTOR REPORT</a:t></a:r><a:endParaRPr lang="en-US" sz="600" dirty="0"><a:solidFill><a:schemeClr val="bg1"/></a:solidFill><a:latin typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="77"/><a:ea typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="0"/><a:cs typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="0"/></a:endParaRPr></a:p></p:txBody></p:sp></p:spTree>';
                 $TASFile = str_replace('</p:spTree>',$ThreatActorExternalLinkString,$TASFile);
-                $InfobloxReferenceFound = true;
+                //$InfobloxReferenceFound = true;
             }
+            
             // Update Slide XML with changes
             file_put_contents($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/slide'.$SlideNumber.'.xml', $TASFile);
 
@@ -457,29 +461,28 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
                 if ($element->getAttribute('Type') == "http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesSlide") {
                     $element->remove();
                 }
-                if (array_key_exists($TAI['actor_name'],$KnownActors)) {
-                    $UniqueActor = $KnownActors[$TAI['actor_name']]['IMG'];
-                    // Threat Actor PNG
-                    if ($element->getAttribute('Id') == $ThreatActorPNGID) {
-                        copy($AssetsDir.'/images/Threat Actors/Glow/'.$UniqueActor.'.png',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/'.$UniqueActor.'.png');
-                        $element->setAttribute('Target','../media/'.$UniqueActor.'.png');
-                    }
-                    // Threat Actor SVG
-                    if ($element->getAttribute('Id') == $ThreatActorSVGID) {
-                        copy($AssetsDir.'/images/Threat Actors/Glow/'.$UniqueActor.'.svg',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/'.$UniqueActor.'.svg');
-                        $element->setAttribute('Target','../media/'.$UniqueActor.'.svg');
-                    }
-                }
+            }
+
+            $xml_tas_f = $xml_tas->createDocumentFragment();
+
+            if ((array_key_exists($TAI['actor_name'],$KnownActors)) && isset($KnownActors[$TAI['actor_name']]['IMG'])) {
+                $UniqueActor = $KnownActors[$TAI['actor_name']]['IMG'];
+                // Threat Actor PNG
+                copy($AssetsDir.'/images/Threat Actors/Glow/'.$UniqueActor.'.png',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/'.$UniqueActor.'.png');
+                copy($AssetsDir.'/images/Threat Actors/Glow/'.$UniqueActor.'.svg',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/'.$UniqueActor.'.svg');
+                $xml_tas_f->appendXML('<Relationship Id="rId115" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/'.$UniqueActor.'.png"/>');
+                $xml_tas_f->appendXML('<Relationship Id="rId116" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/'.$UniqueActor.'.svg"/>');
+            } else {
+                $xml_tas_f->appendXML('<Relationship Id="rId115" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/logo-only.png"/>');
+                $xml_tas_f->appendXML('<Relationship Id="rId116" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/logo-only.svg"/>');
             }
 
             // Virus Total PNG / SVG
             if ($VTIndicatorFound) {
                 copy($AssetsDir.'/images/Threat Actors/Other/virustotal.png',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/virustotal.png');
                 copy($AssetsDir.'/images/Threat Actors/Other/virustotal.svg',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/virustotal.svg');
-                $xml_tas_f = $xml_tas->createDocumentFragment();
                 $xml_tas_f->appendXML('<Relationship Id="rId120" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/virustotal.png"/>');
                 $xml_tas_f->appendXML('<Relationship Id="rId121" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/virustotal.svg"/>');
-                $xml_tas->getElementsByTagName('Relationships')->item(0)->appendChild($xml_tas_f);
             }
 
             // Infoblox Blog URL
@@ -493,11 +496,10 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
             if ((array_key_exists($TAI['actor_name'],$KnownActors)) && isset($KnownActors[$TAI['actor_name']]['URLStub'])) {
                 $URLStub = $KnownActors[$TAI['actor_name']]['URLStub'];
                 $URL = 'https://www.infoblox.com/threat-intel/threat-actors/'.$URLStub.'/';
-                $xml_tas_f2 = $xml_tas->createDocumentFragment();
-                $xml_tas_f2->appendXML('<Relationship Id="rId122" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="'.$URL.'" TargetMode="External"/>');
-                $xml_tas->getElementsByTagName('Relationships')->item(0)->appendChild($xml_tas_f2);
+                $xml_tas_f->appendXML('<Relationship Id="rId122" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="'.$URL.'" TargetMode="External"/>');
             }
 
+            $xml_tas->getElementsByTagName('Relationships')->item(0)->appendChild($xml_tas_f);
             $xml_tas->save($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/_rels/slide'.$SlideNumber.'.xml.rels');
             $TagStart += 10;
             // Iterate slide number
@@ -698,9 +700,6 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
         unlink($FilesDir.'/reports/report-'.$UUID.'-extracted.pptx');
 
         $Status = 'Success';
-    } else {
-        $Status = 'API Error';
-        $Error = 'Invalid API Key.';
     }
 
     ## Generate Response
