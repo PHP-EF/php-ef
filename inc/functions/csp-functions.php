@@ -116,7 +116,7 @@ function GetB1ThreatActorsById($Actors) {
     // Workaround for problematic Threat Actors
     // These timeout when using the 'batch_actor_summary_with_indicators' API Endpoint
     $WorkaroundArr = array(
-      'c2303ad0-0f9e-4349-a71e-821794e202bd' // Revolver Rabbit
+      //'c2303ad0-0f9e-4349-a71e-821794e202bd' // Revolver Rabbit - TIDE-850
     );
     if (in_array($UniqueId, $WorkaroundArr)) {
       $ActorQuery = QueryCSP('get','tide-ng-threat-actor/v1/actor?_filter=id=="'.$UniqueId.'" and page==1');
@@ -133,6 +133,11 @@ function GetB1ThreatActorsById($Actors) {
           $NewArr['external_references'] = $ActorQuery->external_references;
         } else {
           $NewArr['external_references'] = [];
+        }
+        if (isset($ActorQuery->infoblox_references)) {
+          $NewArr['infoblox_references'] = $ActorQuery->infoblox_references;
+        } else {
+          $NewArr['infoblox_references'] = [];
         }
         array_push($Results,$NewArr);
       }
@@ -172,6 +177,11 @@ function GetB1ThreatActorsById($Actors) {
           $NewArr['external_references'] = $AR->external_references;
         } else {
           $NewArr['external_references'] = [];
+        }
+        if (isset($AR->infoblox_references)) {
+          $NewArr['infoblox_references'] = $AR->infoblox_references;
+        } else {
+          $NewArr['infoblox_references'] = [];
         }
         array_push($Results,$NewArr);
       }

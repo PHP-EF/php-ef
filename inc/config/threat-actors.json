@@ -1,0 +1,38 @@
+{
+    "Venal Viper": {
+        "IMG": "vextrio-viper",
+        "URLStub": "vextrio"
+    },
+    "Vigorish Viper": {
+        "IMG": "vextrio-viper",
+        "URLStub": "vigorish-viper"
+    },
+    "VexTrio": {
+        "IMG": "vextrio-viper",
+        "URLStub": "" 
+    },
+    "Loopy Lizard": {
+        "IMG": "loopy-lizard",
+        "URLStub": "loopy-lizard"
+    },
+    "Decoy Dog": {
+        "IMG": "decoy-dog",
+        "URLStub": "decoy-dog"
+    },
+    "Savvy Seahorse": {
+        "IMG": "savvy-seahorse",
+        "URLStub": "savvy-seahorse"
+    },
+    "Prolific Puma": {
+        "IMG": "prolific-puma",
+        "URLStub": "prolific-puma"
+    },
+    "Revolver Rabbit": {
+        "IMG": "revolver-rabbit-noglow",
+        "URLStub": "revolver-rabbit"
+    },
+    "Muddling Meerkat": {
+        "IMG": "muddling-meerkat",
+        "URLStub": "muddling-meerkat"
+    }
+}
