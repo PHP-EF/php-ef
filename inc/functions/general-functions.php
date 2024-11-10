@@ -391,7 +391,7 @@ function decrypt($msg_encrypted_bundle, $password){
 	$encrypted_msg = $components[2];
 
 	$decrypted_msg = openssl_decrypt(
-	  $encrypted_msg, 'aes-256-cbc', $salt, null, $iv
+	  $encrypted_msg, 'aes-256-cbc', $salt, 0, $iv
 	);
 
 	if ( $decrypted_msg === false )
