@@ -91,6 +91,11 @@
               <h5>Security Assessment</h5>
             </div>
             <div class="form-group">
+              <label for="securityAssessmentTemplateName">Template Name</label>
+              <input type="text" class="form-control info-field" id="securityAssessmentTemplateName" aria-describedby="securityAssessmentTemplateNameHelp" name="securityAssessmentTemplateName">
+              <small id="securityAssessmentTemplateNameHelp" class="form-text text-muted">The file name for the Security Assessment Template.</small>
+	          </div>
+            <div class="form-group">
               <label for="securityAssessmentThreatActorSlide">Threat Actor Slide</label>
               <input type="text" class="form-control info-field" id="securityAssessmentThreatActorSlide" aria-describedby="securityAssessmentThreatActorSlideHelp" name="securityAssessmentThreatActorSlide">
               <small id="securityAssessmentThreatActorSlideHelp" class="form-text text-muted">This is the Threat Actor template slide number.</small>
@@ -119,6 +124,7 @@
       $("#securitySalt").val(config.Security.salt);
       $("#securityAdminPW").val(config.Security.AdminPassword);
       $("#securityAssessmentThreatActorSlide").val(config.SecurityAssessment.ThreatActorSlide);
+      $("#securityAssessmentTemplateName").val(config.SecurityAssessment.TemplateName);
     });
   }
 

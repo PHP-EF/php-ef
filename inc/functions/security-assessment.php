@@ -22,7 +22,7 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
 
         // Extract Powerpoint Template Zip
         $Progress = writeProgress($UUID,$Progress,"Extracting template");
-        extractZip($FilesDir.'/template-threat-actors.pptx',$FilesDir.'/reports/report-'.$UUID);
+        extractZip($FilesDir.'/'.getConfig()['SecurityAssessment']['TemplateName'],$FilesDir.'/reports/report-'.$UUID);
 
         //
         // Do Chart, Spreadsheet & Image Stuff Here ....
@@ -527,7 +527,7 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
 
         // Cleanup Extracted Zip
         $Progress = writeProgress($UUID,$Progress,"Cleaning up");
-        //rmdirRecursive($FilesDir.'/reports/report-'.$UUID);
+        rmdirRecursive($FilesDir.'/reports/report-'.$UUID);
 
         // Extract Powerpoint Template Strings
         // ** Using external library to save re-writing the string replacement functions manually. Will probably pull this in as native code at some point.

@@ -146,6 +146,7 @@ if (!($_REQUEST['function'])) {
                     if (isset($_POST['securitySalt'])) { setConfig("Security","salt",$_POST['securitySalt']); }
                     if (isset($_POST['securityAdminPW'])) { setConfig("Security","AdminPassword",$_POST['securityAdminPW']); }
                     if (isset($_POST['securityAssessmentThreatActorSlide'])) { setConfig("SecurityAssessment","ThreatActorSlide",$_POST['securityAssessmentThreatActorSlide']); }
+                    if (isset($_POST['securityAssessmentTemplateName'])) { setConfig("SecurityAssessment","TemplateName",$_POST['securityAssessmentTemplateName']); }
                     $newConfig = getConfig();
                     $newConfig['Security']['salt'] = "********";
                     $newConfig['Security']['AdminPassword'] = "********";
