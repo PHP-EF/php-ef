@@ -12,5 +12,8 @@
     "Security": {
         "salt": "somesupersecurepasswordhere"
         "AdminPassword": "secureadminpasswordhere"
+    },
+    "SecurityAssessment": {
+        "ThreatActorSlide": "32"
     }
 }

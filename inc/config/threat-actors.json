@@ -1,7 +1,7 @@
 {
     "Venal Viper": {
         "IMG": "vextrio-viper",
-        "URLStub": "vextrio"
+        "URLStub": ""
     },
     "Vigorish Viper": {
         "IMG": "vextrio-viper",
@@ -9,7 +9,7 @@
     },
     "VexTrio": {
         "IMG": "vextrio-viper",
-        "URLStub": "" 
+        "URLStub": "vextrio" 
     },
     "Loopy Lizard": {
         "IMG": "loopy-lizard",

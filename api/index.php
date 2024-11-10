@@ -145,6 +145,7 @@ if (!($_REQUEST['function'])) {
                     if (isset($_POST['systemRBACInfoFile'])) { setConfig("System","rbacinfo",$_POST['systemRBACInfoFile']); }
                     if (isset($_POST['securitySalt'])) { setConfig("Security","salt",$_POST['securitySalt']); }
                     if (isset($_POST['securityAdminPW'])) { setConfig("Security","AdminPassword",$_POST['securityAdminPW']); }
+                    if (isset($_POST['securityAssessmentThreatActorSlide'])) { setConfig("SecurityAssessment","ThreatActorSlide",$_POST['securityAssessmentThreatActorSlide']); }
                     $newConfig = getConfig();
                     $newConfig['Security']['salt'] = "********";
                     $newConfig['Security']['AdminPassword'] = "********";

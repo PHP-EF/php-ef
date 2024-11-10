@@ -85,6 +85,17 @@
               <small id="securityAdminPWHelp" class="form-text text-muted">The password for the <b>admin</b> account.</small>
 	          </div>
           </div>
+          <br>
+          <div class="card border-secondary">
+            <div class="card-title">
+              <h5>Security Assessment</h5>
+            </div>
+            <div class="form-group">
+              <label for="securityAssessmentThreatActorSlide">Threat Actor Slide</label>
+              <input type="text" class="form-control info-field" id="securityAssessmentThreatActorSlide" aria-describedby="securityAssessmentThreatActorSlideHelp" name="securityAssessmentThreatActorSlide">
+              <small id="securityAssessmentThreatActorSlideHelp" class="form-text text-muted">This is the Threat Actor template slide number.</small>
+	          </div>
+          </div>
         </div>
 	    </form>
       <br>
@@ -107,6 +118,7 @@
       $("#systemRBACInfoFile").val(config.System.rbacinfo);
       $("#securitySalt").val(config.Security.salt);
       $("#securityAdminPW").val(config.Security.AdminPassword);
+      $("#securityAssessmentThreatActorSlide").val(config.SecurityAssessment.ThreatActorSlide);
     });
   }
 

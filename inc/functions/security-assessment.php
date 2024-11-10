@@ -6,8 +6,6 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
     // ** Stuff that may change when the template does ** //
-    // New slides to be appended after this slide number
-    $ThreatActorSlideStart = 32;
     // The Threat Actor PNG ID - Found in slideX.xml.rels
     $ThreatActorPNGID = 'rId20';
     // The Threat Actor SVG ID - Found in slideX.xml.rels
@@ -372,6 +370,8 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
         // Do Threat Actor Stuff Here ....
         //
         $Progress = writeProgress($UUID,$Progress,"Generating Threat Actor Slides");
+        // New slides to be appended after this slide number
+        $ThreatActorSlideStart = getConfig()['SecurityAssessment']['ThreatActorSlide'];
         // Calculate the slide position based on above value
         $ThreatActorSlidePosition = $ThreatActorSlideStart-2;
 
