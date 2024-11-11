@@ -151,6 +151,8 @@ $("#Generate").click(function(){
         toast("Success","Do not refresh the page","Security Assessment Report Job Started Successfully","success","30000");
       } else {
         toast(data['Status'],"",data['Error'],"danger","30000");
+        hideLoading();
+        $("#Generate").prop('disabled', false);
       }
     }).fail(function( data, status ) {
         toast("API Error","","Unknown API Error","danger","30000");
