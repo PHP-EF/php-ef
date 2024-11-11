@@ -209,7 +209,7 @@ if (!($_REQUEST['function'])) {
                 if ($method = checkRequestMethod('GET')) {
                     if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
                         $id = $_REQUEST['id'];
-                        echo json_encode(getProgress($id,36)); // Produces percentage for use on progress bar
+                        echo json_encode(getProgress($id,37)); // Produces percentage for use on progress bar
                     }
                 }
             }

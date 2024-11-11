@@ -704,6 +704,9 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
         $Progress = writeProgress($UUID,$Progress,"Final Cleanup");
         unlink($FilesDir.'/reports/report-'.$UUID.'-extracted.pptx');
 
+        // Report Status as Done
+        $Progress = writeProgress($UUID,$Progress,"Done");
+
         $Status = 'Success';
     }
 
