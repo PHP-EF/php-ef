@@ -100,9 +100,9 @@ function updateProgress(id) {
         setTimeout(function() {
           updateProgress(id);
         }, 1000);
-      } else if (progress == 100 && data['Action'] == 'Done' ) {
+      } else if (progress == 100 && data['Action'] == 'Done..' ) {
         toast("Success","","Security Assessment Successfully Generated","success","30000");
-        download('/api?function=downloadSecurityReport&id='+data['id']);
+        download('/api?function=downloadSecurityReport&id='+id);
         hideLoading();
         $("#Generate").prop('disabled', false);
       }
