@@ -386,7 +386,6 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
         $xml_rels->load($FilesDir.'/reports/report-'.$UUID.'/ppt/_rels/presentation.xml.rels');
         $xml_rels_f = $xml_rels->createDocumentFragment();
         $xml_rels_fstart = ($xml_rels->getElementsByTagName('Relationship')->length)+50;
-
         // Open PPTX Presentation XML
         $xml_pres = new DOMDocument('1.0', 'utf-8');
         $xml_pres->formatOutput = true;
@@ -394,39 +393,31 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
         $xml_pres->load($FilesDir.'/reports/report-'.$UUID.'/ppt/presentation.xml');
         $xml_pres_f = $xml_pres->createDocumentFragment();
         $xml_pres_fstart = 14700;
-
         // Get Slide Count
         $SlidesCount = iterator_count(new FilesystemIterator($FilesDir.'/reports/report-'.$UUID.'/ppt/slides'));
         // Set first slide number
         $SlideNumber = $SlidesCount++;
-
         // Copy Blank Threat Actor Image
         copy($AssetsDir.'/images/Threat Actors/Other/logo-only.png',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/logo-only.png');
-
         // Build new Threat Actor Slides & Update PPTX Resources
         $KnownActors = getThreatActorConfig();
         foreach  ($ThreatActorInfo as $TAI) {
             if (($ThreatActorSlideCount - 1) > 0) {
                 $xml_rels_f->appendXML('<Relationship Id="rId'.$xml_rels_fstart.'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide'.$SlideNumber.'.xml"/>');
                 $xml_pres_f->appendXML('<p:sldId id="'.$xml_pres_fstart.'" r:id="rId'.$xml_rels_fstart.'"/>');
-    
                 $xml_rels_fstart++;
                 $xml_pres_fstart++;
-    
                 copy($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/slide'.$ThreatActorSlideStart.'.xml',$FilesDir.'/reports/report-'.$UUID.'/ppt/slides/slide'.$SlideNumber.'.xml');
                 copy($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/_rels/slide'.$ThreatActorSlideStart.'.xml.rels',$FilesDir.'/reports/report-'.$UUID.'/ppt/slides/_rels/slide'.$SlideNumber.'.xml.rels');
             } else {
                 $SlideNumber = $ThreatActorSlideStart;
             }
-
             // Update Tag Numbers
             $TASFile = file_get_contents($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/slide'.$SlideNumber.'.xml');
             $TASFile = str_replace('#TATAG00', '#TATAG'.$TagStart, $TASFile);
-
             // Add Threat Actor Icon
             $ThreatActorIconString = '<p:pic><p:nvPicPr><p:cNvPr id="36" name="Graphic 35"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{898E1A10-3ABF-AED0-2C71-1F26BBB6304B}"/></a:ext></a:extLst></p:cNvPr><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="rId115"><a:extLst><a:ext uri="{96DAC541-7B7A-43D3-8B79-37D633B846F1}"><asvg:svgBlip xmlns:asvg="http://schemas.microsoft.com/office/drawing/2016/SVG/main" r:embed="rId115"/></a:ext></a:extLst></a:blip><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="5522998" y="2349624"/><a:ext cx="1246722" cy="1582377"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic></p:spTree>';
             $TASFile = str_replace('</p:spTree>',$ThreatActorIconString,$TASFile);
-            
             // Append Virus Total Stuff if applicable to the slide
             if (isset($TAI['related_indicators_with_dates'])) {
                 foreach ($TAI['related_indicators_with_dates'] as $TAII) {
@@ -452,24 +443,19 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
                 $TASFile = str_replace('</p:spTree>',$ThreatActorExternalLinkString,$TASFile);
                 //$InfobloxReferenceFound = true;
             }
-            
             // Update Slide XML with changes
             file_put_contents($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/slide'.$SlideNumber.'.xml', $TASFile);
-
             $xml_tas = new DOMDocument('1.0', 'utf-8');
             $xml_tas->formatOutput = true; 
             $xml_tas->preserveWhiteSpace = false;
             $xml_tas->load($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/_rels/slide'.$SlideNumber.'.xml.rels');
-
             foreach ($xml_tas->getElementsByTagName('Relationship') as $element) {
                 // Remove notes references to avoid having to create unneccessary notes resources
                 if ($element->getAttribute('Type') == "http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesSlide") {
                     $element->remove();
                 }
             }
-
             $xml_tas_f = $xml_tas->createDocumentFragment();
-
             if (array_key_exists($TAI['actor_name'],$KnownActors) && $KnownActors[$TAI['actor_name']]['IMG'] !== "") {
                 $UniqueActor = $KnownActors[$TAI['actor_name']]['IMG'];
                 // Threat Actor PNG

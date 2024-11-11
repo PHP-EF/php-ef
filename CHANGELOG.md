@@ -3,6 +3,7 @@
 - Add additional error checking when Infoblox APIs timeout
 - Various bugfixes/cleanup
 - Add text based status to security assessment generator
+- Move generation to be a background task to avoid idle timeouts
 
 ## v0.4.6
 - Fix bug where invalid API Keys would not always be reported

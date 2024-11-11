@@ -35,10 +35,10 @@
               </select>
           </div>
           <div class="col-md-2 ml-md-auto startDate">
-              <input class="dateTimePicker" type="text" id="startDate" placeholder="Start Date/Time">
+              <input type="text" id="startDate" placeholder="Start Date/Time">
           </div>
           <div class="col-md-2 ml-md-auto endDate">
-              <input class="dateTimePicker" type="text" id="endDate" placeholder="End Date/Time">
+              <input type="text" id="endDate" placeholder="End Date/Time">
           </div>
           <div class="col-md-2 ml-md-auto actions">
             <button class="btn btn-success" id="Generate">Generate</button>
@@ -100,9 +100,9 @@ function updateProgress(id) {
         setTimeout(function() {
           updateProgress(id);
         }, 1000);
-      } else if (progress == 100 && data['Action'] == 'Done' ) {
+      } else if (progress == 100 && data['Action'] == 'Done..' ) {
         toast("Success","","Security Assessment Successfully Generated","success","30000");
-        download('/api?function=downloadSecurityReport&id='+data['id']);
+        download('/api?function=downloadSecurityReport&id='+id);
         hideLoading();
         $("#Generate").prop('disabled', false);
       }
@@ -151,6 +151,8 @@ $("#Generate").click(function(){
         toast("Success","Do not refresh the page","Security Assessment Report Job Started Successfully","success","30000");
       } else {
         toast(data['Status'],"",data['Error'],"danger","30000");
+        hideLoading();
+        $("#Generate").prop('disabled', false);
       }
     }).fail(function( data, status ) {
         toast("API Error","","Unknown API Error","danger","30000");

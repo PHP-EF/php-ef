@@ -34,10 +34,10 @@
                 </select>
             </div>
             <div class="col-md-2 ml-md-auto startDate">
-                <input class="dateTimePicker" type="text" id="startDate" placeholder="Start Date/Time">
+                <input type="text" id="startDate" placeholder="Start Date/Time">
             </div>
             <div class="col-md-2 ml-md-auto endDate">
-                <input class="dateTimePicker" type="text" id="endDate" placeholder="End Date/Time">
+                <input type="text" id="endDate" placeholder="End Date/Time">
             </div>
             <div class="col-md-2 ml-md-auto actions">
               <button class="btn btn-success" id="Generate">Get Usage</button>
