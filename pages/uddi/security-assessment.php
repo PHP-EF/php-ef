@@ -100,6 +100,11 @@ function updateProgress(id) {
         setTimeout(function() {
           updateProgress(id);
         }, 1000);
+      } else if (progress == 100 && data['Action'] == 'Done' ) {
+        toast("Success","","Security Assessment Successfully Generated","success","30000");
+        download('/api?function=downloadSecurityReport&id='+data['id']);
+        hideLoading();
+        $("#Generate").prop('disabled', false);
       }
   }).fail(function( data, status ) {
     setTimeout(function() {
@@ -143,16 +148,15 @@ $("#Generate").click(function(){
     }
     $.post( "/api?function=createSecurityReport", postArr).done(function( data, status ) {
       if (data['Status'] == 'Success') {
-        toast("Success","","The report has been successfully generated.","success","30000");
-        download('/api?function=downloadSecurityReport&id='+data['id'])
+        toast("Success","Do not refresh the page","Security Assessment Report Job Started Successfully","success","30000");
       } else {
         toast(data['Status'],"",data['Error'],"danger","30000");
       }
     }).fail(function( data, status ) {
         toast("API Error","","Unknown API Error","danger","30000");
+        hideLoading();
+        $("#Generate").prop('disabled', false);
     }).always(function() {
-        hideLoading()
-        $("#Generate").prop('disabled', false)
     });
   });
 });

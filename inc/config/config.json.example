@@ -6,8 +6,8 @@
         "logdirectory": "logs/",
         "loglevel": "Debug",
         "logretention": "30",
-        "CURL-Timeout": "90",
-        "CURL-ConnectTimeout": "60"
+        "CURL-Timeout": "180",
+        "CURL-ConnectTimeout": "90"
     },
     "Security": {
         "salt": "somesupersecurepasswordhere"
