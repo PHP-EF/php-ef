@@ -11,6 +11,11 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
         $Status = $UserInfo['Status'];
         $Error = $UserInfo['Error'];
     } else {
+        echo json_encode(array(
+            'Status' => 'Success',
+            'Action' => 'Started'
+        ));
+        fastcgi_finish_request();
         $Progress = 0;
         // Set Time Dimensions
         $StartDimension = str_replace('Z','',$StartDateTime);
