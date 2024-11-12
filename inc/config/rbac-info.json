@@ -39,6 +39,12 @@
 			"PermittedMenus": [
 				"ADMIN-Menu"
 			]
+		},
+		"ADMIN-SECASS": {
+			"description": "Grants the ability to view and manage the Security Assessment Generator Configuration",
+			"PermittedMenus": [
+				"ADMIN-Menu"
+			]
 		}
 	}
 }

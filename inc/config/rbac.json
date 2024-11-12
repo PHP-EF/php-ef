@@ -22,7 +22,8 @@
             "DNS-TOOLBOX",
             "B1-SECURITY-ASSESSMENT",
             "B1-THREAT-ACTORS",
-            "B1-LICENSE-USAGE"
+            "B1-LICENSE-USAGE",
+            "ADMIN-SECASS"
         ],
         "PermittedMenus": [
             "ADMIN-Menu",

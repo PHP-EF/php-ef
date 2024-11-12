@@ -746,6 +746,43 @@ function getThreatActorConfig() {
     return json_decode(file_get_contents(__DIR__.'/../../inc/config/threat-actors.json'), true);
 }
 
+function newThreatActorConfig($Name,$IMG,$URLStub) {
+    $ThreatActorConfig = getThreatActorConfig();
+    if (!isset($ThreatActorConfig[$Name])) {
+        $ThreatActorConfig[$Name] = array(
+            "IMG" => $IMG,
+            "URLStub" => $URLStub
+        );
+        file_put_contents(__DIR__.'/../../inc/config/threat-actors.json',json_encode($ThreatActorConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+        return array(
+            'Status' => 'Success',
+            'Message' => 'Threat Actor added successfully'
+        );
+    } else {
+        return array(
+            'Status' => 'Error',
+            'Message' => 'Threat Actor already exists'
+        );
+    }
+}
+
+function removeThreatActorConfig($Name) {
+    $ThreatActorConfig = getThreatActorConfig();
+    if (isset($ThreatActorConfig[$Name])) {
+        unset($ThreatActorConfig[$Name]);
+        file_put_contents(__DIR__.'/../../inc/config/threat-actors.json',json_encode($ThreatActorConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+        return array(
+            'Status' => 'Success',
+            'Message' => 'Threat Actor removed successfully'
+        );
+    } else {
+        return array(
+            'Status' => 'Error',
+            'Message' => 'Threat Actor does not exist'
+        );
+    }
+}
+
 function writeProgress($id,$Count,$Action = "") {
     $Count++;
     $myfile = fopen(__DIR__.'/../../files/reports/report-'.$id.'.progress', "w") or die("Unable to save progress file");
