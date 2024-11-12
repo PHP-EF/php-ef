@@ -11,11 +11,14 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
         $Status = $UserInfo['Status'];
         $Error = $UserInfo['Error'];
     } else {
-        echo json_encode(array(
-            'Status' => 'Success',
-            'Action' => 'Started'
-        ));
-        fastcgi_finish_request();
+        // echo json_encode(array(
+        //     'Status' => 'Success',
+        //     'Action' => 'Started'
+        // ));
+        // fastcgi_finish_request();
+
+        // Set Progress
+        $Progress = 0;
 
         // Set Time Dimensions
         $StartDimension = str_replace('Z','',$StartDateTime);
@@ -46,11 +49,10 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
             'Users' => '{"measures":["PortunusAggInsight.userCount"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"contains","values":["2","3"]}],"limit":"1","ungrouped":false}',
             'ThreatInsight' => '{"measures":[],"dimensions":["PortunusDnsLogs.tproperty"],"timeDimensions":[{"dimension":"PortunusDnsLogs.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusDnsLogs.type","operator":"equals","values":["4"]}],"limit":"10000","ungrouped":false}',
             'ThreatView' => '{"measures":["PortunusAggInsight.tpropertyCount"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"equals","values":["2"]}],"limit":"1","ungrouped":false}',
-            'Sources' => '{"measures":["PortunusAggSecurity.networkCount"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggSecurity.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggSecurity.type","operator":"contains","values":["2","3"]}],"limit":"1","ungrouped":false}'
+            'Sources' => '{"measures":["PortunusAggSecurity.networkCount"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggSecurity.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggSecurity.type","operator":"contains","values":["2","3"]}],"limit":"1","ungrouped":false}',
+            'ThreatActors' => '{"segments":[],"timeDimensions":[{"dimension":"PortunusAggIPSummary.timestamp","granularity":null,"dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"ungrouped":false,"order":{"PortunusAggIPSummary.timestampMax":"desc"},"measures":["PortunusAggIPSummary.count"],"dimensions":["PortunusAggIPSummary.threat_indicator","PortunusAggIPSummary.actor_id"],"limit":1000,"filters":[{"and":[{"operator":"set","member":"PortunusAggIPSummary.threat_indicator"},{"operator":"set","member":"PortunusAggIPSummary.actor_id"}]}]}'
         );
         $CubeJSResults = QueryCubeJSMulti($CubeJSRequests);
-
-        $Progress = 0;
 
         // Set Directories
         $FilesDir = __DIR__.'/../../files';
@@ -324,8 +326,9 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
         }
 
         // Threat Actors Metrics
-        $Progress = writeProgress($UUID,$Progress,"Getting Threat Actor Metrics");
-        $ThreatActors = GetB1ThreatActors($StartDateTime,$EndDateTime);
+        $Progress = writeProgress($UUID,$Progress,"Building Threat Actor Metrics");
+        //$ThreatActors = GetB1ThreatActors($StartDateTime,$EndDateTime);
+        $ThreatActors = $CubeJSResults['ThreatActors']['Body']->result->data;
         if (isset($ThreatActors)) {
             $Progress = writeProgress($UUID,$Progress,"Getting Threat Actor Information (This may take a moment)");
             $ThreatActorsCount = count(array_unique(array_column($ThreatActors, 'PortunusAggIPSummary.actor_id')));

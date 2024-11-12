@@ -19,7 +19,7 @@ function GetCSPConfiguration($Uri,$APIKey = "",$Realm = "US") {
     $Realm = $_POST['Realm'];
   }
 
-  if (strpos($Uri,"https://csp.") === FALSE) {
+  if ($Uri == null || strpos($Uri,"https://csp.") === FALSE) {
     if ($Realm == "US") {
       $Url = "https://csp.infoblox.com/".$Uri;
     } elseif ($Realm == "EU") {
