@@ -55,10 +55,19 @@
             <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
           </div>
           <br>
-          <div class="spinner-border text-primary" role="status">
-              <span class="sr-only">Loading...</span>
+          <div id="spinner-container">
+            <div class="spinner-grow text-warning" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="spinner-grow text-success" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="spinner-grow text-info" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
           </div>
           <p class="progressAction" id="progressAction"></p>
+          <small id="elapsed"></small>
         </div>
       </div>
 	  </div>
@@ -71,6 +80,36 @@
 <script>
 let haltProgress = false;
 
+const spinners = document.querySelectorAll('.spinner-grow');
+
+function showSpinners() {
+  // Show spinners one by one
+  spinners.forEach((spinner, i) => {
+    setTimeout(() => {
+      spinner.style.display = 'inline-block'; // Show spinner
+    }, i * 1000); // Delay of 1 second for each spinner
+  });
+
+  // Hide spinners in the same order
+  setTimeout(() => {
+    spinners.forEach((spinner, i) => {
+      setTimeout(() => {
+        spinner.style.display = 'none'; // Hide spinner
+      }, i * 1000); // Delay of 1 second for each spinner
+    });
+  }, (spinners.length * 1000) + 1000); // Start hiding after all are shown
+
+  setTimeout(function() {
+    showSpinners();
+  }, (spinners.length * 2) * 1000);
+}
+
+function hideSpinners() {
+  spinners.forEach((spinner) => {
+    spinner.style.display = 'none'; // Hide all spinners
+  });
+}
+
 function download(url) {
   const a = document.createElement('a')
   a.href = url
@@ -80,35 +119,38 @@ function download(url) {
   document.body.removeChild(a)
 }
 
-function showLoading(id) {
+function showLoading(id,timer) {
   document.querySelector('.loading-icon').style.display = 'block';
+  $('.spinner-grow').css('display','none');
+  showSpinners();
   haltProgress = false;
-  updateProgress(id);
+  updateProgress(id,timer);
 }
-function hideLoading() {
+function hideLoading(timer) {
   document.querySelector('.loading-icon').style.display = 'none';
   $('#progress-bar').css('width', '0%').attr('aria-valuenow', 0).text('0%');
   haltProgress = true;
+  stopTimer(timer);
 }
 
-function updateProgress(id) {
+function updateProgress(id,timer) {
   $.get('/api?function=getSecurityReportProgress&id='+id, function(data) {
       var progress = parseFloat(data['Progress']).toFixed(1); // Assuming the server returns a JSON object with a 'progress' field
       $('#progress-bar').css('width', progress + '%').attr('aria-valuenow', progress).text(progress + '%');
       $('#progressAction').text(data['Action'])
       if (progress < 100 && haltProgress == false) {
         setTimeout(function() {
-          updateProgress(id);
+          updateProgress(id,timer);
         }, 1000);
       } else if (progress >= 100 && data['Action'] == 'Done..' ) {
         toast("Success","","Security Assessment Successfully Generated","success","30000");
         download('/api?function=downloadSecurityReport&id='+id);
-        hideLoading();
+        hideLoading(timer);
         $("#Generate").prop('disabled', false);
       }
   }).fail(function( data, status ) {
     setTimeout(function() {
-      updateProgress(id);
+      updateProgress(id,timer);
     }, 1000);
   });
 }
@@ -135,7 +177,8 @@ $("#Generate").click(function(){
 
   $("#Generate").prop('disabled', true)
   $.get( "/api?function=getUUID", function( id ) {
-    showLoading(id);
+    let timer = startTimer();
+    showLoading(id,timer);
     const startDateTime = new Date($('#startDate')[0].value)
     const endDateTime = new Date($('#endDate')[0].value)
     var postArr = {}
@@ -151,12 +194,12 @@ $("#Generate").click(function(){
         toast("Success","Do not refresh the page","Security Assessment Report Job Started Successfully","success","30000");
       } else {
         toast(data['Status'],"",data['Error'],"danger","30000");
-        hideLoading();
+        hideLoading(timer);
         $("#Generate").prop('disabled', false);
       }
     }).fail(function( data, status ) {
         toast("API Error","","Unknown API Error","danger","30000");
-        hideLoading();
+        hideLoading(timer);
         $("#Generate").prop('disabled', false);
     }).always(function() {
     });

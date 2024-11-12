@@ -7,3 +7,4 @@ config.json
 _archive
 .DS_Store
 test.php
+php.error.log

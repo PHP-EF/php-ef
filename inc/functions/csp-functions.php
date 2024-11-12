@@ -223,7 +223,7 @@ function GetB1ThreatActorsById($Actors) {
     }
   }
 
-  $ArrayChunk = array_chunk($ActorInfo, 10);
+  $ArrayChunk = array_chunk($ActorInfo, 5);
   $Requests = [];
   foreach ($ArrayChunk as $Chunk) {
     $Query = json_encode(array(

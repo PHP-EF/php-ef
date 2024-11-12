@@ -372,6 +372,29 @@ function enableDateTime() {
   });
 }
 
+let seconds = 0;
+
+function startTimer() {
+    let timer;
+    seconds = 0;
+    timer = setInterval(() => {
+        seconds++;
+        if (seconds > 60) {
+          const minutes = Math.floor(seconds / 60);
+          const remainingSeconds = seconds % 60;
+          $('#elapsed').text(`Elapsed: ${minutes}m ${remainingSeconds}s`);
+        } else {
+          $('#elapsed').text(`Elapsed: ${seconds}s`);
+        }
+    }, 1000);
+    return timer;
+}
+
+function stopTimer(timer) {
+    clearInterval(timer);
+    console.log(`Timer stopped at ${seconds} seconds`);
+}
+
 // END
 
 document.addEventListener('DOMContentLoaded', function() {

@@ -4,6 +4,7 @@
 - Various bugfixes/cleanup
 - Add text based status to security assessment generator
 - Move generation to be a background task to avoid idle timeouts
+- Swapped progress spinner to something more infoblox
 
 ## v0.4.6
 - Fix bug where invalid API Keys would not always be reported
