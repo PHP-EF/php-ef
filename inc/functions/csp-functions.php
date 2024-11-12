@@ -46,7 +46,7 @@ function GetCSPConfiguration($Uri,$APIKey = "",$Realm = "US") {
   );
 }
 
-function QueryCSPMultiRequestBuilder($Method = 'GET', $Uri, $Data = null, $Id = "") {
+function QueryCSPMultiRequestBuilder($Method = 'GET', $Uri = '', $Data = null, $Id = "") {
   return array(
     "Id" => $Id,
     "Method" => $Method,
