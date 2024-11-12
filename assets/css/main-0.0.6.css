@@ -915,6 +915,9 @@ height: 100%;
 .progressAction {
   margin-top: 10px;
 }
+.spinner-container {
+  margin-bottom: 10px;
+}
 @media (min-width: 1800px) {
   .container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl {
       max-width: 1720px!important;
