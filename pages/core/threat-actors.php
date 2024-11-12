@@ -87,7 +87,7 @@ pre code {
         <h4>Threat Actor Information</h4>
         <div class="form-group">
           <label for="threatActorName">Threat Actor Name</label>
-          <input type="text" class="form-control" id="threatActorName" aria-describedby="threatActorNameHelp">
+          <input type="text" class="form-control" id="threatActorName" aria-describedby="threatActorNameHelp" disabled>
           <small id="threatActorNameHelp" class="form-text text-muted">The name of the Threat Actor to add to the list.</small>
         </div>
         <div class="form-group">
@@ -185,15 +185,14 @@ pre code {
           }
         }).fail(function( data, status ) {
             toast("API Error","","Failed to remove Threat Actor: "+row.Name,"danger","30000");
-        }).always(function( data, status) {
-      $('#editModal').modal('hide');
-    })
+        })
       }
     }
   }
 
   $(document).on('click', '#newThreatActor', function(event) {
     $('#newThreatActorModal').modal('show');
+    $('#newThreatActorModal input').val('');
   });
 
   $(document).on('click', '#newThreatActorSubmit', function(event) {
@@ -218,7 +217,24 @@ pre code {
   });
 
   $(document).on('click', '#editThreatActorSubmit', function(event) {
-    toast("Warning","","Not yet implemented","warning","30000");
+    var postArr = {}
+    postArr.name = encodeURIComponent($('#threatActorName').val())
+    postArr.IMG = encodeURIComponent($('#threatActorIMG').val())
+    postArr.URLStub = encodeURIComponent($('#threatActorURLStub').val())
+    $.post( "/api?function=setThreatActorConfig", postArr).done(function( data, status ) {
+      if (data['Status'] == 'Success') {
+        toast(data['Status'],"",data['Message'],"success");
+        $('#threatActorTable').bootstrapTable('refresh');
+      } else if (data['Status'] == 'Error') {
+        toast(data['Status'],"",data['Message'],"danger","30000");
+      } else {
+        toast("Error","","Failed to update Threat Actor: "+postArr.name,"danger","30000");
+      }
+    }).fail(function( data, status ) {
+        toast("API Error","","Failed to update Threat Actor: "+postArr.name,"danger","30000");
+    }).always(function( data, status) {
+      $('#editModal').modal('hide');
+    })
   });
 
 </script>

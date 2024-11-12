@@ -748,10 +748,10 @@ function getThreatActorConfig() {
 
 function newThreatActorConfig($Name,$IMG,$URLStub) {
     $ThreatActorConfig = getThreatActorConfig();
-    if (!isset($ThreatActorConfig[$Name])) {
-        $ThreatActorConfig[$Name] = array(
-            "IMG" => $IMG,
-            "URLStub" => $URLStub
+    if (!isset($ThreatActorConfig[urldecode($Name)])) {
+        $ThreatActorConfig[urldecode($Name)] = array(
+            "IMG" => urldecode($IMG),
+            "URLStub" => urldecode($URLStub)
         );
         file_put_contents(__DIR__.'/../../inc/config/threat-actors.json',json_encode($ThreatActorConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
         return array(
@@ -762,6 +762,26 @@ function newThreatActorConfig($Name,$IMG,$URLStub) {
         return array(
             'Status' => 'Error',
             'Message' => 'Threat Actor already exists'
+        );
+    }
+}
+
+function setThreatActorConfig($Name,$IMG,$URLStub) {
+    $ThreatActorConfig = getThreatActorConfig();
+    if (isset($ThreatActorConfig[urldecode($Name)])) {
+        $ThreatActorConfig[urldecode($Name)] = array(
+            "IMG" => urldecode($IMG),
+            "URLStub" => urldecode($URLStub)
+        );
+        file_put_contents(__DIR__.'/../../inc/config/threat-actors.json',json_encode($ThreatActorConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+        return array(
+            'Status' => 'Success',
+            'Message' => 'Threat Actor added successfully'
+        );
+    } else {
+        return array(
+            'Status' => 'Error',
+            'Message' => 'Threat Actor does not exist'
         );
     }
 }

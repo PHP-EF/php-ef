@@ -255,6 +255,15 @@ if (!($_REQUEST['function'])) {
                     }
                 }
                 break;
+                case 'setThreatActorConfig':
+                    if (CheckAccess(null,"ADMIN-SECASS")) {
+                        if ($method = checkRequestMethod('POST')) {
+                            if (isset($_POST['name']) AND isset($_POST['IMG']) AND isset($_POST['URLStub'])) {
+                                echo json_encode(setThreatActorConfig($_POST['name'],$_POST['IMG'],$_POST['URLStub']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                            }
+                        }
+                    }
+                    break;
             case 'removeThreatActorConfig':
                 if (CheckAccess(null,"ADMIN-SECASS")) {
                     if ($method = checkRequestMethod('POST')) {
