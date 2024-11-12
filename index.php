@@ -194,6 +194,9 @@ pre code {
                     if (CheckAccess(null,"ADMIN-CONFIG")) { echo '
                     <li><a href="#page=core/configuration" class="toggleFrame">Configuration</a></li>
                     ';}
+                    if (CheckAccess(null,"ADMIN-SECASS")) { echo '
+                    <li><a href="#page=core/threat-actors" class="toggleFrame">Threat Actors</a></li>
+                    ';}
                   echo '
 		              </ul>
 		            </li>';

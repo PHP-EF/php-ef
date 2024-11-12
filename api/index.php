@@ -231,6 +231,48 @@ if (!($_REQUEST['function'])) {
                 }
             }
             break;
+        case 'getThreatActorConfig':
+            if (CheckAccess(null,"ADMIN-SECASS")) {
+                if ($method = checkRequestMethod('GET')) {
+                    $ThreatActorConfig = [];
+                    foreach (getThreatActorConfig() as $Key => $Val) {
+                        $ThreatActorConfig[] = array(
+                            'Name' => $Key,
+                            'IMG' => $Val['IMG'],
+                            'URLStub' => $Val['URLStub']
+                        );
+                    }
+                    echo json_encode($ThreatActorConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                }
+            }
+            break;
+            case 'newThreatActorConfig':
+                if (CheckAccess(null,"ADMIN-SECASS")) {
+                    if ($method = checkRequestMethod('POST')) {
+                        if (isset($_POST['name']) AND isset($_POST['IMG']) AND isset($_POST['URLStub'])) {
+                            echo json_encode(newThreatActorConfig($_POST['name'],$_POST['IMG'],$_POST['URLStub']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                        }
+                    }
+                }
+                break;
+                case 'setThreatActorConfig':
+                    if (CheckAccess(null,"ADMIN-SECASS")) {
+                        if ($method = checkRequestMethod('POST')) {
+                            if (isset($_POST['name']) AND isset($_POST['IMG']) AND isset($_POST['URLStub'])) {
+                                echo json_encode(setThreatActorConfig($_POST['name'],$_POST['IMG'],$_POST['URLStub']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                            }
+                        }
+                    }
+                    break;
+            case 'removeThreatActorConfig':
+                if (CheckAccess(null,"ADMIN-SECASS")) {
+                    if ($method = checkRequestMethod('POST')) {
+                        if (isset($_POST['name'])) {
+                            echo json_encode(removeThreatActorConfig($_POST['name']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                        }
+                    }
+                }
+                break;
         case 'getThreatActors':
             if (CheckAccess(null,"B1-THREAT-ACTORS")) {
                 if ($method = checkRequestMethod('POST')) {
