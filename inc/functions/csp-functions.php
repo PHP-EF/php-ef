@@ -46,7 +46,7 @@ function GetCSPConfiguration($Uri,$APIKey = "",$Realm = "US") {
   );
 }
 
-function QueryCSPMultiRequestBuilder($Method, $Uri, $Data = null, $Id = "") {
+function QueryCSPMultiRequestBuilder($Method = 'GET', $Uri, $Data = null, $Id = "") {
   return array(
     "Id" => $Id,
     "Method" => $Method,
@@ -64,22 +64,28 @@ function QueryCSPMulti($MultiQuery,$APIKey = "",$Realm = "US") {
     if (isset($Multi['Data'])) { $Data = $Multi['Data']; } else { $Data = null; }
     $requests[] = array(
       "id" => $Multi['Id'],
-      "method" => $Multi['Method'],
+      "type" => constant('Requests::' . strtoupper($Multi['Method'])),
       "url" => $CSPConfig['Url'].$Multi['Uri'],
-      "body" => $Data,
+      "data" => $Data,
       "headers" => $CSPConfig['Headers'],
       "options" => $CSPConfig['Options']
     );
   }
-
   // Send the requests simultaneously
   $responses = Requests::request_multiple($requests);
   
   $Results = [];
+  $IdStepIn = 0;
   foreach ($responses as $index => $response) {
-    $Results[$requests[$index]['id']] = array(
-        'Response' => $response,
-        'Body' => json_decode($response->body)
+    if ($requests[$index]['id'] != "") {
+      $Id = $requests[$index]['id'];
+    } else {
+      $Id = $IdStepIn;
+      $IdStepIn++;
+    }
+    $Results[$Id] = array(
+      'Response' => $response,
+      'Body' => json_decode($response->body)
     );
   }
   return $Results;
@@ -216,14 +222,20 @@ function GetB1ThreatActorsById($Actors) {
       );
     }
   }
-  $ArrayChunk = array_chunk($ActorInfo, 25);
+
+  $ArrayChunk = array_chunk($ActorInfo, 10);
+  $Requests = [];
   foreach ($ArrayChunk as $Chunk) {
-    $Query = array(
+    $Query = json_encode(array(
       'actor_indicators' => $Chunk
-    );
-    $Cube = QueryCSP('post','tide-ng-threat-actor/v1/batch_actor_summary_with_indicators',$Query);
-    if (isset($Cube->actor_responses)) {
-      foreach ($Cube->actor_responses as $AR) {
+    ));
+    $Requests[] = QueryCSPMultiRequestBuilder('post','tide-ng-threat-actor/v1/batch_actor_summary_with_indicators',$Query);
+  }
+  $Responses = QueryCSPMulti($Requests);
+
+  foreach ($Responses as $Response) {
+    if (isset($Response['Body']->actor_responses)) {
+      foreach ($Response['Body']->actor_responses as $AR) {
         $NewArr = array(
           'actor_id' => $AR->actor_id,
           'actor_name' => $AR->actor_name,
@@ -244,9 +256,7 @@ function GetB1ThreatActorsById($Actors) {
         }
         array_push($Results,$NewArr);
       }
-    } else {
-      return $Cube;
-    }
+    } 
   }
   return $Results;
 }
