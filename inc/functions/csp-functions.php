@@ -1,5 +1,5 @@
 <?php
-function QueryCSP($Method, $Uri, $Data = "", $APIKey = "", $Realm = "US") {
+function GetCSPConfiguration($Uri,$APIKey = "",$Realm = "US") {
   if (isset($_COOKIE['crypt'])) {
     $B1ApiKey = decrypt($_COOKIE['crypt'],getConfig("Security","salt"));
   } elseif (isset($_POST['APIKey'])) {
@@ -37,22 +37,72 @@ function QueryCSP($Method, $Uri, $Data = "", $APIKey = "", $Realm = "US") {
     'connect_timeout' => getConfig("System","CURL-ConnectTimeout")
   );
 
+  return array(
+    "APIKey" => $B1ApiKey,
+    "Realm" => $Realm,
+    "Url" => $Url,
+    "Options" => $Options,
+    "Headers" => $CSPHeaders
+  );
+}
+
+function QueryCSPMultiRequestBuilder($Method, $Uri, $Data = null, $Id = "") {
+  return array(
+    "Id" => $Id,
+    "Method" => $Method,
+    "Uri" => $Uri,
+    "Data" => $Data
+  );
+}
+
+function QueryCSPMulti($MultiQuery,$APIKey = "",$Realm = "US") {
+  $CSPConfig = GetCSPConfiguration(null,$APIKey,$Realm);
+
+  // Prepare the requests
+  $requests = [];
+  foreach ($MultiQuery as $Multi) {
+    if (isset($Multi['Data'])) { $Data = $Multi['Data']; } else { $Data = null; }
+    $requests[] = array(
+      "id" => $Multi['Id'],
+      "method" => $Multi['Method'],
+      "url" => $CSPConfig['Url'].$Multi['Uri'],
+      "body" => $Data,
+      "headers" => $CSPConfig['Headers'],
+      "options" => $CSPConfig['Options']
+    );
+  }
+
+  // Send the requests simultaneously
+  $responses = Requests::request_multiple($requests);
+  
+  $Results = [];
+  foreach ($responses as $index => $response) {
+    $Results[$requests[$index]['id']] = array(
+        'Response' => $response,
+        'Body' => json_decode($response->body)
+    );
+  }
+  return $Results;
+}
+
+function QueryCSP($Method, $Uri, $Data = "", $APIKey = "", $Realm = "US") {
+  $CSPConfig = GetCSPConfiguration($Uri,$APIKey,$Realm);
   try {
     switch ($Method) {
       case 'get':
-        $Result = WpOrg\Requests\Requests::get($Url, $CSPHeaders, $Options);
+        $Result = Requests::get($CSPConfig['Url'], $CSPConfig['Headers'], $CSPConfig['Options']);
         break;
       case 'post':
-        $Result = WpOrg\Requests\Requests::post($Url, $CSPHeaders, json_encode($Data,JSON_UNESCAPED_SLASHES), $Options);
+        $Result = Requests::post($CSPConfig['Url'], $CSPConfig['Headers'], json_encode($Data,JSON_UNESCAPED_SLASHES), $CSPConfig['Options']);
         break;
       case 'put':
-        $Result = WpOrg\Requests\Requests::put($Url, $CSPHeaders, json_encode($Data,JSON_UNESCAPED_SLASHES), $Options);
+        $Result = Requests::put($CSPConfig['Url'], $CSPConfig['Headers'], json_encode($Data,JSON_UNESCAPED_SLASHES), $CSPConfig['Options']);
         break;
       case 'patch':
-        $Result = WpOrg\Requests\Requests::patch($Url, $CSPHeaders, json_encode($Data,JSON_UNESCAPED_SLASHES), $Options);
+        $Result = Requests::patch($CSPConfig['Url'], $CSPConfig['Headers'], json_encode($Data,JSON_UNESCAPED_SLASHES), $CSPConfig['Options']);
         break;
       case 'delete':
-        $Result = WpOrg\Requests\Requests::delete($Url, $CSPHeaders, $Options);
+        $Result = Requests::delete($CSPConfig['Url'], $CSPConfig['Headers'], $CSPConfig['Options']);
         break;
     }
   } catch (Exception $e) {
@@ -64,8 +114,8 @@ function QueryCSP($Method, $Uri, $Data = "", $APIKey = "", $Realm = "US") {
 
   $LogArr = array(
     "Method" => $Method,
-    "Url" => $Url,
-    "Options" => $Options
+    "Url" => $CSPConfig['Url'],
+    "Options" => $CSPConfig['Options']
   );
 
   if ($Result) {
@@ -82,8 +132,17 @@ function QueryCSP($Method, $Uri, $Data = "", $APIKey = "", $Realm = "US") {
         break;
     }
   } elseif ($ErrorOnEmpty) {
-    echo "Warning. No results from API.".$Url;
+    echo "Warning. No results from API.".$CSPConfig->Url;
   }
+}
+
+function QueryCubeJSMulti($MultiQuery,$APIKey = "", $Realm = "US") {
+  $BuildQuery = [];
+  foreach ($MultiQuery as $Id => $Query) {
+    $BuildQuery[] = QueryCSPMultiRequestBuilder("get","api/cubejs/v1/query?query=".urlencode($Query),null,$Id);
+  }
+  $Results = QueryCSPMulti($BuildQuery,$APIKey,$Realm);
+  return $Results;
 }
 
 function QueryCubeJS($Query,$APIKey = "", $Realm = "US") {
