@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
-  if (CheckAccess(null,"ADMIN-RBAC") == false) {
+  if ($auth->checkAccess(null,"ADMIN-RBAC") == false) {
     die();
   }
 

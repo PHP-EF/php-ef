@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
-  if (CheckAccess(null,"ADMIN-SECASS") == false) {
+  if ($auth->checkAccess(null,"ADMIN-SECASS") == false) {
     die();
   }
 
@@ -78,17 +78,16 @@ pre code {
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="editModalLabel"></h5>
+        <h5 class="modal-title" id="editModalLabel">Threat Actor Information</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
           <span aria-hidden="true"></span>
         </button>
       </div>
       <div class="modal-body" id="editModelBody">
-        <h4>Threat Actor Information</h4>
         <div class="form-group">
           <label for="threatActorName">Threat Actor Name</label>
           <input type="text" class="form-control" id="threatActorName" aria-describedby="threatActorNameHelp" disabled>
-          <small id="threatActorNameHelp" class="form-text text-muted">The name of the Threat Actor to add to the list.</small>
+          <small id="threatActorNameHelp" class="form-text text-muted">The name of the Threat Actor.</small>
         </div>
         <div class="form-group">
           <label for="threatActorIMG">Image</label>

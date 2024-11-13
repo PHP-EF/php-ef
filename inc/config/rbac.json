@@ -23,7 +23,8 @@
             "B1-SECURITY-ASSESSMENT",
             "B1-THREAT-ACTORS",
             "B1-LICENSE-USAGE",
-            "ADMIN-SECASS"
+            "ADMIN-SECASS",
+            "ADMIN-USERS"
         ],
         "PermittedMenus": [
             "ADMIN-Menu",

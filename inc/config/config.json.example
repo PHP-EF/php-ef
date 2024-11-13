@@ -11,7 +11,6 @@
     },
     "Security": {
         "salt": "somesupersecurepasswordhere"
-        "AdminPassword": "secureadminpasswordhere"
     },
     "SecurityAssessment": {
         "TemplateName": "template-sept-24.pptx",

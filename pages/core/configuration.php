@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
-  if (CheckAccess(null,"ADMIN-CONFIG") == false) {
+  if ($auth->checkAccess(null,"ADMIN-CONFIG") == false) {
     die();
   }
 
@@ -79,11 +79,6 @@
               <input type="password" class="form-control info-field" id="securitySalt" aria-describedby="securitySaltHelp" name="securitySalt">
               <small id="securitySaltHelp" class="form-text text-muted">The salt used to encrypt credentials.</small>
 	          </div>
-            <div class="form-group">
-              <label for="securityAdminPW">Admin Password</label>
-              <input type="password" class="form-control info-field" id="securityAdminPW" aria-describedby="securityAdminPWHelp" name="securityAdminPW">
-              <small id="securityAdminPWHelp" class="form-text text-muted">The password for the <b>admin</b> account.</small>
-	          </div>
           </div>
           <br>
           <div class="card border-secondary">
@@ -122,7 +117,6 @@
       $("#systemRBACFile").val(config.System.rbacjson);
       $("#systemRBACInfoFile").val(config.System.rbacinfo);
       $("#securitySalt").val(config.Security.salt);
-      $("#securityAdminPW").val(config.Security.AdminPassword);
       $("#securityAssessmentThreatActorSlide").val(config.SecurityAssessment.ThreatActorSlide);
       $("#securityAssessmentTemplateName").val(config.SecurityAssessment.TemplateName);
     });

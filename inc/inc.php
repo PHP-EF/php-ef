@@ -2,13 +2,19 @@
 // Set Max Script Execution Time
 ini_set('max_execution_time', '300');
 ini_set('error_log',__DIR__.'/nginx/php.error.log');
-// Include Functions
+// Include Composer
 require_once(__DIR__.'/../vendor/autoload.php');
-require_once(__DIR__.'/functions/auth-functions.php');
-require_once(__DIR__.'/functions/general-functions.php');
-require_once(__DIR__.'/functions/csp-functions.php');
-require_once(__DIR__.'/functions/security-assessment.php');
-require_once(__DIR__.'/functions/license-usage.php');
+// Include Classes
+foreach (glob(__DIR__.'/classes/' . '*.php') as $class) {
+  require_once $class; // Include each PHP file
+}
+// Initialize Database
+$auth = new Auth(__DIR__.'/config/app.db');
+// Include Functions
+foreach (glob(__DIR__.'/functions/' . '*.php') as $function) {
+  require_once $function; // Include each PHP file
+}
+
 if (!(isset($SkipCSS))) {
 
     echo '
