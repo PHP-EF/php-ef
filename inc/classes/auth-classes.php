@@ -52,6 +52,7 @@ class Auth {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT UNIQUE,
       password TEXT,
+      salt TEXT,
       groups TEXT,
       created DATE,
       lastlogin DATE,
@@ -59,16 +60,29 @@ class Auth {
     )");
   }
 
+  private function hashAndSalt($password) {
+    // Generate a random salt
+    $salt = bin2hex(random_bytes(16)); // Generates a 32-character hexadecimal salt
+    // Concatenate the salt with the password
+    $saltedPassword = $salt . $password;
+    // Hash the salted password
+    $hashedPassword = password_hash($saltedPassword, PASSWORD_DEFAULT);
+    return array(
+      'hash' => $hashedPassword,
+      'salt' => $salt
+    );
+  }
+
   public function newUser($username, $password, $groups = '') {
     // Hash the password for security
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    $pepper = $this->hashAndSalt($password);
     // Get current date/time
     $currentDateTime = date('Y-m-d H:i:s');
     $passwordExpiryDate = new DateTime();
     $passwordExpiryDate->modify('+90 days');
     $passwordExpires = $passwordExpiryDate->format('Y-m-d H:i:s');
 
-    $stmt = $this->db->prepare("INSERT INTO users (username, password, groups, created, passwordexpires) VALUES (:username, :password, :groups, :created, :passwordexpires)");
+    $stmt = $this->db->prepare("INSERT INTO users (username, password, salt, groups, created, passwordexpires) VALUES (:username, :password, :salt, :groups, :created, :passwordexpires)");
     
     try {
         // Check if username already exists
@@ -88,7 +102,7 @@ class Auth {
     }
 
     try {
-      $stmt->execute([':username' => $username, ':password' => $hashedPassword, ':groups' => $groups, ':created' => $currentDateTime, ':passwordexpires' => $passwordExpires]);
+      $stmt->execute([':username' => $username, ':password' => $pepper['hash'], ':salt' => $pepper['salt'], ':groups' => $groups, ':created' => $currentDateTime, ':passwordexpires' => $passwordExpires]);
         return array(
             'Status' => 'Success',
             'Message' => 'Created user successfully'
@@ -121,9 +135,15 @@ class Auth {
   public function updateUser($id,$username,$password,$groups) {
     if ($this->getUser($id)) {
       // Hash the password for security
-      $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-      $stmt = $this->db->prepare("UPDATE users SET username = :username, password = :password, groups = :groups WHERE id = :id");
-      $stmt->execute([':id' => $id, ':username' => $username, ':password' => $hashedPassword, ':groups' => $groups]);
+      if ($password != "") {
+        $pepper = $this->hashAndSalt($password);
+        $stmt = $this->db->prepare("UPDATE users SET username = :username, password = :password, salt = :salt, groups = :groups WHERE id = :id");
+        $stmt->execute([':id' => $id, ':username' => $username, ':password' => $pepper['hash'], ':salt' => $pepper['salt'], ':groups' => $groups]);
+      } else {
+        $stmt = $this->db->prepare("UPDATE users SET username = :username, groups = :groups WHERE id = :id");
+        $stmt->execute([':id' => $id, ':username' => $username, ':groups' => $groups]);
+      }
+
       return array(
         'Status' => 'Success',
         'Message' => 'User updated successfully'
@@ -165,11 +185,10 @@ class Auth {
   }
 
   public function login($username, $password) {
-    $stmt = $this->db->prepare("SELECT id, password, groups FROM users WHERE username = :username");
+    $stmt = $this->db->prepare("SELECT id, password, salt, groups FROM users WHERE username = :username");
     $stmt->execute([':username' => $username]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($user && password_verify($password, $user['password'])) { // Login Successful
+    if ($user && password_verify($user['salt'].$password, $user['password'])) { // Login Successful
       // Update last login
       $currentDateTime = date('Y-m-d H:i:s');
       $stmt = $this->db->prepare("UPDATE users SET lastlogin = :lastlogin WHERE id = :id");
