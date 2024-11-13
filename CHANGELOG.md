@@ -1,6 +1,3 @@
-## v0.5.1
-- Move to new authentication classes
-
 ## v0.5.0
 - Threat Actor slides are now automated when using the security assessment generator, with one slide created for each threat actor found.
 - Add additional error checking when Infoblox APIs timeout
@@ -8,6 +5,7 @@
 - Add text based status to security assessment generator
 - Move generation to be a background task to avoid idle timeouts
 - Swapped progress spinner to something more infoblox
+- Move to new authentication classes
 
 ## v0.4.6
 - Fix bug where invalid API Keys would not always be reported
