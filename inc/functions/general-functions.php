@@ -55,19 +55,20 @@ function writeLog($Logger, $Message, $Level, $Context = [], $LogFile = "") {
   $Context2 = json_decode(json_encode($Context), true);
   $log = new Logger($Logger);
   $log->pushProcessor(function ($record) {
-    $Auth = GetAuth();
-    if (isset($Auth['Username'])) {
-      $Username = $Auth['Username'];
+    global $auth;
+    $AuthObj = $auth->getAuth();
+    if (isset($AuthObj['Username'])) {
+      $Username = $AuthObj['Username'];
     } else {
       $Username = "N/A";
     }
-    if (isset($Auth['DisplayName'])) {
-      $DisplayName = $Auth['DisplayName'];
+    if (isset($AuthObj['DisplayName'])) {
+      $DisplayName = $AuthObj['DisplayName'];
     } else {
       $DisplayName = "N/A";
     }
-    if (isset($Auth['IPAddress'])) {
-      $IPAddress = $Auth['IPAddress'];
+    if (isset($AuthObj['IPAddress'])) {
+      $IPAddress = $AuthObj['IPAddress'];
     } else {
       $IPAddress = "N/A";
     }

@@ -9,7 +9,7 @@
   require_once(__DIR__.'/inc/inc.php');
   require_once(__DIR__.'/inc/me.php');
 
-  if (GetAuth()['Authenticated'] == true) {
+  if ($auth->getAuth()['Authenticated'] == true) {
     $isAuth = true;
   } else {
     $isAuth = false;
@@ -95,8 +95,8 @@ pre code {
         </div>
 	      <div class="user-info">
           <?php if ($isAuth) { echo '
-	        <span class="display-name">'.GetAuth()['DisplayName'].'</span>
-	        <span class="user-name">'.GetAuth()['Username'].'</span>
+	        <span class="display-name">'.$auth->getAuth()['DisplayName'].'</span>
+	        <span class="user-name">'.$auth->getAuth()['Username'].'</span>
           <span class="user-status">
             <i class="fa fa-circle"></i>
             <span>Online</span>
@@ -132,28 +132,28 @@ pre code {
             <span>Reports</span>
 	        </li> -->
           <?php
-          if (CheckAccess(null,'DNS-TOOLBOX')) { echo '
+          if ($auth->checkAccess(null,'DNS-TOOLBOX')) { echo '
           <li class="header-menu">
             <a href="#page=tools/dnstoolbox" class="toggleFrame">
               <i class="fa fa-toolbox"></i>
               <span>DNS Toolbox</span>
             </a>
           </li>';}
-          if (CheckAccess(null,'B1-SECURITY-ASSESSMENT')) { echo '
+          if ($auth->checkAccess(null,'B1-SECURITY-ASSESSMENT')) { echo '
           <li class="header-menu">
             <a href="#page=uddi/security-assessment" class="toggleFrame">
               <i class="fa fa-magnifying-glass-chart"></i>
               <span>Security Assessment</span>
             </a>
           </li>';}
-          if (CheckAccess(null,'B1-THREAT-ACTORS')) { echo '
+          if ($auth->checkAccess(null,'B1-THREAT-ACTORS')) { echo '
           <li class="header-menu">
             <a href="#page=uddi/threat-actors" class="toggleFrame">
               <i class="fa fa-skull"></i>
               <span>Threat Actors</span>
             </a>
           </li>';}
-          if (CheckAccess(null,null,"DEV-Menu")) { echo '
+          if ($auth->checkAccess(null,null,"DEV-Menu")) { echo '
 	        <li class="header-menu">
             <span>Dev</span>
 	        </li>
@@ -163,7 +163,7 @@ pre code {
               <span>Tools</span>
             </a>
             <div class="sidebar-submenu">';
-              if (CheckAccess(null,'B1-LICENSE-USAGE')) { echo '
+              if ($auth->checkAccess(null,'B1-LICENSE-USAGE')) { echo '
               <ul>
                 <li>
                   <a href="#page=uddi/license-usage" class="toggleFrame">License Utilization</a>
@@ -174,7 +174,7 @@ pre code {
             </div>
 	        </li>';}
 
-          if (CheckAccess(null,null,"ADMIN-Menu")) { echo '
+          if ($auth->checkAccess(null,null,"ADMIN-Menu")) { echo '
           <li class="header-menu">
             <span>Admin</span>
           </li>
@@ -188,19 +188,22 @@ pre code {
                 <li class="sidebar-subdropdown">
 		              <a href="#">Settings</a>
 		              <ul class="sidebar-subsubmenu">';
-                    if (CheckAccess(null,"ADMIN-RBAC")) { echo '
+                    if ($auth->checkAccess(null,"ADMIN-RBAC")) { echo '
 		                <li><a href="#page=core/rbac" class="toggleFrame">Role Based Access</a></li>
                     ';}
-                    if (CheckAccess(null,"ADMIN-CONFIG")) { echo '
+                    if ($auth->checkAccess(null,"ADMIN-CONFIG")) { echo '
                     <li><a href="#page=core/configuration" class="toggleFrame">Configuration</a></li>
                     ';}
-                    if (CheckAccess(null,"ADMIN-SECASS")) { echo '
+                    if ($auth->checkAccess(null,"ADMIN-SECASS")) { echo '
                     <li><a href="#page=core/threat-actors" class="toggleFrame">Threat Actors</a></li>
                     ';}
+                    if ($auth->checkAccess(null,"ADMIN-USERS")) { echo '
+                      <li><a href="#page=core/users" class="toggleFrame">Users</a></li>
+                      ';}
                   echo '
 		              </ul>
 		            </li>';
-                if (CheckAccess(null,"ADMIN-LOGS")) { echo '
+                if ($auth->checkAccess(null,"ADMIN-LOGS")) { echo '
                 <li class="sidebar-subdropdown">
 		              <a href="#">Logs</a>
                   <ul class="sidebar-subsubmenu">

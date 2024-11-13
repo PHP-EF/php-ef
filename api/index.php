@@ -13,13 +13,51 @@ if (!($_REQUEST['function'])) {
 } else {
     switch ($_REQUEST['function']) {
         case 'login':
-            echo json_encode(NewAuth($_POST['un'],$_POST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+            echo json_encode($auth->login($_POST['un'],$_POST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
             break;
         case 'logout':
-            echo json_encode(InvalidateAuth(),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+            echo json_encode($auth->logout(),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+            break;
+        case 'getUsers':
+            if ($method = checkRequestMethod('GET')) {
+                if ($auth->checkAccess(null,"ADMIN-USERS")) {
+                    $users = $auth->getAllUsers();
+                    echo json_encode($users,JSON_PRETTY_PRINT);
+                }
+            }
+            break;
+        case 'newUser':
+            if ($method = checkRequestMethod('POST')) {
+                if ($auth->checkAccess(null,"ADMIN-USERS")) {
+                    if (isset($_POST['un']) AND isset($_POST['pw']) AND isset($_POST['groups'])) {
+                        $new = $auth->newUser($_POST['un'],$_POST['pw'],$_POST['groups']);
+                        echo json_encode($new,JSON_PRETTY_PRINT);
+                    }
+                }
+            }
+            break;
+        case 'setUser':
+            if ($method = checkRequestMethod('POST')) {
+                if ($auth->checkAccess(null,"ADMIN-USERS")) {
+                    if (isset($_POST['id']) && isset($_POST['un']) && isset($_POST['pw']) && isset($_POST['groups'])) {
+                        $update = $auth->updateUser($_POST['id'],$_POST['un'],$_POST['pw'],$_POST['groups']);
+                        echo json_encode($update,JSON_PRETTY_PRINT);
+                    }
+                }
+            }
+            break;
+        case 'removeUser':
+            if ($method = checkRequestMethod('POST')) {
+                if ($auth->checkAccess(null,"ADMIN-USERS")) {
+                    if (isset($_POST['id'])) {
+                        $remove = $auth->removeUser($_POST['id']);
+                        echo json_encode($remove,JSON_PRETTY_PRINT);
+                    }
+                }
+            }
             break;
         case 'heartbeat':
-            if (GetAuth()['Authenticated'] == true) {
+            if ($auth->getAuth()['Authenticated'] == true) {
                 http_response_code(200);
             } else {
                 http_response_code(301);
@@ -28,8 +66,8 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'whoami':
-            if (isset(GetAuth()['Authenticated'])) {
-                $AuthContent = GetAuth();
+            if (isset($auth->getAuth()['Authenticated'])) {
+                $AuthContent = $auth->getAuth();
                 $AuthContent['headers'] = getallheaders();
                 $UnsetHeaders = array(
                     "Remote-Email",
@@ -44,11 +82,11 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'CheckAccess':
-            if (isset($_REQUEST['node']) && GetAuth()['Authenticated'] == true) {
+            if (isset($_REQUEST['node']) && $auth->getAuth()['Authenticated'] == true) {
                 $Result = array(
                     "node" => $_REQUEST['node']
                 );
-                if (CheckAccess(null,$_REQUEST['node'])) {
+                if ($auth->checkAccess(null,$_REQUEST['node'])) {
                     $Result['permitted'] = true;
                 } else {
                     $Result['permitted'] = false;
@@ -57,7 +95,7 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'GetLog':
-            if (CheckAccess(null,"ADMIN-LOGS")) {
+            if ($auth->checkAccess(null,"ADMIN-LOGS")) {
                 if (isset($_REQUEST['date'])) {
                     $Date = $_REQUEST['date'];
                 } else {
@@ -69,7 +107,7 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'GetRBAC':
-            if (CheckAccess(null,"ADMIN-RBAC")) {
+            if ($auth->checkAccess(null,"ADMIN-RBAC")) {
                 if (isset($_REQUEST['group'])) {
                     $Group = $_REQUEST['group'];
                 } else {
@@ -86,7 +124,7 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'SetRBAC':
-            if (CheckAccess(null,"ADMIN-RBAC")) {
+            if ($auth->checkAccess(null,"ADMIN-RBAC")) {
                 if (isset($_REQUEST['group'])) {
                     $Group = $_REQUEST['group'];
                 } else {
@@ -111,7 +149,7 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'DeleteRBAC':
-            if (CheckAccess(null,"ADMIN-RBAC")) {
+            if ($auth->checkAccess(null,"ADMIN-RBAC")) {
                 if (isset($_REQUEST['group'])) {
                     $Group = $_REQUEST['group'];
                 } else {
@@ -121,20 +159,18 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'GetConfig':
-            if (CheckAccess(null,"ADMIN-CONFIG")) {
+            if ($auth->checkAccess(null,"ADMIN-CONFIG")) {
                 $config = getConfig();
                 $config['Security']['salt'] = "********";
-                $config['Security']['AdminPassword'] = "********";
                 echo json_encode($config,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                 writeLog("Config","Queried Configuration","info",$_REQUEST);
             }
             break;
         case 'SetConfig':
             if ($method = checkRequestMethod('POST')) {
-                if (CheckAccess(null,"ADMIN-CONFIG")) {
+                if ($auth->checkAccess(null,"ADMIN-CONFIG")) {
                     $config = getConfig();
                     $config['Security']['salt'] = "********";
-                    $config['Security']['AdminPassword'] = "********";
                     if (isset($_POST['systemLogFileName'])) { setConfig("System","logfilename",$_POST['systemLogFileName']); }
                     if (isset($_POST['systemLogDirectory'])) { setConfig("System","logdirectory",$_POST['systemLogDirectory']); }
                     if (isset($_POST['systemLogLevel'])) { setConfig("System","loglevel",$_POST['systemLogLevel']); }
@@ -144,12 +180,10 @@ if (!($_REQUEST['function'])) {
                     if (isset($_POST['systemRBACFile'])) { setConfig("System","rbacjson",$_POST['systemRBACFile']); }
                     if (isset($_POST['systemRBACInfoFile'])) { setConfig("System","rbacinfo",$_POST['systemRBACInfoFile']); }
                     if (isset($_POST['securitySalt'])) { setConfig("Security","salt",$_POST['securitySalt']); }
-                    if (isset($_POST['securityAdminPW'])) { setConfig("Security","AdminPassword",$_POST['securityAdminPW']); }
                     if (isset($_POST['securityAssessmentThreatActorSlide'])) { setConfig("SecurityAssessment","ThreatActorSlide",$_POST['securityAssessmentThreatActorSlide']); }
                     if (isset($_POST['securityAssessmentTemplateName'])) { setConfig("SecurityAssessment","TemplateName",$_POST['securityAssessmentTemplateName']); }
                     $newConfig = getConfig();
                     $newConfig['Security']['salt'] = "********";
-                    $newConfig['Security']['AdminPassword'] = "********";
                     echo json_encode($newConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                     $logArr = array(
                         "Old Configuration" => $config,
@@ -173,7 +207,7 @@ if (!($_REQUEST['function'])) {
             echo \Ramsey\Uuid\Uuid::uuid4();
             break;
         case 'createSecurityReport':
-            if (CheckAccess(null,"B1-SECURITY-ASSESSMENT")) {
+            if ($auth->checkAccess(null,"B1-SECURITY-ASSESSMENT")) {
                 if ($method = checkRequestMethod('POST')) {
                     if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm']) AND isset($_POST['id'])) {
                         if (isValidUuid($_POST['id'])) {
@@ -185,7 +219,7 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'downloadSecurityReport':
-            if (CheckAccess(null,"B1-SECURITY-ASSESSMENT")) {
+            if ($auth->checkAccess(null,"B1-SECURITY-ASSESSMENT")) {
                 if ($method = checkRequestMethod('GET')) {
                     writeLog("SecurityAssessment","Downloaded security report","info");
                     if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
@@ -205,7 +239,7 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'getSecurityReportProgress':
-            if (CheckAccess(null,"B1-SECURITY-ASSESSMENT")) {
+            if ($auth->checkAccess(null,"B1-SECURITY-ASSESSMENT")) {
                 if ($method = checkRequestMethod('GET')) {
                     if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
                         $id = $_REQUEST['id'];
@@ -215,7 +249,7 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'createLicenseReport':
-            if (CheckAccess(null,"B1-LICENSE-USAGE")) {
+            if ($auth->checkAccess(null,"B1-LICENSE-USAGE")) {
                 if ($method = checkRequestMethod('POST')) {
                     if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
                         $response = getLicenseCount($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm']);
@@ -232,7 +266,7 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'getThreatActorConfig':
-            if (CheckAccess(null,"ADMIN-SECASS")) {
+            if ($auth->checkAccess(null,"ADMIN-SECASS")) {
                 if ($method = checkRequestMethod('GET')) {
                     $ThreatActorConfig = [];
                     foreach (getThreatActorConfig() as $Key => $Val) {
@@ -246,35 +280,35 @@ if (!($_REQUEST['function'])) {
                 }
             }
             break;
-            case 'newThreatActorConfig':
-                if (CheckAccess(null,"ADMIN-SECASS")) {
-                    if ($method = checkRequestMethod('POST')) {
-                        if (isset($_POST['name']) AND isset($_POST['IMG']) AND isset($_POST['URLStub'])) {
-                            echo json_encode(newThreatActorConfig($_POST['name'],$_POST['IMG'],$_POST['URLStub']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                        }
+        case 'newThreatActorConfig':
+            if ($auth->checkAccess(null,"ADMIN-SECASS")) {
+                if ($method = checkRequestMethod('POST')) {
+                    if (isset($_POST['name']) AND isset($_POST['IMG']) AND isset($_POST['URLStub'])) {
+                        echo json_encode(newThreatActorConfig($_POST['name'],$_POST['IMG'],$_POST['URLStub']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                     }
                 }
-                break;
-                case 'setThreatActorConfig':
-                    if (CheckAccess(null,"ADMIN-SECASS")) {
-                        if ($method = checkRequestMethod('POST')) {
-                            if (isset($_POST['name']) AND isset($_POST['IMG']) AND isset($_POST['URLStub'])) {
-                                echo json_encode(setThreatActorConfig($_POST['name'],$_POST['IMG'],$_POST['URLStub']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                            }
-                        }
-                    }
-                    break;
-            case 'removeThreatActorConfig':
-                if (CheckAccess(null,"ADMIN-SECASS")) {
-                    if ($method = checkRequestMethod('POST')) {
-                        if (isset($_POST['name'])) {
-                            echo json_encode(removeThreatActorConfig($_POST['name']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                        }
+            }
+            break;
+        case 'setThreatActorConfig':
+            if ($auth->checkAccess(null,"ADMIN-SECASS")) {
+                if ($method = checkRequestMethod('POST')) {
+                    if (isset($_POST['name']) AND isset($_POST['IMG']) AND isset($_POST['URLStub'])) {
+                        echo json_encode(setThreatActorConfig($_POST['name'],$_POST['IMG'],$_POST['URLStub']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                     }
                 }
-                break;
+            }
+            break;
+        case 'removeThreatActorConfig':
+            if ($auth->checkAccess(null,"ADMIN-SECASS")) {
+                if ($method = checkRequestMethod('POST')) {
+                    if (isset($_POST['name'])) {
+                        echo json_encode(removeThreatActorConfig($_POST['name']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                    }
+                }
+            }
+            break;
         case 'getThreatActors':
-            if (CheckAccess(null,"B1-THREAT-ACTORS")) {
+            if ($auth->checkAccess(null,"B1-THREAT-ACTORS")) {
                 if ($method = checkRequestMethod('POST')) {
                     if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
                         $UserInfo = GetCSPCurrentUser();
