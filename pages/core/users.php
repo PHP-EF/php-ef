@@ -17,6 +17,22 @@
     width: 300px; /* Adjust as needed */
     margin-left: 105%;
 }
+
+body.dark-theme .popover {
+  background-color: #2b2e34;
+}
+
+.popover {
+    display: none;
+    position: absolute;
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 1000;
+    width: 300px; /* Adjust as needed */
+    margin-left: 105%;
+}
 </style>
 
 <div class="container">
