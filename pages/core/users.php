@@ -40,35 +40,7 @@ pre code {
       <div class="my-4">
         <h5 class="mb-0 mt-5">User/Group Configuration</h5>
         <p>Use the following to configure Users & Groups within the Infoblox SA Tools Portal.</p>
-        <table  data-url="/api?function=getUsers"
-          data-toggle="table"
-          data-search="true"
-          data-filter-control="true" 
-          data-show-refresh="true"
-          data-pagination="true"
-          data-toolbar="#toolbar"
-          data-sort-name="id"
-          data-sort-order="asc"
-          data-page-size="25"
-          class="table table-striped" id="userTable">
-
-          <thead>
-            <tr>
-              <th data-field="state" data-checkbox="true"></th>
-              <th data-field="id" data-sortable="true">ID</th>
-              <th data-field="username" data-sortable="true">Username</th>
-              <th data-field="groups" data-sortable="true">Group(s)</th>
-              <th data-field="lastlogin" data-sortable="true">Last Login Date</th>
-              <th data-field="created" data-sortable="true">Creation Date</th>
-              <th data-field="passwordexpires" data-sortable="true">Password Expiry Date</th>
-              <th data-formatter="actionFormatter" data-events="actionEvents">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="userConfig"></tbody>
-          <div class="text-left">
-            <button class="btn btn-success" id="newUser">New User</button>
-          </div>
-        </table>
+        <table id="userTable"></table>
       </div>
     </div>
   </div>
@@ -107,11 +79,6 @@ pre code {
           <small id="editPasswordExpiresHelp" class="form-text text-muted">The date/time of when the password for this account will expire.</small>
         </div>
         <div class="form-group">
-          <label for="editUserGroups">Groups</label>
-          <input type="text" class="form-control" id="editUserGroups" aria-describedby="editUserGroupsHelp">
-          <small id="editUserGroupsHelp" class="form-text text-muted">The groups to assign the user to.</small>
-        </div>
-        <div class="form-group">
           <label for="editUserPassword">Password</label>
           <input type="password" class="form-control" id="editUserPassword" aria-describedby="editUserPasswordHelp">
           <small id="editUserPasswordHelp" class="form-text text-muted">The updated password for the user.</small>
@@ -121,10 +88,14 @@ pre code {
           <input type="password" class="form-control" id="editUserPassword2" aria-describedby="editUserPassword2Help">
           <small id="editUserPassword2Help" class="form-text text-muted">Enter the updated password again.</small>
         </div>
-        <button class="btn btn-primary" id="editUserSubmit">Submit</button>
+	      <hr>
+        <h4>Groups</h4>
+        <p>Enable or Disable the following groups to provide granular control to specific areas of the Infoblox SA Tools Portal.</p>
+	      <div class="list-group mb-5 shadow" id="modalListGroup"></div> 
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-success" id="editUserSubmit">Save</button>
       </div>
     </div>
   </div>
@@ -157,15 +128,10 @@ pre code {
           <input type="password" class="form-control" id="newUserPassword2" aria-describedby="newUserPassword2Help">
           <small id="newUserPassword2Help" class="form-text text-muted">Enter the password again.</small>
         </div>
-        <div class="form-group">
-          <label for="newUserGroups">Groups</label>
-          <input type="text" class="form-control" id="newUserGroups" aria-describedby="newUserGroupsHelp">
-          <small id="newUserGroupsHelp" class="form-text text-muted">The groups to assign the user to.</small>
-        </div>
-        <button class="btn btn-primary" id="newUserSubmit">Submit</button>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-success" id="newUserSubmit">Save</button>
       </div>
     </div>
   </div>
@@ -185,17 +151,35 @@ pre code {
     ].join('')
   }
 
-  function listUsers(row) {
+  function groupsFormatter(value, row, index) {
+    var html = "";
+    if (groupinfo != null) {
+      $(row.groups).each(function (group) {
+        for (groupi in groupinfo ) {
+          if (row.groups[group] === groupinfo[groupi]['id']) {
+            html += '<span class="badge bg-info">'+groupinfo[groupi]['Group']+'</span>&nbsp;';
+          }
+        }
+      });
+    } else {
+      $(row.groups).each(function (group) {
+        html += '<span class="badge bg-info">'+row.groups[group]+'</span>&nbsp;';
+      });
+    }
+    return html;
+  }
+
+  function listUserConfig(row) {
     $('#editUserID').val(row['id']);
     $('#editUserName').val(row['username']);
     $('#editLastLogin').val(row['lastlogin']);
     $('#editPasswordExpires').val(row['passwordexpires']);
-    $('#editUserGroups').val(row['groups']);
   }
 
   window.actionEvents = {
     'click .edit': function (e, value, row, index) { 
-      listUsers(row);
+      listUserConfig(row);
+      listGroups(row);
       $('#editModal').modal('show');
     },
     'click .delete': function (e, value, row, index) {
@@ -205,7 +189,7 @@ pre code {
         $.post( "/api?function=removeUser", postArr).done(function( data, status ) {
           if (data['Status'] == 'Success') {
             toast(data['Status'],"",data['Message'],"success");
-            $('#userTable').bootstrapTable('refresh');
+            populateUsers();
           } else if (data['Status'] == 'Error') {
             toast(data['Status'],"",data['Message'],"danger","30000");
           } else {
@@ -218,9 +202,56 @@ pre code {
     }
   }
 
-  $(document).on('click', '#newUser', function(event) {
-    $('#newUserModal').modal('show');
-    $('#newUserModal input').val('');
+  function listGroups(row) {
+    var div = document.getElementById('modalListGroup');
+    $.getJSON('/api?function=GetRBAC&action=listconfigurablegroups', function(groupinfo) {
+      div.innerHTML = "";
+      for (var key in groupinfo) {
+        div.innerHTML += `
+          <div class="list-group-item">
+            <div class="row align-items-center">
+              <div class="col">
+                <strong class="mb-2">${groupinfo[key]['Group']}</strong>
+                <p class="text-muted mb-0">${groupinfo[key]['Description']}</p>
+              </div>
+              <div class="col-auto">
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input toggle" id="${groupinfo[key]['id']}">
+                  <label class="custom-control-label" for="${groupinfo[key]['id']}"></label>
+                </div>
+	            </div>
+            </div>
+          </div>`
+      };
+      var groupsplit = row.groups;
+      if (groupsplit[0] != "") {
+        for (var group in groupsplit) {
+          $("#"+groupsplit[group]).prop("checked", "true");
+        }
+      }
+    });
+  }
+
+  $(document).on('click', '.toggle', function(event) {
+    let toggle = $('#'+event.target.id).prop('checked');
+    let groups = $('#editModal .toggle:checked').map(function() {
+    return this.id; // or $(this).attr('id');
+    }).get().join(',');
+    var postArr = {}
+    postArr.id = $('#editUserID').val();
+    postArr.groups = groups;
+    $.post( "/api?function=setUser", postArr).done(function( data, status ) {
+      if (data['Status'] == 'Success') {
+        toast(data['Status'],"",data['Message'],"success");
+        populateUsers();
+      } else if (data['Status'] == 'Error') {
+        toast(data['Status'],"",data['Message'],"danger","30000");
+      } else {
+        toast("Error","","Failed to update user groups: "+postArr.un,"danger","30000");
+      }
+    }).fail(function( data, status ) {
+        toast("API Error","","Failed to update groups: "+postArr.un,"danger","30000");
+    })
   });
 
   $(document).on('click', '#newUserSubmit', function(event) {
@@ -231,13 +262,12 @@ pre code {
     var username = $('#newUserName').val().trim();
     var password = $('#newUserPassword').val().trim();
     var confirmPassword = $('#newUserPassword2').val().trim();
-    var groups = $('#newUserGroups').val().trim();
 
     // Initialize a flag for validation
     var isValid = true;
 
     // Check if all fields are populated
-    if (!username || !password || !confirmPassword || !groups) {
+    if (!username || !password || !confirmPassword) {
       toast("Error","","All fields must be filled out","danger","30000");
       isValid = false;
     }
@@ -253,11 +283,11 @@ pre code {
       var postArr = {}
       postArr.un = $('#newUserName').val()
       postArr.pw = $('#newUserPassword').val()
-      postArr.groups = $('#newUserGroups').val()
       $.post( "/api?function=newUser", postArr).done(function( data, status ) {
         if (data['Status'] == 'Success') {
           toast(data['Status'],"",data['Message'],"success");
-          $('#userTable').bootstrapTable('refresh');
+          populateUsers();
+          $('#newUserModal').modal('hide');
         } else if (data['Status'] == 'Error') {
           toast(data['Status'],"",data['Message'],"danger","30000");
         } else {
@@ -265,8 +295,6 @@ pre code {
         }
       }).fail(function( data, status ) {
           toast("API Error","","Failed to add new user","danger","30000");
-      }).always(function( data, status) {
-        $('#newUserModal').modal('hide');
       })
     }
   });
@@ -276,11 +304,10 @@ pre code {
     postArr.id = $('#editUserID').val()
     postArr.un = $('#editUserName').val()
     postArr.pw = $('#editUserPassword').val()
-    postArr.groups = $('#editUserGroups').val()
     $.post( "/api?function=setUser", postArr).done(function( data, status ) {
       if (data['Status'] == 'Success') {
         toast(data['Status'],"",data['Message'],"success");
-        $('#userTable').bootstrapTable('refresh');
+        populateUsers();
       } else if (data['Status'] == 'Error') {
         toast(data['Status'],"",data['Message'],"danger","30000");
       } else {
@@ -293,7 +320,117 @@ pre code {
     })
   });
 
+  function userButtons() {
+    return {
+      btnAddUser: {
+        text: "Add User",
+        icon: "bi-person-fill-add",
+        event: function() {
+          $('#newUserModal').modal('show');
+          $('#newUserModal input').val('');
+        },
+        attributes: {
+          title: "Add a new user to the Infoblox SA Tools Portal",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }//,
+      // btnBulkDelete: {
+      //   text: "Bulk Delete",
+      //   icon: "bi bi-trash",
+      //   event: function() {
+      //     bulkDelete();
+      //   },
+      //   attributes: {
+      //     title: "Delete one or more users from the Infoblox SA Tools Portal.",
+      //     style: "background-color:#ff3c4e;border-color:#ff3c4e;"
+      //   }
+      // }
+    }
+  }
+
+  function populateUsers() {
+    $.getJSON('/api?function=getUsers', function(data) {
+      if (data['Status'] == 'Error') {
+        toast(data['Status'],"",data['Error'],"danger","30000");
+      } else if (data['error']) {
+        toast('Error',"",data['error'][0]['message'],"danger","30000");
+      } else {
+        $('#userTable').bootstrapTable('destroy');
+        $('#userTable').bootstrapTable({
+          data: data,
+          sortable: true,
+          pagination: true,
+          search: true,
+          showExport: true,
+          exportTypes: ['json', 'xml', 'csv', 'txt', 'excel', 'sql'],
+          showColumns: true,
+          showRefresh: true,
+          filterControl: true,
+          filterControlVisible: false,
+          showFilterControlSwitch: true,
+          buttons: 'userButtons',
+          buttonsOrder: 'btnAddUser,btnBulkDelete,refresh,columns,export,filterControlSwitch',
+          columns: [{
+            field: 'state',
+            title: 'state',
+            checkbox: true
+          },{
+            field: 'id',
+            title: 'ID',
+            filterControl: 'input',
+            sortable: true
+          },{
+            field: 'username',
+            title: 'Username',
+            filterControl: 'input',
+            sortable: true
+          },{
+            field: 'groups',
+            title: 'Group(s)',
+            filterControl: 'input',
+            sortable: true,
+            formatter: 'groupsFormatter'
+          },{
+            field: 'lastlogin',
+            title: 'Last Login Date',
+            filterControl: 'input',
+            sortable: false,
+            formatter: 'datetimeFormatter'
+          },{
+            field: 'created',
+            title: 'Creation Date',
+            filterControl: 'input',
+            sortable: false,
+            formatter: 'datetimeFormatter'            
+          },{
+            field: 'passwordexpires',
+            title: 'Password Expiry Date',
+            filterControl: 'input',
+            sortable: false,
+            formatter: 'datetimeFormatter'
+          },{
+            title: 'Actions',
+            formatter: 'actionFormatter',
+            events: 'actionEvents',
+          }]
+        });
+        // Enable refresh button
+        $('button[name="refresh"]').click(function() {
+          populateUsers();
+        });
+      }
+    }).fail(function( data, status ) {
+        toast("API Error","","Unknown API Error","danger","30000");
+    })
+  }
+
+  var groupinfo = '';
+
   $(document).ready(function() {
+    $.getJSON('/api?function=GetRBAC&action=listconfigurablegroups', function(groupres) {
+      groupinfo = groupres;
+      populateUsers();
+    });
     $('#newUserPassword2').on('change', function() {
       var password = $('#newUserPassword').val();
       var confirmPassword = $(this).val();

@@ -447,11 +447,7 @@ $('.toggleThemeBtn').on('click', function () {
 $('.infoBtn').on('click', function() {
   $('#infoModal').modal('show');
   $.getJSON('/api?function=whoami', function(whoami) {
-    if (whoami.headers['X-Authentik-Uid'] != null) {
-      if (whoami.Groups != null) {whoami.Groups = whoami.Groups.split('|')};
-    } else {
-      if (whoami.Groups != null) {whoami.Groups = whoami.Groups.split(',')};
-    }
+    if (whoami.Groups != null) {whoami.Groups = whoami.Groups};
     if (whoami.headers.Cookie != null) {whoami.headers.Cookie = whoami.headers.Cookie.split('; ')};
     $('#whoami').text(JSON.stringify(whoami, null, 2));
   });
