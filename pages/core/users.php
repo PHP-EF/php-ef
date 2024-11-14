@@ -25,7 +25,7 @@
       <div class="my-4">
         <h5 class="mb-0 mt-5">User/Group Configuration</h5>
         <p>Use the following to configure Users & Groups within the Infoblox SA Tools Portal.</p>
-        <table id="userTable"></table>
+        <table id="userTable" class="table table-striped"></table>
       </div>
     </div>
   </div>
