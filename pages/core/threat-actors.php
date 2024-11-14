@@ -6,35 +6,6 @@
 
 ?>
 
-<style>
-pre {
-  background-color: #000;
-  overflow: auto;
-  font-family: 'Monaco', monospace;
-  padding: 0 1em;
-}
-
-code {
-  font-family: Monaco, monospace;
-  font-size: $base-font-size;
-  line-height: 100%;
- /background-color: #000;/
-  padding: 0.2em;
-  letter-spacing: -0.05em;
-  word-break: normal;
-  /border-radius: 5px;/
-}
-
-pre code {
-  border: none;
-  background: none;
-  font-size: $base-font-size * 0.875;
-  line-height: 1em;
-  letter-spacing: normal;
-  word-break: break-all;
-}
-</style>
-
 <div class="container">
   <div class="row justify-content-center">
     <div class="col-12 col-lg-10 mx-auto">
@@ -51,6 +22,8 @@ pre code {
           data-sort-name="Name"
           data-sort-order="asc"
           data-page-size="25"
+          data-buttons="threatActorButtons"
+          data-buttons-order="btnAddThreatActor,refresh"
           class="table table-striped" id="threatActorTable">
 
           <thead>
@@ -63,9 +36,6 @@ pre code {
             </tr>
           </thead>
           <tbody id="threatActorConfig"></tbody>
-          <div class="text-left">
-            <button class="btn btn-success" id="newThreatActor">New Threat Actor</button>
-          </div>
         </table>
       </div>
     </div>
@@ -158,6 +128,23 @@ pre code {
     ].join('')
   }
 
+  function threatActorButtons() {
+    return {
+      btnAddThreatActor: {
+        text: "Add Threat Actor",
+        icon: "bi-plus-lg",
+        event: function() {
+          $('#newThreatActorModal').modal('show');
+          $('#newThreatActorModal input').val('');
+        },
+        attributes: {
+          title: "Add a new Threat Actor",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
   function listThreatActor(row) {
     $('#threatActorName').val(row['Name']);
     $('#threatActorIMG').val(row['IMG']);
@@ -188,11 +175,6 @@ pre code {
       }
     }
   }
-
-  $(document).on('click', '#newThreatActor', function(event) {
-    $('#newThreatActorModal').modal('show');
-    $('#newThreatActorModal input').val('');
-  });
 
   $(document).on('click', '#newThreatActorSubmit', function(event) {
     var postArr = {}

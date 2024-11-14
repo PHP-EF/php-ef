@@ -6,38 +6,27 @@
 ?>
 
 <style>
-pre {
-  background-color: #000;
-  overflow: auto;
-  font-family: 'Monaco', monospace;
-  padding: 0 1em;
+.popover {
+    display: none;
+    position: absolute;
+    background-color: #f8f9fa;
+    border: 1px solid #007bff;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 1000;
+    width: 300px; /* Adjust as needed */
+    margin-left: 105%;
 }
 
-code {
-  font-family: Monaco, monospace;
-  font-size: $base-font-size;
-  line-height: 100%;
- /background-color: #000;/
-  padding: 0.2em;
-  letter-spacing: -0.05em;
-  word-break: normal;
-  /border-radius: 5px;/
-}
-
-pre code {
-  border: none;
-  background: none;
-  font-size: $base-font-size * 0.875;
-  line-height: 1em;
-  letter-spacing: normal;
-  word-break: break-all;
+body.dark-theme .popover {
+  background-color: #2b2e34;
 }
 
 .popover {
     display: none;
     position: absolute;
     background-color: #f8f9fa;
-    border: 1px solid #007bff;
+    border: 1px solid #ced4da;
     padding: 10px;
     border-radius: 5px;
     z-index: 1000;
@@ -52,7 +41,7 @@ pre code {
       <div class="my-4">
         <h5 class="mb-0 mt-5">User/Group Configuration</h5>
         <p>Use the following to configure Users & Groups within the Infoblox SA Tools Portal.</p>
-        <table id="userTable"></table>
+        <table id="userTable" class="table table-striped"></table>
       </div>
     </div>
   </div>
