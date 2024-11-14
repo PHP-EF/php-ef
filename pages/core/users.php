@@ -6,33 +6,6 @@
 ?>
 
 <style>
-pre {
-  background-color: #000;
-  overflow: auto;
-  font-family: 'Monaco', monospace;
-  padding: 0 1em;
-}
-
-code {
-  font-family: Monaco, monospace;
-  font-size: $base-font-size;
-  line-height: 100%;
- /background-color: #000;/
-  padding: 0.2em;
-  letter-spacing: -0.05em;
-  word-break: normal;
-  /border-radius: 5px;/
-}
-
-pre code {
-  border: none;
-  background: none;
-  font-size: $base-font-size * 0.875;
-  line-height: 1em;
-  letter-spacing: normal;
-  word-break: break-all;
-}
-
 .popover {
     display: none;
     position: absolute;
