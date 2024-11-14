@@ -135,15 +135,26 @@ class Auth {
   public function updateUser($id,$username,$password,$groups) {
     if ($this->getUser($id)) {
       // Hash the password for security
-      if ($password != "") {
+      $prepare = [];
+      $execute = [];
+      $execute[':id'] = $id;
+      if ($password !== null) {
         $pepper = $this->hashAndSalt($password);
-        $stmt = $this->db->prepare("UPDATE users SET username = :username, password = :password, salt = :salt, groups = :groups WHERE id = :id");
-        $stmt->execute([':id' => $id, ':username' => $username, ':password' => $pepper['hash'], ':salt' => $pepper['salt'], ':groups' => $groups]);
-      } else {
-        $stmt = $this->db->prepare("UPDATE users SET username = :username, groups = :groups WHERE id = :id");
-        $stmt->execute([':id' => $id, ':username' => $username, ':groups' => $groups]);
+        $prepare[] = 'password = :password';
+        $prepare[] = 'salt = :salt';
+        $execute[':password'] = $pepper['hash'];
+        $execute[':salt'] = $pepper['salt'];
       }
-
+      if ($username !== null) {
+        $prepare[] = 'username = :username';
+        $execute[':username'] = $username;
+      }
+      if ($groups !== null) {
+        $prepare[] = 'groups = :groups';
+        $execute[':groups'] = $groups;
+      }
+      $stmt = $this->db->prepare('UPDATE users SET '.implode(", ",$prepare).' WHERE id = :id');
+      $stmt->execute($execute);
       return array(
         'Status' => 'Success',
         'Message' => 'User updated successfully'
@@ -179,9 +190,27 @@ class Auth {
     $stmt->execute();
     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     if (!is_array($users)) {
-        $users = array($users);
+        $usermap = array(
+          'id' => $users['id'],
+          'username' => $users['username'],
+          'groups' => explode(',',$users['groups']),
+          'created' => $users['created'],
+          'lastlogin' => $users['lastlogin'],
+          'passwordexpires' => $users['passwordexpires'],
+        );
+    } else {
+      foreach ($users as $user) {
+        $usermap[] = array(
+          'id' => $user['id'],
+          'username' => $user['username'],
+          'groups' => explode(',',$user['groups']),
+          'created' => $user['created'],
+          'lastlogin' => $user['lastlogin'],
+          'passwordexpires' => $user['passwordexpires'],
+        );
+      }
     }
-    return $users;
+    return $usermap;
   }
 
   public function login($username, $password) {
@@ -240,7 +269,9 @@ class Auth {
         $AuthResult = array(
           'Authenticated' => false,
           'IPAddress' => $IPAddress,
-          'Groups' => 'Everyone'
+          'Groups' => [
+            'everyone'
+          ]
         );
         return $AuthResult;
       } else {
@@ -268,10 +299,14 @@ class Auth {
         }
   
         if (isset($decodedJWT->groups)) {
-          $decodedJWT->groups[] = 'Authenticated|Everyone';
-          $Groups = join("|",$decodedJWT->groups);
+          $decodedJWT->groups[] = 'authenticated';
+          $decodedJWT->groups[] = 'everyone';
+          $Groups = $decodedJWT->groups;
         } else {
-          $Groups = "Authenticated|Everyone";
+          $Groups = [
+            'authenticated',
+            'everyone'
+          ];
         }
   
         if (isset($decodedJWT->email)) {
@@ -292,14 +327,14 @@ class Auth {
         $AuthResult = array(
           'Authenticated' => false,
           'IPAddress' => $IPAddress,
-          'Groups' => 'Everyone'
+          'Groups' => 'everyone'
         );
       }
     } else {
       $AuthResult = array(
         'Authenticated' => false,
         'IPAddress' => $IPAddress,
-        'Groups' => 'Everyone'
+        'Groups' => 'everyone'
       );
     }
     return $AuthResult;
@@ -313,17 +348,17 @@ class Auth {
       $rbacJson = file_get_contents(__DIR__.'/../'.getConfig("System","rbacjson"));
       $rbac = json_decode($rbacJson, true);
       if (isset($User['Groups'])) {
-        $usergroups = explode('|',$User['Groups']);
+        $usergroups = $User['Groups'];
         if ($Service != null) {
             $Services = explode(',',$Service);
             foreach ($Services as $ServiceToCheck) {
-            foreach ($usergroups as $usergroup) {
-              if (isset($rbac[$usergroup])) {
-                if (in_array($ServiceToCheck,$rbac[$usergroup]['PermittedResources'])) {
-                  return true;
+              foreach ($usergroups as $usergroup) {
+                if (isset($rbac[$usergroup])) {
+                  if (in_array($ServiceToCheck,$rbac[$usergroup]['PermittedResources'])) {
+                    return true;
+                  }
                 }
               }
-            }
             }
         }
         if ($Menu != null) {

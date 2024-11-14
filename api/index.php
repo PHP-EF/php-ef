@@ -29,20 +29,60 @@ if (!($_REQUEST['function'])) {
         case 'newUser':
             if ($method = checkRequestMethod('POST')) {
                 if ($auth->checkAccess(null,"ADMIN-USERS")) {
-                    if (isset($_POST['un']) AND isset($_POST['pw']) AND isset($_POST['groups'])) {
-                        $new = $auth->newUser($_POST['un'],$_POST['pw'],$_POST['groups']);
-                        echo json_encode($new,JSON_PRETTY_PRINT);
+                    if (isset($_POST['un'])) {
+                        $UN = $_POST['un'];
+                    } else {
+                        return json_encode(array(
+                            'Status' => 'Error',
+                            'Message' => 'Invalid Username'
+                        ));
                     }
+                    if (isset($_POST['pw'])) {
+                        $PW = $_POST['pw'];
+                    } else {
+                        return json_encode(array(
+                            'Status' => 'Error',
+                            'Message' => 'Invalid Password'
+                        ));
+                    }
+                    if (isset($_POST['groups'])) {
+                        $Groups = $_POST['groups'];
+                    } else {
+                        $Groups = null;
+                    }
+                    $new = $auth->newUser($UN,$PW,$Groups);
+                    echo json_encode($new,JSON_PRETTY_PRINT);
                 }
             }
             break;
         case 'setUser':
             if ($method = checkRequestMethod('POST')) {
                 if ($auth->checkAccess(null,"ADMIN-USERS")) {
-                    if (isset($_POST['id']) && isset($_POST['un']) && isset($_POST['pw']) && isset($_POST['groups'])) {
-                        $update = $auth->updateUser($_POST['id'],$_POST['un'],$_POST['pw'],$_POST['groups']);
-                        echo json_encode($update,JSON_PRETTY_PRINT);
+                    if (isset($_POST['id'])) {
+                        $ID = $_POST['id'];
+                    } else {
+                        return json_encode(array(
+                            'Status' => 'Error',
+                            'Message' => 'Invalid User ID'
+                        ));
                     }
+                    if (isset($_POST['un'])) {
+                        $UN = $_POST['un'];
+                    } else {
+                        $UN = null;
+                    }
+                    if (isset($_POST['pw'])) {
+                        $PW = $_POST['pw'];
+                    } else {
+                        $PW = null;
+                    }
+                    if (isset($_POST['groups'])) {
+                        $Groups = $_POST['groups'];
+                    } else {
+                        $Groups = null;
+                    }
+                    $update = $auth->updateUser($ID,$UN,$PW,$Groups);
+                    echo json_encode($update,JSON_PRETTY_PRINT);
                 }
             }
             break;
@@ -125,10 +165,15 @@ if (!($_REQUEST['function'])) {
             break;
         case 'SetRBAC':
             if ($auth->checkAccess(null,"ADMIN-RBAC")) {
-                if (isset($_REQUEST['group'])) {
-                    $Group = $_REQUEST['group'];
+                if (isset($_REQUEST['id'])) {
+                    $GroupID = $_REQUEST['id'];
                 } else {
-                    $Group = null;
+                    $GroupID = null;
+                }
+                if (isset($_REQUEST['name'])) {
+                    $GroupName = $_REQUEST['name'];
+                } else {
+                    $GroupName = null;
                 }
                 if (isset($_REQUEST['description'])) {
                     $Description = $_REQUEST['description'];
@@ -145,7 +190,7 @@ if (!($_REQUEST['function'])) {
                 } else {
                     $Value = null;
                 }
-                 echo json_encode(setRBAC($Group,$Description,$Key,$Value), JSON_PRETTY_PRINT);
+                 echo json_encode(setRBAC($GroupID,$GroupName,$Description,$Key,$Value), JSON_PRETTY_PRINT);
             }
             break;
         case 'DeleteRBAC':
