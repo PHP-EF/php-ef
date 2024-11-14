@@ -32,6 +32,18 @@ pre code {
   letter-spacing: normal;
   word-break: break-all;
 }
+
+.popover {
+    display: none;
+    position: absolute;
+    background-color: #f8f9fa;
+    border: 1px solid #007bff;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 1000;
+    width: 300px; /* Adjust as needed */
+    margin-left: 105%;
+}
 </style>
 
 <div class="container">
@@ -80,6 +92,7 @@ pre code {
         </div>
         <div class="form-group">
           <label for="editUserPassword">Password</label>
+          <i class="fa fa-info-circle hover-target" aria-hidden="true"></i>
           <input type="password" class="form-control" id="editUserPassword" aria-describedby="editUserPasswordHelp">
           <small id="editUserPasswordHelp" class="form-text text-muted">The updated password for the user.</small>
         </div>
@@ -88,7 +101,15 @@ pre code {
           <input type="password" class="form-control" id="editUserPassword2" aria-describedby="editUserPassword2Help">
           <small id="editUserPassword2Help" class="form-text text-muted">Enter the updated password again.</small>
         </div>
-	      <hr>
+        <hr>
+        <div id="popover" class="popover" role="alert">
+          <h4 class="alert-heading">Password Complexity</h4>
+          <p>Minimum of 8 characters</p>
+          <p>At least one uppercase letter</p>
+          <p>At least one lowercase letter</p>
+          <p>At least one number</p>
+          <p>At least one special character</p>
+        </div>
         <h4>Groups</h4>
         <p>Enable or Disable the following groups to provide granular control to specific areas of the Infoblox SA Tools Portal.</p>
 	      <div class="list-group mb-5 shadow" id="modalListGroup"></div> 
@@ -119,7 +140,8 @@ pre code {
           <small id="newUserNameHelp" class="form-text text-muted">The username for the new user.</small>
         </div>
         <div class="form-group">
-          <label for="newUserPassword">Password</label>
+          <label for="newUserPassword">Password</label>&nbsp;
+          <i class="fa fa-info-circle hover-target" aria-hidden="true"></i>
           <input type="password" class="form-control" id="newUserPassword" aria-describedby="newUserPasswordHelp">
           <small id="newUserPasswordHelp" class="form-text text-muted">The password for the new user.</small>
         </div>
@@ -127,6 +149,15 @@ pre code {
           <label for="newUserPassword2">Verify Password</label>
           <input type="password" class="form-control" id="newUserPassword2" aria-describedby="newUserPassword2Help">
           <small id="newUserPassword2Help" class="form-text text-muted">Enter the password again.</small>
+        </div>
+        <hr>
+        <div id="popover" class="popover" role="alert">
+          <h4 class="alert-heading">Password Complexity</h4>
+          <p>Minimum of 8 characters</p>
+          <p>At least one uppercase letter</p>
+          <p>At least one lowercase letter</p>
+          <p>At least one number</p>
+          <p>At least one special character</p>
         </div>
       </div>
       <div class="modal-footer">
@@ -427,6 +458,16 @@ pre code {
   var groupinfo = '';
 
   $(document).ready(function() {
+    $('.hover-target').hover(
+        function() {
+            $('.popover').css({
+                display: 'block',
+            });
+        },
+        function() {
+            $('.popover').hide();
+        }
+    );
     $.getJSON('/api?function=GetRBAC&action=listconfigurablegroups', function(groupres) {
       groupinfo = groupres;
       populateUsers();

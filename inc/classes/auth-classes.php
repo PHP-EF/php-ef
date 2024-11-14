@@ -73,45 +73,68 @@ class Auth {
     );
   }
 
-  public function newUser($username, $password, $groups = '') {
-    // Hash the password for security
-    $pepper = $this->hashAndSalt($password);
-    // Get current date/time
-    $currentDateTime = date('Y-m-d H:i:s');
-    $passwordExpiryDate = new DateTime();
-    $passwordExpiryDate->modify('+90 days');
-    $passwordExpires = $passwordExpiryDate->format('Y-m-d H:i:s');
+  private function isPasswordComplex($password) {
+    // Define the complexity criteria
+    $length = strlen($password) >= 8; // Minimum length of 8
+    $uppercase = preg_match('/[A-Z]/', $password); // At least one uppercase letter
+    $lowercase = preg_match('/[a-z]/', $password); // At least one lowercase letter
+    $number = preg_match('/[0-9]/', $password); // At least one number
+    $specialChar = preg_match('/[\W_]/', $password); // At least one special character
 
-    $stmt = $this->db->prepare("INSERT INTO users (username, password, salt, groups, created, passwordexpires) VALUES (:username, :password, :salt, :groups, :created, :passwordexpires)");
-    
-    try {
-        // Check if username already exists
-        $checkStmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE username = :username");
-        $checkStmt->execute([':username' => $username]);
-        if ($checkStmt->fetchColumn() > 0) {
-            return array(
-                'Status' => 'Error',
-                'Message' => 'Username already exists'
-            );
-        }
-    } catch (PDOException $e) {
-        return array(
-            'Status' => 'Error',
-            'Message' => $e
-        );
+    // Check if all criteria are met
+    if ($length && $uppercase && $lowercase && $number && $specialChar) {
+        return true; // Password is complex
+    } else {
+        return false; // Password is not complex
     }
+  }
 
-    try {
-      $stmt->execute([':username' => $username, ':password' => $pepper['hash'], ':salt' => $pepper['salt'], ':groups' => $groups, ':created' => $currentDateTime, ':passwordexpires' => $passwordExpires]);
-        return array(
-            'Status' => 'Success',
-            'Message' => 'Created user successfully'
-        );
-    } catch (PDOException $e) {
-        return array(
-            'Status' => 'Error',
-            'Message' => $e
-        );
+  public function newUser($username, $password, $groups = '') {
+    if ($this->isPasswordComplex($password)) {
+      // Hash the password for security
+      $pepper = $this->hashAndSalt($password);
+      // Get current date/time
+      $currentDateTime = date('Y-m-d H:i:s');
+      $passwordExpiryDate = new DateTime();
+      $passwordExpiryDate->modify('+90 days');
+      $passwordExpires = $passwordExpiryDate->format('Y-m-d H:i:s');
+
+      $stmt = $this->db->prepare("INSERT INTO users (username, password, salt, groups, created, passwordexpires) VALUES (:username, :password, :salt, :groups, :created, :passwordexpires)");
+      
+      try {
+          // Check if username already exists
+          $checkStmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE username = :username");
+          $checkStmt->execute([':username' => $username]);
+          if ($checkStmt->fetchColumn() > 0) {
+              return array(
+                  'Status' => 'Error',
+                  'Message' => 'Username already exists'
+              );
+          }
+      } catch (PDOException $e) {
+          return array(
+              'Status' => 'Error',
+              'Message' => $e
+          );
+      }
+
+      try {
+        $stmt->execute([':username' => $username, ':password' => $pepper['hash'], ':salt' => $pepper['salt'], ':groups' => $groups, ':created' => $currentDateTime, ':passwordexpires' => $passwordExpires]);
+          return array(
+              'Status' => 'Success',
+              'Message' => 'Created user successfully'
+          );
+      } catch (PDOException $e) {
+          return array(
+              'Status' => 'Error',
+              'Message' => $e
+          );
+      }
+    } else {
+      return array(
+        'Status' => 'Error',
+        'Message' => 'Password does not meet the complexity requirements'
+      );
     }
   }
 
@@ -298,7 +321,7 @@ class Auth {
           $Name = null;
         }
   
-        if (isset($decodedJWT->groups)) {
+        if (isset($decodedJWT->groups[0]) && $decodedJWT->groups[0] != "") {
           $decodedJWT->groups[] = 'authenticated';
           $decodedJWT->groups[] = 'everyone';
           $Groups = $decodedJWT->groups;
@@ -350,16 +373,16 @@ class Auth {
       if (isset($User['Groups'])) {
         $usergroups = $User['Groups'];
         if ($Service != null) {
-            $Services = explode(',',$Service);
-            foreach ($Services as $ServiceToCheck) {
-              foreach ($usergroups as $usergroup) {
-                if (isset($rbac[$usergroup])) {
-                  if (in_array($ServiceToCheck,$rbac[$usergroup]['PermittedResources'])) {
-                    return true;
-                  }
+          $Services = explode(',',$Service);
+          foreach ($Services as $ServiceToCheck) {
+            foreach ($usergroups as $usergroup) {
+              if (isset($rbac[$usergroup])) {
+                if (in_array($ServiceToCheck,$rbac[$usergroup]['PermittedResources'])) {
+                  return true;
                 }
               }
             }
+          }
         }
         if ($Menu != null) {
           foreach ($usergroups as $usergroup) {
