@@ -30,8 +30,9 @@
             <tr>
               <th data-field="state" data-checkbox="true"></th>
               <th data-field="Name" data-sortable="true">Threat Actor</th>
-              <th data-field="IMG" data-sortable="true">Image</th>
               <th data-field="URLStub" data-sortable="true">URL Stub</th>
+              <th data-field="PNG" data-sortable="true">PNG Image</th>
+              <th data-field="SVG" data-sortable="true">SVG Image</th>
               <th data-formatter="actionFormatter" data-events="actionEvents">Actions</th>
             </tr>
           </thead>
@@ -60,19 +61,34 @@
           <small id="threatActorNameHelp" class="form-text text-muted">The name of the Threat Actor.</small>
         </div>
         <div class="form-group">
-          <label for="threatActorIMG">Image</label>
-          <input type="text" class="form-control" id="threatActorIMG" aria-describedby="threatActorIMGHelp">
-          <small id="threatActorIMGHelp" class="form-text text-muted">The Threat Actor image to use when generating Security Assessment reports.</small>
-        </div>
-        <div class="form-group">
           <label for="threatActorURLStub">URL Stub</label>
           <input type="text" class="form-control" id="threatActorURLStub" aria-describedby="threatActorURLStubHelp">
           <small id="threatActorURLStubHelp" class="form-text text-muted">The Threat Actor Report <b>URL Stub</b> to use when generating Security Assessment reports.</small>
         </div>
-        <button class="btn btn-primary" id="editThreatActorSubmit">Submit</button>
+        <div class="form-group row">
+          <label for="threatActorIMGSVG" class="col-form-label">SVG Image</label>
+          <div class="col-sm-5">
+            <input type="file" class="form-control" id="threatActorIMGSVG" accept=".svg" aria-describedby="threatActorIMGSVGHelp">
+            <small id="threatActorIMGSVGHelp" class="form-text text-muted">Upload an SVG image.</small>
+          </div>
+          <div class="col-sm-5">
+            <img id="imagePreviewSVG" src="" alt="PNG Image Preview" style="display:none; margin-top: 10px; max-width: 100%;">
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="threatActorIMGPNG" class="col-form-label">PNG Image</label>
+          <div class="col-sm-5">
+            <input type="file" class="form-control" id="threatActorIMGPNG" accept=".png" aria-describedby="threatActorIMGPNGHelp">
+            <small id="threatActorIMGPNGHelp" class="form-text text-muted">Upload an PNG image.</small>
+          </div>
+          <div class="col-sm-5">
+            <img id="imagePreviewPNG" src="" alt="PNG Image Preview" style="display:none; margin-top: 10px; max-width: 100%;">
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-primary" id="editThreatActorSubmit">Save</button>
       </div>
     </div>
   </div>
@@ -96,14 +112,29 @@
           <small id="newThreatActorNameHelp" class="form-text text-muted">The name of the Threat Actor to add to the list.</small>
         </div>
         <div class="form-group">
-          <label for="newThreatActorIMG">Image</label>
-          <input type="text" class="form-control" id="newThreatActorIMG" aria-describedby="newThreatActorIMGHelp">
-          <small id="newThreatActorIMGHelp" class="form-text text-muted">The Threat Actor image to use when generating Security Assessment reports.</small>
-        </div>
-        <div class="form-group">
           <label for="newThreatActorURLStub">URL Stub</label>
           <input type="text" class="form-control" id="newThreatActorURLStub" aria-describedby="newThreatActorURLStubHelp">
           <small id="newThreatActorURLStubHelp" class="form-text text-muted">The Threat Actor Report <b>URL Stub</b> to use when generating Security Assessment reports.</small>
+        </div>
+        <div class="form-group row">
+          <label for="newThreatActorIMGSVG" class="col-form-label">SVG Image</label>
+          <div class="col-sm-5">
+            <input type="file" class="form-control" id="newThreatActorIMGSVG" accept=".svg" aria-describedby="newThreatActorIMGSVGHelp">
+            <small id="newThreatActorIMGSVGHelp" class="form-text text-muted">Upload an SVG image.</small>
+          </div>
+          <div class="col-sm-5">
+            <img id="newImagePreviewSVG" src="" alt="PNG Image Preview" style="display:none; margin-top: 10px; max-width: 100%;">
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="newThreatActorIMGPNG" class="col-form-label">PNG Image</label>
+          <div class="col-sm-5">
+            <input type="file" class="form-control" id="newThreatActorIMGPNG" accept=".png" aria-describedby="newThreatActorIMGPNGHelp">
+            <small id="newThreatActorIMGPNGHelp" class="form-text text-muted">Upload an PNG image.</small>
+          </div>
+          <div class="col-sm-5">
+            <img id="newImagePreviewPNG" src="" alt="PNG Image Preview" style="display:none; margin-top: 10px; max-width: 100%;">
+          </div>
         </div>
         <button class="btn btn-primary" id="newThreatActorSubmit">Submit</button>
       </div>
@@ -146,10 +177,57 @@
   }
 
   function listThreatActor(row) {
+    $('#editModal input').val('');
+    $('#imagePreviewSVG, #imagePreviewPNG').attr('src','').css('display','none');
     $('#threatActorName').val(row['Name']);
-    $('#threatActorIMG').val(row['IMG']);
+    if (row['SVG'] != "") {
+      imagePreview('imagePreviewSVG','/assets/images/Threat Actors/Uploads/'+row['PNG']);
+    }
+    if (row['PNG'] != "") {
+      imagePreview('imagePreviewPNG','/assets/images/Threat Actors/Uploads/'+row['PNG']);
+    }
     $('#threatActorURLStub').val(row['URLStub']);
   }
+
+  function imagePreview(elem,img) {
+    const preview = document.getElementById(elem);
+    if (img) {
+      preview.src = img;
+      preview.style.display = 'block'; // Show the image preview
+    } else {
+      preview.src = '';
+      preview.style.display = 'none'; // Hide the image preview if no file is selected
+    }
+  }
+
+  $('#threatActorIMGPNG, #threatActorIMGSVG, #newThreatActorIMGPNG, #newThreatActorIMGSVG').on('change', function(event) {
+    const file = event.target.files[0];
+    let target = '';
+    if (event.target.id == 'threatActorIMGPNG') {
+      target = 'imagePreviewPNG';
+    }
+    if (event.target.id == 'threatActorIMGSVG') {
+      target = 'imagePreviewSVG';
+    }
+    if (event.target.id == 'newThreatActorIMGPNG') {
+      target = 'newImagePreviewPNG';
+    }
+    if (event.target.id == 'newThreatActorIMGSVG') {
+      target = 'newImagePreviewSVG';
+    }
+    const preview = document.getElementById(target);
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block'; // Show the image preview
+        };
+        reader.readAsDataURL(file);
+    } else {
+        preview.src = '';
+        preview.style.display = 'none'; // Hide the image preview if no file is selected
+    }
+  });
 
   window.actionEvents = {
     'click .edit': function (e, value, row, index) { 
@@ -177,14 +255,46 @@
   }
 
   $(document).on('click', '#newThreatActorSubmit', function(event) {
+    const svgFiles = $('#newThreatActorIMGSVG')[0].files;
+    const pngFiles = $('#newThreatActorIMGPNG')[0].files;
+
     var postArr = {}
+    if (svgFiles[0]) {
+      postArr.SVG = svgFiles[0].name;
+    }
+    if (svgFiles[0]) {
+      postArr.PNG = pngFiles[0].name;
+    }
     postArr.name = encodeURIComponent($('#newThreatActorName').val())
-    postArr.IMG = encodeURIComponent($('#newThreatActorIMG').val())
     postArr.URLStub = encodeURIComponent($('#newThreatActorURLStub').val())
     $.post( "/api?function=newThreatActorConfig", postArr).done(function( data, status ) {
       if (data['Status'] == 'Success') {
         toast(data['Status'],"",data['Message'],"success");
         $('#threatActorTable').bootstrapTable('refresh');
+        if (svgFiles.length > 0 || pngFiles.length > 0) {
+          const formData = new FormData();
+          if (svgFiles[0]) {
+            formData.append('svgImage', svgFiles[0]);
+          }
+          if (pngFiles[0]) {
+            formData.append('pngImage', pngFiles[0]);
+          }
+          $.ajax({
+            url: '/api?function=uploadThreatActorImage', // Replace with your PHP API endpoint
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+              toast('Success',"","Uploaded images","success");
+              console.log(response);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+              toast('Error',"","Error submitting images","danger");
+              console.error(errorThrown);
+            }
+          });
+        }
       } else if (data['Status'] == 'Error') {
         toast(data['Status'],"",data['Message'],"danger","30000");
       } else {
@@ -198,14 +308,46 @@
   });
 
   $(document).on('click', '#editThreatActorSubmit', function(event) {
+    const svgFiles = $('#threatActorIMGSVG')[0].files;
+    const pngFiles = $('#threatActorIMGPNG')[0].files;
+
     var postArr = {}
+    if (svgFiles[0]) {
+      postArr.SVG = svgFiles[0].name;
+    }
+    if (svgFiles[0]) {
+      postArr.PNG = pngFiles[0].name;
+    }
     postArr.name = encodeURIComponent($('#threatActorName').val())
-    postArr.IMG = encodeURIComponent($('#threatActorIMG').val())
     postArr.URLStub = encodeURIComponent($('#threatActorURLStub').val())
     $.post( "/api?function=setThreatActorConfig", postArr).done(function( data, status ) {
       if (data['Status'] == 'Success') {
         toast(data['Status'],"",data['Message'],"success");
         $('#threatActorTable').bootstrapTable('refresh');
+        if (svgFiles.length > 0 || pngFiles.length > 0) {
+          const formData = new FormData();
+          if (svgFiles[0]) {
+            formData.append('svgImage', svgFiles[0]);
+          }
+          if (pngFiles[0]) {
+            formData.append('pngImage', pngFiles[0]);
+          }
+          $.ajax({
+            url: '/api?function=uploadThreatActorImage', // Replace with your PHP API endpoint
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+              toast('Success',"","Uploaded images","success");
+              console.log(response);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+              toast('Error',"","Error submitting images","danger");
+              console.error(errorThrown);
+            }
+          });
+        }
       } else if (data['Status'] == 'Error') {
         toast(data['Status'],"",data['Message'],"danger","30000");
       } else {

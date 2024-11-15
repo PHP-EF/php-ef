@@ -490,13 +490,14 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
                 }
             }
             $xml_tas_f = $xml_tas->createDocumentFragment();
-            if (array_key_exists($TAI['actor_name'],$KnownActors) && $KnownActors[$TAI['actor_name']]['IMG'] !== "") {
-                $UniqueActor = $KnownActors[$TAI['actor_name']]['IMG'];
+            if (array_key_exists($TAI['actor_name'],$KnownActors) && $KnownActors[$TAI['actor_name']]['PNG'] !== "" && $KnownActors[$TAI['actor_name']]['SVG'] !== "") {
+                $SVG = $KnownActors[$TAI['actor_name']]['SVG'];
+                $PNG = $KnownActors[$TAI['actor_name']]['PNG'];
                 // Threat Actor PNG
-                copy($AssetsDir.'/images/Threat Actors/Glow/'.$UniqueActor.'.png',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/'.$UniqueActor.'.png');
-                copy($AssetsDir.'/images/Threat Actors/Glow/'.$UniqueActor.'.svg',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/'.$UniqueActor.'.svg');
-                $xml_tas_f->appendXML('<Relationship Id="rId115" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/'.$UniqueActor.'.png"/>');
-                $xml_tas_f->appendXML('<Relationship Id="rId116" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/'.$UniqueActor.'.svg"/>');
+                copy($AssetsDir.'/images/Threat Actors/Uploads/'.$PNG,$FilesDir.'/reports/report-'.$UUID.'/ppt/media/'.$PNG);
+                copy($AssetsDir.'/images/Threat Actors/Uploads/'.$SVG,$FilesDir.'/reports/report-'.$UUID.'/ppt/media/'.$SVG);
+                $xml_tas_f->appendXML('<Relationship Id="rId115" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/'.$PNG.'"/>');
+                $xml_tas_f->appendXML('<Relationship Id="rId116" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/'.$SVG.'"/>');
             } else {
                 $xml_tas_f->appendXML('<Relationship Id="rId115" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/logo-only.png"/>');
                 $xml_tas_f->appendXML('<Relationship Id="rId116" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/logo-only.svg"/>');
@@ -746,13 +747,20 @@ function getThreatActorConfig() {
     return json_decode(file_get_contents(__DIR__.'/../../inc/config/threat-actors.json'), true);
 }
 
-function newThreatActorConfig($Name,$IMG,$URLStub) {
+function newThreatActorConfig($Name,$SVG,$PNG,$URLStub) {
     $ThreatActorConfig = getThreatActorConfig();
     if (!isset($ThreatActorConfig[urldecode($Name)])) {
-        $ThreatActorConfig[urldecode($Name)] = array(
-            "IMG" => urldecode($IMG),
-            "URLStub" => urldecode($URLStub)
-        );
+        $ThreatActorConfig[urldecode($Name)]['URLStub'] = urldecode($URLStub);
+        if ($SVG != null) {
+            $ThreatActorConfig[urldecode($Name)]['SVG'] = urldecode($SVG);
+        } else {
+            $ThreatActorConfig[urldecode($Name)]['SVG'] = '';
+        }
+        if ($PNG != null) {
+            $ThreatActorConfig[urldecode($Name)]['PNG'] = urldecode($PNG);
+        } else {
+            $ThreatActorConfig[urldecode($Name)]['PNG'] = '';
+        }
         file_put_contents(__DIR__.'/../../inc/config/threat-actors.json',json_encode($ThreatActorConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
         return array(
             'Status' => 'Success',
@@ -766,17 +774,20 @@ function newThreatActorConfig($Name,$IMG,$URLStub) {
     }
 }
 
-function setThreatActorConfig($Name,$IMG,$URLStub) {
+function setThreatActorConfig($Name,$SVG,$PNG,$URLStub) {
     $ThreatActorConfig = getThreatActorConfig();
     if (isset($ThreatActorConfig[urldecode($Name)])) {
-        $ThreatActorConfig[urldecode($Name)] = array(
-            "IMG" => urldecode($IMG),
-            "URLStub" => urldecode($URLStub)
-        );
+        $ThreatActorConfig[urldecode($Name)]['URLStub'] = urldecode($URLStub);
+        if ($SVG != null) {
+            $ThreatActorConfig[urldecode($Name)]['SVG'] = urldecode($SVG);
+        }
+        if ($PNG != null) {
+            $ThreatActorConfig[urldecode($Name)]['PNG'] = urldecode($PNG);
+        }
         file_put_contents(__DIR__.'/../../inc/config/threat-actors.json',json_encode($ThreatActorConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
         return array(
             'Status' => 'Success',
-            'Message' => 'Threat Actor added successfully'
+            'Message' => 'Threat Actor successfully updated'
         );
     } else {
         return array(
@@ -801,6 +812,10 @@ function removeThreatActorConfig($Name) {
             'Message' => 'Threat Actor does not exist'
         );
     }
+}
+
+function uploadThreatActorImage() {
+    // Do stuff
 }
 
 function writeProgress($id,$Count,$Action = "") {

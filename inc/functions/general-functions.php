@@ -399,3 +399,8 @@ function decrypt($msg_encrypted_bundle, $password){
 		return false;
 	return $decrypted_msg;
 }
+
+function isValidFileType($fileName, $validExtensions) {
+    $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+    return in_array($fileExtension, $validExtensions);
+}

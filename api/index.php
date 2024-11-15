@@ -215,7 +215,7 @@ if (!($_REQUEST['function'])) {
                 } else {
                     $Action = null;
                 }
-                echo json_encode(getRBAC($Group,$Action), JSON_PRETTY_PRINT);
+                echo json_encode($rbac->getRBAC($Group,$Action), JSON_PRETTY_PRINT);
             } else {
                 return false;
             }
@@ -247,7 +247,7 @@ if (!($_REQUEST['function'])) {
                 } else {
                     $Value = null;
                 }
-                 echo json_encode(setRBAC($GroupID,$GroupName,$Description,$Key,$Value), JSON_PRETTY_PRINT);
+                 echo json_encode($rbac->setRBAC($GroupID,$GroupName,$Description,$Key,$Value), JSON_PRETTY_PRINT);
             }
             break;
         case 'DeleteRBAC':
@@ -257,7 +257,7 @@ if (!($_REQUEST['function'])) {
                 } else {
                     $Group = null;
                 }
-                echo json_encode(deleteRBAC($Group), JSON_PRETTY_PRINT);
+                echo json_encode($rbac->deleteRBAC($Group), JSON_PRETTY_PRINT);
             }
             break;
         case 'GetConfig':
@@ -374,7 +374,8 @@ if (!($_REQUEST['function'])) {
                     foreach (getThreatActorConfig() as $Key => $Val) {
                         $ThreatActorConfig[] = array(
                             'Name' => $Key,
-                            'IMG' => $Val['IMG'],
+                            'SVG' => $Val['SVG'],
+                            'PNG' => $Val['PNG'],
                             'URLStub' => $Val['URLStub']
                         );
                     }
@@ -385,8 +386,8 @@ if (!($_REQUEST['function'])) {
         case 'newThreatActorConfig':
             if ($auth->checkAccess(null,"ADMIN-SECASS")) {
                 if ($method = checkRequestMethod('POST')) {
-                    if (isset($_POST['name']) AND isset($_POST['IMG']) AND isset($_POST['URLStub'])) {
-                        echo json_encode(newThreatActorConfig($_POST['name'],$_POST['IMG'],$_POST['URLStub']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                    if (isset($_POST['name']) AND isset($_POST['SVG']) AND isset($_POST['PNG']) AND isset($_POST['URLStub'])) {
+                        echo json_encode(newThreatActorConfig($_POST['name'],$_POST['SVG'],$_POST['PNG'],$_POST['URLStub']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                     }
                 }
             }
@@ -394,8 +395,18 @@ if (!($_REQUEST['function'])) {
         case 'setThreatActorConfig':
             if ($auth->checkAccess(null,"ADMIN-SECASS")) {
                 if ($method = checkRequestMethod('POST')) {
-                    if (isset($_POST['name']) AND isset($_POST['IMG']) AND isset($_POST['URLStub'])) {
-                        echo json_encode(setThreatActorConfig($_POST['name'],$_POST['IMG'],$_POST['URLStub']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                    if (isset($_POST['name']) AND isset($_POST['URLStub'])) {
+                        if (isset($_POST['SVG'])) {
+                            $SVG = $_POST['SVG'];
+                        } else {
+                            $SVG = null;
+                        }
+                        if (isset($_POST['PNG'])) {
+                            $SVG = $_POST['PNG'];
+                        } else {
+                            $SVG = null;
+                        }
+                        echo json_encode(setThreatActorConfig($_POST['name'],$_POST['SVG'],$_POST['PNG'],$_POST['URLStub']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                     }
                 }
             }
@@ -423,6 +434,61 @@ if (!($_REQUEST['function'])) {
                         } else {
                             echo json_encode($Actors);
                         };
+                    }
+                }
+            }
+            break;
+        case 'uploadThreatActorImage':
+            if ($auth->checkAccess(null,"B1-THREAT-ACTORS")) {
+                if ($method = checkRequestMethod('POST')) {
+                    $uploadDir = __DIR__.'/../assets/images/Threat Actors/Uploads/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    if (isset($_FILES['svgImage']) && $_FILES['svgImage']['error'] == UPLOAD_ERR_OK) {
+                        if (isValidFileType($_FILES['svgImage']['name'],['svg'])) {
+                            $svgFileName = basename($_FILES['svgImage']['name']);
+                            $svgFilePath = $uploadDir . $svgFileName;
+                        
+                            // Move the uploaded file to the designated directory
+                            if (move_uploaded_file($_FILES['svgImage']['tmp_name'], $svgFilePath)) {
+                                $response['svg'] = "SVG image uploaded successfully: $svgFileName";
+                            } else {
+                                $response['svg'] = "Error uploading SVG image.";
+                            }
+                        } else {
+                            echo json_encode(array(
+                                'Status' => 'Error',
+                                'Message' => "Invalid SVG File: $svgFileName"
+                            ));
+                            break;
+                        }
+                    }
+                    
+                    // Handle PNG image upload
+                    if (isset($_FILES['pngImage']) && $_FILES['pngImage']['error'] == UPLOAD_ERR_OK) {
+                            $pngFileName = basename($_FILES['pngImage']['name']);
+                            $pngFilePath = $uploadDir . $pngFileName;
+                            if (isValidFileType($_FILES['pngImage']['name'],['png'])) {
+                            // Move the uploaded file to the designated directory
+                            if (move_uploaded_file($_FILES['pngImage']['tmp_name'], $pngFilePath)) {
+                                echo json_encode(array(
+                                    'Status' => 'Success',
+                                    'Message' => "PNG image uploaded successfully: $pngFileName"
+                                ));
+                            } else {
+                                echo json_encode(array(
+                                    'Status' => 'Error',
+                                    'Message' => "Error uploading PNG image"
+                                ));
+                            }
+                        } else {
+                            echo json_encode(array(
+                                'Status' => 'Error',
+                                'Message' => "Invalid PNG File: $pngFileName"
+                            ));
+                            break;
+                        }
                     }
                 }
             }
