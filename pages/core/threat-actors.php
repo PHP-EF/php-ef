@@ -167,6 +167,7 @@
         event: function() {
           $('#newThreatActorModal').modal('show');
           $('#newThreatActorModal input').val('');
+          $('#newImagePreviewSVG, #newImagePreviewPNG').attr('src','').css('display','none');
         },
         attributes: {
           title: "Add a new Threat Actor",

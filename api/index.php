@@ -386,8 +386,18 @@ if (!($_REQUEST['function'])) {
         case 'newThreatActorConfig':
             if ($auth->checkAccess(null,"ADMIN-SECASS")) {
                 if ($method = checkRequestMethod('POST')) {
-                    if (isset($_POST['name']) AND isset($_POST['SVG']) AND isset($_POST['PNG']) AND isset($_POST['URLStub'])) {
-                        echo json_encode(newThreatActorConfig($_POST['name'],$_POST['SVG'],$_POST['PNG'],$_POST['URLStub']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                    if (isset($_POST['name']) AND isset($_POST['URLStub'])) {
+                        if (isset($_POST['SVG'])) {
+                            $SVG = $_POST['SVG'];
+                        } else {
+                            $SVG = null;
+                        }
+                        if (isset($_POST['PNG'])) {
+                            $SVG = $_POST['PNG'];
+                        } else {
+                            $SVG = null;
+                        }
+                        echo json_encode(newThreatActorConfig($_POST['name'],$SVG,$PNG,$_POST['URLStub']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                     }
                 }
             }
