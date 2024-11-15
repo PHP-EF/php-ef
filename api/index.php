@@ -32,25 +32,54 @@ if (!($_REQUEST['function'])) {
                     if (isset($_POST['un'])) {
                         $UN = $_POST['un'];
                     } else {
-                        return json_encode(array(
+                        echo json_encode(array(
                             'Status' => 'Error',
-                            'Message' => 'Invalid Username'
+                            'Message' => 'Username missing from request'
                         ));
+                        break;
                     }
                     if (isset($_POST['pw'])) {
                         $PW = $_POST['pw'];
                     } else {
-                        return json_encode(array(
+                        echo json_encode(array(
                             'Status' => 'Error',
-                            'Message' => 'Invalid Password'
+                            'Message' => 'Password missing from request'
                         ));
+                        break;
+                    }
+                    if (isset($_POST['fn'])) {
+                        $FN = $_POST['fn'];
+                    } else {
+                        echo json_encode(array(
+                            'Status' => 'Error',
+                            'Message' => 'First name missing from request'
+                        ));
+                        break;
+                    }
+                    if (isset($_POST['sn'])) {
+                        $SN = $_POST['sn'];
+                    } else {
+                        echo json_encode(array(
+                            'Status' => 'Error',
+                            'Message' => 'Surname missing from request'
+                        ));
+                        break;
+                    }
+                    if (isset($_POST['em'])) {
+                        $EM = $_POST['em'];
+                    } else {
+                        echo json_encode(array(
+                            'Status' => 'Error',
+                            'Message' => 'Email address missing from request'
+                        ));
+                        break;
                     }
                     if (isset($_POST['groups'])) {
                         $Groups = $_POST['groups'];
                     } else {
                         $Groups = null;
                     }
-                    $new = $auth->newUser($UN,$PW,$Groups);
+                    $new = $auth->newUser($UN,$PW,$FN,$SN,$EM,$Groups);
                     echo json_encode($new,JSON_PRETTY_PRINT);
                 }
             }
@@ -61,10 +90,38 @@ if (!($_REQUEST['function'])) {
                     if (isset($_POST['id'])) {
                         $ID = $_POST['id'];
                     } else {
-                        return json_encode(array(
+                        echo json_encode(array(
                             'Status' => 'Error',
                             'Message' => 'Invalid User ID'
                         ));
+                        break;
+                    }
+                    if (isset($_POST['fn'])) {
+                        $FN = $_POST['fn'];
+                    } else {
+                        echo json_encode(array(
+                            'Status' => 'Error',
+                            'Message' => 'First name missing from request'
+                        ));
+                        break;
+                    }
+                    if (isset($_POST['sn'])) {
+                        $SN = $_POST['sn'];
+                    } else {
+                        echo json_encode(array(
+                            'Status' => 'Error',
+                            'Message' => 'Surname missing from request'
+                        ));
+                        break;
+                    }
+                    if (isset($_POST['em'])) {
+                        $EM = $_POST['em'];
+                    } else {
+                        echo json_encode(array(
+                            'Status' => 'Error',
+                            'Message' => 'Email address missing from request'
+                        ));
+                        break;
                     }
                     if (isset($_POST['un'])) {
                         $UN = $_POST['un'];
@@ -81,7 +138,7 @@ if (!($_REQUEST['function'])) {
                     } else {
                         $Groups = null;
                     }
-                    $update = $auth->updateUser($ID,$UN,$PW,$Groups);
+                    $update = $auth->updateUser($ID,$UN,$PW,$FN,$SN,$EM,$Groups);
                     echo json_encode($update,JSON_PRETTY_PRINT);
                 }
             }

@@ -11,12 +11,15 @@ class CoreJwt {
     }
 
     // Generate a JWT
-    public function generateToken($UN,$Groups) {
+    public function generateToken($UN,$FN,$SN,$EM,$Groups) {
         $payload = [
           'iat' => time(), // Issued at
           'exp' => time() + (86400 * 30), // Expiration time (30 days)
           'username' => $UN,
-          'name' => null,
+          'firstname' => $FN,
+          'surname' => $SN,
+          'email' => $EM,
+          'fullname' => $FN.' '.$SN,
           'groups' => $Groups
         ];
         writeLog("Authentication","Issued JWT token","debug",$payload);
@@ -51,6 +54,9 @@ class Auth {
     $this->db->exec("CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT UNIQUE,
+      firstname TEXT,
+      surname TEXT,
+      email TEXT,
       password TEXT,
       salt TEXT,
       groups TEXT,
@@ -89,7 +95,7 @@ class Auth {
     }
   }
 
-  public function newUser($username, $password, $groups = '') {
+  public function newUser($username, $password, $firstname = '', $surname = '', $email = '', $groups = '') {
     if ($this->isPasswordComplex($password)) {
       // Hash the password for security
       $pepper = $this->hashAndSalt($password);
@@ -99,7 +105,7 @@ class Auth {
       $passwordExpiryDate->modify('+90 days');
       $passwordExpires = $passwordExpiryDate->format('Y-m-d H:i:s');
 
-      $stmt = $this->db->prepare("INSERT INTO users (username, password, salt, groups, created, passwordexpires) VALUES (:username, :password, :salt, :groups, :created, :passwordexpires)");
+      $stmt = $this->db->prepare("INSERT INTO users (username, firstname, surname, email, password, salt, groups, created, passwordexpires) VALUES (:username, :firstname, :surname, :email, :password, :salt, :groups, :created, :passwordexpires)");
       
       try {
           // Check if username already exists
@@ -119,7 +125,7 @@ class Auth {
       }
 
       try {
-        $stmt->execute([':username' => $username, ':password' => $pepper['hash'], ':salt' => $pepper['salt'], ':groups' => $groups, ':created' => $currentDateTime, ':passwordexpires' => $passwordExpires]);
+        $stmt->execute([':username' => $username, ':firstname' => $firstname, ':surname' => $surname, ':email' => $email, ':password' => $pepper['hash'], ':salt' => $pepper['salt'], ':groups' => $groups, ':created' => $currentDateTime, ':passwordexpires' => $passwordExpires]);
           return array(
               'Status' => 'Success',
               'Message' => 'Created user successfully'
@@ -140,10 +146,10 @@ class Auth {
 
   public function getUser($id = null, $username = null) {
     if ($id != null) {
-      $stmt = $this->db->prepare("SELECT id, username, groups, created, lastlogin, passwordexpires FROM users WHERE id = :id");
+      $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires FROM users WHERE id = :id");
       $stmt->execute([':id' => $id]);
     } else if ($username != null) {
-      $stmt = $this->db->prepare("SELECT id, username, groups, created, lastlogin, passwordexpires FROM users WHERE username = :username");
+      $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires FROM users WHERE username = :username");
       $stmt->execute([':username' => $username]);
     }
 
@@ -155,7 +161,7 @@ class Auth {
     }
   }
 
-  public function updateUser($id,$username,$password,$groups) {
+  public function updateUser($id,$username,$password,$firstname,$surname,$email,$groups) {
     if ($this->getUser($id)) {
       // Hash the password for security
       $prepare = [];
@@ -171,6 +177,18 @@ class Auth {
       if ($username !== null) {
         $prepare[] = 'username = :username';
         $execute[':username'] = $username;
+      }
+      if ($firstname !== null) {
+        $prepare[] = 'firstname = :firstname';
+        $execute[':firstname'] = $firstname;
+      }
+      if ($surname !== null) {
+        $prepare[] = 'surname = :surname';
+        $execute[':surname'] = $surname;
+      }
+      if ($email !== null) {
+        $prepare[] = 'email = :email';
+        $execute[':email'] = $email;
       }
       if ($groups !== null) {
         $prepare[] = 'groups = :groups';
@@ -209,13 +227,16 @@ class Auth {
   }
 
   public function getAllUsers() {
-    $stmt = $this->db->prepare("SELECT id, username, groups, created, lastlogin, passwordexpires FROM users");
+    $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires FROM users");
     $stmt->execute();
     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     if (!is_array($users)) {
         $usermap = array(
           'id' => $users['id'],
           'username' => $users['username'],
+          'firstname' => $users['firstname'],
+          'surname' => $users['surname'],
+          'email' => $users['email'],
           'groups' => explode(',',$users['groups']),
           'created' => $users['created'],
           'lastlogin' => $users['lastlogin'],
@@ -226,6 +247,9 @@ class Auth {
         $usermap[] = array(
           'id' => $user['id'],
           'username' => $user['username'],
+          'firstname' => $user['firstname'],
+          'surname' => $user['surname'],
+          'email' => $user['email'],
           'groups' => explode(',',$user['groups']),
           'created' => $user['created'],
           'lastlogin' => $user['lastlogin'],
@@ -237,7 +261,7 @@ class Auth {
   }
 
   public function login($username, $password) {
-    $stmt = $this->db->prepare("SELECT id, password, salt, groups FROM users WHERE username = :username");
+    $stmt = $this->db->prepare("SELECT id, username, password, salt, firstname, surname, email, groups FROM users WHERE username = :username OR email = :username");
     $stmt->execute([':username' => $username]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($user && password_verify($user['salt'].$password, $user['password'])) { // Login Successful
@@ -248,7 +272,7 @@ class Auth {
 
       // Generate JWT token
       $CoreJwt = new CoreJwt();
-      $jwt = $CoreJwt->generateToken($username,explode(',',$user['groups']));
+      $jwt = $CoreJwt->generateToken($user['username'],$user['firstname'],$user['surname'],$user['email'],explode(',',$user['groups']));
       // Set JWT as a cookie
       setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
 
@@ -315,10 +339,30 @@ class Auth {
           $Username = null;
         }
   
-        if (isset($decodedJWT->name)) {
-          $Name = $decodedJWT->name;
+        $FullNameArr = [];
+        
+        if (isset($decodedJWT->firstname)) {
+          $Firstname = $decodedJWT->firstname;
+          $FullNameArr[] = $Firstname;
         } else {
-          $Name = null;
+          $Firstname = null;
+        }
+
+        if (isset($decodedJWT->surname)) {
+          $Surname = $decodedJWT->surname;
+          $FullNameArr[] = $Surname;
+        } else {
+          $Surname = null;
+        }
+
+        if (isset($FullNameArr)) {
+          $FullName = implode(' ',$FullNameArr);
+        }
+
+        if (isset($decodedJWT->email)) {
+          $Email = $decodedJWT->email;
+        } else {
+          $Email = null;
         }
   
         if (isset($decodedJWT->groups[0]) && $decodedJWT->groups[0] != "") {
@@ -341,7 +385,10 @@ class Auth {
         $AuthResult = array(
           'Authenticated' => true,
           'Username' => $Username,
-          'DisplayName' => $Name,
+          'Firstname' => $Firstname,
+          'Surname' => $Surname,
+          'Email' => $Email,
+          'DisplayName' => $FullName,
           'EmailAddress' => $Email,
           'IPAddress' => $IPAddress,
           'Groups' => $Groups
@@ -350,14 +397,14 @@ class Auth {
         $AuthResult = array(
           'Authenticated' => false,
           'IPAddress' => $IPAddress,
-          'Groups' => 'everyone'
+          'Groups' => ['everyone']
         );
       }
     } else {
       $AuthResult = array(
         'Authenticated' => false,
         'IPAddress' => $IPAddress,
-        'Groups' => 'everyone'
+        'Groups' => ['everyone']
       );
     }
     return $AuthResult;
@@ -407,5 +454,166 @@ class Auth {
     } else {
       echo '<script>top.window.location = "/login.php?redirect_uri="+parent.window.location.href.replace("#","?")</script>';
     }
+  }
+}
+
+class RBAC {
+  private $rbacJson;
+  private $rbacInfo;
+
+  private function __construct($config,$info) {
+    // Create or open the RBAC Configuration
+    $this->rbacJson = $config;
+    $this->rbacInfo = $info;
+  }
+
+  public function getRBAC($Group = null,$Action = null) {
+    writeLog("RBAC","Queried RBAC List","debug",$_REQUEST);
+    $rbacJson = file_get_contents(__DIR__.'/../'.getConfig("System","rbacjson"));
+    $rbac = json_decode($rbacJson, true);
+    switch ($Action) {
+      case 'listgroups':
+        $splat = array();
+        foreach ($rbac as $group => $groupval) {
+          $newArr = array(
+            "id" => $group,
+            "Group" => $groupval['Name'],
+            "Description" => $groupval['Description']
+          );
+          array_push($splat,$newArr);
+        }
+        return $splat;
+      case 'listconfigurablegroups':
+        $splat = array();
+        foreach ($rbac as $group => $groupval) {
+          // Exclude SYSTEM Groups
+          if ($group != 'authenticated' && $group != 'everyone') {
+            $newArr = array(
+              "id" => $group,
+              "Group" => $groupval['Name'],
+              "Description" => $groupval['Description']
+            );
+            array_push($splat,$newArr);
+          }
+        }
+        return $splat;
+      case 'listroles':
+        $rbacJson = file_get_contents(__DIR__.'/../'.getConfig("System","rbacinfo"));
+        $rbac = json_decode($rbacJson, true);
+        return $rbac;
+      default:
+        if ($Group != null) {
+          return $rbac[$Group];
+        } else {
+          return $rbac;
+        }
+    }
+  }
+  
+  public function setRBAC($GroupID,$GroupName,$Description = null,$Key = null,$Value = null) {
+    $rbac = getRBAC();
+    $roles = getRBAC(null,"listroles");
+    if (array_key_exists($GroupID,$rbac)) {
+      if ($Description != null) {
+        $rbac[$GroupID]['Description'] = $Description;
+        file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbac, JSON_PRETTY_PRINT));
+        writeLog("RBAC","Updated description for ".$rbac[$GroupID]['Name'],$rbac[$GroupID]);
+      }
+      if ($Key != null) {
+        if (array_key_exists($Key,$roles['Resources'])) {
+          if ($Value == "true") {
+            ## Add Key to Array
+            if (in_array($Key,$rbac[$GroupID]['PermittedResources'])) {
+              writeLog("RBAC","$Key is already assigned to ".$rbac[$GroupID]['Name'],"debug",$Key,$rbac[$GroupID]);
+            } else {
+              array_push($rbac[$GroupID]['PermittedResources'],$Key);
+              file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbac, JSON_PRETTY_PRINT));
+              writeLog("RBAC","Added $Key to ".$rbac[$GroupID]['Name'],"warning",$rbac[$GroupID]);
+            }
+  
+            ## Add Menus to Array
+            foreach ($roles['Resources'][$Key]['PermittedMenus'] as $PermittedMenu) {
+              if (in_array($PermittedMenu,$rbac[$GroupID]['PermittedMenus'])) {
+                writeLog("RBAC","$PermittedMenu is already assigned to: ".$rbac[$GroupID]['Name'],"debug",$rbac[$GroupID]);
+              } else {
+                array_push($rbac[$GroupID]['PermittedMenus'],$PermittedMenu);
+                file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbac, JSON_PRETTY_PRINT));
+                writeLog("RBAC","Added Menu: $PermittedMenu to ".$rbac[$GroupID]['Name'],"info",$rbac[$GroupID]);
+              }
+            }
+          } else if ($Value == "false") {
+            ## Remove Key from Array
+            if (in_array($Key,$rbac[$GroupID]['PermittedResources'])) {
+              if (($keytoremove = array_search($Key, $rbac[$GroupID]['PermittedResources'])) !== false) {
+                unset($rbac[$GroupID]['PermittedResources'][$keytoremove]);
+                $rbac[$GroupID]['PermittedResources'] = array_values($rbac[$GroupID]['PermittedResources']);
+                file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbac, JSON_PRETTY_PRINT));
+                writeLog("RBAC","Removed $Key from ".$rbac[$GroupID]['Name'],"warning",$rbac[$GroupID]);
+              }
+            } else {
+              writeLog("RBAC","$Key is not assigned to ".$rbac[$GroupID]['Name'],"error",$Key,$rbac[$GroupID]);
+            }
+            ## Remove Menus from Array
+            $Needed = false;
+            foreach ($roles['Resources'][$Key]['PermittedMenus'] as $PermittedMenu) {
+              if (in_array($PermittedMenu,$rbac[$GroupID]['PermittedMenus'])) {
+                if (!empty($rbac[$GroupID]['PermittedResources'])) {
+                  foreach ($rbac[$GroupID]['PermittedResources'] as $PermittedResource) {
+                    if (in_array($PermittedMenu,$roles['Resources'][$PermittedResource]['PermittedMenus'])) {
+                      $Needed = true;
+                    }
+                  }
+                } else {
+                  foreach ($rbac[$GroupID]['PermittedMenus'] as $PermittedMenu) {
+                    if (($menutoremove = array_search($PermittedMenu, $rbac[$GroupID]['PermittedMenus'])) !== false) {;
+                      unset($rbac[$GroupID]['PermittedMenus'][$menutoremove]);
+                    }
+                  }
+                  $rbac[$GroupID]['PermittedMenus'] = array_values($rbac[$GroupID]['PermittedMenus']);
+                  file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbac, JSON_PRETTY_PRINT));
+                  writeLog("RBAC","No permitted resources left, removing permitted menus from ".$rbac[$GroupID]['Name'],"debug",$rbac[$GroupID]);
+                }
+              } else {
+                writeLog("RBAC","$PermittedMenu is not assigned to ".$rbac[$GroupID]['Name'],"error",$Key,$rbac[$GroupID]);
+              }
+              if (!$Needed) {
+                if (($menutoremove = array_search($PermittedMenu, $rbac[$GroupID]['PermittedMenus'])) !== false) {
+                  unset($rbac[$GroupID]['PermittedMenus'][$menutoremove]);
+                  $rbac[$GroupID]['PermittedMenus'] = array_values($rbac[$GroupID]['PermittedMenus']);
+                  file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbac, JSON_PRETTY_PRINT));
+                  writeLog("RBAC","Removed Menu: $PermittedMenu from ".$rbac[$GroupID]['Name'],"info",$rbac[$GroupID]);
+                }
+              }
+            }
+          }
+        } else {
+          return "Error. Invalid RBAC Option specified: ".$Key.".";
+        }
+      }
+    } else {
+      $NewNode = array(
+          "Name" => $GroupName,
+          "Description" => $Description,
+          "PermittedResources" => array(),
+          "PermittedMenus" => array()
+      );
+      $rbac[$GroupID] = $NewNode;
+      file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbac, JSON_PRETTY_PRINT));
+    }
+    return $rbac;
+  }
+  
+  public function deleteRBAC($Group) {
+    writeLog("RBAC","Deleted RBAC Group: $Group","debug",$_REQUEST);
+    $rbacJson = file_get_contents(__DIR__.'/../'.getConfig("System","rbacjson"));
+    $rbacArr = json_decode($rbacJson, true);
+    if (array_key_exists($Group,$rbacArr)) {
+      writeLog("RBAC","Deleted RBAC Group: $Group","debug",$_REQUEST);
+      unset($rbacArr[$Group]);
+      file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbacArr, JSON_PRETTY_PRINT));
+    } else {
+      writeLog("RBAC","Error deleting RBAC Group: $Group. The group does not exist.","error",$_REQUEST);
+    }
+    return $rbacArr;
   }
 }
