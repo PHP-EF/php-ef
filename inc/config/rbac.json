@@ -9,8 +9,8 @@
         "Name": "Everyone",
         "Description": "This group applies to any user, regardless of if they are logged in or not",
         "PermittedResources": [
-            "DNS-TOOLBOX",
             "B1-THREAT-ACTORS",
+            "DNS-TOOLBOX",
             "B1-SECURITY-ASSESSMENT"
         ],
         "PermittedMenus": []
@@ -22,12 +22,12 @@
             "ADMIN-RBAC",
             "ADMIN-CONFIG",
             "ADMIN-LOGS",
-            "DNS-TOOLBOX",
             "B1-SECURITY-ASSESSMENT",
             "B1-THREAT-ACTORS",
             "B1-LICENSE-USAGE",
             "ADMIN-SECASS",
-            "ADMIN-USERS"
+            "ADMIN-USERS",
+            "DNS-TOOLBOX"
         ],
         "PermittedMenus": [
             "ADMIN-Menu",

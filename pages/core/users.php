@@ -70,6 +70,26 @@ body.dark-theme .popover {
           <small id="editUserNameHelp" class="form-text text-muted">The Username for the account.</small>
         </div>
         <div class="form-group">
+          <label for="editUserFirstname">First Name</label>
+          <input type="text" class="form-control" id="editUserFirstname" aria-describedby="editUserFirstnameHelp">
+          <small id="editUserFirstnameHelp" class="form-text text-muted">Enter the updated users first name.</small>
+        </div>
+        <div class="form-group">
+          <label for="editUserSurname">Surname</label>
+          <input type="text" class="form-control" id="editUserSurname" aria-describedby="editUserSurnameHelp">
+          <small id="editUserSurnameHelp" class="form-text text-muted">Enter the updated users surname.</small>
+        </div>
+        <div class="form-group">
+          <label for="editUserEmail">Email</label>
+          <input type="text" class="form-control" id="editUserEmail" aria-describedby="editUserEmailHelp">
+          <small id="editUserEmailHelp" class="form-text text-muted">Enter the updated users email address.</small>
+        </div>
+        <div class="form-group">
+          <label for="editCreated">Created Date</label>
+          <input type="text" class="form-control" id="editCreated" aria-describedby="editCreatedHelp" disabled>
+          <small id="editCreatedHelp" class="form-text text-muted">The date when this account was created.</small>
+        </div>
+        <div class="form-group">
           <label for="editLastLogin">Last Login Date</label>
           <input type="text" class="form-control" id="editLastLogin" aria-describedby="editLastLoginHelp" disabled>
           <small id="editLastLoginHelp" class="form-text text-muted">The date when this account last logged in.</small>
@@ -127,6 +147,21 @@ body.dark-theme .popover {
           <label for="newUserName">Username</label>
           <input type="text" class="form-control" id="newUserName" aria-describedby="newUserNameHelp">
           <small id="newUserNameHelp" class="form-text text-muted">The username for the new user.</small>
+        </div>
+        <div class="form-group">
+          <label for="newUserFirstname">First Name</label>
+          <input type="text" class="form-control" id="newUserFirstname" aria-describedby="newUserFirstnameHelp">
+          <small id="newUserFirstnameHelp" class="form-text text-muted">Enter the new users first name.</small>
+        </div>
+        <div class="form-group">
+          <label for="newUserSurname">Surname</label>
+          <input type="text" class="form-control" id="newUserSurname" aria-describedby="newUserSurnameHelp">
+          <small id="newUserSurnameHelp" class="form-text text-muted">Enter the new users surname.</small>
+        </div>
+        <div class="form-group">
+          <label for="newUserEmail">Email</label>
+          <input type="text" class="form-control" id="newUserEmail" aria-describedby="newUserEmailHelp">
+          <small id="newUserEmailHelp" class="form-text text-muted">Enter the new users email address.</small>
         </div>
         <div class="form-group">
           <label for="newUserPassword">Password</label>&nbsp;
@@ -192,8 +227,12 @@ body.dark-theme .popover {
   function listUserConfig(row) {
     $('#editUserID').val(row['id']);
     $('#editUserName').val(row['username']);
+    $('#editUserFirstname').val(row['firstname']);
+    $('#editUserSurname').val(row['surname']);
+    $('#editUserEmail').val(row['email']);
     $('#editLastLogin').val(row['lastlogin']);
     $('#editPasswordExpires').val(row['passwordexpires']);
+    $('#editCreated').val(row['created']);
   }
 
   window.actionEvents = {
@@ -282,6 +321,9 @@ body.dark-theme .popover {
     var username = $('#newUserName').val().trim();
     var password = $('#newUserPassword').val().trim();
     var confirmPassword = $('#newUserPassword2').val().trim();
+    var firstname = $('#newUserFirstname').val().trim();
+    var surname = $('#newUserSurname').val().trim();
+    var email = $('#newUserEmail').val().trim();
 
     // Initialize a flag for validation
     var isValid = true;
@@ -301,8 +343,11 @@ body.dark-theme .popover {
     // Display error messages or proceed with form submission
     if (isValid) {
       var postArr = {}
-      postArr.un = $('#newUserName').val()
-      postArr.pw = $('#newUserPassword').val()
+      postArr.un = username;
+      postArr.pw = password;
+      postArr.fn = firstname;
+      postArr.sn = surname;
+      postArr.em = email;
       $.post( "/api?function=newUser", postArr).done(function( data, status ) {
         if (data['Status'] == 'Success') {
           toast(data['Status'],"",data['Message'],"success");
@@ -321,9 +366,12 @@ body.dark-theme .popover {
 
   $(document).on('click', '#editUserSubmit', function(event) {
     var postArr = {}
-    postArr.id = $('#editUserID').val()
-    postArr.un = $('#editUserName').val()
-    postArr.pw = $('#editUserPassword').val()
+    postArr.id = $('#editUserID').val().trim();
+    postArr.un = $('#editUserName').val().trim();
+    postArr.pw = $('#editUserPassword').val().trim();
+    postArr.fn = $('#editUserFirstname').val().trim();
+    postArr.sn = $('#editUserSurname').val().trim();
+    postArr.em = $('#editUserEmail').val().trim();
     $.post( "/api?function=setUser", postArr).done(function( data, status ) {
       if (data['Status'] == 'Success') {
         toast(data['Status'],"",data['Message'],"success");
@@ -405,6 +453,21 @@ body.dark-theme .popover {
             filterControl: 'input',
             sortable: true
           },{
+            field: 'firstname',
+            title: 'First Name',
+            filterControl: 'input',
+            sortable: true
+          },{
+            field: 'surname',
+            title: 'Surname',
+            filterControl: 'input',
+            sortable: true
+          },{
+            field: 'email',
+            title: 'Email',
+            filterControl: 'input',
+            sortable: true
+          },{
             field: 'groups',
             title: 'Group(s)',
             filterControl: 'input',
@@ -421,12 +484,14 @@ body.dark-theme .popover {
             title: 'Creation Date',
             filterControl: 'input',
             sortable: false,
+            visible: false,
             formatter: 'datetimeFormatter'            
           },{
             field: 'passwordexpires',
             title: 'Password Expiry Date',
             filterControl: 'input',
             sortable: false,
+            visible: false,
             formatter: 'datetimeFormatter'
           },{
             title: 'Actions',
