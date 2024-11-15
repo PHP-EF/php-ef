@@ -8,12 +8,14 @@ require_once(__DIR__.'/../vendor/autoload.php');
 foreach (glob(__DIR__.'/classes/' . '*.php') as $class) {
   require_once $class; // Include each PHP file
 }
-// Initialize Database
+// Instantiate Authentication Class & Database
 $auth = new Auth(__DIR__.'/config/app.db');
 // Include Functions
 foreach (glob(__DIR__.'/functions/' . '*.php') as $function) {
   require_once $function; // Include each PHP file
 }
+// Instantiate RBAC Class
+$rbac = new RBAC();
 
 if (!(isset($SkipCSS))) {
 

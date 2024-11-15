@@ -461,15 +461,15 @@ class RBAC {
   private $rbacJson;
   private $rbacInfo;
 
-  private function __construct($config,$info) {
+  public function __construct() {
     // Create or open the RBAC Configuration
-    $this->rbacJson = $config;
-    $this->rbacInfo = $info;
+    $this->rbacJson = __DIR__.'/../'.getConfig("System","rbacjson");
+    $this->rbacInfo = __DIR__.'/../'.getConfig("System","rbacinfo");
   }
 
   public function getRBAC($Group = null,$Action = null) {
     writeLog("RBAC","Queried RBAC List","debug",$_REQUEST);
-    $rbacJson = file_get_contents(__DIR__.'/../'.getConfig("System","rbacjson"));
+    $rbacJson = file_get_contents($this->rbacJson);
     $rbac = json_decode($rbacJson, true);
     switch ($Action) {
       case 'listgroups':
@@ -498,7 +498,7 @@ class RBAC {
         }
         return $splat;
       case 'listroles':
-        $rbacJson = file_get_contents(__DIR__.'/../'.getConfig("System","rbacinfo"));
+        $rbacJson = file_get_contents($this->rbacInfo);
         $rbac = json_decode($rbacJson, true);
         return $rbac;
       default:
@@ -511,13 +511,13 @@ class RBAC {
   }
   
   public function setRBAC($GroupID,$GroupName,$Description = null,$Key = null,$Value = null) {
-    $rbac = getRBAC();
-    $roles = getRBAC(null,"listroles");
+    $rbac = $this->getRBAC();
+    $roles = $this->getRBAC(null,"listroles");
     if (array_key_exists($GroupID,$rbac)) {
       if ($Description != null) {
         $rbac[$GroupID]['Description'] = $Description;
-        file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbac, JSON_PRETTY_PRINT));
-        writeLog("RBAC","Updated description for ".$rbac[$GroupID]['Name'],$rbac[$GroupID]);
+        file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
+        writeLog("RBAC","Updated description for: ".$rbac[$GroupID]['Name'],"info",$rbac[$GroupID]);
       }
       if ($Key != null) {
         if (array_key_exists($Key,$roles['Resources'])) {
@@ -527,7 +527,7 @@ class RBAC {
               writeLog("RBAC","$Key is already assigned to ".$rbac[$GroupID]['Name'],"debug",$Key,$rbac[$GroupID]);
             } else {
               array_push($rbac[$GroupID]['PermittedResources'],$Key);
-              file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbac, JSON_PRETTY_PRINT));
+              file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
               writeLog("RBAC","Added $Key to ".$rbac[$GroupID]['Name'],"warning",$rbac[$GroupID]);
             }
   
@@ -537,7 +537,7 @@ class RBAC {
                 writeLog("RBAC","$PermittedMenu is already assigned to: ".$rbac[$GroupID]['Name'],"debug",$rbac[$GroupID]);
               } else {
                 array_push($rbac[$GroupID]['PermittedMenus'],$PermittedMenu);
-                file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbac, JSON_PRETTY_PRINT));
+                file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
                 writeLog("RBAC","Added Menu: $PermittedMenu to ".$rbac[$GroupID]['Name'],"info",$rbac[$GroupID]);
               }
             }
@@ -547,7 +547,7 @@ class RBAC {
               if (($keytoremove = array_search($Key, $rbac[$GroupID]['PermittedResources'])) !== false) {
                 unset($rbac[$GroupID]['PermittedResources'][$keytoremove]);
                 $rbac[$GroupID]['PermittedResources'] = array_values($rbac[$GroupID]['PermittedResources']);
-                file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbac, JSON_PRETTY_PRINT));
+                file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
                 writeLog("RBAC","Removed $Key from ".$rbac[$GroupID]['Name'],"warning",$rbac[$GroupID]);
               }
             } else {
@@ -570,7 +570,7 @@ class RBAC {
                     }
                   }
                   $rbac[$GroupID]['PermittedMenus'] = array_values($rbac[$GroupID]['PermittedMenus']);
-                  file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbac, JSON_PRETTY_PRINT));
+                  file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
                   writeLog("RBAC","No permitted resources left, removing permitted menus from ".$rbac[$GroupID]['Name'],"debug",$rbac[$GroupID]);
                 }
               } else {
@@ -580,7 +580,7 @@ class RBAC {
                 if (($menutoremove = array_search($PermittedMenu, $rbac[$GroupID]['PermittedMenus'])) !== false) {
                   unset($rbac[$GroupID]['PermittedMenus'][$menutoremove]);
                   $rbac[$GroupID]['PermittedMenus'] = array_values($rbac[$GroupID]['PermittedMenus']);
-                  file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbac, JSON_PRETTY_PRINT));
+                  file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
                   writeLog("RBAC","Removed Menu: $PermittedMenu from ".$rbac[$GroupID]['Name'],"info",$rbac[$GroupID]);
                 }
               }
@@ -598,19 +598,19 @@ class RBAC {
           "PermittedMenus" => array()
       );
       $rbac[$GroupID] = $NewNode;
-      file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbac, JSON_PRETTY_PRINT));
+      file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
     }
     return $rbac;
   }
   
   public function deleteRBAC($Group) {
     writeLog("RBAC","Deleted RBAC Group: $Group","debug",$_REQUEST);
-    $rbacJson = file_get_contents(__DIR__.'/../'.getConfig("System","rbacjson"));
+    $rbacJson = file_get_contents($this->rbacJson);
     $rbacArr = json_decode($rbacJson, true);
     if (array_key_exists($Group,$rbacArr)) {
       writeLog("RBAC","Deleted RBAC Group: $Group","debug",$_REQUEST);
       unset($rbacArr[$Group]);
-      file_put_contents(__DIR__.'/../'.getConfig("System","rbacjson"), json_encode($rbacArr, JSON_PRETTY_PRINT));
+      file_put_contents($this->rbacJson, json_encode($rbacArr, JSON_PRETTY_PRINT));
     } else {
       writeLog("RBAC","Error deleting RBAC Group: $Group. The group does not exist.","error",$_REQUEST);
     }

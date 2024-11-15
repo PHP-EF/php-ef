@@ -1,38 +1,47 @@
 {
     "Venal Viper": {
-        "IMG": "vextrio-viper",
+        "SVG": "vextrio-viper.svg",
+        "PNG": "vextrio-viper.png",
         "URLStub": ""
     },
     "Vigorish Viper": {
-        "IMG": "vextrio-viper",
+        "SVG": "vextrio-viper.svg",
+        "PNG": "vextrio-viper.png",
         "URLStub": "vigorish-viper"
     },
     "VexTrio": {
-        "IMG": "vextrio-viper",
+        "SVG": "vextrio-viper.svg",
+        "PNG": "vextrio-viper.png",
         "URLStub": "vextrio"
     },
     "Loopy Lizard": {
-        "IMG": "loopy-lizard",
+        "SVG": "loopy-lizard.svg",
+        "PNG": "loopy-lizard.png",
         "URLStub": "loopy-lizard"
     },
     "Decoy Dog": {
-        "IMG": "decoy-dog",
+        "SVG": "decoy-dog.svg",
+        "PNG": "decoy-dog.png",
         "URLStub": "decoy-dog"
     },
     "Savvy Seahorse": {
-        "IMG": "savvy-seahorse",
+        "SVG": "savvy-seahorse.svg",
+        "PNG": "savvy-seahorse.png",
         "URLStub": "savvy-seahorse"
     },
     "Prolific Puma": {
-        "IMG": "prolific-puma",
+        "SVG": "prolific-puma.svg",
+        "PNG": "prolific-puma.png",
         "URLStub": "prolific-puma"
     },
     "Revolver Rabbit": {
-        "IMG": "revolver-rabbit-noglow",
+        "SVG": "revolver-rabbit-noglow.svg",
+        "PNG": "revolver-rabbit-noglow.png",
         "URLStub": "revolver-rabbit"
     },
     "Muddling Meerkat": {
-        "IMG": "muddling-meerkat",
+        "SVG": "muddling-meerkat.svg",
+        "PNG": "muddling-meerkat.png",
         "URLStub": "muddling-meerkat"
     }
 }
