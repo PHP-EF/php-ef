@@ -132,7 +132,7 @@ html {
 
 <script>
 function login() {
-  $.post( "/api?function=login", {
+  $.post( "/api?f=login", {
       un: $('#un').val(),
       pw: $('#pw').val()
   }).done(function( data, status ) {

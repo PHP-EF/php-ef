@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
-  if ($auth->checkAccess(null,"B1-SECURITY-ASSESSMENT") == false) {
+  if ($ib->auth->checkAccess(null,"B1-SECURITY-ASSESSMENT") == false) {
     die();
   }
 ?>
@@ -134,7 +134,7 @@ function hideLoading(timer) {
 }
 
 function updateProgress(id,timer) {
-  $.get('/api?function=getSecurityReportProgress&id='+id, function(data) {
+  $.get('/api?f=getSecurityReportProgress&id='+id, function(data) {
       var progress = parseFloat(data['Progress']).toFixed(1); // Assuming the server returns a JSON object with a 'progress' field
       $('#progress-bar').css('width', progress + '%').attr('aria-valuenow', progress).text(progress + '%');
       $('#progressAction').text(data['Action'])
@@ -144,7 +144,7 @@ function updateProgress(id,timer) {
         }, 1000);
       } else if (progress >= 100 && data['Action'] == 'Done..' ) {
         toast("Success","","Security Assessment Successfully Generated","success","30000");
-        download('/api?function=downloadSecurityReport&id='+id);
+        download('/api?f=downloadSecurityReport&id='+id);
         hideLoading(timer);
         $("#Generate").prop('disabled', false);
       }
@@ -176,7 +176,7 @@ $("#Generate").click(function(){
   }
 
   $("#Generate").prop('disabled', true)
-  $.get( "/api?function=getUUID", function( id ) {
+  $.get( "/api?f=getUUID", function( id ) {
     let timer = startTimer();
     showLoading(id,timer);
     const startDateTime = new Date($('#startDate')[0].value)
@@ -189,7 +189,7 @@ $("#Generate").click(function(){
     if ($('#APIKey')[0].value) {
       postArr.APIKey = $('#APIKey')[0].value
     }
-    $.post( "/api?function=createSecurityReport", postArr).done(function( data, status ) {
+    $.post( "/api?f=createSecurityReport", postArr).done(function( data, status ) {
       if (data['Status'] == 'Success') {
         toast("Success","Do not refresh the page","Security Assessment Report Job Started Successfully","success","30000");
       } else {

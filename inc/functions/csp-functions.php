@@ -1,7 +1,8 @@
 <?php
 function GetCSPConfiguration($Uri,$APIKey = "",$Realm = "US") {
+  global $ib;
   if (isset($_COOKIE['crypt'])) {
-    $B1ApiKey = decrypt($_COOKIE['crypt'],getConfig("Security","salt"));
+    $B1ApiKey = decrypt($_COOKIE['crypt'],$ib->config->getConfig("Security","salt"));
   } elseif (isset($_POST['APIKey'])) {
     $B1ApiKey = $_POST['APIKey'];
   } else {
@@ -33,8 +34,8 @@ function GetCSPConfiguration($Uri,$APIKey = "",$Realm = "US") {
   }
 
   $Options = array(
-    'timeout' => getConfig("System","CURL-Timeout"),
-    'connect_timeout' => getConfig("System","CURL-ConnectTimeout")
+    'timeout' => $ib->config->getConfig("System","CURL-Timeout"),
+    'connect_timeout' => $ib->config->getConfig("System","CURL-ConnectTimeout")
   );
 
   return array(
@@ -92,6 +93,7 @@ function QueryCSPMulti($MultiQuery,$APIKey = "",$Realm = "US") {
 }
 
 function QueryCSP($Method, $Uri, $Data = "", $APIKey = "", $Realm = "US") {
+  global $ib;
   $CSPConfig = GetCSPConfiguration($Uri,$APIKey,$Realm);
   try {
     switch ($Method) {
@@ -128,12 +130,12 @@ function QueryCSP($Method, $Uri, $Data = "", $APIKey = "", $Realm = "US") {
     switch ($Result->status_code) {
       case '401':
         $LogArr['Error'] = "Invalid API Key.";
-        writeLog("CSP","Failed to authenticate to the CSP","debug",$LogArr);
+        $ib->logging->writeLog("CSP","Failed to authenticate to the CSP","debug",$LogArr);
         return array("Status" => "Error", "Error" => "Invalid API Key.");
         break;
       default:
         $Output = json_decode($Result->body);
-        writeLog("CSP","Queried the CSP","debug",$LogArr);
+        $ib->logging->writeLog("CSP","Queried the CSP","debug",$LogArr);
         return $Output;
         break;
     }

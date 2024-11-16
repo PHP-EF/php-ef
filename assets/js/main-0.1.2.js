@@ -169,10 +169,10 @@ function getCookie(name) {
 async function heartBeat() {
   const delay = ms => new Promise(res => setTimeout(res, ms));
   try {
-    const response = await fetch('/api?function=heartbeat', {cache: "no-cache"});
+    const response = await fetch('/api?f=heartbeat', {cache: "no-cache"});
     if (response.status == "200") {
       while (true) {
-	      let response2 = await fetch('/api?function=heartbeat', {cache: "no-cache"});
+	      let response2 = await fetch('/api?f=heartbeat', {cache: "no-cache"});
         if (response2.status == "301") {
       	  console.log("Session timed out.");
           window.location.href = "/login.php?redirect_uri="+window.location.href.replace("#","?");
@@ -325,7 +325,7 @@ applyFontSize();
 
 // New Stuff
 function saveAPIKey(key) {
-  $.post( "/api?function=crypt", {key: key}).done(function( data, status ) {
+  $.post( "/api?f=crypt", {key: key}).done(function( data, status ) {
       setCookie('crypt',data,7);
       checkAPIKey();
       toast("Success","","Saved API Key.","success","30000");

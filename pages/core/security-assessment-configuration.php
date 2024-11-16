@@ -1,60 +1,105 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
-  if ($auth->checkAccess(null,"ADMIN-SECASS") == false) {
+  if ($ib->auth->checkAccess(null,"ADMIN-SECASS") == false) {
     die();
   }
-
 ?>
+
+<style>
+.card {
+  padding: 10px;
+}
+</style>
 
 <div class="container">
   <div class="row justify-content-center">
     <div class="col-12 col-lg-10 mx-auto">
-      <div class="my-4">
-        <h5 class="mb-0 mt-5">Threat Actor Configuration</h5>
-        <p>Use the following to configure the known Threat Actors. This allows populating Threat Actors with Images / Report Links during Security Assessment Report generation.</p>
-        <table  data-url="/api?function=getThreatActorConfig"
-          data-toggle="table"
-          data-search="true"
-          data-filter-control="true" 
-          data-show-refresh="true"
-          data-pagination="true"
-          data-toolbar="#toolbar"
-          data-sort-name="Name"
-          data-sort-order="asc"
-          data-page-size="25"
-          data-buttons="threatActorButtons"
-          data-buttons-order="btnAddThreatActor,refresh"
-          class="table table-striped" id="threatActorTable">
+      <h2 class="h3 mb-4 page-title">Security Assessment Report Generator Configuration</h2>
 
-          <thead>
-            <tr>
-              <th data-field="state" data-checkbox="true"></th>
-              <th data-field="Name" data-sortable="true">Threat Actor</th>
-              <th data-field="URLStub" data-sortable="true">URL Stub</th>
-              <th data-field="PNG" data-sortable="true">PNG Image</th>
-              <th data-field="SVG" data-sortable="true">SVG Image</th>
-              <th data-formatter="actionFormatter" data-events="actionEvents">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="threatActorConfig"></tbody>
-        </table>
+      <div class="my-4">
+        <div class="card border-secondary">
+          <div class="card-title">
+            <h5>Threat Actor Configuration</h5>
+            <p>Use the following to configure the known Threat Actors. This allows populating Threat Actors with Images / Report Links during Security Assessment Report generation.</p>
+          </div>
+          <table  data-url="/api?f=getThreatActorConfig"
+            data-toggle="table"
+            data-search="true"
+            data-filter-control="true" 
+            data-show-refresh="true"
+            data-pagination="true"
+            data-toolbar="#toolbar"
+            data-sort-name="Name"
+            data-sort-order="asc"
+            data-page-size="25"
+            data-buttons="threatActorButtons"
+            data-buttons-order="btnAddThreatActor,refresh"
+            class="table table-striped" id="threatActorTable">
+
+            <thead>
+              <tr>
+                <th data-field="state" data-checkbox="true"></th>
+                <th data-field="Name" data-sortable="true">Threat Actor</th>
+                <th data-field="URLStub" data-sortable="true">URL Stub</th>
+                <th data-field="PNG" data-sortable="true">PNG Image</th>
+                <th data-field="SVG" data-sortable="true">SVG Image</th>
+                <th data-formatter="threatActorActionFormatter" data-events="actionEvents">Actions</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+
+        <hr>
+        
+        <div class="card border-secondary">
+          <div class="card-title">
+            <h5>Template Configuration</h5>
+            <p>Use the following to configure the template for the Security Assessment Report Generator.</p>
+          </div>
+          <table  data-url="/api?f=getSecurityAssessmentTemplates"
+            data-toggle="table"
+            data-search="true"
+            data-filter-control="true" 
+            data-show-refresh="true"
+            data-pagination="true"
+            data-toolbar="#toolbar"
+            data-sort-name="Name"
+            data-sort-order="asc"
+            data-page-size="25"
+            data-buttons="templateButtons"
+            data-buttons-order="btnAddTemplate,refresh"
+            class="table table-striped" id="templateTable">
+
+            <thead>
+              <tr>
+                <th data-field="state" data-checkbox="true"></th>
+                <th data-field="Status" data-sortable="true">Status</th>
+                <th data-field="TemplateName" data-sortable="true">Name</th>
+                <th data-field="ThreatActorSlide" data-sortable="true">Threat Actor Slide</th>
+                <th data-field="FileName" data-sortable="true">File Name</th>
+                <th data-field="Created" data-sortable="true">Upload Date</th>
+                <th data-formatter="templateActionFormatter" data-events="actionEvents">Actions</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 
-<!-- Edit Modal -->
-<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+<!-- Edit Threat Actor Modal -->
+<div class="modal fade" id="editThreatActorModal" tabindex="-1" role="dialog" aria-labelledby="editThreatActorModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="editModalLabel">Threat Actor Information</h5>
+        <h5 class="modal-title" id="editThreatActorModalLabel">Threat Actor Information</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
           <span aria-hidden="true"></span>
         </button>
       </div>
-      <div class="modal-body" id="editModelBody">
+      <div class="modal-body" id="editThreatActorModalBody">
         <div class="form-group">
           <label for="threatActorName">Threat Actor Name</label>
           <input type="text" class="form-control" id="threatActorName" aria-describedby="threatActorNameHelp" disabled>
@@ -136,24 +181,124 @@
             <img id="newImagePreviewPNG" src="" alt="PNG Image Preview" style="display:none; margin-top: 10px; max-width: 100%;">
           </div>
         </div>
-        <button class="btn btn-primary" id="newThreatActorSubmit">Submit</button>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-primary" id="newThreatActorSubmit">Save</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- -------------------- -->
 
+<!-- Edit Template Modal -->
+<div class="modal fade" id="editTemplateModal" tabindex="-1" role="dialog" aria-labelledby="editTemplateModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editTemplateModalLabel">Template Information</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="modal-body" id="editTemplateModalBody">
+        <div class="form-group">
+          <label for="templateStatus">Template Status</label>
+          <select id="templateStatus" class="form-select" aria-label="Template Status" aria-describedby="templateStatusHelp">
+            <option value="Active">Active</option>
+            <option value="Previous" disabled>Previous</option>
+            <option value="Old">Old</option>
+          </select>
+          <small id="templateStatusHelp" class="form-text text-muted">The current status of the template.</small>
+        </div>
+        <div class="form-group">
+          <label for="templateName">Template Name</label>
+          <input type="text" class="form-control info-field" id="templateName" aria-describedby="templateNameHelp" name="templateName">
+          <small id="templateNameHelp" class="form-text text-muted">The file name for the Security Assessment Template.</small>
+        </div>
+        <div class="form-group">
+          <label for="templateThreatActorSlide">Threat Actor Slide</label>
+          <input type="text" class="form-control info-field" id="templateThreatActorSlide" aria-describedby="templateThreatActorSlideHelp" name="templateThreatActorSlide">
+          <small id="templateThreatActorSlideHelp" class="form-text text-muted">This is the Threat Actor template slide number.</small>
+        </div>
+        <div class="form-group">
+          <label for="templateFileName">Template File Name</label>
+          <input type="text" class="form-control info-field" id="templateFileName" aria-describedby="templateFileNameHelp" name="templateFileName" disabled>
+          <small id="templateFileNameHelp" class="form-text text-muted">The file name for the Security Assessment Template.</small>
+        </div>
+        <div class="form-group">
+          <label for="templateUploadDate">Upload Date</label>
+          <input type="text" class="form-control" id="templateUploadDate" aria-describedby="templateUploadDateHelp" disabled>
+          <small id="templateUploadDateHelp" class="form-text text-muted">The upload date of this template.</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-primary" id="editTemplateSubmit">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New Template Modal -->
+<div class="modal fade" id="newTemplateModal" tabindex="-1" role="dialog" aria-labelledby="newTemplateModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="newTemplateModalLabel">New Template Wizard</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="modal-body" id="newTemplateModelBody">
+	      <p>Enter the new template information below to add it to the list.</p>
+        <div class="form-group">
+          <label for="templateStatus">Template Status</label>
+          <select id="templateStatus" class="form-select" aria-label="Template Status" aria-describedby="templateStatusHelp">
+            <option value="active">Active</option>
+            <option value="previous">Previous</option>
+            <option value="old">Old</option>
+          </select>
+          <small id="templateStatusHelp" class="form-text text-muted">The status of the new template.</small>
+        </div>
+        <div class="form-group">
+          <label for="templateName">Template Name</label>
+          <input type="text" class="form-control info-field" id="templateName" aria-describedby="templateNameHelp" name="templateName" disabled>
+          <small id="templateNameHelp" class="form-text text-muted">The name for the Security Assessment Template.</small>
+        </div>
+        <div class="form-group">
+          <label for="templateThreatActorSlide">Threat Actor Slide</label>
+          <input type="text" class="form-control info-field" id="templateThreatActorSlide" aria-describedby="templateThreatActorSlideHelp" name="templateThreatActorSlide">
+          <small id="templateThreatActorSlideHelp" class="form-text text-muted">This is the Threat Actor template slide number.</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-primary" id="newTemplateSubmit">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-  function actionFormatter(value, row, index) {
+  function threatActorActionFormatter(value, row, index) {
     return [
-      '<a class="edit" title="Edit">',
+      '<a class="editThreatActor" title="Edit">',
       '<i class="fa fa-pencil"></i>',
       '</a>&nbsp;',
-      '<a class="delete" title="Delete">',
+      '<a class="deleteThreatActor" title="Delete">',
+      '<i class="fa fa-trash"></i>',
+      '</a>'
+    ].join('')
+  }
+
+  function templateActionFormatter(value, row, index) {
+    return [
+      '<a class="editTemplate" title="Edit">',
+      '<i class="fa fa-pencil"></i>',
+      '</a>&nbsp;',
+      '<a class="deleteTemplate" title="Delete">',
       '<i class="fa fa-trash"></i>',
       '</a>'
     ].join('')
@@ -177,8 +322,23 @@
     }
   }
 
+  function templateButtons() {
+    return {
+      btnAddTemplate: {
+        text: "Add Security Assessment Template",
+        icon: "bi-plus-lg",
+        event: function() {
+        },
+        attributes: {
+          title: "Add a new Security Assessment Template",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
   function listThreatActor(row) {
-    $('#editModal input').val('');
+    $('#editThreatActorModal input').val('');
     $('#imagePreviewSVG, #imagePreviewPNG').attr('src','').css('display','none');
     $('#threatActorName').val(row['Name']);
     if (row['SVG'] != "") {
@@ -188,6 +348,15 @@
       imagePreview('imagePreviewPNG','/assets/images/Threat Actors/Uploads/'+row['PNG']);
     }
     $('#threatActorURLStub').val(row['URLStub']);
+  }
+
+  function listTemplate(row) {
+    $('#editTemplateModal input').val('');
+    $('#templateStatus').val(row['Status']);
+    $('#templateName').val(row['TemplateName']);
+    $('#templateFileName').val(row['FileName']);
+    $('#templateThreatActorSlide').val(row['ThreatActorSlide']);
+    $('#templateUploadDate').val(row['Created']);
   }
 
   function imagePreview(elem,img) {
@@ -231,15 +400,15 @@
   });
 
   window.actionEvents = {
-    'click .edit': function (e, value, row, index) { 
+    'click .editThreatActor': function (e, value, row, index) { 
       listThreatActor(row);
-      $('#editModal').modal('show');
+      $('#editThreatActorModal').modal('show');
     },
-    'click .delete': function (e, value, row, index) {
+    'click .deleteThreatActor': function (e, value, row, index) {
       if(confirm("Are you sure you want to delete "+row.Name+" from the list of Threat Actors? This is irriversible.") == true) {
         var postArr = {}
         postArr.name = row.Name;
-        $.post( "/api?function=removeThreatActorConfig", postArr).done(function( data, status ) {
+        $.post( "/api?f=removeThreatActorConfig", postArr).done(function( data, status ) {
           if (data['Status'] == 'Success') {
             toast(data['Status'],"",data['Message'],"success");
             $('#threatActorTable').bootstrapTable('refresh');
@@ -252,6 +421,10 @@
             toast("API Error","","Failed to remove Threat Actor: "+row.Name,"danger","30000");
         })
       }
+    },
+    'click .editTemplate': function (e, value, row, index) { 
+      listTemplate(row);
+      $('#editTemplateModal').modal('show');
     }
   }
 
@@ -268,7 +441,7 @@
     }
     postArr.name = encodeURIComponent($('#newThreatActorName').val())
     postArr.URLStub = encodeURIComponent($('#newThreatActorURLStub').val())
-    $.post( "/api?function=newThreatActorConfig", postArr).done(function( data, status ) {
+    $.post( "/api?f=newThreatActorConfig", postArr).done(function( data, status ) {
       if (data['Status'] == 'Success') {
         toast(data['Status'],"",data['Message'],"success");
         $('#threatActorTable').bootstrapTable('refresh');
@@ -281,7 +454,7 @@
             formData.append('pngImage', pngFiles[0]);
           }
           $.ajax({
-            url: '/api?function=uploadThreatActorImage', // Replace with your PHP API endpoint
+            url: '/api?f=uploadThreatActorImage', // Replace with your PHP API endpoint
             type: 'POST',
             data: formData,
             contentType: false,
@@ -321,7 +494,7 @@
     }
     postArr.name = encodeURIComponent($('#threatActorName').val())
     postArr.URLStub = encodeURIComponent($('#threatActorURLStub').val())
-    $.post( "/api?function=setThreatActorConfig", postArr).done(function( data, status ) {
+    $.post( "/api?f=setThreatActorConfig", postArr).done(function( data, status ) {
       if (data['Status'] == 'Success') {
         toast(data['Status'],"",data['Message'],"success");
         $('#threatActorTable').bootstrapTable('refresh');
@@ -334,7 +507,7 @@
             formData.append('pngImage', pngFiles[0]);
           }
           $.ajax({
-            url: '/api?function=uploadThreatActorImage', // Replace with your PHP API endpoint
+            url: '/api?f=uploadThreatActorImage', // Replace with your PHP API endpoint
             type: 'POST',
             data: formData,
             contentType: false,
@@ -357,7 +530,7 @@
     }).fail(function( data, status ) {
         toast("API Error","","Failed to update Threat Actor: "+postArr.name,"danger","30000");
     }).always(function( data, status) {
-      $('#editModal').modal('hide');
+      $('#editThreatActorModal').modal('hide');
     })
   });
 

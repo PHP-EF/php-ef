@@ -4,31 +4,73 @@ $SkipCSS = true;
 require_once(__DIR__.'/../inc/inc.php');
 header('Content-Type: application/json; charset=utf-8');
 
-if (!($_REQUEST['function'])) {
+if (!($_REQUEST['f'])) {
     echo json_encode(array(
         'Error' => 'Function not specified.',
         'Request' => $_REQUEST
     ),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
     die();
 } else {
-    switch ($_REQUEST['function']) {
+    switch ($_REQUEST['f']) {
         case 'login':
-            echo json_encode($auth->login($_POST['un'],$_POST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+            echo json_encode($ib->auth->login($_POST['un'],$_POST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
             break;
         case 'logout':
-            echo json_encode($auth->logout(),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+            echo json_encode($ib->auth->logout(),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+            break;
+        case 'sso':
+            if ($ib->config->getConfig('SAML','enabled')) {
+                $ib->auth->sso();
+            } else {
+                echo json_encode(array(
+                    'Status' => 'Error',
+                    'Message' => 'SSO is not enabled.'
+                ),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+            }
+            break;
+        case 'slo':
+            if ($ib->config->getConfig('SAML','enabled')) {
+                $ib->auth->slo();
+            } else {
+                echo json_encode(array(
+                    'Status' => 'Error',
+                    'Message' => 'SSO is not enabled.'
+                ),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+            }
+            break;
+        case 'acs':
+            if ($ib->config->getConfig('SAML','enabled')) {
+                if ($method = checkRequestMethod('POST') && isset($_POST['SAMLResponse'])) {
+                    $ib->auth->acs();
+                }
+            } else {
+                echo json_encode(array(
+                    'Status' => 'Error',
+                    'Message' => 'SSO is not enabled.'
+                ),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+            }
+            break;
+        case 'samlMetadata':
+            if ($ib->config->getConfig('SAML','enabled')) {
+                // Do something
+            } else {
+                echo json_encode(array(
+                    'Status' => 'Error',
+                    'Message' => 'SSO is not enabled.'
+                ),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+            }
             break;
         case 'getUsers':
             if ($method = checkRequestMethod('GET')) {
-                if ($auth->checkAccess(null,"ADMIN-USERS")) {
-                    $users = $auth->getAllUsers();
+                if ($ib->auth->checkAccess(null,"ADMIN-USERS")) {
+                    $users = $ib->auth->getAllUsers();
                     echo json_encode($users,JSON_PRETTY_PRINT);
                 }
             }
             break;
         case 'newUser':
             if ($method = checkRequestMethod('POST')) {
-                if ($auth->checkAccess(null,"ADMIN-USERS")) {
+                if ($ib->auth->checkAccess(null,"ADMIN-USERS")) {
                     if (isset($_POST['un'])) {
                         $UN = $_POST['un'];
                     } else {
@@ -79,14 +121,14 @@ if (!($_REQUEST['function'])) {
                     } else {
                         $Groups = null;
                     }
-                    $new = $auth->newUser($UN,$PW,$FN,$SN,$EM,$Groups);
+                    $new = $ib->auth->newUser($UN,$PW,$FN,$SN,$EM,$Groups);
                     echo json_encode($new,JSON_PRETTY_PRINT);
                 }
             }
             break;
         case 'setUser':
             if ($method = checkRequestMethod('POST')) {
-                if ($auth->checkAccess(null,"ADMIN-USERS")) {
+                if ($ib->auth->checkAccess(null,"ADMIN-USERS")) {
                     if (isset($_POST['id'])) {
                         $ID = $_POST['id'];
                     } else {
@@ -138,23 +180,23 @@ if (!($_REQUEST['function'])) {
                     } else {
                         $Groups = null;
                     }
-                    $update = $auth->updateUser($ID,$UN,$PW,$FN,$SN,$EM,$Groups);
+                    $update = $ib->auth->updateUser($ID,$UN,$PW,$FN,$SN,$EM,$Groups);
                     echo json_encode($update,JSON_PRETTY_PRINT);
                 }
             }
             break;
         case 'removeUser':
             if ($method = checkRequestMethod('POST')) {
-                if ($auth->checkAccess(null,"ADMIN-USERS")) {
+                if ($ib->auth->checkAccess(null,"ADMIN-USERS")) {
                     if (isset($_POST['id'])) {
-                        $remove = $auth->removeUser($_POST['id']);
+                        $remove = $ib->auth->removeUser($_POST['id']);
                         echo json_encode($remove,JSON_PRETTY_PRINT);
                     }
                 }
             }
             break;
         case 'heartbeat':
-            if ($auth->getAuth()['Authenticated'] == true) {
+            if ($ib->auth->getAuth()['Authenticated'] == true) {
                 http_response_code(200);
             } else {
                 http_response_code(301);
@@ -163,8 +205,8 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'whoami':
-            if (isset($auth->getAuth()['Authenticated'])) {
-                $AuthContent = $auth->getAuth();
+            if (isset($ib->auth->getAuth()['Authenticated'])) {
+                $AuthContent = $ib->auth->getAuth();
                 $AuthContent['headers'] = getallheaders();
                 $UnsetHeaders = array(
                     "Remote-Email",
@@ -179,11 +221,11 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'CheckAccess':
-            if (isset($_REQUEST['node']) && $auth->getAuth()['Authenticated'] == true) {
+            if (isset($_REQUEST['node']) && $ib->auth->getAuth()['Authenticated'] == true) {
                 $Result = array(
                     "node" => $_REQUEST['node']
                 );
-                if ($auth->checkAccess(null,$_REQUEST['node'])) {
+                if ($ib->auth->checkAccess(null,$_REQUEST['node'])) {
                     $Result['permitted'] = true;
                 } else {
                     $Result['permitted'] = false;
@@ -192,19 +234,19 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'GetLog':
-            if ($auth->checkAccess(null,"ADMIN-LOGS")) {
+            if ($ib->auth->checkAccess(null,"ADMIN-LOGS")) {
                 if (isset($_REQUEST['date'])) {
                     $Date = $_REQUEST['date'];
                 } else {
                     $Date = "";
                 }
-                echo json_encode(getLog($Date), JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                echo json_encode($ib->logging->getLog($Date), JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
             } else {
                 return false;
             }
             break;
         case 'GetRBAC':
-            if ($auth->checkAccess(null,"ADMIN-RBAC")) {
+            if ($ib->auth->checkAccess(null,"ADMIN-RBAC")) {
                 if (isset($_REQUEST['group'])) {
                     $Group = $_REQUEST['group'];
                 } else {
@@ -215,13 +257,13 @@ if (!($_REQUEST['function'])) {
                 } else {
                     $Action = null;
                 }
-                echo json_encode($rbac->getRBAC($Group,$Action), JSON_PRETTY_PRINT);
+                echo json_encode($ib->rbac->getRBAC($Group,$Action), JSON_PRETTY_PRINT);
             } else {
                 return false;
             }
             break;
         case 'SetRBAC':
-            if ($auth->checkAccess(null,"ADMIN-RBAC")) {
+            if ($ib->auth->checkAccess(null,"ADMIN-RBAC")) {
                 if (isset($_REQUEST['id'])) {
                     $GroupID = $_REQUEST['id'];
                 } else {
@@ -247,51 +289,107 @@ if (!($_REQUEST['function'])) {
                 } else {
                     $Value = null;
                 }
-                 echo json_encode($rbac->setRBAC($GroupID,$GroupName,$Description,$Key,$Value), JSON_PRETTY_PRINT);
+                 echo json_encode($ib->rbac->setRBAC($GroupID,$GroupName,$Description,$Key,$Value), JSON_PRETTY_PRINT);
             }
             break;
         case 'DeleteRBAC':
-            if ($auth->checkAccess(null,"ADMIN-RBAC")) {
+            if ($ib->auth->checkAccess(null,"ADMIN-RBAC")) {
                 if (isset($_REQUEST['group'])) {
                     $Group = $_REQUEST['group'];
                 } else {
                     $Group = null;
                 }
-                echo json_encode($rbac->deleteRBAC($Group), JSON_PRETTY_PRINT);
+                echo json_encode($ib->rbac->deleteRBAC($Group), JSON_PRETTY_PRINT);
             }
             break;
         case 'GetConfig':
-            if ($auth->checkAccess(null,"ADMIN-CONFIG")) {
-                $config = getConfig();
+            if ($ib->auth->checkAccess(null,"ADMIN-CONFIG")) {
+                $config = $ib->config->getConfig();
                 $config['Security']['salt'] = "********";
+                if ($config['SAML']['sp']['privateKey'] != "") {
+                    $config['SAML']['sp']['privateKey'] = "********";
+                }
+                $config['SAML']['idp']['x509cert'] = substr($config['SAML']['idp']['x509cert'],0,24).'...';
                 echo json_encode($config,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                writeLog("Config","Queried Configuration","info",$_REQUEST);
+                $ib->logging->writeLog("Config","Queried Configuration","info",$_REQUEST);
             }
             break;
         case 'SetConfig':
             if ($method = checkRequestMethod('POST')) {
-                if ($auth->checkAccess(null,"ADMIN-CONFIG")) {
-                    $config = getConfig();
+                if ($ib->auth->checkAccess(null,"ADMIN-CONFIG")) {
+                    $config = $ib->config->getConfig();
                     $config['Security']['salt'] = "********";
-                    if (isset($_POST['systemLogFileName'])) { setConfig("System","logfilename",$_POST['systemLogFileName']); }
-                    if (isset($_POST['systemLogDirectory'])) { setConfig("System","logdirectory",$_POST['systemLogDirectory']); }
-                    if (isset($_POST['systemLogLevel'])) { setConfig("System","loglevel",$_POST['systemLogLevel']); }
-                    if (isset($_POST['systemLogRetention'])) { setConfig("System","logretention",$_POST['systemLogRetention']); }
-                    if (isset($_POST['systemCURLTimeout'])) { setConfig("System","CURL-Timeout",$_POST['systemCURLTimeout']); }
-                    if (isset($_POST['systemCURLTimeoutConnect'])) { setConfig("System","CURL-ConnectTimeout",$_POST['systemCURLTimeoutConnect']); }
-                    if (isset($_POST['systemRBACFile'])) { setConfig("System","rbacjson",$_POST['systemRBACFile']); }
-                    if (isset($_POST['systemRBACInfoFile'])) { setConfig("System","rbacinfo",$_POST['systemRBACInfoFile']); }
-                    if (isset($_POST['securitySalt'])) { setConfig("Security","salt",$_POST['securitySalt']); }
-                    if (isset($_POST['securityAssessmentThreatActorSlide'])) { setConfig("SecurityAssessment","ThreatActorSlide",$_POST['securityAssessmentThreatActorSlide']); }
-                    if (isset($_POST['securityAssessmentTemplateName'])) { setConfig("SecurityAssessment","TemplateName",$_POST['securityAssessmentTemplateName']); }
-                    $newConfig = getConfig();
+                    if ($config['SAML']['sp']['privateKey'] != "") {
+                        $config['SAML']['sp']['privateKey'] = "********";
+                    }
+                    $config['SAML']['idp']['x509cert'] = substr($config['SAML']['idp']['x509cert'],0,24).'...';
+                    if (isset($_POST['systemLogFileName'])) { $ib->config->setConfig("System","logfilename",$_POST['systemLogFileName']); }
+                    if (isset($_POST['systemLogDirectory'])) { $ib->config->setConfig("System","logdirectory",$_POST['systemLogDirectory']); }
+                    if (isset($_POST['systemLogLevel'])) { $ib->config->setConfig("System","loglevel",$_POST['systemLogLevel']); }
+                    if (isset($_POST['systemLogRetention'])) { $ib->config->setConfig("System","logretention",$_POST['systemLogRetention']); }
+                    if (isset($_POST['systemCURLTimeout'])) { $ib->config->setConfig("System","CURL-Timeout",$_POST['systemCURLTimeout']); }
+                    if (isset($_POST['systemCURLTimeoutConnect'])) { $ib->config->setConfig("System","CURL-ConnectTimeout",$_POST['systemCURLTimeoutConnect']); }
+                    if (isset($_POST['systemRBACFile'])) { $ib->config->setConfig("System","rbacjson",$_POST['systemRBACFile']); }
+                    if (isset($_POST['systemRBACInfoFile'])) { $ib->config->setConfig("System","rbacinfo",$_POST['systemRBACInfoFile']); }
+                    if (isset($_POST['securitySalt'])) { $ib->config->setConfig("Security","salt",$_POST['securitySalt']); }
+                    if (isset($_POST['securityAssessmentThreatActorSlide'])) { $ib->config->setConfig("SecurityAssessment","ThreatActorSlide",$_POST['securityAssessmentThreatActorSlide']); }
+                    if (isset($_POST['securityAssessmentTemplateName'])) { $ib->config->setConfig("SecurityAssessment","TemplateName",$_POST['securityAssessmentTemplateName']); }
+
+                    // SAML Stuff //
+                    if (isset($_POST['samlEnabled'])) { $ib->config->setConfig("SAML","enabled",filter_var($_POST['samlEnabled'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)); }
+                    if (isset($_POST['samlStrict'])) { $ib->config->setConfig("SAML","strict",filter_var($_POST['samlStrict'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)); }
+                    if (isset($_POST['samlDebug'])) { $ib->config->setConfig("SAML","debug",filter_var($_POST['samlDebug'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)); }
+
+                    if (isset($_POST['spEntityId']) || isset($_POST['spAcsUrl']) || isset($_POST['spSloUrl']) || isset($_POST['spX509Cert']) || isset($_POST['spPrivateKey'])) {
+                        $spconfig = $config['SAML']['sp'];
+                        if (isset($_POST['spEntityId'])) {
+                            $spconfig['entityId'] = urldecode($_POST['spEntityId']);
+                        }
+                        if (isset($_POST['spAcsUrl'])) {
+                            $spconfig['assertionConsumerService']['url'] = urldecode($_POST['spAcsUrl']);
+                        }
+                        if (isset($_POST['spSloUrl'])) {
+                            $spconfig['singleLogoutService']['url'] = urldecode($_POST['spSloUrl']);
+                        }
+                        if (isset($_POST['spX509Cert'])) {
+                            $spconfig['x509cert'] = urldecode($_POST['spX509Cert']);
+                        }
+                        if (isset($_POST['spPrivateKey'])) {
+                            $spconfig['privateKey'] = urldecode($_POST['spPrivateKey']);
+                        }
+                        $ib->config->setConfig("SAML","sp",$spconfig);
+                    }
+
+                    if (isset($_POST['idpEntityId']) || isset($_POST['idpSsoUrl']) || isset($_POST['idpSloUrl']) || isset($_POST['idpX509Cert'])) {
+                        $idpconfig = $config['SAML']['idp'];
+                        if (isset($_POST['idpEntityId'])) {
+                            $idpconfig['entityId'] = urldecode($_POST['idpEntityId']);
+                        }
+                        if (isset($_POST['idpSsoUrl'])) {
+                            $idpconfig['singleSignOnService']['url'] = urldecode($_POST['idpSsoUrl']);
+                        }
+                        if (isset($_POST['idpSloUrl'])) {
+                            $idpconfig['singleLogoutService']['url'] = urldecode($_POST['idpSloUrl']);
+                        }
+                        if (isset($_POST['idpX509Cert'])) {
+                            $idpconfig['x509cert'] = urldecode($_POST['idpX509Cert']);
+                        }
+                        $ib->config->setConfig("SAML","idp",$idpconfig);
+                    }
+                    // End of SAML stuff //
+
+                    $newConfig = $ib->config->getConfig();
                     $newConfig['Security']['salt'] = "********";
+                    if ($newConfig['SAML']['sp']['privateKey'] != "") {
+                        $newConfig['SAML']['sp']['privateKey'] = "********";
+                    }
+                    $newConfig['SAML']['idp']['x509cert'] = substr($newConfig['SAML']['idp']['x509cert'],0,24).'...';
                     echo json_encode($newConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                     $logArr = array(
                         "Old Configuration" => $config,
                         "New Configuration" => $newConfig
                     );
-                    writeLog("Config","Updated configuration","warning",$logArr);
+                    $ib->logging->writeLog("Config","Updated configuration","warning",$logArr);
                 }
             }
             break;
@@ -309,7 +407,7 @@ if (!($_REQUEST['function'])) {
             echo \Ramsey\Uuid\Uuid::uuid4();
             break;
         case 'createSecurityReport':
-            if ($auth->checkAccess(null,"B1-SECURITY-ASSESSMENT")) {
+            if ($ib->auth->checkAccess(null,"B1-SECURITY-ASSESSMENT")) {
                 if ($method = checkRequestMethod('POST')) {
                     if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm']) AND isset($_POST['id'])) {
                         if (isValidUuid($_POST['id'])) {
@@ -321,9 +419,9 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'downloadSecurityReport':
-            if ($auth->checkAccess(null,"B1-SECURITY-ASSESSMENT")) {
+            if ($ib->auth->checkAccess(null,"B1-SECURITY-ASSESSMENT")) {
                 if ($method = checkRequestMethod('GET')) {
-                    writeLog("SecurityAssessment","Downloaded security report","info");
+                    $ib->logging->writeLog("SecurityAssessment","Downloaded security report","info");
                     if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
                         $id = $_REQUEST['id'];
                         $File = __DIR__.'/../files/reports/report-'.$id.'.pptx';
@@ -341,7 +439,7 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'getSecurityReportProgress':
-            if ($auth->checkAccess(null,"B1-SECURITY-ASSESSMENT")) {
+            if ($ib->auth->checkAccess(null,"B1-SECURITY-ASSESSMENT")) {
                 if ($method = checkRequestMethod('GET')) {
                     if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
                         $id = $_REQUEST['id'];
@@ -351,7 +449,7 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'createLicenseReport':
-            if ($auth->checkAccess(null,"B1-LICENSE-USAGE")) {
+            if ($ib->auth->checkAccess(null,"B1-LICENSE-USAGE")) {
                 if ($method = checkRequestMethod('POST')) {
                     if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
                         $response = getLicenseCount($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm']);
@@ -363,15 +461,22 @@ if (!($_REQUEST['function'])) {
         case 'crypt':
             if ($method = checkRequestMethod('POST')) {
                 if (isset($_POST['key'])) {
-                    echo json_encode(array(encrypt($_POST['key'],getConfig("Security","salt"))));
+                    echo json_encode(array(encrypt($_POST['key'],$ib->config->getConfig("Security","salt"))));
+                }
+            }
+            break;
+        case 'getSecurityAssessmentTemplates':
+            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
+                if ($method = checkRequestMethod('GET')) {
+                    echo json_encode(getSecurityAssessmentConfig()['Templates'],JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                 }
             }
             break;
         case 'getThreatActorConfig':
-            if ($auth->checkAccess(null,"ADMIN-SECASS")) {
+            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
                 if ($method = checkRequestMethod('GET')) {
                     $ThreatActorConfig = [];
-                    foreach (getThreatActorConfig() as $Key => $Val) {
+                    foreach (getSecurityAssessmentConfig()['ThreatActors'] as $Key => $Val) {
                         $ThreatActorConfig[] = array(
                             'Name' => $Key,
                             'SVG' => $Val['SVG'],
@@ -384,7 +489,7 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'newThreatActorConfig':
-            if ($auth->checkAccess(null,"ADMIN-SECASS")) {
+            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
                 if ($method = checkRequestMethod('POST')) {
                     if (isset($_POST['name']) AND isset($_POST['URLStub'])) {
                         if (isset($_POST['SVG'])) {
@@ -393,9 +498,9 @@ if (!($_REQUEST['function'])) {
                             $SVG = null;
                         }
                         if (isset($_POST['PNG'])) {
-                            $SVG = $_POST['PNG'];
+                            $PNG = $_POST['PNG'];
                         } else {
-                            $SVG = null;
+                            $PNG = null;
                         }
                         echo json_encode(newThreatActorConfig($_POST['name'],$SVG,$PNG,$_POST['URLStub']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                     }
@@ -403,7 +508,7 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'setThreatActorConfig':
-            if ($auth->checkAccess(null,"ADMIN-SECASS")) {
+            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
                 if ($method = checkRequestMethod('POST')) {
                     if (isset($_POST['name']) AND isset($_POST['URLStub'])) {
                         if (isset($_POST['SVG'])) {
@@ -412,17 +517,17 @@ if (!($_REQUEST['function'])) {
                             $SVG = null;
                         }
                         if (isset($_POST['PNG'])) {
-                            $SVG = $_POST['PNG'];
+                            $PNG = $_POST['PNG'];
                         } else {
-                            $SVG = null;
+                            $PNG = null;
                         }
-                        echo json_encode(setThreatActorConfig($_POST['name'],$_POST['SVG'],$_POST['PNG'],$_POST['URLStub']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                        echo json_encode(setThreatActorConfig($_POST['name'],$SVG,$PNG,$_POST['URLStub']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                     }
                 }
             }
             break;
         case 'removeThreatActorConfig':
-            if ($auth->checkAccess(null,"ADMIN-SECASS")) {
+            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
                 if ($method = checkRequestMethod('POST')) {
                     if (isset($_POST['name'])) {
                         echo json_encode(removeThreatActorConfig($_POST['name']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
@@ -431,12 +536,12 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'getThreatActors':
-            if ($auth->checkAccess(null,"B1-THREAT-ACTORS")) {
+            if ($ib->auth->checkAccess(null,"B1-THREAT-ACTORS")) {
                 if ($method = checkRequestMethod('POST')) {
                     if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
                         $UserInfo = GetCSPCurrentUser();
                         if (isset($UserInfo)) {
-                            writeLog("ThreatActors",$UserInfo->result->name." queried list of Threat Actors","info");
+                            $ib->logging->writeLog("ThreatActors",$UserInfo->result->name." queried list of Threat Actors","info");
                         }
                         $Actors = GetB1ThreatActors($_POST['StartDateTime'],$_POST['EndDateTime']);
                         if (!isset($Actors['Error'])) {
@@ -449,7 +554,7 @@ if (!($_REQUEST['function'])) {
             }
             break;
         case 'uploadThreatActorImage':
-            if ($auth->checkAccess(null,"B1-THREAT-ACTORS")) {
+            if ($ib->auth->checkAccess(null,"B1-THREAT-ACTORS")) {
                 if ($method = checkRequestMethod('POST')) {
                     $uploadDir = __DIR__.'/../assets/images/Threat Actors/Uploads/';
                     if (!is_dir($uploadDir)) {

@@ -267,7 +267,7 @@ body {
   background: 0 0;
   position: absolute;
   right: 15px;
-  top: 14px;
+  /* top: 14px; */
 }
 
 .sidebar-wrapper .sidebar-menu .sidebar-dropdown .sidebar-submenu ul,
@@ -790,7 +790,7 @@ color: white;
   margin-top: 10px!important;
   margin-bottom: 10px!important;
   padding: 10px;
-  border: none;
+  /* border: none; */
   border-radius: 5px;
 }
 button {
@@ -846,7 +846,10 @@ visibility: visible;
   width:100%;
 }
 input, select {
-  border: 1px solid #aaaeb2!important;
+  border: 1px solid #aaaeb2;
+}
+input.changed, select.changed {
+  border: 4px solid #ffbd43;
 }
 .realm > select {
   margin-top:10px;

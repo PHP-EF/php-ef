@@ -20,7 +20,7 @@ switch ($source) {
 }
 
 if(isset($domain) && $domain !=null){
-  writeLog("DNSToolbox","A query was performed using type: ".$_GET['request'],"debug",$_GET);
+  $ib->logging->writeLog("DNSToolbox","A query was performed using type: ".$_GET['request'],"debug",$_GET);
   switch ($_GET['request']) {
     case 'a':
       include_once('./A.php');

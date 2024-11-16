@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
-  if ($auth->checkAccess(null,"ADMIN-LOGS") == false) {
+  if ($ib->auth->checkAccess(null,"ADMIN-LOGS") == false) {
     die();
   }
 
@@ -45,7 +45,7 @@ pre code {
       <div class="my-4">
           <h5 class="mb-0 mt-5">Logs</h5>
           <p>The following table displays logs from the Infoblox SA Tools Portal.</p>
-          <table  data-url="/api?function=GetLog"
+          <table  data-url="/api?f=GetLog"
             data-toggle="table"
             data-search="true"
             data-filter-control="true"
@@ -65,10 +65,10 @@ pre code {
             <div id="toolbar" class="select">
               <select class="form-select" id="logDate">
                 <?php
-                  $LogFiles = array_reverse(getLogFiles());
+                  $LogFiles = array_reverse($ib->logging->getLogFiles());
                   $LogFileArr = array();
                     foreach ($LogFiles as $LogFile) {
-                      $LogFileShort = explode(".log",explode(getConfig("System","logfilename")."-",$LogFile)[1]);
+                      $LogFileShort = explode(".log",explode($ib->config->getConfig("System","logfilename")."-",$LogFile)[1]);
                       if ($LogFileShort[0] != null) {
                         array_push($LogFileArr,$LogFileShort[0]);
                       }

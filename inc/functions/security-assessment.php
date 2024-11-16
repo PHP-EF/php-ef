@@ -5,6 +5,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
+    global $ib;
     // Check API Key is valid & get User Info
     $UserInfo = GetCSPCurrentUser();
     if (is_array($UserInfo) && isset($UserInfo['Error'])) {
@@ -60,7 +61,7 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
 
         // Extract Powerpoint Template Zip
         $Progress = writeProgress($UUID,$Progress,"Extracting template");
-        extractZip($FilesDir.'/'.getConfig()['SecurityAssessment']['TemplateName'],$FilesDir.'/reports/report-'.$UUID);
+        extractZip($FilesDir.'/'.$ib->config->getConfig()['SecurityAssessment']['TemplateName'],$FilesDir.'/reports/report-'.$UUID);
 
         //
         // Do Chart, Spreadsheet & Image Stuff Here ....
@@ -406,7 +407,7 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
         //
         $Progress = writeProgress($UUID,$Progress,"Generating Threat Actor Slides");
         // New slides to be appended after this slide number
-        $ThreatActorSlideStart = getConfig()['SecurityAssessment']['ThreatActorSlide'];
+        $ThreatActorSlideStart = $ib->config->getConfig()['SecurityAssessment']['ThreatActorSlide'];
         // Calculate the slide position based on above value
         $ThreatActorSlidePosition = $ThreatActorSlideStart-2;
 
@@ -434,7 +435,7 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
         // Copy Blank Threat Actor Image
         copy($AssetsDir.'/images/Threat Actors/Other/logo-only.png',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/logo-only.png');
         // Build new Threat Actor Slides & Update PPTX Resources
-        $KnownActors = getThreatActorConfig();
+        $KnownActors = getSecurityAssessmentConfig()['ThreatActors'];
         foreach  ($ThreatActorInfo as $TAI) {
             if (($ThreatActorSlideCount - 1) > 0) {
                 $xml_rels_f->appendXML('<Relationship Id="rId'.$xml_rels_fstart.'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide'.$SlideNumber.'.xml"/>');
@@ -569,7 +570,7 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
         // Get & Inject Customer Name, Contact Name & Email
         $AccountInfo = QueryCSP("get","v2/current_user/accounts");
         $CurrentAccount = $AccountInfo->results[array_search($UserInfo->result->account_id, array_column($AccountInfo->results, 'id'))];
-        writeLog("SecurityAssessment",$UserInfo->result->name." requested a security assessment report for: ".$CurrentAccount->name,"info");
+        $ib->logging->writeLog("SecurityAssessment",$UserInfo->result->name." requested a security assessment report for: ".$CurrentAccount->name,"info");
         $mapping = replaceTag($mapping,'#TAG01',$CurrentAccount->name);
         $mapping = replaceTag($mapping,'#DATE',date("dS F Y"));
         $mapping = replaceTag($mapping,'#NAME',$UserInfo->result->name);
@@ -743,25 +744,67 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
     return $response;
 }
 
-function getThreatActorConfig() {
-    return json_decode(file_get_contents(__DIR__.'/../../inc/config/threat-actors.json'), true);
+function getSecurityAssessmentConfig() {
+    return json_decode(file_get_contents(__DIR__.'/../../inc/config/security-assessment.json'), true);
+}
+
+function newTemplateConfig($Status,$FileName,$TemplateName,$ThreatActorSlide) {
+    $TemplateConfig = getSecurityAssessmentConfig();
+    if (!in_array(urldecode($TemplateName),array_column($TemplateConfig['Templates'],'TemplateName'))) {
+        $CurrentDate = new DateTime();
+        $TemplateConfig['Templates'][] = array(
+            "Status" => urldecode($Status),
+            "FileName" => urldecode($FileName),
+            "TemplateName" => urldecode($TemplateName),
+            "ThreatActorSlide" => urldecode($ThreatActorSlide),
+            "Created" => $CurrentDate->format('Y-m-d H:i:s')
+        );
+        file_put_contents(__DIR__.'/../../inc/config/security-assessment.json',json_encode($TemplateConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+        return array(
+            'Status' => 'Success',
+            'Message' => 'Template added successfully'
+        );
+    } else {
+        return array(
+            'Status' => 'Error',
+            'Message' => 'Template name already exists'
+        );
+    }
+}
+
+function removeTemplateConfig($TemplateName) {
+    $TemplateConfig = getSecurityAssessmentConfig();
+    $ArrId = array_search(urldecode($TemplateName),array_column($TemplateConfig['Templates'],'TemplateName'));
+    if (in_array(urldecode($TemplateName),array_column($TemplateConfig['Templates'],'TemplateName'))) {
+        unset($TemplateConfig['Templates'][$ArrId]);
+        file_put_contents(__DIR__.'/../../inc/config/security-assessment.json',json_encode($TemplateConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+        return array(
+            'Status' => 'Success',
+            'Message' => 'Template removed successfully'
+        );
+    } else {
+        return array(
+            'Status' => 'Error',
+            'Message' => 'Template does not exist'
+        );
+    }
 }
 
 function newThreatActorConfig($Name,$SVG,$PNG,$URLStub) {
-    $ThreatActorConfig = getThreatActorConfig();
-    if (!isset($ThreatActorConfig[urldecode($Name)])) {
-        $ThreatActorConfig[urldecode($Name)]['URLStub'] = urldecode($URLStub);
+    $ThreatActorConfig = getSecurityAssessmentConfig();
+    if (!isset($ThreatActorConfig['ThreatActors'][urldecode($Name)])) {
+        $ThreatActorConfig['ThreatActors'][urldecode($Name)]['URLStub'] = urldecode($URLStub);
         if ($SVG != null) {
-            $ThreatActorConfig[urldecode($Name)]['SVG'] = urldecode($SVG);
+            $ThreatActorConfig['ThreatActors'][urldecode($Name)]['SVG'] = urldecode($SVG);
         } else {
-            $ThreatActorConfig[urldecode($Name)]['SVG'] = '';
+            $ThreatActorConfig['ThreatActors'][urldecode($Name)]['SVG'] = '';
         }
         if ($PNG != null) {
-            $ThreatActorConfig[urldecode($Name)]['PNG'] = urldecode($PNG);
+            $ThreatActorConfig['ThreatActors'][urldecode($Name)]['PNG'] = urldecode($PNG);
         } else {
-            $ThreatActorConfig[urldecode($Name)]['PNG'] = '';
+            $ThreatActorConfig['ThreatActors'][urldecode($Name)]['PNG'] = '';
         }
-        file_put_contents(__DIR__.'/../../inc/config/threat-actors.json',json_encode($ThreatActorConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+        file_put_contents(__DIR__.'/../../inc/config/security-assessment.json',json_encode($ThreatActorConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
         return array(
             'Status' => 'Success',
             'Message' => 'Threat Actor added successfully'
@@ -775,16 +818,16 @@ function newThreatActorConfig($Name,$SVG,$PNG,$URLStub) {
 }
 
 function setThreatActorConfig($Name,$SVG,$PNG,$URLStub) {
-    $ThreatActorConfig = getThreatActorConfig();
-    if (isset($ThreatActorConfig[urldecode($Name)])) {
-        $ThreatActorConfig[urldecode($Name)]['URLStub'] = urldecode($URLStub);
+    $ThreatActorConfig = getSecurityAssessmentConfig();
+    if (isset($ThreatActorConfig['ThreatActors'][urldecode($Name)])) {
+        $ThreatActorConfig['ThreatActors'][urldecode($Name)]['URLStub'] = urldecode($URLStub);
         if ($SVG != null) {
-            $ThreatActorConfig[urldecode($Name)]['SVG'] = urldecode($SVG);
+            $ThreatActorConfig['ThreatActors'][urldecode($Name)]['SVG'] = urldecode($SVG);
         }
         if ($PNG != null) {
-            $ThreatActorConfig[urldecode($Name)]['PNG'] = urldecode($PNG);
+            $ThreatActorConfig['ThreatActors'][urldecode($Name)]['PNG'] = urldecode($PNG);
         }
-        file_put_contents(__DIR__.'/../../inc/config/threat-actors.json',json_encode($ThreatActorConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+        file_put_contents(__DIR__.'/../../inc/config/security-assessment.json',json_encode($ThreatActorConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
         return array(
             'Status' => 'Success',
             'Message' => 'Threat Actor successfully updated'
@@ -798,10 +841,10 @@ function setThreatActorConfig($Name,$SVG,$PNG,$URLStub) {
 }
 
 function removeThreatActorConfig($Name) {
-    $ThreatActorConfig = getThreatActorConfig();
-    if (isset($ThreatActorConfig[$Name])) {
-        unset($ThreatActorConfig[$Name]);
-        file_put_contents(__DIR__.'/../../inc/config/threat-actors.json',json_encode($ThreatActorConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+    $ThreatActorConfig = getSecurityAssessmentConfig();
+    if (isset($ThreatActorConfig['ThreatActors'][$Name])) {
+        unset($ThreatActorConfig['ThreatActors'][$Name]);
+        file_put_contents(__DIR__.'/../../inc/config/security-assessment.json',json_encode($ThreatActorConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
         return array(
             'Status' => 'Success',
             'Message' => 'Threat Actor removed successfully'
