@@ -15,3 +15,6 @@ service cron start
 cp /home/site/wwwroot/inc/nginx/redis.conf /etc/redis/redis.conf
 redis-cli shutdown
 service redis-server start
+
+# Link PHP Custom INI
+ln -s /home/site/wwwroot/inc/nginx/php/php.ini /usr/local/etc/php/conf.d/custom.ini
