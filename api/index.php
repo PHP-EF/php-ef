@@ -515,8 +515,8 @@ if (!($_REQUEST['f'])) {
                     if (!is_dir($uploadDir)) {
                         mkdir($uploadDir, 0755, true);
                     }
-                    if (isset($_POST['TemplateName'])) {
-                        if (isset($_FILES['pptx']) && $_FILES['pptx']['error'] == UPLOAD_ERR_OK) {
+                    if (isset($_FILES['pptx']) && $_FILES['pptx']['error'] == UPLOAD_ERR_OK) {
+                        if (isset($_POST['TemplateName'])) {
                             if (isValidFileType($_FILES['pptx']['name'],['pptx'])) {
                                 $pptxFileName = basename($_FILES['pptx']['name']);
                                 $pptxFilePath = $uploadDir . urldecode($_POST['TemplateName']) . '.pptx';
@@ -542,13 +542,13 @@ if (!($_REQUEST['f'])) {
                         } else {
                             echo json_encode(array(
                                 'Status' => 'Error',
-                                'Message' => "Error uploading PPTX file."
+                                'Message' => "Template Name is missing."
                             ));
                         }
                     } else {
                         echo json_encode(array(
                             'Status' => 'Error',
-                            'Message' => "Template Name is missing."
+                            'Message' => "Error uploading PPTX file."
                         ));
                     }
                 }
