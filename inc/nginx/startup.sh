@@ -15,3 +15,6 @@ service cron start
 cp /home/site/wwwroot/inc/nginx/redis.conf /etc/redis/redis.conf
 redis-cli shutdown
 service redis-server start
+
+# Set ENV Variables
+export PHP_INI_SCAN_DIR=/home/site/wwwroot/inc/nginx/php
