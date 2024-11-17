@@ -332,8 +332,6 @@ if (!($_REQUEST['f'])) {
                     if (isset($_POST['systemRBACFile'])) { $ib->config->setConfig("System","rbacjson",$_POST['systemRBACFile']); }
                     if (isset($_POST['systemRBACInfoFile'])) { $ib->config->setConfig("System","rbacinfo",$_POST['systemRBACInfoFile']); }
                     if (isset($_POST['securitySalt'])) { $ib->config->setConfig("Security","salt",$_POST['securitySalt']); }
-                    if (isset($_POST['securityAssessmentThreatActorSlide'])) { $ib->config->setConfig("SecurityAssessment","ThreatActorSlide",$_POST['securityAssessmentThreatActorSlide']); }
-                    if (isset($_POST['securityAssessmentTemplateName'])) { $ib->config->setConfig("SecurityAssessment","TemplateName",$_POST['securityAssessmentTemplateName']); }
 
                     // SAML Stuff //
                     if (isset($_POST['samlEnabled'])) { $ib->config->setConfig("SAML","enabled",filter_var($_POST['samlEnabled'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)); }
@@ -468,41 +466,109 @@ if (!($_REQUEST['f'])) {
         case 'getSecurityAssessmentTemplates':
             if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
                 if ($method = checkRequestMethod('GET')) {
-                    echo json_encode(getSecurityAssessmentConfig()['Templates'],JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                    echo json_encode($ib->templates->getTemplateConfigs(),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                }
+            }
+            break;
+        case 'newSecurityAssessmentTemplate':
+            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
+                if ($method = checkRequestMethod('POST')) {
+                    if (isset($_POST['TemplateName'])) {
+                        $TemplateName = $_POST['TemplateName'];
+                        if (isset($_POST['Status'])) { $Status = $_POST['Status']; } else { $Status = null; }
+                        if (isset($_POST['FileName'])) { $FileName = $_POST['FileName'] . '.pptx'; } else { $FileName = null; }
+                        if (isset($_POST['Description'])) { $Description = $_POST['Description']; } else { $Description = null; }
+                        if (isset($_POST['ThreatActorSlide'])) { $ThreatActorSlide = $_POST['ThreatActorSlide']; } else { $ThreatActorSlide = null; }
+                        echo json_encode($ib->templates->newTemplateConfig($Status,$FileName,$TemplateName,$Description,$ThreatActorSlide),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                    }
+                }
+            }
+            break;
+        case 'setSecurityAssessmentTemplate':
+            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
+                if ($method = checkRequestMethod('POST')) {
+                    if (isset($_POST['id'])) {
+                        $ID = $_POST['id'];
+                        if (isset($_POST['TemplateName'])) { $TemplateName = $_POST['TemplateName']; } else { $TemplateName = null; }
+                        if (isset($_POST['Status'])) { $Status = $_POST['Status']; } else { $Status = null; }
+                        if (isset($_POST['FileName'])) { $FileName = $_POST['FileName'] . '.pptx'; } else { $FileName = null; }
+                        if (isset($_POST['Description'])) { $Description = $_POST['Description']; } else { $Description = null; }
+                        if (isset($_POST['ThreatActorSlide'])) { $ThreatActorSlide = $_POST['ThreatActorSlide']; } else { $ThreatActorSlide = null; }
+                        echo json_encode($ib->templates->setTemplateConfig($ID,$Status,$FileName,$TemplateName,$Description,$ThreatActorSlide),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                    }
+                }
+            }
+            break;
+        case 'removeSecurityAssessmentTemplate':
+            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
+                if ($method = checkRequestMethod('POST')) {
+                    if (isset($_POST['id'])) {
+                        echo json_encode($ib->templates->removeTemplateConfig($_POST['id']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                    }
+                }
+            }
+            break;
+        case 'uploadSecurityAssessmentTemplate':
+            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
+                if ($method = checkRequestMethod('POST')) {
+                    $uploadDir = __DIR__.'/../files/templates/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    if (isset($_POST['TemplateName'])) {
+                        if (isset($_FILES['pptx']) && $_FILES['pptx']['error'] == UPLOAD_ERR_OK) {
+                            if (isValidFileType($_FILES['pptx']['name'],['pptx'])) {
+                                $pptxFileName = basename($_FILES['pptx']['name']);
+                                $pptxFilePath = $uploadDir . urldecode($_POST['TemplateName']) . '.pptx';
+                            
+                                // Move the uploaded file to the designated directory
+                                if (move_uploaded_file($_FILES['pptx']['tmp_name'], $pptxFilePath)) {
+                                    echo json_encode(array(
+                                        'Status' => 'Success',
+                                        'Message' => "Successfully uploaded PPTX file: $pptxFileName"
+                                    ));
+                                } else {
+                                    echo json_encode(array(
+                                        'Status' => 'Error',
+                                        'Message' => "Error uploading PPTX file."
+                                    ));
+                                }
+                            } else {
+                                echo json_encode(array(
+                                    'Status' => 'Error',
+                                    'Message' => "Invalid PPTX file: $pptxFileName"
+                                ));
+                            }
+                        } else {
+                            echo json_encode(array(
+                                'Status' => 'Error',
+                                'Message' => "Error uploading PPTX file."
+                            ));
+                        }
+                    } else {
+                        echo json_encode(array(
+                            'Status' => 'Error',
+                            'Message' => "Template Name is missing."
+                        ));
+                    }
                 }
             }
             break;
         case 'getThreatActorConfig':
             if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
                 if ($method = checkRequestMethod('GET')) {
-                    $ThreatActorConfig = [];
-                    foreach (getSecurityAssessmentConfig()['ThreatActors'] as $Key => $Val) {
-                        $ThreatActorConfig[] = array(
-                            'Name' => $Key,
-                            'SVG' => $Val['SVG'],
-                            'PNG' => $Val['PNG'],
-                            'URLStub' => $Val['URLStub']
-                        );
-                    }
-                    echo json_encode($ThreatActorConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                    echo json_encode($ib->threatactors->getThreatActorConfigs(),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                 }
             }
             break;
         case 'newThreatActorConfig':
             if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
                 if ($method = checkRequestMethod('POST')) {
-                    if (isset($_POST['name']) AND isset($_POST['URLStub'])) {
-                        if (isset($_POST['SVG'])) {
-                            $SVG = $_POST['SVG'];
-                        } else {
-                            $SVG = null;
-                        }
-                        if (isset($_POST['PNG'])) {
-                            $PNG = $_POST['PNG'];
-                        } else {
-                            $PNG = null;
-                        }
-                        echo json_encode(newThreatActorConfig($_POST['name'],$SVG,$PNG,$_POST['URLStub']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                    if (isset($_POST['name'])) {
+                        if (isset($_POST['SVG'])) { $SVG = $_POST['SVG'] . '.svg'; } else { $SVG = null; }
+                        if (isset($_POST['PNG'])) { $PNG = $_POST['PNG'] . '.png'; } else { $PNG = null; }
+                        if (isset($_POST['URLStub'])) { $URLStub = $_POST['URLStub']; } else { $URLStub = null; }
+                        echo json_encode($ib->threatactors->newThreatActorConfig($_POST['name'],$SVG,$PNG,$URLStub),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                     }
                 }
             }
@@ -510,18 +576,12 @@ if (!($_REQUEST['f'])) {
         case 'setThreatActorConfig':
             if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
                 if ($method = checkRequestMethod('POST')) {
-                    if (isset($_POST['name']) AND isset($_POST['URLStub'])) {
-                        if (isset($_POST['SVG'])) {
-                            $SVG = $_POST['SVG'];
-                        } else {
-                            $SVG = null;
-                        }
-                        if (isset($_POST['PNG'])) {
-                            $PNG = $_POST['PNG'];
-                        } else {
-                            $PNG = null;
-                        }
-                        echo json_encode(setThreatActorConfig($_POST['name'],$SVG,$PNG,$_POST['URLStub']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                    if (isset($_POST['id'])) {
+                        if (isset($_POST['name'])) { $Name = $_POST['name']; } else { $Name = null; }
+                        if (isset($_POST['SVG'])) { $SVG = $_POST['SVG'] . '.svg'; } else { $SVG = null; }
+                        if (isset($_POST['PNG'])) { $PNG = $_POST['PNG'] . '.png'; } else { $PNG = null; }
+                        if (isset($_POST['URLStub'])) { $URLStub = $_POST['URLStub']; } else { $URLStub = null; }
+                        echo json_encode($ib->threatactors->setThreatActorConfig($_POST['id'],$Name,$SVG,$PNG,$URLStub),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                     }
                 }
             }
@@ -529,8 +589,8 @@ if (!($_REQUEST['f'])) {
         case 'removeThreatActorConfig':
             if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
                 if ($method = checkRequestMethod('POST')) {
-                    if (isset($_POST['name'])) {
-                        echo json_encode(removeThreatActorConfig($_POST['name']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                    if (isset($_POST['id'])) {
+                        echo json_encode($ib->threatactors->removeThreatActorConfig($_POST['id']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                     }
                 }
             }
@@ -554,27 +614,35 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'uploadThreatActorImage':
-            if ($ib->auth->checkAccess(null,"B1-THREAT-ACTORS")) {
+            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
                 if ($method = checkRequestMethod('POST')) {
                     $uploadDir = __DIR__.'/../assets/images/Threat Actors/Uploads/';
                     if (!is_dir($uploadDir)) {
                         mkdir($uploadDir, 0755, true);
                     }
                     if (isset($_FILES['svgImage']) && $_FILES['svgImage']['error'] == UPLOAD_ERR_OK) {
-                        if (isValidFileType($_FILES['svgImage']['name'],['svg'])) {
-                            $svgFileName = basename($_FILES['svgImage']['name']);
-                            $svgFilePath = $uploadDir . $svgFileName;
-                        
-                            // Move the uploaded file to the designated directory
-                            if (move_uploaded_file($_FILES['svgImage']['tmp_name'], $svgFilePath)) {
-                                $response['svg'] = "SVG image uploaded successfully: $svgFileName";
+                        if (isset($_POST['svgFileName'])) {
+                            if (isValidFileType($_FILES['svgImage']['name'],['svg'])) {
+                                $svgFileName = basename($_FILES['svgImage']['name']);
+                                $svgFilePath = $uploadDir . urldecode($_POST['svgFileName']) . '.svg';
+                            
+                                // Move the uploaded file to the designated directory
+                                if (move_uploaded_file($_FILES['svgImage']['tmp_name'], $svgFilePath)) {
+                                    $response['svg'] = "SVG image uploaded successfully: $svgFileName";
+                                } else {
+                                    $response['svg'] = "Error uploading SVG image.";
+                                }
                             } else {
-                                $response['svg'] = "Error uploading SVG image.";
+                                echo json_encode(array(
+                                    'Status' => 'Error',
+                                    'Message' => "Invalid SVG File: $svgFileName"
+                                ));
+                                break;
                             }
                         } else {
                             echo json_encode(array(
                                 'Status' => 'Error',
-                                'Message' => "Invalid SVG File: $svgFileName"
+                                'Message' => "SVG File Name Missing"
                             ));
                             break;
                         }
@@ -582,25 +650,33 @@ if (!($_REQUEST['f'])) {
                     
                     // Handle PNG image upload
                     if (isset($_FILES['pngImage']) && $_FILES['pngImage']['error'] == UPLOAD_ERR_OK) {
+                        if (isset($_POST['pngFileName'])) {
                             $pngFileName = basename($_FILES['pngImage']['name']);
-                            $pngFilePath = $uploadDir . $pngFileName;
+                            $pngFilePath = $uploadDir . urldecode($_POST['svgFileName']) . '.png';
                             if (isValidFileType($_FILES['pngImage']['name'],['png'])) {
-                            // Move the uploaded file to the designated directory
-                            if (move_uploaded_file($_FILES['pngImage']['tmp_name'], $pngFilePath)) {
-                                echo json_encode(array(
-                                    'Status' => 'Success',
-                                    'Message' => "PNG image uploaded successfully: $pngFileName"
-                                ));
+                                // Move the uploaded file to the designated directory
+                                if (move_uploaded_file($_FILES['pngImage']['tmp_name'], $pngFilePath)) {
+                                    echo json_encode(array(
+                                        'Status' => 'Success',
+                                        'Message' => "PNG image uploaded successfully: $pngFileName"
+                                    ));
+                                } else {
+                                    echo json_encode(array(
+                                        'Status' => 'Error',
+                                        'Message' => "Error uploading PNG image"
+                                    ));
+                                }
                             } else {
                                 echo json_encode(array(
                                     'Status' => 'Error',
-                                    'Message' => "Error uploading PNG image"
+                                    'Message' => "Invalid PNG File: $pngFileName"
                                 ));
+                                break;
                             }
                         } else {
                             echo json_encode(array(
                                 'Status' => 'Error',
-                                'Message' => "Invalid PNG File: $pngFileName"
+                                'Message' => "PNG File Name Missing"
                             ));
                             break;
                         }

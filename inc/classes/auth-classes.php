@@ -50,10 +50,8 @@ class Auth {
   private $CoreJwt;
   private $sso;
 
-  public function __construct($core,$dbFile) {
-    // Create or open the SQLite database
-    $this->db = new PDO("sqlite:$dbFile");
-    $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+  public function __construct($core,$db) {
+    $this->db = $db;
     $this->createUsersTable();
 
     // Set Config

@@ -9,13 +9,19 @@ class ib {
   public $rbac;
   public $config;
   public $logging;
+  public $db;
+  public $templates;
+  public $threatactors;
 
   public function __construct() {
+      $this->db = (new db(__DIR__.'/../config/app.db'))->db;
       $this->core = new core(__DIR__.'/../config/config.json');
-      $this->auth = new Auth($this->core,__DIR__.'/../config/app.db');
+      $this->auth = new Auth($this->core,$this->db);
       $this->rbac = new RBAC($this->core);
       $this->config = $this->core->config;
       $this->logging = $this->core->logging;
+      $this->templates = new TemplateConfig($this->db);
+      $this->threatactors = new ThreatActorConfig($this->db);
   }
 
   public function getVersion() {
@@ -30,6 +36,16 @@ class core {
   public function __construct($configFile) {
     $this->config = new Config($configFile);
     $this->logging = new Logging($this->config);
+  }
+}
+
+class db {
+  public $db;
+
+  public function __construct($dbFile) {
+    // Create or open the SQLite database
+    $this->db = new PDO("sqlite:$dbFile");
+    $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
   }
 }
 

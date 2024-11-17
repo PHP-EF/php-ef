@@ -10,8 +10,8 @@
         "Description": "This group applies to any user, regardless of if they are logged in or not",
         "PermittedResources": [
             "B1-THREAT-ACTORS",
-            "DNS-TOOLBOX",
-            "B1-SECURITY-ASSESSMENT"
+            "B1-SECURITY-ASSESSMENT",
+            "DNS-TOOLBOX"
         ],
         "PermittedMenus": []
     },

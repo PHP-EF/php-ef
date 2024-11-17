@@ -83,22 +83,6 @@
           <br>
           <div class="card border-secondary">
             <div class="card-title">
-              <h5>Security Assessment</h5>
-            </div>
-            <div class="form-group">
-              <label for="securityAssessmentTemplateName">Template Name</label>
-              <input type="text" class="form-control info-field" id="securityAssessmentTemplateName" aria-describedby="securityAssessmentTemplateNameHelp" name="securityAssessmentTemplateName">
-              <small id="securityAssessmentTemplateNameHelp" class="form-text text-muted">The file name for the Security Assessment Template.</small>
-	          </div>
-            <div class="form-group">
-              <label for="securityAssessmentThreatActorSlide">Threat Actor Slide</label>
-              <input type="text" class="form-control info-field" id="securityAssessmentThreatActorSlide" aria-describedby="securityAssessmentThreatActorSlideHelp" name="securityAssessmentThreatActorSlide">
-              <small id="securityAssessmentThreatActorSlideHelp" class="form-text text-muted">This is the Threat Actor template slide number.</small>
-	          </div>
-          </div>
-          <br>
-          <div class="card border-secondary">
-            <div class="card-title">
               <h5>SAML Configuration</h5>
             </div>
             <div class="row">
@@ -186,8 +170,6 @@
       $("#systemRBACFile").val(config.System.rbacjson);
       $("#systemRBACInfoFile").val(config.System.rbacinfo);
       $("#securitySalt").val(config.Security.salt);
-      $("#securityAssessmentThreatActorSlide").val(config.SecurityAssessment.ThreatActorSlide);
-      $("#securityAssessmentTemplateName").val(config.SecurityAssessment.TemplateName);
       $("#spEntityId").val(config.SAML.sp.entityId);
       $("#spAcsUrl").val(config.SAML.sp.assertionConsumerService.url);
       $("#spSloUrl").val(config.SAML.sp.singleLogoutService.url);

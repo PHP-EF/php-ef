@@ -12,10 +12,6 @@
     "Security": {
         "salt": "somesupersecurepasswordhere"
     },
-    "SecurityAssessment": {
-        "TemplateName": "template-sept-24.pptx",
-        "ThreatActorSlide": "32"
-    },
     "SAML": {
         "enabled": true,
         "strict": true,

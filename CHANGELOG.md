@@ -5,7 +5,9 @@
 - Add text based status to security assessment generator
 - Move generation to be a background task to avoid idle timeouts
 - Swapped progress spinner to something more infoblox
-- Move to new authentication classes
+- Move large number of functions to new classes
+- Implemented SAML Authentication for SSO
+- Implemented new configuration pages for Threat Actors/Security Assessment Templates
 
 ## v0.4.6
 - Fix bug where invalid API Keys would not always be reported

@@ -61,7 +61,7 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
 
         // Extract Powerpoint Template Zip
         $Progress = writeProgress($UUID,$Progress,"Extracting template");
-        extractZip($FilesDir.'/'.$ib->config->getConfig()['SecurityAssessment']['TemplateName'],$FilesDir.'/reports/report-'.$UUID);
+        extractZip($FilesDir.'/templates/'.$ib->templates->getActiveTemplate()['FileName'],$FilesDir.'/reports/report-'.$UUID);
 
         //
         // Do Chart, Spreadsheet & Image Stuff Here ....
@@ -407,7 +407,7 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
         //
         $Progress = writeProgress($UUID,$Progress,"Generating Threat Actor Slides");
         // New slides to be appended after this slide number
-        $ThreatActorSlideStart = $ib->config->getConfig()['SecurityAssessment']['ThreatActorSlide'];
+        $ThreatActorSlideStart = $ib->templates->getActiveTemplate()['ThreatActorSlide'];
         // Calculate the slide position based on above value
         $ThreatActorSlidePosition = $ThreatActorSlideStart-2;
 
@@ -433,10 +433,10 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
         // Set first slide number
         $SlideNumber = $SlidesCount++;
         // Copy Blank Threat Actor Image
-        copy($AssetsDir.'/images/Threat Actors/Other/logo-only.png',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/logo-only.png');
+        copy($AssetsDir.'/images/Threat Actors/logo-only.png',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/logo-only.png');
         // Build new Threat Actor Slides & Update PPTX Resources
-        $KnownActors = getSecurityAssessmentConfig()['ThreatActors'];
         foreach  ($ThreatActorInfo as $TAI) {
+            $KnownActor = $ib->threatactors->getThreatActorConfigByName($TAI['actor_name']);
             if (($ThreatActorSlideCount - 1) > 0) {
                 $xml_rels_f->appendXML('<Relationship Id="rId'.$xml_rels_fstart.'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide'.$SlideNumber.'.xml"/>');
                 $xml_pres_f->appendXML('<p:sldId id="'.$xml_pres_fstart.'" r:id="rId'.$xml_rels_fstart.'"/>');
@@ -473,7 +473,7 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
             // if (isset($TAI['infoblox_references'][0])) {
             // ** // Use the following code to link based on the Threat Actor config
             //$InfobloxReferenceFound = false;
-            if (array_key_exists($TAI['actor_name'],$KnownActors) && $KnownActors[$TAI['actor_name']]['URLStub'] !== "") {
+            if ($KnownActor && $KnownActor['URLStub'] !== "") {
                 $ThreatActorExternalLinkString = '<p:sp><p:nvSpPr><p:cNvPr id="7" name="Text Placeholder 20"><a:hlinkClick r:id="rId122"/><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{4A652F23-47D6-59A0-1D85-972482B29234}"/></a:ext></a:extLst></p:cNvPr><p:cNvSpPr txBox="1"><a:spLocks/></p:cNvSpPr><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="5574269" y="3869404"/><a:ext cx="1168604" cy="271567"/></a:xfrm><a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val 20777"/></a:avLst></a:prstGeom><a:noFill/><a:ln w="19050"><a:solidFill><a:schemeClr val="accent1"/></a:solidFill></a:ln><a:effectLst><a:glow rad="63500"><a:srgbClr val="00B24C"><a:alpha val="40000"/></a:srgbClr></a:glow></a:effectLst></p:spPr><p:txBody><a:bodyPr lIns="0" tIns="0" rIns="0" bIns="0" anchor="ctr" anchorCtr="0"/><a:lstStyle><a:lvl1pPr marL="141755" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="620"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1736" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl1pPr><a:lvl2pPr marL="425265" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1488" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl2pPr><a:lvl3pPr marL="708774" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1240" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl3pPr><a:lvl4pPr marL="992284" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl4pPr><a:lvl5pPr marL="1275794" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl5pPr><a:lvl6pPr marL="1559303" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl6pPr><a:lvl7pPr marL="1842813" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl7pPr><a:lvl8pPr marL="2126323" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl8pPr><a:lvl9pPr marL="2409833" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl9pPr></a:lstStyle><a:p><a:pPr marL="0" indent="0" algn="ctr"><a:lnSpc><a:spcPct val="100000"/></a:lnSpc><a:spcBef><a:spcPts val="300"/></a:spcBef><a:spcAft><a:spcPts val="600"/></a:spcAft><a:buClr><a:schemeClr val="tx1"/></a:buClr><a:buNone/></a:pPr><a:r><a:rPr lang="en-US" sz="600" b="1" dirty="0"><a:solidFill><a:schemeClr val="bg1"/></a:solidFill><a:latin typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="77"/><a:ea typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="0"/><a:cs typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="0"/></a:rPr><a:t>THREAT ACTOR REPORT</a:t></a:r><a:endParaRPr lang="en-US" sz="600" dirty="0"><a:solidFill><a:schemeClr val="bg1"/></a:solidFill><a:latin typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="77"/><a:ea typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="0"/><a:cs typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="0"/></a:endParaRPr></a:p></p:txBody></p:sp></p:spTree>';
                 $TASFile = str_replace('</p:spTree>',$ThreatActorExternalLinkString,$TASFile);
                 //$InfobloxReferenceFound = true;
@@ -491,9 +491,9 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
                 }
             }
             $xml_tas_f = $xml_tas->createDocumentFragment();
-            if (array_key_exists($TAI['actor_name'],$KnownActors) && $KnownActors[$TAI['actor_name']]['PNG'] !== "" && $KnownActors[$TAI['actor_name']]['SVG'] !== "") {
-                $SVG = $KnownActors[$TAI['actor_name']]['SVG'];
-                $PNG = $KnownActors[$TAI['actor_name']]['PNG'];
+            if ($KnownActor && $KnownActor['PNG'] !== "" && $KnownActor['SVG'] !== "") {
+                $SVG = $KnownActor['SVG'];
+                $PNG = $KnownActor['PNG'];
                 // Threat Actor PNG
                 copy($AssetsDir.'/images/Threat Actors/Uploads/'.$PNG,$FilesDir.'/reports/report-'.$UUID.'/ppt/media/'.$PNG);
                 copy($AssetsDir.'/images/Threat Actors/Uploads/'.$SVG,$FilesDir.'/reports/report-'.$UUID.'/ppt/media/'.$SVG);
@@ -506,8 +506,8 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
 
             // Virus Total PNG / SVG
             if ($VTIndicatorFound) {
-                copy($AssetsDir.'/images/Threat Actors/Other/virustotal.png',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/virustotal.png');
-                copy($AssetsDir.'/images/Threat Actors/Other/virustotal.svg',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/virustotal.svg');
+                copy($AssetsDir.'/images/Other/virustotal.png',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/virustotal.png');
+                copy($AssetsDir.'/images/Other/virustotal.svg',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/virustotal.svg');
                 $xml_tas_f->appendXML('<Relationship Id="rId120" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/virustotal.png"/>');
                 $xml_tas_f->appendXML('<Relationship Id="rId121" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/virustotal.svg"/>');
             }
@@ -520,9 +520,8 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
             //     $xml_tas->getElementsByTagName('Relationships')->item(0)->appendChild($xml_tas_f2);
             // }
             // ** // Use the following code to link based on the Threat Actor config
-            if (array_key_exists($TAI['actor_name'],$KnownActors) && $KnownActors[$TAI['actor_name']]['URLStub'] !== "") {
-                $URLStub = $KnownActors[$TAI['actor_name']]['URLStub'];
-                $URL = 'https://www.infoblox.com/threat-intel/threat-actors/'.$URLStub.'/';
+            if ($KnownActor && $KnownActor['URLStub'] !== "") {
+                $URL = $KnownActor['URLStub'];
                 $xml_tas_f->appendXML('<Relationship Id="rId122" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="'.$URL.'" TargetMode="External"/>');
             }
 
@@ -742,123 +741,6 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
         $response['id'] = $UUID;
     }
     return $response;
-}
-
-function getSecurityAssessmentConfig() {
-    return json_decode(file_get_contents(__DIR__.'/../../inc/config/security-assessment.json'), true);
-}
-
-function newTemplateConfig($Status,$FileName,$TemplateName,$ThreatActorSlide) {
-    $TemplateConfig = getSecurityAssessmentConfig();
-    if (!in_array(urldecode($TemplateName),array_column($TemplateConfig['Templates'],'TemplateName'))) {
-        $CurrentDate = new DateTime();
-        $TemplateConfig['Templates'][] = array(
-            "Status" => urldecode($Status),
-            "FileName" => urldecode($FileName),
-            "TemplateName" => urldecode($TemplateName),
-            "ThreatActorSlide" => urldecode($ThreatActorSlide),
-            "Created" => $CurrentDate->format('Y-m-d H:i:s')
-        );
-        file_put_contents(__DIR__.'/../../inc/config/security-assessment.json',json_encode($TemplateConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
-        return array(
-            'Status' => 'Success',
-            'Message' => 'Template added successfully'
-        );
-    } else {
-        return array(
-            'Status' => 'Error',
-            'Message' => 'Template name already exists'
-        );
-    }
-}
-
-function removeTemplateConfig($TemplateName) {
-    $TemplateConfig = getSecurityAssessmentConfig();
-    $ArrId = array_search(urldecode($TemplateName),array_column($TemplateConfig['Templates'],'TemplateName'));
-    if (in_array(urldecode($TemplateName),array_column($TemplateConfig['Templates'],'TemplateName'))) {
-        unset($TemplateConfig['Templates'][$ArrId]);
-        file_put_contents(__DIR__.'/../../inc/config/security-assessment.json',json_encode($TemplateConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
-        return array(
-            'Status' => 'Success',
-            'Message' => 'Template removed successfully'
-        );
-    } else {
-        return array(
-            'Status' => 'Error',
-            'Message' => 'Template does not exist'
-        );
-    }
-}
-
-function newThreatActorConfig($Name,$SVG,$PNG,$URLStub) {
-    $ThreatActorConfig = getSecurityAssessmentConfig();
-    if (!isset($ThreatActorConfig['ThreatActors'][urldecode($Name)])) {
-        $ThreatActorConfig['ThreatActors'][urldecode($Name)]['URLStub'] = urldecode($URLStub);
-        if ($SVG != null) {
-            $ThreatActorConfig['ThreatActors'][urldecode($Name)]['SVG'] = urldecode($SVG);
-        } else {
-            $ThreatActorConfig['ThreatActors'][urldecode($Name)]['SVG'] = '';
-        }
-        if ($PNG != null) {
-            $ThreatActorConfig['ThreatActors'][urldecode($Name)]['PNG'] = urldecode($PNG);
-        } else {
-            $ThreatActorConfig['ThreatActors'][urldecode($Name)]['PNG'] = '';
-        }
-        file_put_contents(__DIR__.'/../../inc/config/security-assessment.json',json_encode($ThreatActorConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
-        return array(
-            'Status' => 'Success',
-            'Message' => 'Threat Actor added successfully'
-        );
-    } else {
-        return array(
-            'Status' => 'Error',
-            'Message' => 'Threat Actor already exists'
-        );
-    }
-}
-
-function setThreatActorConfig($Name,$SVG,$PNG,$URLStub) {
-    $ThreatActorConfig = getSecurityAssessmentConfig();
-    if (isset($ThreatActorConfig['ThreatActors'][urldecode($Name)])) {
-        $ThreatActorConfig['ThreatActors'][urldecode($Name)]['URLStub'] = urldecode($URLStub);
-        if ($SVG != null) {
-            $ThreatActorConfig['ThreatActors'][urldecode($Name)]['SVG'] = urldecode($SVG);
-        }
-        if ($PNG != null) {
-            $ThreatActorConfig['ThreatActors'][urldecode($Name)]['PNG'] = urldecode($PNG);
-        }
-        file_put_contents(__DIR__.'/../../inc/config/security-assessment.json',json_encode($ThreatActorConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
-        return array(
-            'Status' => 'Success',
-            'Message' => 'Threat Actor successfully updated'
-        );
-    } else {
-        return array(
-            'Status' => 'Error',
-            'Message' => 'Threat Actor does not exist'
-        );
-    }
-}
-
-function removeThreatActorConfig($Name) {
-    $ThreatActorConfig = getSecurityAssessmentConfig();
-    if (isset($ThreatActorConfig['ThreatActors'][$Name])) {
-        unset($ThreatActorConfig['ThreatActors'][$Name]);
-        file_put_contents(__DIR__.'/../../inc/config/security-assessment.json',json_encode($ThreatActorConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
-        return array(
-            'Status' => 'Success',
-            'Message' => 'Threat Actor removed successfully'
-        );
-    } else {
-        return array(
-            'Status' => 'Error',
-            'Message' => 'Threat Actor does not exist'
-        );
-    }
-}
-
-function uploadThreatActorImage() {
-    // Do stuff
 }
 
 function writeProgress($id,$Count,$Action = "") {

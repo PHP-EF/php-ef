@@ -13,7 +13,7 @@
 
 <div class="container">
   <div class="row justify-content-center">
-    <div class="col-12 col-lg-10 mx-auto">
+    <div class="col-12 col-lg-12 mx-auto">
       <h2 class="h3 mb-4 page-title">Security Assessment Report Generator Configuration</h2>
 
       <div class="my-4">
@@ -40,9 +40,9 @@
               <tr>
                 <th data-field="state" data-checkbox="true"></th>
                 <th data-field="Name" data-sortable="true">Threat Actor</th>
-                <th data-field="URLStub" data-sortable="true">URL Stub</th>
                 <th data-field="PNG" data-sortable="true">PNG Image</th>
                 <th data-field="SVG" data-sortable="true">SVG Image</th>
+                <th data-field="URLStub" data-sortable="true">URL Stub</th>
                 <th data-formatter="threatActorActionFormatter" data-events="actionEvents">Actions</th>
               </tr>
             </thead>
@@ -75,6 +75,7 @@
                 <th data-field="state" data-checkbox="true"></th>
                 <th data-field="Status" data-sortable="true">Status</th>
                 <th data-field="TemplateName" data-sortable="true">Name</th>
+                <th data-field="Description" data-sortable="true">Description</th>
                 <th data-field="ThreatActorSlide" data-sortable="true">Threat Actor Slide</th>
                 <th data-field="FileName" data-sortable="true">File Name</th>
                 <th data-field="Created" data-sortable="true">Upload Date</th>
@@ -101,6 +102,9 @@
       </div>
       <div class="modal-body" id="editThreatActorModalBody">
         <div class="form-group">
+          <div class="form-group" hidden>
+            <input type="text" class="form-control info-field" id="threatActorId" aria-describedby="threatActorIdHelp" name="threatActorId" disabled>
+          </div>
           <label for="threatActorName">Threat Actor Name</label>
           <input type="text" class="form-control" id="threatActorName" aria-describedby="threatActorNameHelp" disabled>
           <small id="threatActorNameHelp" class="form-text text-muted">The name of the Threat Actor.</small>
@@ -108,7 +112,7 @@
         <div class="form-group">
           <label for="threatActorURLStub">URL Stub</label>
           <input type="text" class="form-control" id="threatActorURLStub" aria-describedby="threatActorURLStubHelp">
-          <small id="threatActorURLStubHelp" class="form-text text-muted">The Threat Actor Report <b>URL Stub</b> to use when generating Security Assessment reports.</small>
+          <small id="threatActorURLStubHelp" class="form-text text-muted">The Threat Actor Report <b>URL</b> to use when generating Security Assessment reports.</small>
         </div>
         <div class="form-group row">
           <label for="threatActorIMGSVG" class="col-form-label">SVG Image</label>
@@ -159,7 +163,7 @@
         <div class="form-group">
           <label for="newThreatActorURLStub">URL Stub</label>
           <input type="text" class="form-control" id="newThreatActorURLStub" aria-describedby="newThreatActorURLStubHelp">
-          <small id="newThreatActorURLStubHelp" class="form-text text-muted">The Threat Actor Report <b>URL Stub</b> to use when generating Security Assessment reports.</small>
+          <small id="newThreatActorURLStubHelp" class="form-text text-muted">The Threat Actor Report <b>URL</b> to use when generating Security Assessment reports.</small>
         </div>
         <div class="form-group row">
           <label for="newThreatActorIMGSVG" class="col-form-label">SVG Image</label>
@@ -204,23 +208,40 @@
       </div>
       <div class="modal-body" id="editTemplateModalBody">
         <div class="form-group">
+          <div class="form-group" hidden>
+            <input type="text" class="form-control info-field" id="templateId" aria-describedby="templateIdHelp" name="templateId" disabled>
+          </div>
           <label for="templateStatus">Template Status</label>
           <select id="templateStatus" class="form-select" aria-label="Template Status" aria-describedby="templateStatusHelp">
             <option value="Active">Active</option>
-            <option value="Previous" disabled>Previous</option>
-            <option value="Old">Old</option>
+            <option value="Inactive">Inactive</option>
           </select>
           <small id="templateStatusHelp" class="form-text text-muted">The current status of the template.</small>
         </div>
         <div class="form-group">
           <label for="templateName">Template Name</label>
           <input type="text" class="form-control info-field" id="templateName" aria-describedby="templateNameHelp" name="templateName">
-          <small id="templateNameHelp" class="form-text text-muted">The file name for the Security Assessment Template.</small>
+          <small id="templateNameHelp" class="form-text text-muted">The name for the Security Assessment Template.</small>
+        </div>
+        <div class="form-group">
+          <label for="templateDescription">Template Description</label>
+          <input type="text" class="form-control info-field" id="templateDescription" aria-describedby="templateDescriptionHelp" name="templateDescription">
+          <small id="templateDescriptionHelp" class="form-text text-muted">The description of the Security Assessment Template.</small>
         </div>
         <div class="form-group">
           <label for="templateThreatActorSlide">Threat Actor Slide</label>
           <input type="text" class="form-control info-field" id="templateThreatActorSlide" aria-describedby="templateThreatActorSlideHelp" name="templateThreatActorSlide">
           <small id="templateThreatActorSlideHelp" class="form-text text-muted">This is the Threat Actor template slide number.</small>
+        </div>
+        <div class="form-group row">
+          <label for="templatePPTX" class="col-form-label">PowerPoint Template</label>
+          <div class="col-sm-5">
+            <input type="file" class="form-control" id="templatePPTX" accept=".pptx" aria-describedby="templatePPTXHelp">
+            <small id="templatePPTXHelp" class="form-text text-muted">Upload a PowerPoint Template.</small>
+          </div>
+          <div class="col-sm-5">
+            <img id="imagePreviewSVG" src="" alt="PNG Image Preview" style="display:none; margin-top: 10px; max-width: 100%;">
+          </div>
         </div>
         <div class="form-group">
           <label for="templateFileName">Template File Name</label>
@@ -254,23 +275,37 @@
       <div class="modal-body" id="newTemplateModelBody">
 	      <p>Enter the new template information below to add it to the list.</p>
         <div class="form-group">
-          <label for="templateStatus">Template Status</label>
-          <select id="templateStatus" class="form-select" aria-label="Template Status" aria-describedby="templateStatusHelp">
-            <option value="active">Active</option>
-            <option value="previous">Previous</option>
-            <option value="old">Old</option>
+          <label for="newTemplateStatus">Template Status</label>
+          <select id="newTemplateStatus" class="form-select" aria-label="Template Status" aria-describedby="newTemplateStatusHelp">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
           </select>
-          <small id="templateStatusHelp" class="form-text text-muted">The status of the new template.</small>
+          <small id="newTemplateStatusHelp" class="form-text text-muted">The status of the new template.</small>
         </div>
         <div class="form-group">
-          <label for="templateName">Template Name</label>
-          <input type="text" class="form-control info-field" id="templateName" aria-describedby="templateNameHelp" name="templateName" disabled>
-          <small id="templateNameHelp" class="form-text text-muted">The name for the Security Assessment Template.</small>
+          <label for="newTemplateName">Template Name</label>
+          <input type="text" class="form-control info-field" id="newTemplateName" aria-describedby="newTemplateNameHelp" name="newTemplateName">
+          <small id="newTemplateNameHelp" class="form-text text-muted">The name for the Security Assessment Template. (Cannot be changed once saved)</small>
         </div>
         <div class="form-group">
-          <label for="templateThreatActorSlide">Threat Actor Slide</label>
-          <input type="text" class="form-control info-field" id="templateThreatActorSlide" aria-describedby="templateThreatActorSlideHelp" name="templateThreatActorSlide">
-          <small id="templateThreatActorSlideHelp" class="form-text text-muted">This is the Threat Actor template slide number.</small>
+          <label for="newTemplateDescription">Template Description</label>
+          <input type="text" class="form-control info-field" id="newTemplateDescription" aria-describedby="newTemplateDescriptionHelp" name="newTemplateDescription">
+          <small id="newTemplateDescriptionHelp" class="form-text text-muted">The description of the Security Assessment Template.</small>
+        </div>
+        <div class="form-group">
+          <label for="newTemplateThreatActorSlide">Threat Actor Slide</label>
+          <input type="text" class="form-control info-field" id="newTemplateThreatActorSlide" aria-describedby="newTemplateThreatActorSlideHelp" name="newTemplateThreatActorSlide">
+          <small id="newTemplateThreatActorSlideHelp" class="form-text text-muted">This is the Threat Actor template slide number.</small>
+        </div>
+        <div class="form-group row">
+          <label for="newTemplatePPTX" class="col-form-label">PowerPoint Template</label>
+          <div class="col-sm-5">
+            <input type="file" class="form-control" id="newTemplatePPTX" accept=".pptx" aria-describedby="newTemplatePPTXHelp">
+            <small id="newTemplatePPTXHelp" class="form-text text-muted">Upload a PowerPoint Template.</small>
+          </div>
+          <div class="col-sm-5">
+            <img id="imagePreviewSVG" src="" alt="PNG Image Preview" style="display:none; margin-top: 10px; max-width: 100%;">
+          </div>
         </div>
       </div>
       <div class="modal-footer">
@@ -328,6 +363,8 @@
         text: "Add Security Assessment Template",
         icon: "bi-plus-lg",
         event: function() {
+          $('#newTemplateModal').modal('show');
+          $('#newTemplateModal input').val('');
         },
         attributes: {
           title: "Add a new Security Assessment Template",
@@ -339,6 +376,7 @@
 
   function listThreatActor(row) {
     $('#editThreatActorModal input').val('');
+    $('#threatActorId').val(row['id']);
     $('#imagePreviewSVG, #imagePreviewPNG').attr('src','').css('display','none');
     $('#threatActorName').val(row['Name']);
     if (row['SVG'] != "") {
@@ -352,8 +390,10 @@
 
   function listTemplate(row) {
     $('#editTemplateModal input').val('');
+    $('#templateId').val(row['id']);
     $('#templateStatus').val(row['Status']);
     $('#templateName').val(row['TemplateName']);
+    $('#templateDescription').val(row['Description']);
     $('#templateFileName').val(row['FileName']);
     $('#templateThreatActorSlide').val(row['ThreatActorSlide']);
     $('#templateUploadDate').val(row['Created']);
@@ -407,7 +447,7 @@
     'click .deleteThreatActor': function (e, value, row, index) {
       if(confirm("Are you sure you want to delete "+row.Name+" from the list of Threat Actors? This is irriversible.") == true) {
         var postArr = {}
-        postArr.name = row.Name;
+        postArr.id = row.id;
         $.post( "/api?f=removeThreatActorConfig", postArr).done(function( data, status ) {
           if (data['Status'] == 'Success') {
             toast(data['Status'],"",data['Message'],"success");
@@ -425,19 +465,37 @@
     'click .editTemplate': function (e, value, row, index) { 
       listTemplate(row);
       $('#editTemplateModal').modal('show');
+    },
+    'click .deleteTemplate': function (e, value, row, index) {
+      if(confirm("Are you sure you want to delete "+row.TemplateName+" from the list of Templates? This is irriversible.") == true) {
+        var postArr = {}
+        postArr.id = row.id;
+        $.post( "/api?f=removeSecurityAssessmentTemplate", postArr).done(function( data, status ) {
+          if (data['Status'] == 'Success') {
+            toast(data['Status'],"",data['Message'],"success");
+            $('#templateTable').bootstrapTable('refresh');
+          } else if (data['Status'] == 'Error') {
+            toast(data['Status'],"",data['Message'],"danger","30000");
+          } else {
+            toast("Error","","Failed to remove Template: "+row.TemplateName,"danger","30000");
+          }
+        }).fail(function( data, status ) {
+            toast("API Error","","Failed to remove Template: "+row.TemplateName,"danger","30000");
+        })
+      }
     }
   }
 
   $(document).on('click', '#newThreatActorSubmit', function(event) {
     const svgFiles = $('#newThreatActorIMGSVG')[0].files;
     const pngFiles = $('#newThreatActorIMGPNG')[0].files;
-
+    const threatActorFileName = $('#newThreatActorName').val().toLowerCase().replace(/ /g, '-');
     var postArr = {}
     if (svgFiles[0]) {
-      postArr.SVG = svgFiles[0].name;
+      postArr.SVG = threatActorFileName;
     }
     if (svgFiles[0]) {
-      postArr.PNG = pngFiles[0].name;
+      postArr.PNG = threatActorFileName;
     }
     postArr.name = encodeURIComponent($('#newThreatActorName').val())
     postArr.URLStub = encodeURIComponent($('#newThreatActorURLStub').val())
@@ -449,9 +507,11 @@
           const formData = new FormData();
           if (svgFiles[0]) {
             formData.append('svgImage', svgFiles[0]);
+            formData.append('svgFileName', threatActorFileName);
           }
           if (pngFiles[0]) {
             formData.append('pngImage', pngFiles[0]);
+            formData.append('pngFileName', threatActorFileName);
           }
           $.ajax({
             url: '/api?f=uploadThreatActorImage', // Replace with your PHP API endpoint
@@ -484,14 +544,15 @@
   $(document).on('click', '#editThreatActorSubmit', function(event) {
     const svgFiles = $('#threatActorIMGSVG')[0].files;
     const pngFiles = $('#threatActorIMGPNG')[0].files;
-
+    const threatActorFileName = $('#threatActorName').val().toLowerCase().replace(/ /g, '-');
     var postArr = {}
     if (svgFiles[0]) {
-      postArr.SVG = svgFiles[0].name;
+      postArr.SVG = threatActorFileName;
     }
     if (svgFiles[0]) {
-      postArr.PNG = pngFiles[0].name;
+      postArr.PNG = threatActorFileName;
     }
+    postArr.id = encodeURIComponent($('#threatActorId').val())
     postArr.name = encodeURIComponent($('#threatActorName').val())
     postArr.URLStub = encodeURIComponent($('#threatActorURLStub').val())
     $.post( "/api?f=setThreatActorConfig", postArr).done(function( data, status ) {
@@ -502,9 +563,11 @@
           const formData = new FormData();
           if (svgFiles[0]) {
             formData.append('svgImage', svgFiles[0]);
+            formData.append('svgFileName', threatActorFileName);
           }
           if (pngFiles[0]) {
             formData.append('pngImage', pngFiles[0]);
+            formData.append('pngFileName', threatActorFileName);
           }
           $.ajax({
             url: '/api?f=uploadThreatActorImage', // Replace with your PHP API endpoint
@@ -531,6 +594,113 @@
         toast("API Error","","Failed to update Threat Actor: "+postArr.name,"danger","30000");
     }).always(function( data, status) {
       $('#editThreatActorModal').modal('hide');
+    })
+  });
+
+  $(document).on('click', '#newTemplateSubmit', function(event) {
+    const templateFiles = $('#newTemplatePPTX')[0].files;
+
+    var postArr = {}
+    postArr.Status = encodeURIComponent($('#newTemplateStatus').val());
+    postArr.TemplateName = encodeURIComponent($('#newTemplateName').val());
+    postArr.Description = encodeURIComponent($('#newTemplateDescription').val());
+    postArr.ThreatActorSlide = encodeURIComponent($('#newTemplateThreatActorSlide').val());
+    if (templateFiles[0]) {
+      postArr.FileName = $('#newTemplateName').val().toLowerCase().replace(/ /g, '-');
+    }
+    $.post( "/api?f=newSecurityAssessmentTemplate", postArr).done(function( data, status ) {
+      if (data['Status'] == 'Success') {
+        toast(data['Status'],"",data['Message'],"success");
+        $('#templateTable').bootstrapTable('refresh');
+        if (templateFiles.length > 0) {
+          const formData = new FormData();
+          formData.append('pptx', templateFiles[0]);
+          formData.append('TemplateName', postArr.FileName);
+          toast("Uploading","Please wait..","Uploading Template..","info","30000");
+          $.ajax({
+            url: '/api?f=uploadSecurityAssessmentTemplate', // Replace with your PHP API endpoint
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+              if (response['Status'] == 'Success') {
+                toast(response['Status'],"",response['Message'],"success","30000");
+              } else if (response['Status'] == 'Error') {
+                toast(response['Status'],"",response['Message'],"danger","30000");
+              } else {
+                toast("Error","","Failed to add new template","danger","30000");
+              }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+              toast('Error',"","Error uploading template","danger");
+              console.error(errorThrown);
+            }
+          });
+        }
+      } else if (data['Status'] == 'Error') {
+        toast(data['Status'],"",data['Message'],"danger","30000");
+      } else {
+        toast("Error","","Failed to add new template","danger","30000");
+      }
+    }).fail(function( data, status ) {
+        toast("API Error","","Failed to add new template","danger","30000");
+    }).always(function( data, status) {
+      $('#newTemplateModal').modal('hide');
+    })
+  });
+
+  $(document).on('click', '#editTemplateSubmit', function(event) {
+    const templateFiles = $('#templatePPTX')[0].files;
+
+    var postArr = {}
+    postArr.id = encodeURIComponent($('#templateId').val());
+    postArr.Status = encodeURIComponent($('#templateStatus').val());
+    postArr.TemplateName = encodeURIComponent($('#templateName').val());
+    postArr.Description = encodeURIComponent($('#templateDescription').val());
+    postArr.ThreatActorSlide = encodeURIComponent($('#templateThreatActorSlide').val());
+    if (templateFiles[0]) {
+      postArr.FileName = $('#templateName').val().toLowerCase().replace(/ /g, '-');
+    }
+    $.post( "/api?f=setSecurityAssessmentTemplate", postArr).done(function( data, status ) {
+      if (data['Status'] == 'Success') {
+        toast(data['Status'],"",data['Message'],"success");
+        $('#templateTable').bootstrapTable('refresh');
+        if (templateFiles.length > 0) {
+          const formData = new FormData();
+          formData.append('pptx', templateFiles[0]);
+          formData.append('TemplateName', postArr.FileName);
+          toast("Uploading","Please wait..","Uploading Template..","info","30000");
+          $.ajax({
+            url: '/api?f=uploadSecurityAssessmentTemplate', // Replace with your PHP API endpoint
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+              if (response['Status'] == 'Success') {
+                toast(response['Status'],"",response['Message'],"success","30000");
+              } else if (response['Status'] == 'Error') {
+                toast(response['Status'],"",response['Message'],"danger","30000");
+              } else {
+                toast("Error","","Failed to edit template","danger","30000");
+              }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+              toast('Error',"","Error uploading template","danger");
+              console.error(errorThrown);
+            }
+          });
+        }
+      } else if (data['Status'] == 'Error') {
+        toast(data['Status'],"",data['Message'],"danger","30000");
+      } else {
+        toast("Error","","Failed to edit template","danger","30000");
+      }
+    }).fail(function( data, status ) {
+        toast("API Error","","Failed to edit template","danger","30000");
+    }).always(function( data, status) {
+      $('#editTemplateModal').modal('hide');
     })
   });
 

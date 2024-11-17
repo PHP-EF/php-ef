@@ -37,7 +37,7 @@ body.dark-theme .popover {
 
 <div class="container">
   <div class="row justify-content-center">
-    <div class="col-12 col-lg-10 mx-auto">
+    <div class="col-12 col-lg-12 mx-auto">
       <div class="my-4">
         <h5 class="mb-0 mt-5">User/Group Configuration</h5>
         <p>Use the following to configure Users & Groups within the Infoblox SA Tools Portal.</p>
