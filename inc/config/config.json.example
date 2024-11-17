@@ -12,8 +12,30 @@
     "Security": {
         "salt": "somesupersecurepasswordhere"
     },
-    "SecurityAssessment": {
-        "TemplateName": "template-sept-24.pptx",
-        "ThreatActorSlide": "32"
+    "SAML": {
+        "enabled": true,
+        "strict": true,
+        "debug": false,
+        "sp": {
+            "entityId": "",
+            "assertionConsumerService": {
+                "url": "https://fqdn/api?f=acs"
+            },
+            "singleLogoutService": {
+                "url": "https://fqdn/api?f=slo"
+            },
+            "x509cert": "",
+            "privateKey": ""
+        },
+        "idp": {
+            "entityId": "https://saml.example.com/entityid",
+            "singleSignOnService": {
+                "url": "https://mocksaml.com/api/saml/sso"
+            },
+            "singleLogoutService": {
+                "url": "https://mocksaml.com/api/saml/slo"
+            },
+            "x509cert": "MIIC4jCCAcoCCQC33wnybT5QZDANBgkqhkiG9w0BAQsFADAyM..."
+        }
     }
 }

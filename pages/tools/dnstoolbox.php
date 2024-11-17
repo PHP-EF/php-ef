@@ -5,7 +5,9 @@ header("Expires: Tue, 01 Jan 1980 1:00:00 GMT");
 header("Pragma: no-cache");
 
 require_once(__DIR__.'/../../inc/inc.php');
-
+if ($ib->auth->checkAccess(null,"DNS-TOOLBOX") == false) {
+  die();
+}
 ?>
 
 <!DOCTYPE html>

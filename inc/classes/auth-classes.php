@@ -5,9 +5,13 @@ use Predis\Client;
 
 class CoreJwt {
     private $redis;
+    private $config;
+    private $logging;
 
-    public function __construct() {
+    public function __construct($core) {
         $this->redis = new Client(); // Connect to Redis
+        $this->config = $core->config;
+        $this->logging = $core->logging;
     }
 
     // Generate a JWT
@@ -22,15 +26,15 @@ class CoreJwt {
           'fullname' => $FN.' '.$SN,
           'groups' => $Groups
         ];
-        writeLog("Authentication","Issued JWT token","debug",$payload);
-        return JWT::encode($payload, getConfig()['Security']['salt'], 'HS256');
+        $this->logging->writeLog("Authentication","Issued JWT token","debug",$payload);
+        return JWT::encode($payload, $this->config->getConfig()['Security']['salt'], 'HS256');
     }
 
     // Revoke a token
     public function revokeToken($token) {
-        $decoded = JWT::decode($token, new Key(getConfig()['Security']['salt'], 'HS256'));
+        $decoded = JWT::decode($token, new Key($this->config->getConfig()['Security']['salt'], 'HS256'));
         $this->redis->set($token, json_encode($decoded), 'EX', (86400 * 30)); // Store token with expiration
-        writeLog("Authentication","Revoked JWT token","debug",$decoded);
+        $this->logging->writeLog("Authentication","Revoked JWT token","debug",$decoded);
     }
 
     // Check if a token is revoked
@@ -41,12 +45,24 @@ class CoreJwt {
 
 class Auth {
   private $db;
+  private $config;
+  private $logging;
+  private $CoreJwt;
+  private $sso;
 
-  public function __construct($dbFile) {
-    // Create or open the SQLite database
-    $this->db = new PDO("sqlite:$dbFile");
-    $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+  public function __construct($core,$db) {
+    $this->db = $db;
     $this->createUsersTable();
+
+    // Set Config
+    $this->config = $core->config;
+    $this->logging = $core->logging;
+
+    // CoreJwt
+    $this->CoreJwt = new CoreJwt($core);
+
+    // SSO
+    $this->sso = new OneLogin\Saml2\Auth($this->config->getConfig("SAML"));
   }
 
   private function createUsersTable() {
@@ -271,8 +287,7 @@ class Auth {
       $stmt->execute([':id' => $user['id'], ':lastlogin' => $currentDateTime]);
 
       // Generate JWT token
-      $CoreJwt = new CoreJwt();
-      $jwt = $CoreJwt->generateToken($user['username'],$user['firstname'],$user['surname'],$user['email'],explode(',',$user['groups']));
+      $jwt = $this->CoreJwt->generateToken($user['username'],$user['firstname'],$user['surname'],$user['email'],explode(',',$user['groups']));
       // Set JWT as a cookie
       setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
 
@@ -280,26 +295,55 @@ class Auth {
         'Status' => 'Success',
         'Location' => '/'
       );
-      writeLog("Authentication",$username." successfully logged in","info",$Arr);
+      $this->logging->writeLog("Authentication",$username." successfully logged in","info",$Arr);
       return $Arr;
     } else { // Login failed
       $Arr = array(
         'Status' => 'Error',
         'Message' => 'Invalid Credentials'
       );
-      writeLog("Authentication",$username." failed to log in","warning",$Arr);
+      $this->logging->writeLog("Authentication",$username." failed to log in","warning",$Arr);
       return $Arr;
     }
   }
 
   public function logout() {
-    $CoreJwt = new CoreJwt();
-    $CoreJwt->revokeToken($_COOKIE['jwt']);
+    $this->CoreJwt->revokeToken($_COOKIE['jwt']);
     return $this->getAuth();
+  }
+
+  public function sso() {
+    $this->sso->login();
+  }
+
+  public function slo() {
+    $callback = function () {
+      $this->logout();
+    };
+    $this->sso->processSLO(false, null, false, $callback);
+  }
+
+  public function acs() {
+    // Implement Redis for expired assertions
+    $this->sso->processResponse();
+
+    if ($this->sso->isAuthenticated()) {
+        // User is authenticated
+        echo json_encode(array(
+          'samlUserdata' => $this->sso->getAttributes(),
+          'samlNameId' => $this->sso->getNameId(),
+          'samlNameIdFormat' => $this->sso->getNameIdFormat(),
+          'samlNameidNameQualifier' => $this->sso->getNameIdNameQualifier(),
+          'samlNameidSPNameQualifier' => $this->sso->getNameIdSPNameQualifier(),
+          'samlSessionIndex' => $this->sso->getSessionIndex()
+        ));
+    } else {
+        // Authentication failed
+        echo "Authentication failed.";
+    }
   }
   
   public function getAuth() {
-    $CoreJwt = new CoreJwt();
     if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
       $IPAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
     } else if (isset($_SERVER['REMOTE_ADDR'])) {
@@ -310,8 +354,8 @@ class Auth {
     $IPAddress = explode(':',$IPAddress)[0];
     
     if (isset($_COOKIE['jwt'])) {
-      $secretKey = getConfig()['Security']['salt']; // Change this to a secure key
-      if ($CoreJwt->isRevoked($_COOKIE['jwt']) == true) {
+      $secretKey = $this->config->getConfig()['Security']['salt']; // Change this to a secure key
+      if ($this->CoreJwt->isRevoked($_COOKIE['jwt']) == true) {
         // Token is invalid
         $AuthResult = array(
           'Authenticated' => false,
@@ -415,7 +459,7 @@ class Auth {
       $User = $this->getAuth();
     }
     if (isset($User['Authenticated'])) {
-      $rbacJson = file_get_contents(__DIR__.'/../'.getConfig("System","rbacjson"));
+      $rbacJson = file_get_contents(__DIR__.'/../'.$this->config->getConfig("System","rbacjson"));
       $rbac = json_decode($rbacJson, true);
       if (isset($User['Groups'])) {
         $usergroups = $User['Groups'];
@@ -460,15 +504,21 @@ class Auth {
 class RBAC {
   private $rbacJson;
   private $rbacInfo;
+  private $config;
+  private $logging;
 
-  public function __construct() {
+  public function __construct($core) {
+    // Set Config
+    $this->config = $core->config;
+    $this->logging = $core->logging;
+
     // Create or open the RBAC Configuration
-    $this->rbacJson = __DIR__.'/../'.getConfig("System","rbacjson");
-    $this->rbacInfo = __DIR__.'/../'.getConfig("System","rbacinfo");
+    $this->rbacJson = __DIR__.'/../'.$this->config->getConfig("System","rbacjson");
+    $this->rbacInfo = __DIR__.'/../'.$this->config->getConfig("System","rbacinfo");
   }
 
   public function getRBAC($Group = null,$Action = null) {
-    writeLog("RBAC","Queried RBAC List","debug",$_REQUEST);
+    $this->logging->writeLog("RBAC","Queried RBAC List","debug",$_REQUEST);
     $rbacJson = file_get_contents($this->rbacJson);
     $rbac = json_decode($rbacJson, true);
     switch ($Action) {
@@ -517,28 +567,28 @@ class RBAC {
       if ($Description != null) {
         $rbac[$GroupID]['Description'] = $Description;
         file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
-        writeLog("RBAC","Updated description for: ".$rbac[$GroupID]['Name'],"info",$rbac[$GroupID]);
+        $this->logging->writeLog("RBAC","Updated description for: ".$rbac[$GroupID]['Name'],"info",$rbac[$GroupID]);
       }
       if ($Key != null) {
         if (array_key_exists($Key,$roles['Resources'])) {
           if ($Value == "true") {
             ## Add Key to Array
             if (in_array($Key,$rbac[$GroupID]['PermittedResources'])) {
-              writeLog("RBAC","$Key is already assigned to ".$rbac[$GroupID]['Name'],"debug",$Key,$rbac[$GroupID]);
+              $this->logging->writeLog("RBAC","$Key is already assigned to ".$rbac[$GroupID]['Name'],"debug",$Key,$rbac[$GroupID]);
             } else {
               array_push($rbac[$GroupID]['PermittedResources'],$Key);
               file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
-              writeLog("RBAC","Added $Key to ".$rbac[$GroupID]['Name'],"warning",$rbac[$GroupID]);
+              $this->logging->writeLog("RBAC","Added $Key to ".$rbac[$GroupID]['Name'],"warning",$rbac[$GroupID]);
             }
   
             ## Add Menus to Array
             foreach ($roles['Resources'][$Key]['PermittedMenus'] as $PermittedMenu) {
               if (in_array($PermittedMenu,$rbac[$GroupID]['PermittedMenus'])) {
-                writeLog("RBAC","$PermittedMenu is already assigned to: ".$rbac[$GroupID]['Name'],"debug",$rbac[$GroupID]);
+                $this->logging->writeLog("RBAC","$PermittedMenu is already assigned to: ".$rbac[$GroupID]['Name'],"debug",$rbac[$GroupID]);
               } else {
                 array_push($rbac[$GroupID]['PermittedMenus'],$PermittedMenu);
                 file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
-                writeLog("RBAC","Added Menu: $PermittedMenu to ".$rbac[$GroupID]['Name'],"info",$rbac[$GroupID]);
+                $this->logging->writeLog("RBAC","Added Menu: $PermittedMenu to ".$rbac[$GroupID]['Name'],"info",$rbac[$GroupID]);
               }
             }
           } else if ($Value == "false") {
@@ -548,10 +598,10 @@ class RBAC {
                 unset($rbac[$GroupID]['PermittedResources'][$keytoremove]);
                 $rbac[$GroupID]['PermittedResources'] = array_values($rbac[$GroupID]['PermittedResources']);
                 file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
-                writeLog("RBAC","Removed $Key from ".$rbac[$GroupID]['Name'],"warning",$rbac[$GroupID]);
+                $this->logging->writeLog("RBAC","Removed $Key from ".$rbac[$GroupID]['Name'],"warning",$rbac[$GroupID]);
               }
             } else {
-              writeLog("RBAC","$Key is not assigned to ".$rbac[$GroupID]['Name'],"error",$Key,$rbac[$GroupID]);
+              $this->logging->writeLog("RBAC","$Key is not assigned to ".$rbac[$GroupID]['Name'],"error",$Key,$rbac[$GroupID]);
             }
             ## Remove Menus from Array
             $Needed = false;
@@ -571,17 +621,17 @@ class RBAC {
                   }
                   $rbac[$GroupID]['PermittedMenus'] = array_values($rbac[$GroupID]['PermittedMenus']);
                   file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
-                  writeLog("RBAC","No permitted resources left, removing permitted menus from ".$rbac[$GroupID]['Name'],"debug",$rbac[$GroupID]);
+                  $this->logging->writeLog("RBAC","No permitted resources left, removing permitted menus from ".$rbac[$GroupID]['Name'],"debug",$rbac[$GroupID]);
                 }
               } else {
-                writeLog("RBAC","$PermittedMenu is not assigned to ".$rbac[$GroupID]['Name'],"error",$Key,$rbac[$GroupID]);
+                $this->logging->writeLog("RBAC","$PermittedMenu is not assigned to ".$rbac[$GroupID]['Name'],"error",$Key,$rbac[$GroupID]);
               }
               if (!$Needed) {
                 if (($menutoremove = array_search($PermittedMenu, $rbac[$GroupID]['PermittedMenus'])) !== false) {
                   unset($rbac[$GroupID]['PermittedMenus'][$menutoremove]);
                   $rbac[$GroupID]['PermittedMenus'] = array_values($rbac[$GroupID]['PermittedMenus']);
                   file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
-                  writeLog("RBAC","Removed Menu: $PermittedMenu from ".$rbac[$GroupID]['Name'],"info",$rbac[$GroupID]);
+                  $this->logging->writeLog("RBAC","Removed Menu: $PermittedMenu from ".$rbac[$GroupID]['Name'],"info",$rbac[$GroupID]);
                 }
               }
             }
@@ -604,15 +654,15 @@ class RBAC {
   }
   
   public function deleteRBAC($Group) {
-    writeLog("RBAC","Deleted RBAC Group: $Group","debug",$_REQUEST);
+    $this->logging->writeLog("RBAC","Deleted RBAC Group: $Group","debug",$_REQUEST);
     $rbacJson = file_get_contents($this->rbacJson);
     $rbacArr = json_decode($rbacJson, true);
     if (array_key_exists($Group,$rbacArr)) {
-      writeLog("RBAC","Deleted RBAC Group: $Group","debug",$_REQUEST);
+      $this->logging->writeLog("RBAC","Deleted RBAC Group: $Group","debug",$_REQUEST);
       unset($rbacArr[$Group]);
       file_put_contents($this->rbacJson, json_encode($rbacArr, JSON_PRETTY_PRINT));
     } else {
-      writeLog("RBAC","Error deleting RBAC Group: $Group. The group does not exist.","error",$_REQUEST);
+      $this->logging->writeLog("RBAC","Error deleting RBAC Group: $Group. The group does not exist.","error",$_REQUEST);
     }
     return $rbacArr;
   }

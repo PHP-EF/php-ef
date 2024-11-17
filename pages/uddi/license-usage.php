@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
-  if ($auth->checkAccess(null,"B1-LICENSE-USAGE") == false) {
+  if ($ib->auth->checkAccess(null,"B1-LICENSE-USAGE") == false) {
     die();
   }
 ?>
@@ -124,7 +124,7 @@ $("#Generate").click(function(){
       if ($('#APIKey')[0].value) {
         postArr.APIKey = $('#APIKey')[0].value
       }
-      $.post( "/api?function=createLicenseReport", postArr).done(function( data, status ) {
+      $.post( "/api?f=createLicenseReport", postArr).done(function( data, status ) {
         if (data['Status'] == 'Error') {
           toast(data['Status'],"",data['Error'],"danger","30000");
         } else {

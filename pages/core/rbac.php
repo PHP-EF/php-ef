@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
-  if ($auth->checkAccess(null,"ADMIN-RBAC") == false) {
+  if ($ib->auth->checkAccess(null,"ADMIN-RBAC") == false) {
     die();
   }
 
@@ -8,11 +8,11 @@
 
 <div class="container">
   <div class="row justify-content-center">
-    <div class="col-12 col-lg-10 mx-auto">
+    <div class="col-12 col-lg-12 mx-auto">
       <div class="my-4">
         <h5 class="mb-0 mt-5">Role Based Access</h5>
         <p>Use the following to configure Role Based Access for Access Groups. This allows providing granular control over which areas of the Infoblox SA Tools Portal users have access to.</p>
-        <table  data-url="/api?function=GetRBAC&action=listgroups"
+        <table  data-url="/api?f=GetRBAC&action=listgroups"
           data-toggle="table"
           data-search="true"
           data-filter-control="true" 
@@ -150,7 +150,7 @@
     var div = document.getElementById('modalListGroup');
     var title = document.getElementById('editModalLabel');
     $('#editGroupDescription').val(row['Description']);
-    $.getJSON('/api?function=GetRBAC&action=listroles', function(roleinfo) {
+    $.getJSON('/api?f=GetRBAC&action=listroles', function(roleinfo) {
       div.innerHTML = "";
       for (var key in roleinfo['Resources']) {
         div.innerHTML += `
@@ -169,7 +169,7 @@
             </div>
           </div>`
       };
-      $.getJSON('/api?function=GetRBAC&group='+encodeURIComponent(row.id), function(grouproleinfo) {
+      $.getJSON('/api?f=GetRBAC&group='+encodeURIComponent(row.id), function(grouproleinfo) {
         $('#editModalLabel').text(row.Group);
         for (var key in grouproleinfo.PermittedResources) {
           $("#"+grouproleinfo.PermittedResources[key]).prop("checked", "true");
@@ -179,7 +179,7 @@
   }
 
   function roleQuery(data) {
-    $.getJSON('/api?function=GetRBAC&group='+encodeURIComponent(data.Group), function(grouproleinfo) {
+    $.getJSON('/api?f=GetRBAC&group='+encodeURIComponent(data.Group), function(grouproleinfo) {
       for (var key in grouproleinfo.PermittedResources) {
         $("#"+grouproleinfo.PermittedResources[key]).prop("checked", "true");
       }
@@ -193,7 +193,7 @@
     },
     'click .delete': function (e, value, row, index) {
       if(confirm("Are you sure you want to delete "+row.Group+" from Role Based Access? This is irriversible.") == true) {
-        $.getJSON('/api?function=DeleteRBAC&group='+encodeURIComponent(row.id), function(removeRBACResults) {
+        $.getJSON('/api?f=DeleteRBAC&group='+encodeURIComponent(row.id), function(removeRBACResults) {
           if (removeRBACResults[row.id]) {
             toast("Error","","Failed to delete "+row.Group+" from Role Based Access","danger");
 	        } else {
@@ -210,7 +210,7 @@
     let toggle = $('#'+event.target.id).prop('checked');
     let group = $('#editModalLabel').text();
     let targetid = event.target.id
-    $.getJSON('/api?function=SetRBAC&id='+encodeURIComponent(id)+'&key='+targetid+'&value='+toggle, function(setRBACResults) {
+    $.getJSON('/api?f=SetRBAC&id='+encodeURIComponent(id)+'&key='+targetid+'&value='+toggle, function(setRBACResults) {
       if (setRBACResults[id]['PermittedResources'].includes(targetid)) {
         if (toggle) {
           toast("Success","","Successfully added "+targetid+" to "+group,"success");
@@ -231,7 +231,7 @@
     let id = $('#editGroupID').val();
     let group = $('#editModalLabel').text();
     let description = $('#editGroupDescription').val();
-    $.getJSON('/api?function=SetRBAC&id='+encodeURIComponent(id)+'&description='+encodeURIComponent(description),function(setRBACResults) {
+    $.getJSON('/api?f=SetRBAC&id='+encodeURIComponent(id)+'&description='+encodeURIComponent(description),function(setRBACResults) {
       if (setRBACResults[id]['Description'] == description) {
         toast("Success","","Successfully edited "+group+" description to: "+description,"success");
         $('#rbacTable').bootstrapTable('refresh');
@@ -251,7 +251,7 @@
     let groupName = $('#groupName').val();
     let groupId = groupName.toLowerCase().replace(/ /g, '-');
     let groupDescription = $('#groupDescription').val();
-    $.getJSON('/api?function=SetRBAC&id='+encodeURIComponent(groupId)+'&name='+encodeURIComponent(groupName)+'&description='+encodeURIComponent(groupDescription)).done(function( data, status ) {
+    $.getJSON('/api?f=SetRBAC&id='+encodeURIComponent(groupId)+'&name='+encodeURIComponent(groupName)+'&description='+encodeURIComponent(groupDescription)).done(function( data, status ) {
       if (data[groupId] != null) {
           toast("Success","","Successfully created group: "+groupName,"success");
           $('#rbacTable').bootstrapTable('refresh');

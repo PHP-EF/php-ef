@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
-  if ($auth->checkAccess(null,"ADMIN-USERS") == false) {
+  if ($ib->auth->checkAccess(null,"ADMIN-USERS") == false) {
     die();
   }
 ?>
@@ -37,7 +37,7 @@ body.dark-theme .popover {
 
 <div class="container">
   <div class="row justify-content-center">
-    <div class="col-12 col-lg-10 mx-auto">
+    <div class="col-12 col-lg-12 mx-auto">
       <div class="my-4">
         <h5 class="mb-0 mt-5">User/Group Configuration</h5>
         <p>Use the following to configure Users & Groups within the Infoblox SA Tools Portal.</p>
@@ -245,7 +245,7 @@ body.dark-theme .popover {
       if(confirm("Are you sure you want to delete "+row.username+" from the list of Users? This is irriversible.") == true) {
         var postArr = {}
         postArr.id = row.id;
-        $.post( "/api?function=removeUser", postArr).done(function( data, status ) {
+        $.post( "/api?f=removeUser", postArr).done(function( data, status ) {
           if (data['Status'] == 'Success') {
             toast(data['Status'],"",data['Message'],"success");
             populateUsers();
@@ -263,7 +263,7 @@ body.dark-theme .popover {
 
   function listGroups(row) {
     var div = document.getElementById('modalListGroup');
-    $.getJSON('/api?function=GetRBAC&action=listconfigurablegroups', function(groupinfo) {
+    $.getJSON('/api?f=GetRBAC&action=listconfigurablegroups', function(groupinfo) {
       div.innerHTML = "";
       for (var key in groupinfo) {
         div.innerHTML += `
@@ -299,7 +299,7 @@ body.dark-theme .popover {
     var postArr = {}
     postArr.id = $('#editUserID').val();
     postArr.groups = groups;
-    $.post( "/api?function=setUser", postArr).done(function( data, status ) {
+    $.post( "/api?f=setUser", postArr).done(function( data, status ) {
       if (data['Status'] == 'Success') {
         toast(data['Status'],"",data['Message'],"success");
         populateUsers();
@@ -348,7 +348,7 @@ body.dark-theme .popover {
       postArr.fn = firstname;
       postArr.sn = surname;
       postArr.em = email;
-      $.post( "/api?function=newUser", postArr).done(function( data, status ) {
+      $.post( "/api?f=newUser", postArr).done(function( data, status ) {
         if (data['Status'] == 'Success') {
           toast(data['Status'],"",data['Message'],"success");
           populateUsers();
@@ -372,7 +372,7 @@ body.dark-theme .popover {
     postArr.fn = $('#editUserFirstname').val().trim();
     postArr.sn = $('#editUserSurname').val().trim();
     postArr.em = $('#editUserEmail').val().trim();
-    $.post( "/api?function=setUser", postArr).done(function( data, status ) {
+    $.post( "/api?f=setUser", postArr).done(function( data, status ) {
       if (data['Status'] == 'Success') {
         toast(data['Status'],"",data['Message'],"success");
         populateUsers();
@@ -417,7 +417,7 @@ body.dark-theme .popover {
   }
 
   function populateUsers() {
-    $.getJSON('/api?function=getUsers', function(data) {
+    $.getJSON('/api?f=getUsers', function(data) {
       if (data['Status'] == 'Error') {
         toast(data['Status'],"",data['Error'],"danger","30000");
       } else if (data['error']) {
@@ -522,7 +522,7 @@ body.dark-theme .popover {
             $('.popover').hide();
         }
     );
-    $.getJSON('/api?function=GetRBAC&action=listconfigurablegroups', function(groupres) {
+    $.getJSON('/api?f=GetRBAC&action=listconfigurablegroups', function(groupres) {
       groupinfo = groupres;
       populateUsers();
     });

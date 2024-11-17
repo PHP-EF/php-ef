@@ -4,18 +4,19 @@ ini_set('max_execution_time', '300');
 ini_set('error_log',__DIR__.'/nginx/php.error.log');
 // Include Composer
 require_once(__DIR__.'/../vendor/autoload.php');
+
 // Include Classes
 foreach (glob(__DIR__.'/classes/' . '*.php') as $class) {
   require_once $class; // Include each PHP file
 }
-// Instantiate Authentication Class & Database
-$auth = new Auth(__DIR__.'/config/app.db');
+
+// Instantiate Class Builder
+$ib = new ib();
+
 // Include Functions
 foreach (glob(__DIR__.'/functions/' . '*.php') as $function) {
   require_once $function; // Include each PHP file
 }
-// Instantiate RBAC Class
-$rbac = new RBAC();
 
 if (!(isset($SkipCSS))) {
 

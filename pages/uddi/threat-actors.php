@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
-  if ($auth->checkAccess(null,"B1-THREAT-ACTORS") == false) {
+  if ($ib->auth->checkAccess(null,"B1-THREAT-ACTORS") == false) {
     die();
   }
 ?>
@@ -173,7 +173,7 @@
     if ($('#APIKey')[0].value) {
       postArr.APIKey = $('#APIKey')[0].value
     }
-    $.post( "/api?function=getThreatActors", postArr).done(function( data, status ) {
+    $.post( "/api?f=getThreatActors", postArr).done(function( data, status ) {
       if (data['Status'] == 'Error') {
         toast(data['Status'],"",data['Error'],"danger","30000");
       } else if (data['error']) {
