@@ -16,5 +16,5 @@ cp /home/site/wwwroot/inc/nginx/redis.conf /etc/redis/redis.conf
 redis-cli shutdown
 service redis-server start
 
-# Set ENV Variables
-export PHP_INI_SCAN_DIR=/home/site/wwwroot/inc/nginx/php
+# Link PHP Custom INI
+ln -s /home/site/wwwroot/inc/nginx/php/php.ini /usr/local/etc/php/conf.d/custom.ini

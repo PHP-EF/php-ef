@@ -1,6 +1,4 @@
 <?php
-// Set Max Script Execution Time
-ini_set('max_execution_time', '300');
 ini_set('error_log',__DIR__.'/nginx/php.error.log');
 // Include Composer
 require_once(__DIR__.'/../vendor/autoload.php');
