@@ -15,23 +15,11 @@
     border-radius: 5px;
     z-index: 1000;
     width: 300px; /* Adjust as needed */
-    margin-left: 105%;
+    top: 35%;
 }
 
 body.dark-theme .popover {
   background-color: #2b2e34;
-}
-
-.popover {
-    display: none;
-    position: absolute;
-    background-color: #f8f9fa;
-    border: 1px solid #ced4da;
-    padding: 10px;
-    border-radius: 5px;
-    z-index: 1000;
-    width: 300px; /* Adjust as needed */
-    margin-left: 105%;
 }
 </style>
 
@@ -66,7 +54,7 @@ body.dark-theme .popover {
         </div>
         <div class="form-group">
           <label for="editUserName">Username</label>
-          <input type="text" class="form-control" id="editUserName" aria-describedby="editUserNameHelp" disabled>
+          <input type="text" class="form-control" id="editUserName" aria-describedby="editUserNameHelp">
           <small id="editUserNameHelp" class="form-text text-muted">The Username for the account.</small>
         </div>
         <div class="form-group">
@@ -83,6 +71,11 @@ body.dark-theme .popover {
           <label for="editUserEmail">Email</label>
           <input type="text" class="form-control" id="editUserEmail" aria-describedby="editUserEmailHelp">
           <small id="editUserEmailHelp" class="form-text text-muted">Enter the updated users email address.</small>
+        </div>
+        <div class="form-group">
+          <label for="editUserType">Account Type</label>
+          <input type="text" class="form-control" id="editUserType" aria-describedby="editUserTypeHelp" disabled>
+          <small id="editUserTypeHelp" class="form-text text-muted">The type of account (Local or SSO).</small>
         </div>
         <div class="form-group">
           <label for="editCreated">Created Date</label>
@@ -230,6 +223,14 @@ body.dark-theme .popover {
     $('#editUserFirstname').val(row['firstname']);
     $('#editUserSurname').val(row['surname']);
     $('#editUserEmail').val(row['email']);
+    if (row['type'] == 'SSO') {
+      $('#editUserPassword').attr('disabled',true);
+      $('#editUserPassword2').attr('disabled',true);
+    } else {
+      $('#editUserPassword').attr('disabled',false);
+      $('#editUserPassword2').attr('disabled',false);
+    }
+    $('#editUserType').val(row['type']);
     $('#editLastLogin').val(row['lastlogin']);
     $('#editPasswordExpires').val(row['passwordexpires']);
     $('#editCreated').val(row['created']);
@@ -473,6 +474,11 @@ body.dark-theme .popover {
             filterControl: 'input',
             sortable: true,
             formatter: 'groupsFormatter'
+          },{
+            field: 'type',
+            title: 'Type',
+            filterControl: 'input',
+            sortable: true
           },{
             field: 'lastlogin',
             title: 'Last Login Date',

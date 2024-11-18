@@ -41,7 +41,7 @@ if (!($_REQUEST['f'])) {
         case 'acs':
             if ($ib->config->getConfig('SAML','enabled')) {
                 if ($method = checkRequestMethod('POST') && isset($_POST['SAMLResponse'])) {
-                    $ib->auth->acs();
+                    echo json_encode($ib->auth->acs(),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                 }
             } else {
                 echo json_encode(array(
@@ -52,7 +52,7 @@ if (!($_REQUEST['f'])) {
             break;
         case 'samlMetadata':
             if ($ib->config->getConfig('SAML','enabled')) {
-                // Do something
+                echo $ib->auth->getSamlMetadata();
             } else {
                 echo json_encode(array(
                     'Status' => 'Error',
@@ -141,29 +141,17 @@ if (!($_REQUEST['f'])) {
                     if (isset($_POST['fn'])) {
                         $FN = $_POST['fn'];
                     } else {
-                        echo json_encode(array(
-                            'Status' => 'Error',
-                            'Message' => 'First name missing from request'
-                        ));
-                        break;
+                        $FN = null;
                     }
                     if (isset($_POST['sn'])) {
                         $SN = $_POST['sn'];
                     } else {
-                        echo json_encode(array(
-                            'Status' => 'Error',
-                            'Message' => 'Surname missing from request'
-                        ));
-                        break;
+                        $SN = null;
                     }
                     if (isset($_POST['em'])) {
                         $EM = $_POST['em'];
                     } else {
-                        echo json_encode(array(
-                            'Status' => 'Error',
-                            'Message' => 'Email address missing from request'
-                        ));
-                        break;
+                        $EM = null;
                     }
                     if (isset($_POST['un'])) {
                         $UN = $_POST['un'];
@@ -335,9 +323,11 @@ if (!($_REQUEST['f'])) {
 
                     // SAML Stuff //
                     if (isset($_POST['samlEnabled'])) { $ib->config->setConfig("SAML","enabled",filter_var($_POST['samlEnabled'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)); }
+                    if (isset($_POST['samlAutoCreateUsers'])) { $ib->config->setConfig("SAML","AutoCreateUsers",filter_var($_POST['samlAutoCreateUsers'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)); }
                     if (isset($_POST['samlStrict'])) { $ib->config->setConfig("SAML","strict",filter_var($_POST['samlStrict'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)); }
                     if (isset($_POST['samlDebug'])) { $ib->config->setConfig("SAML","debug",filter_var($_POST['samlDebug'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)); }
 
+                    // SP
                     if (isset($_POST['spEntityId']) || isset($_POST['spAcsUrl']) || isset($_POST['spSloUrl']) || isset($_POST['spX509Cert']) || isset($_POST['spPrivateKey'])) {
                         $spconfig = $config['SAML']['sp'];
                         if (isset($_POST['spEntityId'])) {
@@ -357,7 +347,8 @@ if (!($_REQUEST['f'])) {
                         }
                         $ib->config->setConfig("SAML","sp",$spconfig);
                     }
-
+                    
+                    // IdP
                     if (isset($_POST['idpEntityId']) || isset($_POST['idpSsoUrl']) || isset($_POST['idpSloUrl']) || isset($_POST['idpX509Cert'])) {
                         $idpconfig = $config['SAML']['idp'];
                         if (isset($_POST['idpEntityId'])) {
@@ -373,6 +364,27 @@ if (!($_REQUEST['f'])) {
                             $idpconfig['x509cert'] = urldecode($_POST['idpX509Cert']);
                         }
                         $ib->config->setConfig("SAML","idp",$idpconfig);
+                    }
+
+                    // User Attributes
+                    if (isset($_POST['attributeUsername']) || isset($_POST['attributeFirstName']) || isset($_POST['attributeLastName']) || isset($_POST['attributeEmail']) || isset($_POST['attributeGroups'])) {
+                        $attributeconfig = $config['SAML']['attributes'];
+                        if (isset($_POST['attributeUsername'])) {
+                            $attributeconfig['Username'] = urldecode($_POST['attributeUsername']);
+                        }
+                        if (isset($_POST['attributeFirstName'])) {
+                            $attributeconfig['FirstName'] = urldecode($_POST['attributeFirstName']);
+                        }
+                        if (isset($_POST['attributeLastName'])) {
+                            $attributeconfig['LastName'] = urldecode($_POST['attributeLastName']);
+                        }
+                        if (isset($_POST['attributeEmail'])) {
+                            $attributeconfig['Email'] = urldecode($_POST['attributeEmail']);
+                        }
+                        if (isset($_POST['attributeGroups'])) {
+                            $attributeconfig['Groups'] = urldecode($_POST['attributeGroups']);
+                        }
+                        $ib->config->setConfig("SAML","attributes",$attributeconfig);
                     }
                     // End of SAML stuff //
 

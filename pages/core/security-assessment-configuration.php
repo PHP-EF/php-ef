@@ -285,7 +285,7 @@
         <div class="form-group">
           <label for="newTemplateName">Template Name</label>
           <input type="text" class="form-control info-field" id="newTemplateName" aria-describedby="newTemplateNameHelp" name="newTemplateName">
-          <small id="newTemplateNameHelp" class="form-text text-muted">The name for the Security Assessment Template. (Cannot be changed once saved)</small>
+          <small id="newTemplateNameHelp" class="form-text text-muted">The name for the Security Assessment Template.</small>
         </div>
         <div class="form-group">
           <label for="newTemplateDescription">Template Description</label>
