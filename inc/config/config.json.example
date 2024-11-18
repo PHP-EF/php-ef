@@ -36,6 +36,13 @@
                 "url": "https://mocksaml.com/api/saml/slo"
             },
             "x509cert": "MIIC4jCCAcoCCQC33wnybT5QZDANBgkqhkiG9w0BAQsFADAyM..."
+        },
+        "attributes": {
+            "Username": "email",
+            "FirstName": "firstName",
+            "LastName": "lastName",
+            "Email": "email",
+            "Groups": "groups"
         }
     }
 }

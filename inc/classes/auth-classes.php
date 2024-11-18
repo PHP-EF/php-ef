@@ -37,6 +37,17 @@ class CoreJwt {
         $this->logging->writeLog("Authentication","Revoked JWT token","debug",$decoded);
     }
 
+    // Revoke a SAML Assertion
+    public function revokeAssertion($assertion,$userid,$seconds) {
+      $this->redis->set($assertion, $userid, 'EX', $seconds); // Store assertion with expiration
+      $RevokeArr = array(
+        'assertion' => $assertion,
+        'userid' => $userid,
+        'seconds' => $seconds
+      );
+      $this->logging->writeLog("Authentication","Revoked SAML Assertion","debug",$RevokeArr);
+  }
+
     // Check if a token is revoked
     public function isRevoked($token) {
         return $this->redis->exists($token);
@@ -72,13 +83,14 @@ class Auth {
       username TEXT UNIQUE,
       firstname TEXT,
       surname TEXT,
-      email TEXT,
+      email TEXT UNIQUE,
       password TEXT,
       salt TEXT,
       groups TEXT,
       created DATE,
       lastlogin DATE,
-      passwordexpires DATE
+      passwordexpires DATE,
+      type TEXT
     )");
   }
 
@@ -93,6 +105,18 @@ class Auth {
       'hash' => $hashedPassword,
       'salt' => $salt
     );
+  }
+
+  private function random_password($length) {
+    // Define the characters to use in the password
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!-.[]?*()';
+    $password = '';
+    $characterListLength = mb_strlen($characters, '8bit') - 1;
+    // Generate the password
+    foreach (range(1, $length) as $i) {
+        $password .= $characters[random_int(0, $characterListLength)];
+    }
+    return $password;
   }
 
   private function isPasswordComplex($password) {
@@ -111,7 +135,11 @@ class Auth {
     }
   }
 
-  public function newUser($username, $password, $firstname = '', $surname = '', $email = '', $groups = '') {
+  public function newUser($username, $password, $firstname = '', $surname = '', $email = '', $groups = '', $type = 'Local') {
+    // Set random password for SSO accounts
+    if ($type == 'SSO') {
+      $password = $this->random_password(32);
+    }
     if ($this->isPasswordComplex($password)) {
       // Hash the password for security
       $pepper = $this->hashAndSalt($password);
@@ -121,16 +149,16 @@ class Auth {
       $passwordExpiryDate->modify('+90 days');
       $passwordExpires = $passwordExpiryDate->format('Y-m-d H:i:s');
 
-      $stmt = $this->db->prepare("INSERT INTO users (username, firstname, surname, email, password, salt, groups, created, passwordexpires) VALUES (:username, :firstname, :surname, :email, :password, :salt, :groups, :created, :passwordexpires)");
+      $stmt = $this->db->prepare("INSERT INTO users (username, firstname, surname, email, password, salt, groups, created, passwordexpires, type) VALUES (:username, :firstname, :surname, :email, :password, :salt, :groups, :created, :passwordexpires, :type)");
       
       try {
-          // Check if username already exists
-          $checkStmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE username = :username");
-          $checkStmt->execute([':username' => $username]);
+          // Check if username or email already exists
+          $checkStmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE username = :username OR email = :email");
+          $checkStmt->execute([':username' => $username, ':email' => $email]);
           if ($checkStmt->fetchColumn() > 0) {
               return array(
                   'Status' => 'Error',
-                  'Message' => 'Username already exists'
+                  'Message' => 'Username or Email already exists'
               );
           }
       } catch (PDOException $e) {
@@ -141,7 +169,7 @@ class Auth {
       }
 
       try {
-        $stmt->execute([':username' => $username, ':firstname' => $firstname, ':surname' => $surname, ':email' => $email, ':password' => $pepper['hash'], ':salt' => $pepper['salt'], ':groups' => $groups, ':created' => $currentDateTime, ':passwordexpires' => $passwordExpires]);
+        $stmt->execute([':username' => $username, ':firstname' => $firstname, ':surname' => $surname, ':email' => $email, ':password' => $pepper['hash'], ':salt' => $pepper['salt'], ':groups' => $groups, ':created' => $currentDateTime, ':passwordexpires' => $passwordExpires, ':type' => $type]);
           return array(
               'Status' => 'Success',
               'Message' => 'Created user successfully'
@@ -160,15 +188,43 @@ class Auth {
     }
   }
 
-  public function getUser($id = null, $username = null) {
-    if ($id != null) {
+  public function getUserById($id,$AllColumns = false) {
+    if ($AllColumns) {
+      $stmt = $this->db->prepare("SELECT * FROM users WHERE id = :id");
+    } else {
       $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires FROM users WHERE id = :id");
-      $stmt->execute([':id' => $id]);
-    } else if ($username != null) {
-      $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires FROM users WHERE username = :username");
-      $stmt->execute([':username' => $username]);
     }
+    $stmt->execute([':id' => $id]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($user) {
+      return $user;
+    } else {
+      return false;
+    }
+  }
 
+  public function getUserByUsername($username,$AllColumns = false) {
+    if ($AllColumns) {
+      $stmt = $this->db->prepare("SELECT * FROM users WHERE username = :username");
+    } else {
+      $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires FROM users WHERE username = :username");
+    }
+    $stmt->execute([':username' => $username]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($user) {
+      return $user;
+    } else {
+      return false;
+    }
+  }
+
+  public function getUserByUsernameOrEmail($username,$email,$AllColumns = false) {
+    if ($AllColumns) {
+      $stmt = $this->db->prepare("SELECT * FROM users WHERE username = :username OR email = :email");
+    } else {
+      $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires FROM users WHERE username = :username OR email = :email");
+    }
+    $stmt->execute([':username' => $username,':email' => $email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($user) {
       return $user;
@@ -178,12 +234,31 @@ class Auth {
   }
 
   public function updateUser($id,$username,$password,$firstname,$surname,$email,$groups) {
-    if ($this->getUser($id)) {
-      // Hash the password for security
+    if ($this->getUserById($id)) {
+      if ($username || $password) {
+        try {
+          // Check if username or email already exists
+          $checkStmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE (username = :username OR email = :email) AND id = :id");
+          $checkStmt->execute([':username' => $username, ':email' => $email, ':id' => $id]);
+          if ($checkStmt->fetchColumn() > 0) {
+              return array(
+                  'Status' => 'Error',
+                  'Message' => 'Username or Email already exists'
+              );
+          }
+        } catch (PDOException $e) {
+            return array(
+                'Status' => 'Error',
+                'Message' => $e
+            );
+        }
+      }
+
       $prepare = [];
       $execute = [];
       $execute[':id'] = $id;
       if ($password !== null) {
+        // Hash & salt the password for security
         $pepper = $this->hashAndSalt($password);
         $prepare[] = 'password = :password';
         $prepare[] = 'salt = :salt';
@@ -225,10 +300,10 @@ class Auth {
   }
 
   public function removeUser($id) {
-    if ($this->getUser($id)) {
+    if ($this->getUserById($id)) {
       $stmt = $this->db->prepare("DELETE FROM users WHERE id = :id");
       $stmt->execute([':id' => $id]);
-      if ($this->getUser($id)) {
+      if ($this->getUserById($id)) {
         return array(
           'Status' => 'Error',
           'Message' => 'Failed to delete user'
@@ -243,7 +318,7 @@ class Auth {
   }
 
   public function getAllUsers() {
-    $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires FROM users");
+    $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires, type FROM users");
     $stmt->execute();
     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     if (!is_array($users)) {
@@ -257,6 +332,7 @@ class Auth {
           'created' => $users['created'],
           'lastlogin' => $users['lastlogin'],
           'passwordexpires' => $users['passwordexpires'],
+          'type' => $users['type']
         );
     } else {
       foreach ($users as $user) {
@@ -270,6 +346,7 @@ class Auth {
           'created' => $user['created'],
           'lastlogin' => $user['lastlogin'],
           'passwordexpires' => $user['passwordexpires'],
+          'type' => $user['type']
         );
       }
     }
@@ -277,9 +354,7 @@ class Auth {
   }
 
   public function login($username, $password) {
-    $stmt = $this->db->prepare("SELECT id, username, password, salt, firstname, surname, email, groups FROM users WHERE username = :username OR email = :username");
-    $stmt->execute([':username' => $username]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $user = $this->getUserByUsernameOrEmail($username,$username,true);
     if ($user && password_verify($user['salt'].$password, $user['password'])) { // Login Successful
       // Update last login
       $currentDateTime = date('Y-m-d H:i:s');
@@ -326,20 +401,146 @@ class Auth {
   public function acs() {
     // Implement Redis for expired assertions
     $this->sso->processResponse();
+    $Login = false;
 
     if ($this->sso->isAuthenticated()) {
         // User is authenticated
-        echo json_encode(array(
+        $SAMLArr = array(
           'samlUserdata' => $this->sso->getAttributes(),
           'samlNameId' => $this->sso->getNameId(),
           'samlNameIdFormat' => $this->sso->getNameIdFormat(),
           'samlNameidNameQualifier' => $this->sso->getNameIdNameQualifier(),
           'samlNameidSPNameQualifier' => $this->sso->getNameIdSPNameQualifier(),
           'samlSessionIndex' => $this->sso->getSessionIndex()
-        ));
-    } else {
-        // Authentication failed
-        echo "Authentication failed.";
+        );
+        $AttributeMap = [];
+        if ($this->config->getConfig('SAML','attributes')['Username'] && isset($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['Username']])) {
+          $AttributeMap['Username'] = $SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['Username']][0];
+        } else {
+          $AttributeMap['Username'] = null;
+        }
+        if ($this->config->getConfig('SAML','attributes')['FirstName'] && isset($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['FirstName']])) {
+          $AttributeMap['FirstName'] = ucwords($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['FirstName']][0]);
+        } else {
+          $AttributeMap['FirstName'] = null;
+        }
+        if ($this->config->getConfig('SAML','attributes')['LastName'] && isset($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['LastName']])) {
+          $AttributeMap['LastName'] = ucwords($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['LastName']][0]);
+        } else {
+          $AttributeMap['LastName'] = null;
+        }
+        if ($this->config->getConfig('SAML','attributes')['Email'] && isset($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['Email']])) {
+          $AttributeMap['Email'] = $SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['Email']][0];
+        } else {
+          $AttributeMap['Email'] = null;
+        }
+        if ($this->config->getConfig('SAML','attributes')['Groups'] && isset($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['Groups']])) {
+            $AttributeMap['Groups'] = implode(',',$SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['Groups']]);
+        } else {
+          $AttributeMap['Groups'] = '';
+        }
+        // Add SAML assertion to redis to prevent re-use
+        if ($this->CoreJwt->isRevoked($this->sso->getLastAssertionId())) {
+          $Arr = array(
+            'Status' => 'Error',
+            'Message' => 'SAML Assertion has been revoked'
+          );
+          $this->logging->writeLog("Authentication",$AttributeMap['Username']." attempted a potential replay attack.","warning",$SAMLArr);
+        } else {
+          $this->CoreJwt->revokeAssertion($this->sso->getLastAssertionId(), $this->sso->getNameId(), 3600); // Store SAML Assertion for 1 hour to allow for natural expiry
+
+          // Check if matching user exists
+          $user = $this->getUserByUsernameOrEmail($AttributeMap['Username'],$AttributeMap['Email']);
+
+          if ($user) {
+            // Update last login
+            $currentDateTime = date('Y-m-d H:i:s');
+            // Update user info from IdP
+            $stmt = $this->db->prepare("UPDATE users SET username = :username, firstname = :firstname, surname = :surname, email = :email, groups = :groups, lastlogin = :lastlogin WHERE id = :id");
+            $stmt->execute([':id' => $user['id'], ':username' => $AttributeMap['Username'], ':firstname' => $AttributeMap['FirstName'], ':surname' => $AttributeMap['LastName'], ':email' => $AttributeMap['Email'], ':groups' => $AttributeMap['Groups'], ':lastlogin' => $currentDateTime]);
+            // Set Login to True
+            $Login = true;
+            $this->logging->writeLog("Authentication",$AttributeMap['Username']." successfully logged in with SSO","info",$SAMLArr);
+            $Arr = array(
+              'Status' => 'Success',
+              'Message' => 'User logged in'
+            );
+          } else if ($this->config->getConfig('SAML','AutoCreateUsers')) {
+            // User does not exist and will be created
+            $NewUser = $this->newUser($AttributeMap['Username'], null, $AttributeMap['FirstName'], $AttributeMap['LastName'], $AttributeMap['Email'], $AttributeMap['Groups'], $type = 'SSO');
+            if ($NewUser['Status'] == 'Success') {
+              // Set Login to True
+              $Login = true;
+              $this->logging->writeLog("Authentication",$AttributeMap['Username']." successfully logged in with SSO and new user was created","info",$SAMLArr);
+              $Arr = array(
+                'Status' => 'Success',
+                'Message' => 'User created'
+              );
+            } else {
+              return $NewUser;
+            }
+          } else {
+            // User does not exist and won't be created
+            $this->logging->writeLog("Authentication",$AttributeMap['Username']." successfully logged in with SSO, but user does not exist","warning",$SAMLArr);
+            $Arr = array(
+              'Status' => 'Error',
+              'Message' => 'User does not exist'
+            );
+          }
+
+          if ($Login) {
+            // Get latest user info
+            $userinfo = $this->getUserByUsernameOrEmail($AttributeMap['Username'],$AttributeMap['Email']);
+            // Set Username to Email if Username is not present as an attribute
+            if ($userinfo['username'] == "" && $userinfo['email'] != "") {
+              $Username = $userinfo['email'];
+            } else {
+              $Username = $userinfo['username'];
+            }
+
+            $LoginArr = array(
+              'Username' => $Username,
+              'FirstName' => $userinfo['firstname'],
+              'LastName' => $userinfo['surname'],
+              'Email' => $userinfo['email'],
+              'Groups' => explode(',',$userinfo['groups'])
+            );
+
+            // Generate JWT token
+            $jwt = $this->CoreJwt->generateToken($LoginArr['Username'],$LoginArr['FirstName'],$LoginArr['LastName'],$LoginArr['Email'],$LoginArr['Groups']);
+            // Set JWT as a cookie
+            setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
+            // Redirect
+            header('Location: /');
+          }
+        }
+        return $Arr;
+    } else { // Login failed
+        $Arr = array(
+          'Status' => 'Error',
+          'Message' => 'SSO Authentication Failed'
+        );
+        $this->logging->writeLog("Authentication","User failed to log in with SSO","warning");
+        return $Arr;
+      }
+  }
+
+  public function getSamlMetadata() {
+    try {
+      $settings = $this->sso->getSettings();
+      $metadata = $settings->getSPMetadata();
+      $errors = $settings->validateMetadata($metadata);
+      if (empty($errors)) {
+          header('Content-Type: text/xml');
+          return $metadata;
+      } else {
+          throw new OneLogin_Saml2_Error(
+              'Invalid SP metadata: '.implode(', ', $errors),
+              OneLogin_Saml2_Error::METADATA_SP_INVALID
+          );
+      }
+    } catch (Exception $e) {
+        return $e->getMessage();
     }
   }
   
@@ -433,7 +634,6 @@ class Auth {
           'Surname' => $Surname,
           'Email' => $Email,
           'DisplayName' => $FullName,
-          'EmailAddress' => $Email,
           'IPAddress' => $IPAddress,
           'Groups' => $Groups
         );

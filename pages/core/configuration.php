@@ -136,6 +136,12 @@
                 </div>
                 <div class="form-group">
                   <div class="form-check form-switch">
+                    <input class="form-check-input info-field" type="checkbox" id="samlAutoCreateUsers" name="samlAutoCreateUsers">
+                    <label class="form-check-label" for="samlAutoCreateUsers">Auto-Create Users</label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="form-check form-switch">
                     <input class="form-check-input info-field" type="checkbox" id="samlStrict" name="samlStrict">
                     <label class="form-check-label" for="samlStrict">Use Strict Mode</label>
                   </div>
@@ -148,11 +154,41 @@
                 </div>
               </div>
             </div>
+            <hr>
+            <div class="row">
+              <h4>User Attribute Mapping</h4>
+              <p>Used for mapping SAML Attributes to the account information</p>
+              <div class="col-md-6">
+                <div class="form-group">
+                    <label for="attributeUsername">Username Attribute</label>
+                    <input type="text" class="form-control info-field" id="attributeUsername" name="attributeUsername">
+                </div>
+                <div class="form-group">
+                    <label for="attributeFirstName">First Name Attribute</label>
+                    <input type="text" class="form-control info-field" id="attributeFirstName" name="attributeFirstName">
+                </div>
+                <div class="form-group">
+                    <label for="attributeLastName">Last Name Attribute</label>
+                    <input type="text" class="form-control info-field" id="attributeLastName" name="attributeLastName">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                    <label for="attributeEmail">Email Attribute</label>
+                    <input class="form-control info-field" id="attributeEmail" name="attributeEmail">
+                </div>
+                <div class="form-group">
+                    <label for="attributeGroups">Groups Attribute</label>
+                    <input class="form-control info-field" id="attributeGroups" name="attributeGroups">
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 	    </form>
       <br>
-      <button class="btn btn-primary float-right" id="submitConfig">Submit</button>
+      <button class="btn btn-success float-end ms-1" id="submitConfig">Save Configuration</button>&nbsp;
+      <button class="btn btn-primary float-end" onclick="location.reload();">Discard Changes</button>
 	  </div>
   </div>
 </div>
@@ -179,15 +215,24 @@
       $("#idpSsoUrl").val(config.SAML.idp.singleSignOnService.url);
       $("#idpSloUrl").val(config.SAML.idp.singleLogoutService.url);
       $("#idpX509Cert").text(config.SAML.idp.x509cert);
-      $("#samlEnabled").prop('checked',config.SAML.enabled)
-      $("#samlStrict").prop('checked',config.SAML.strict)
-      $("#samlDebug").prop('checked',config.SAML.debug)
+      $("#samlEnabled").prop('checked',config.SAML.enabled);
+      $("#samlAutoCreateUsers").prop('checked',config.SAML.AutoCreateUsers);
+      $("#samlStrict").prop('checked',config.SAML.strict);
+      $("#samlDebug").prop('checked',config.SAML.debug);
+      $("#attributeUsername").val(config.SAML.attributes.Username);
+      $("#attributeFirstName").val(config.SAML.attributes.FirstName);
+      $("#attributeLastName").val(config.SAML.attributes.LastName);
+      $("#attributeEmail").val(config.SAML.attributes.Email);
+      $("#attributeGroups").val(config.SAML.attributes.Groups);
     });
   }
 
   getConfig();
 
-  $(".info-field").change(function() {
+  $(".info-field").change(function(elem) {
+    console.log(elem);
+    console.log($(elem.target.previousElementSibling).text());
+    toast("Configuration","",$(elem.target.previousElementSibling).text()+' has changed.<br><small>Save configuration to apply changes.</small>',"warning");
     $(this).addClass("changed");
   });
 
