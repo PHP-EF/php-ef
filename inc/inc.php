@@ -1,5 +1,6 @@
 <?php
-ini_set('error_log',__DIR__.'/nginx/php.error.log');
+// Set error log for background tasks
+ini_set('error_log',__DIR__.'/logs/php.error.log');
 // Include Composer
 require_once(__DIR__.'/../vendor/autoload.php');
 

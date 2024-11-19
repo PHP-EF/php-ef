@@ -17,7 +17,7 @@ class ib {
       $this->db = (new db(__DIR__.'/../config/app.db'))->db;
       $this->core = new core(__DIR__.'/../config/config.json');
       $this->auth = new Auth($this->core,$this->db);
-      $this->rbac = new RBAC($this->core);
+      $this->rbac = new RBAC($this->core,$this->db);
       $this->config = $this->core->config;
       $this->logging = $this->core->logging;
       $this->templates = new TemplateConfig($this->db);
@@ -136,7 +136,7 @@ class Logging {
   
   public function getLogFiles() {
     global $ib;
-    $files = array_diff(scandir(__DIR__.'/../'.$this->config->getConfig("System","logdirectory")),array('.', '..'));
+    $files = array_diff(scandir(__DIR__.'/../'.$this->config->getConfig("System","logdirectory")),array('.', '..','php.error.log'));
     return $files;
   }
   
