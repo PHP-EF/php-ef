@@ -24,6 +24,7 @@ if (!(isset($SkipCSS))) {
       <!-- Required meta tags -->
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+      <link rel="icon" type="image/x-icon" href="/assets/images/Other/favicon.svg">
 
       <!-- Main CSS/JS -->
       <script src="https://code.jquery.com/jquery-3.6.3.min.js" crossorigin="anonymous"></script>

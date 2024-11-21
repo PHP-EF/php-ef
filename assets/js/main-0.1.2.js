@@ -272,6 +272,10 @@ function stringValidate(element, min, max, type) {
 function loadiFrame(element = null) {
   if (element != null) {
     var hashsplit = element.split('#page=');
+    var linkElem = $('a[href="#page='+hashsplit[1]+'"]');
+    console.log(element);
+    $('.toggleFrame').removeClass('active');
+    linkElem.addClass('active');
     if (hashsplit[1].startsWith('prx')) {
       var prxsplit = hashsplit[1].split('prx');
       window.parent.document.getElementById('mainFrame').src = prxsplit[1];
@@ -280,6 +284,24 @@ function loadiFrame(element = null) {
     }
   } else if (window.parent.location.hash) {
     var hashsplit = window.parent.location.hash.split('#page=');
+    // Auto-expand and set navbar to active
+    var linkElem = $('a[href="'+window.parent.location.hash+'"]');
+    linkElem.addClass('active');
+    $('.title-text').text(linkElem.data('pageName'));
+    var doubleParent = $('.toggleFrame.active').parent().parent();
+    if (doubleParent.hasClass('sub-sub-menu')) {
+      if (!doubleParent.parent().parent().hasClass('showMenu')) {
+        doubleParent.parent().parent().addClass('showMenu');
+      }
+      if (!doubleParent.parent().parent().parent().hasClass('showMenu')) {
+          doubleParent.parent().parent().parent().addClass('showMenu');
+      }
+    } else if (doubleParent.hasClass('sub-menu')) {
+      if (!doubleParent.parent().hasClass('showMenu')) {
+        doubleParent.parent().addClass('showMenu');
+      }
+    }
+
     if (hashsplit[1].startsWith('prx')) {
       var prxsplit = hashsplit[1].split('prx');
       window.parent.document.getElementById('mainFrame').src = prxsplit[1];
@@ -292,6 +314,7 @@ function loadiFrame(element = null) {
 $(document).ready(function() {
   $('.toggleFrame').click(function(element) {
     loadiFrame(element.currentTarget.href);
+    $('.title-text').text($(element.currentTarget).data('pageName'));
   });
 });
 
