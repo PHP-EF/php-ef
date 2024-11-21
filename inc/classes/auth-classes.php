@@ -135,6 +135,13 @@ class Auth {
     }
   }
 
+  private function updateLastLogin($id) {
+    // Update last login
+    $currentDateTime = date('Y-m-d H:i:s');
+    $stmt = $this->db->prepare("UPDATE users SET lastlogin = :lastlogin WHERE id = :id");
+    $stmt->execute([':id' => $id, ':lastlogin' => $currentDateTime]);
+  }
+
   public function newUser($username, $password, $firstname = '', $surname = '', $email = '', $groups = '', $type = 'Local') {
     // Set random password for SSO accounts
     if ($type == 'SSO') {
@@ -357,9 +364,7 @@ class Auth {
     $user = $this->getUserByUsernameOrEmail($username,$username,true);
     if ($user && password_verify($user['salt'].$password, $user['password'])) { // Login Successful
       // Update last login
-      $currentDateTime = date('Y-m-d H:i:s');
-      $stmt = $this->db->prepare("UPDATE users SET lastlogin = :lastlogin WHERE id = :id");
-      $stmt->execute([':id' => $user['id'], ':lastlogin' => $currentDateTime]);
+      $this->updateLastLogin($user['id']);
 
       // Generate JWT token
       $jwt = $this->CoreJwt->generateToken($user['username'],$user['firstname'],$user['surname'],$user['email'],explode(',',$user['groups']));
@@ -454,10 +459,10 @@ class Auth {
 
           if ($user) {
             // Update last login
-            $currentDateTime = date('Y-m-d H:i:s');
+            $this->updateLastLogin($user['id']);
             // Update user info from IdP
-            $stmt = $this->db->prepare("UPDATE users SET username = :username, firstname = :firstname, surname = :surname, email = :email, groups = :groups, lastlogin = :lastlogin WHERE id = :id");
-            $stmt->execute([':id' => $user['id'], ':username' => $AttributeMap['Username'], ':firstname' => $AttributeMap['FirstName'], ':surname' => $AttributeMap['LastName'], ':email' => $AttributeMap['Email'], ':groups' => $AttributeMap['Groups'], ':lastlogin' => $currentDateTime]);
+            $stmt = $this->db->prepare("UPDATE users SET username = :username, firstname = :firstname, surname = :surname, email = :email, groups = :groups WHERE id = :id");
+            $stmt->execute([':id' => $user['id'], ':username' => $AttributeMap['Username'], ':firstname' => $AttributeMap['FirstName'], ':surname' => $AttributeMap['LastName'], ':email' => $AttributeMap['Email'], ':groups' => $AttributeMap['Groups']]);
             // Set Login to True
             $Login = true;
             $this->logging->writeLog("Authentication",$AttributeMap['Username']." successfully logged in with SSO","info",$SAMLArr);
@@ -469,6 +474,8 @@ class Auth {
             // User does not exist and will be created
             $NewUser = $this->newUser($AttributeMap['Username'], null, $AttributeMap['FirstName'], $AttributeMap['LastName'], $AttributeMap['Email'], $AttributeMap['Groups'], $type = 'SSO');
             if ($NewUser['Status'] == 'Success') {
+              // Update last login
+              $this->updateLastLogin($this->getUserByUsernameOrEmail($AttributeMap['Username'],$AttributeMap['Email'])['id']);
               // Set Login to True
               $Login = true;
               $this->logging->writeLog("Authentication",$AttributeMap['Username']." successfully logged in with SSO and new user was created","info",$SAMLArr);
@@ -706,15 +713,53 @@ class RBAC {
   private $rbacInfo;
   private $config;
   private $logging;
+  private $db;
 
-  public function __construct($core) {
+  public function __construct($core,$db) {
     // Set Config
     $this->config = $core->config;
     $this->logging = $core->logging;
 
+    // SQL
+    $this->db = $db;
+    // Not migrated RBAC to DB
+    // $this->createRBACTable();
+    // $this->createRBACMenuDefinitionsTable();
+    // $this->createRBACResourcesDefinitionsTable();
+
     // Create or open the RBAC Configuration
     $this->rbacJson = __DIR__.'/../'.$this->config->getConfig("System","rbacjson");
     $this->rbacInfo = __DIR__.'/../'.$this->config->getConfig("System","rbacinfo");
+  }
+
+  private function createRBACTable() {
+    // Create users table if it doesn't exist
+    $this->db->exec("CREATE TABLE IF NOT EXISTS rbac (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT UNIQUE,
+      description TEXT,
+      resources TEXT,
+      menus TEXT
+    )");
+  }
+
+  private function createRBACMenuDefinitionsTable() {
+    // Create users table if it doesn't exist
+    $this->db->exec("CREATE TABLE IF NOT EXISTS rbac_menu_definitions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT UNIQUE,
+      description TEXT
+    )");
+  }
+
+  private function createRBACResourcesDefinitionsTable() {
+    // Create users table if it doesn't exist
+    $this->db->exec("CREATE TABLE IF NOT EXISTS rbac_resources_definitions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT UNIQUE,
+      description TEXT,
+      menus TEXT
+    )");
   }
 
   public function getRBAC($Group = null,$Action = null) {

@@ -1,5 +1,6 @@
 <?php
-ini_set('error_log',__DIR__.'/nginx/php.error.log');
+// Set error log for background tasks
+ini_set('error_log',__DIR__.'/logs/php.error.log');
 // Include Composer
 require_once(__DIR__.'/../vendor/autoload.php');
 
@@ -23,6 +24,7 @@ if (!(isset($SkipCSS))) {
       <!-- Required meta tags -->
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+      <link rel="icon" type="image/x-icon" href="/assets/images/Other/favicon.svg">
 
       <!-- Main CSS/JS -->
       <script src="https://code.jquery.com/jquery-3.6.3.min.js" crossorigin="anonymous"></script>
