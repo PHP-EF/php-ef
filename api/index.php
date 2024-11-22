@@ -419,9 +419,9 @@ if (!($_REQUEST['f'])) {
         case 'createSecurityReport':
             if ($ib->auth->checkAccess(null,"B1-SECURITY-ASSESSMENT")) {
                 if ($method = checkRequestMethod('POST')) {
-                    if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm']) AND isset($_POST['id'])) {
+                    if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm']) AND isset($_POST['id']) AND isset($_POST['unnamed']) AND isset($_POST['substring'])) {
                         if (isValidUuid($_POST['id'])) {
-                            $response = generateSecurityReport($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm'],$_POST['id']);
+                            $response = generateSecurityReport($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm'],$_POST['id'],$_POST['unnamed'],$_POST['substring']);
                             echo json_encode($response,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                         }
                     }
@@ -616,8 +616,8 @@ if (!($_REQUEST['f'])) {
                             $ib->logging->writeLog("ThreatActors",$UserInfo->result->name." queried list of Threat Actors","info");
                         }
                         $Actors = GetB1ThreatActors($_POST['StartDateTime'],$_POST['EndDateTime']);
-                        if (!isset($Actors['Error'])) {
-                            echo json_encode(GetB1ThreatActorsById($Actors),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                        if (!isset($Actors->Error)) {
+                            echo json_encode(GetB1ThreatActorsById3($Actors,$_POST['unnamed'],$_POST['substring']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                         } else {
                             echo json_encode($Actors);
                         };

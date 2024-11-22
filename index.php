@@ -18,12 +18,10 @@
 
 <!DOCTYPE html>
 
-<!-- Created by CodingLab |www.youtube.com/CodingLabYT-->
 <html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8">
     <title> Infoblox SA Tools </title>
-    <link rel="stylesheet" href="/assets/css/theme-0.0.1.css">
     <!-- Boxiocns CDN Link -->
     <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
