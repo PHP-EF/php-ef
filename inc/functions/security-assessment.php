@@ -325,6 +325,7 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID,$unname
             // Removed for workaround
             // $ThreatActorsCount = count(array_unique(array_column($ThreatActors, 'PortunusAggIPSummary.actor_id')));
             // $ThreatActorInfo = GetB1ThreatActorsById2($ThreatActors);
+            // This will provide the full count of Threat Actors, vs what is returned based on selected options (i.e excluding unnamed/substring actors)
             $ThreatActorsCount = count(array_unique(array_column($ThreatActors, 'ThreatActors.ikbactorid')));
             $ThreatActorInfo = GetB1ThreatActorsById3($ThreatActors,$unnamed,$substring);
             // End of workaround
