@@ -6,44 +6,12 @@
 
 ?>
 
-<style>
-pre {
-  background-color: #000;
-  overflow: auto;
-  font-family: 'Monaco', monospace;
-  padding: 0 1em;
-}
-
-code {
-  font-family: Monaco, monospace;
-  font-size: $base-font-size;
-  line-height: 100%;
- /background-color: #000;/
-  padding: 0.2em;
-  letter-spacing: -0.05em;
-  word-break: normal;
-  /border-radius: 5px;/
-}
-
-pre code {
-  border: none;
-  background: none;
-  font-size: $base-font-size * 0.875;
-  line-height: 1em;
-  letter-spacing: normal;
-  word-break: break-all;
-  color:#FFF;
-  white-space: pre-wrap;
-}
-</style>
-
 
 <div class="container">
   <div class="row justify-content-center">
     <div class="col-14 col-lg-14 col-xl-14 mx-auto">
       <h2 class="h3 mb-4 page-title">Logs</h2>
       <div class="my-4">
-          <h5 class="mb-0 mt-5">Logs</h5>
           <p>The following table displays logs from the Infoblox SA Tools Portal.</p>
           <table  data-url="/api?f=GetLog"
             data-toggle="table"

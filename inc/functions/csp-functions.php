@@ -92,7 +92,7 @@ function QueryCSPMulti($MultiQuery,$APIKey = "",$Realm = "US") {
   return $Results;
 }
 
-function QueryCSP($Method, $Uri, $Data = "", $APIKey = "", $Realm = "US") {
+function QueryCSP($Method, $Uri, $Data = null, $APIKey = "", $Realm = "US") {
   global $ib;
   $CSPConfig = GetCSPConfiguration($Uri,$APIKey,$Realm);
   try {
@@ -101,7 +101,11 @@ function QueryCSP($Method, $Uri, $Data = "", $APIKey = "", $Realm = "US") {
         $Result = Requests::get($CSPConfig['Url'], $CSPConfig['Headers'], $CSPConfig['Options']);
         break;
       case 'post':
-        $Result = Requests::post($CSPConfig['Url'], $CSPConfig['Headers'], json_encode($Data,JSON_UNESCAPED_SLASHES), $CSPConfig['Options']);
+        if ($Data != null) {
+          $Result = Requests::post($CSPConfig['Url'], $CSPConfig['Headers'], json_encode($Data,JSON_UNESCAPED_SLASHES), $CSPConfig['Options']);
+        } else {
+          $Result = Requests::post($CSPConfig['Url'], $CSPConfig['Headers'], $Data, $CSPConfig['Options']);
+        }
         break;
       case 'put':
         $Result = Requests::put($CSPConfig['Url'], $CSPConfig['Headers'], json_encode($Data,JSON_UNESCAPED_SLASHES), $CSPConfig['Options']);
@@ -167,13 +171,144 @@ function GetCSPCurrentUser($APIKey = "") {
 function GetB1ThreatActors($StartDateTime,$EndDateTime,$APIKey = "", $Realm = "US") {
   $StartDimension = str_replace('Z','',$StartDateTime);
   $EndDimension = str_replace('Z','',$EndDateTime);
-  $Actors = QueryCubeJS('{"segments":[],"timeDimensions":[{"dimension":"PortunusAggIPSummary.timestamp","granularity":null,"dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"ungrouped":false,"order":{"PortunusAggIPSummary.timestampMax":"desc"},"measures":["PortunusAggIPSummary.count"],"dimensions":["PortunusAggIPSummary.threat_indicator","PortunusAggIPSummary.actor_id"],"limit":1000,"filters":[{"and":[{"operator":"set","member":"PortunusAggIPSummary.threat_indicator"},{"operator":"set","member":"PortunusAggIPSummary.actor_id"}]}]}');
+  // Workaround
+  //$Actors = QueryCubeJS('{"segments":[],"timeDimensions":[{"dimension":"PortunusAggIPSummary.timestamp","granularity":null,"dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"ungrouped":false,"order":{"PortunusAggIPSummary.timestampMax":"desc"},"measures":["PortunusAggIPSummary.count"],"dimensions":["PortunusAggIPSummary.threat_indicator","PortunusAggIPSummary.actor_id"],"limit":1000,"filters":[{"and":[{"operator":"set","member":"PortunusAggIPSummary.threat_indicator"},{"operator":"set","member":"PortunusAggIPSummary.actor_id"}]}]}');
+  $Actors = QueryCubeJS('{"measures":[],"segments":[],"dimensions":["ThreatActors.storageid","ThreatActors.ikbactorid","ThreatActors.domain","ThreatActors.ikbfirstsubmittedts","ThreatActors.vtfirstdetectedts","ThreatActors.firstdetectedts","ThreatActors.lastdetectedts"],"timeDimensions":[{"dimension":"ThreatActors.lastdetectedts","granularity":null,"dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"ungrouped":false}');
   if (isset($Actors->result->data)) {
     return $Actors->result->data;
   } else {
     return $Actors;
   }
 }
+
+// Workaround to new issue
+function GetB1ThreatActorsById3($Actors,$unnamed,$substring) {
+  $ActorArr = json_decode(json_encode($Actors),true);
+  $UniqueIds = array_unique(array_column($ActorArr, 'ThreatActors.ikbactorid'));
+  $Results = array();
+  $ActorInfo = array();
+
+  $Requests = [];
+  $ArrayChunk = array_chunk($UniqueIds, 10);
+  $Requests = [];
+  foreach ($ArrayChunk as $Chunk) {
+    $CsvString = implode(',',$Chunk);
+    $Requests[] = QueryCSPMultiRequestBuilder('get','/tide/threat-enrichment/clusterfox/actors/search?actor_id='.$CsvString);
+  }
+  $Responses = QueryCSPMulti($Requests);
+  foreach ($Responses as $Response) {
+    foreach ($Response['Body']->actors as $Actor) {
+      $ObservedIOCKeys = array_keys(array_column($ActorArr, 'ThreatActors.ikbactorid'),$Actor->actor_id);
+      $ObservedIOCCount = count($ObservedIOCKeys);
+      $ObservedIOCs = [];
+      foreach ($ObservedIOCKeys as $ObservedIOCKey) {
+        $ObservedIOCs[] = $ActorArr[$ObservedIOCKey];
+      }
+      if ($Actor->actor_id != "" && $Actor->actor_name != "") {
+        // Ignore Unnamed & Substring Actors
+        if ($unnamed == 'false' && str_starts_with($Actor->actor_name,'unnamed_actor')) {
+          // Skip
+        } else if ($substring == 'false' && str_starts_with($Actor->actor_name,'substring_')) {
+          // Skip
+        } else {
+          $NewArr = array(
+            'actor_id' => $Actor->actor_id,
+            'actor_name' => $Actor->actor_name,
+            'actor_description' => $Actor->actor_description,
+            'related_count' => $Actor->related_count,
+            'observed_count' => $ObservedIOCCount,
+            'observed_iocs' => $ObservedIOCs
+          );
+          if (isset($Actor->external_references)) {
+            $NewArr['external_references'] = $Actor->external_references;
+          } else {
+            $NewArr['external_references'] = [];
+          }
+          if (isset($Actor->infoblox_references)) {
+            $NewArr['infoblox_references'] = $Actor->infoblox_references;
+          } else {
+            $NewArr['infoblox_references'] = [];
+          }
+          array_push($Results,$NewArr);
+        }
+      }
+    }
+  }
+  return $Results;
+}
+
+function GetB1ThreatActorsById2($Actors) {
+  $UniqueIds = array_unique(array_column($Actors, 'PortunusAggIPSummary.actor_id'));
+  $Results = array();
+  $ActorInfo = array();
+  // VirusTotal Indicators
+  $VTIndicators = QueryCSP('post','tide-ng-threat-actor/v1/batch_actor_summary_with_indicators');
+  foreach ($VTIndicators->actor_responses as $Key => $VTIndicator) {
+    if (isset($VTIndicator->actor_id)) {
+      if (in_array($VTIndicator->actor_id,$UniqueIds)) {
+        $Key = array_search($VTIndicator->actor_id,$UniqueIds);
+        unset($UniqueIds[$Key]);
+      }
+    }
+  }
+  foreach ($VTIndicators->actor_responses as $AR) {
+    if (isset($AR->actor_id) && isset($AR->actor_name) && isset($AR->actor_description) && isset($AR->related_count) && isset($AR->related_indicators_with_dates)) {
+      $NewArr = array(
+        'actor_id' => $AR->actor_id,
+        'actor_name' => $AR->actor_name,
+        'actor_description' => $AR->actor_description,
+        'related_count' => $AR->related_count,
+        'related_indicators_with_dates' => $AR->related_indicators_with_dates,
+        'related_indicators' => null,
+      );
+      if (isset($AR->external_references)) {
+        $NewArr['external_references'] = $AR->external_references;
+      } else {
+        $NewArr['external_references'] = [];
+      }
+      if (isset($AR->infoblox_references)) {
+        $NewArr['infoblox_references'] = $AR->infoblox_references;
+      } else {
+        $NewArr['infoblox_references'] = [];
+      }
+      array_push($Results,$NewArr);
+    }
+  }
+
+  $Requests = [];
+  $ArrayChunk = array_chunk($UniqueIds, 10);
+  $Requests = [];
+  foreach ($ArrayChunk as $Chunk) {
+    $CsvString = implode(',',$Chunk);
+    $Requests[] = QueryCSPMultiRequestBuilder('get','/tide/threat-enrichment/clusterfox/actors/search?actor_id='.$CsvString);
+  }
+  $Responses = QueryCSPMulti($Requests);
+  foreach ($Responses as $Response) {
+    foreach ($Response['Body']->actors as $Actor) {
+      $NewArr = array(
+        'actor_id' => $Actor->actor_id,
+        'actor_name' => $Actor->actor_name,
+        'actor_description' => $Actor->actor_description,
+        'related_count' => $Actor->related_count,
+        'related_indicators_with_dates' => null,
+        'related_indicators' => $Actor->related_indicators,
+      );
+      if (isset($Actor->external_references)) {
+        $NewArr['external_references'] = $Actor->external_references;
+      } else {
+        $NewArr['external_references'] = [];
+      }
+      if (isset($Actor->infoblox_references)) {
+        $NewArr['infoblox_references'] = $Actor->infoblox_references;
+      } else {
+        $NewArr['infoblox_references'] = [];
+      }
+      array_push($Results,$NewArr);
+    }
+  }
+  return $Results;
+}
+
 
 function GetB1ThreatActorsById($Actors) {
   $UniqueIds = array_unique(array_column($Actors, 'PortunusAggIPSummary.actor_id'));
@@ -233,8 +368,8 @@ function GetB1ThreatActorsById($Actors) {
     ));
     $Requests[] = QueryCSPMultiRequestBuilder('post','tide-ng-threat-actor/v1/batch_actor_summary_with_indicators',$Query);
   }
-  $Responses = QueryCSPMulti($Requests);
 
+  $Responses = QueryCSPMulti($Requests);
   foreach ($Responses as $Response) {
     if (isset($Response['Body']->actor_responses)) {
       foreach ($Response['Body']->actor_responses as $AR) {

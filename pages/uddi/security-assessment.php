@@ -44,11 +44,27 @@
             <button class="btn btn-success" id="Generate">Generate</button>
           </div>
       </div>
+      <div class="row">
+        <div class="col-md-6 options">
+          <div class="form-group">
+            <div class="form-check form-switch">
+              <input class="form-check-input info-field" type="checkbox" id="unnamed" name="unnamed">
+              <label class="form-check-label" for="unnamed">Enable Unnamed Actors</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-check form-switch">
+              <input class="form-check-input info-field" type="checkbox" id="substring" name="substring">
+              <label class="form-check-label" for="substring">Enable Substring_* Actors</label>
+            </div>
+          </div>
+        </div>
+      </div>
       <br>
       <div class="alert alert-info genInfo" role="alert">
         <center>It can take up to 5 minutes to generate the report, please be patient.</center>
       </div>
-      <div class="calendar"></div>
+      <div class="loading-div"></div>
         <div class="loading-icon">
           <hr>
           <div class="progress">
@@ -186,6 +202,8 @@ $("#Generate").click(function(){
     postArr.EndDateTime = endDateTime.toISOString()
     postArr.Realm = $('#Realm').find(":selected").val()
     postArr.id = id
+    postArr.unnamed = $('#unnamed')[0].checked;
+    postArr.substring = $('#substring')[0].checked;
     if ($('#APIKey')[0].value) {
       postArr.APIKey = $('#APIKey')[0].value
     }

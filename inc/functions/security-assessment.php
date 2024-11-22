@@ -4,7 +4,7 @@ use Label305\PptxExtractor\Basic\BasicInjector;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
-function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
+function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID,$unnamed,$substring) {
     global $ib;
     // Check API Key is valid & get User Info
     $UserInfo = GetCSPCurrentUser();
@@ -29,7 +29,9 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
         $CubeJSRequests = array(
             'TopThreatFeeds' => '{"measures":["PortunusAggSecurity.feednameCount"],"dimensions":["PortunusAggSecurity.feed_name"],"timeDimensions":[{"dimension":"PortunusAggSecurity.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggSecurity.type","operator":"equals","values":["2"]},{"member":"PortunusAggSecurity.severity","operator":"equals","values":["High"]}],"limit":"10","ungrouped":false}',
             'TopDetectedProperties' => '{"measures":["PortunusDnsLogs.tpropertyCount"],"dimensions":["PortunusDnsLogs.tproperty"],"timeDimensions":[{"dimension":"PortunusDnsLogs.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusDnsLogs.type","operator":"equals","values":["2"]},{"member":"PortunusDnsLogs.feed_name","operator":"notEquals","values":["Public_DOH","public-doh","Public_DOH_IP","public-doh-ip"]},{"member":"PortunusDnsLogs.severity","operator":"notEquals","values":["Low","Info"]}],"limit":"10","ungrouped":false}',
-            'ContentFiltration' => '{"measures":["PortunusAggWebcontent.categoryCount"],"dimensions":["PortunusAggWebcontent.category"],"timeDimensions":[{"dimension":"PortunusAggWebcontent.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[],"limit":"10","ungrouped":false}',
+            // Switch to using the Web Content Discovery APIs, rather than those called via the Dashboard.
+            //'ContentFiltration' => '{"measures":["PortunusAggWebcontent.categoryCount"],"dimensions":["PortunusAggWebcontent.category"],"timeDimensions":[{"dimension":"PortunusAggWebcontent.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[],"limit":"10","ungrouped":false}',
+            'ContentFiltration' => '{"timeDimensions":[{"dimension":"PortunusAggWebContentDiscovery.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"measures":["PortunusAggWebContentDiscovery.count"],"dimensions":["PortunusAggWebContentDiscovery.domain_category"],"filters":[{"member":"PortunusAggWebContentDiscovery.domain_category","operator":"set"},{"member":"PortunusAggWebContentDiscovery.domain_category","operator":"notEquals","values":[""]}],"order":{"PortunusAggWebContentDiscovery.count":"desc"},"limit":"10"}',
             'InsightDistribution' => '{"measures":["InsightsAggregated.count"],"dimensions":["InsightsAggregated.threatType"],"filters":[{"member":"InsightsAggregated.insightStatus","operator":"equals","values":["Active"]}]}',
             'DNSFirewallActivity' => '{"measures":["PortunusAggSecurity.severityCount"],"dimensions":["PortunusAggSecurity.severity"],"timeDimensions":[{"dimension":"PortunusAggSecurity.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggSecurity.type","operator":"equals","values":["2","3"]},{"member":"PortunusAggSecurity.severity","operator":"equals","values":["High","Medium","Low"]}],"limit":"3","ungrouped":false}',
             'DNSActivity' => '{"measures":["PortunusAggInsight.requests"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"equals","values":["1"]}],"limit":"1","ungrouped":false}',
@@ -51,7 +53,9 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
             'ThreatInsight' => '{"measures":[],"dimensions":["PortunusDnsLogs.tproperty"],"timeDimensions":[{"dimension":"PortunusDnsLogs.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusDnsLogs.type","operator":"equals","values":["4"]}],"limit":"10000","ungrouped":false}',
             'ThreatView' => '{"measures":["PortunusAggInsight.tpropertyCount"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"equals","values":["2"]}],"limit":"1","ungrouped":false}',
             'Sources' => '{"measures":["PortunusAggSecurity.networkCount"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggSecurity.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggSecurity.type","operator":"contains","values":["2","3"]}],"limit":"1","ungrouped":false}',
-            'ThreatActors' => '{"segments":[],"timeDimensions":[{"dimension":"PortunusAggIPSummary.timestamp","granularity":null,"dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"ungrouped":false,"order":{"PortunusAggIPSummary.timestampMax":"desc"},"measures":["PortunusAggIPSummary.count"],"dimensions":["PortunusAggIPSummary.threat_indicator","PortunusAggIPSummary.actor_id"],"limit":1000,"filters":[{"and":[{"operator":"set","member":"PortunusAggIPSummary.threat_indicator"},{"operator":"set","member":"PortunusAggIPSummary.actor_id"}]}]}'
+            // Workaround for removal of batch threat actor enrichment
+            //'ThreatActors' => '{"segments":[],"timeDimensions":[{"dimension":"PortunusAggIPSummary.timestamp","granularity":null,"dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"ungrouped":false,"order":{"PortunusAggIPSummary.timestampMax":"desc"},"measures":["PortunusAggIPSummary.count"],"dimensions":["PortunusAggIPSummary.threat_indicator","PortunusAggIPSummary.actor_id"],"limit":1000,"filters":[{"and":[{"operator":"set","member":"PortunusAggIPSummary.threat_indicator"},{"operator":"set","member":"PortunusAggIPSummary.actor_id"}]}]}'
+            'ThreatActors' => '{"measures":[],"segments":[],"dimensions":["ThreatActors.storageid","ThreatActors.ikbactorid","ThreatActors.domain","ThreatActors.ikbfirstsubmittedts","ThreatActors.vtfirstdetectedts","ThreatActors.firstdetectedts","ThreatActors.lastdetectedts"],"timeDimensions":[{"dimension":"ThreatActors.lastdetectedts","granularity":null,"dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"ungrouped":false}'
         );
         $CubeJSResults = QueryCubeJSMulti($CubeJSRequests);
 
@@ -106,8 +110,11 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
             $RowNo = 2;
             foreach ($ContentFiltration->result->data as $ContentFilter) {
                 $ContentFiltrationS = $ContentFiltrationSS->getActiveSheet();
-                $ContentFiltrationS->setCellValue('A'.$RowNo, $ContentFilter->{'PortunusAggWebcontent.category'});
-                $ContentFiltrationS->setCellValue('B'.$RowNo, $ContentFilter->{'PortunusAggWebcontent.categoryCount'});
+                // $ContentFiltrationS->setCellValue('A'.$RowNo, $ContentFilter->{'PortunusAggWebcontent.category'});
+                // $ContentFiltrationS->setCellValue('B'.$RowNo, $ContentFilter->{'PortunusAggWebcontent.categoryCount'});
+                // Switch to using the Web Content Discovery APIs, rather than those called via the Dashboard.
+                $ContentFiltrationS->setCellValue('A'.$RowNo, $ContentFilter->{'PortunusAggWebContentDiscovery.domain_category'});
+                $ContentFiltrationS->setCellValue('B'.$RowNo, $ContentFilter->{'PortunusAggWebContentDiscovery.count'});
                 $RowNo++;
             }
             $ContentFiltrationW = IOFactory::createWriter($ContentFiltrationSS, 'Xlsx');
@@ -312,12 +319,16 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
 
         // Threat Actors Metrics
         $Progress = writeProgress($UUID,$Progress,"Building Threat Actor Metrics");
-        //$ThreatActors = GetB1ThreatActors($StartDateTime,$EndDateTime);
         $ThreatActors = $CubeJSResults['ThreatActors']['Body']->result->data;
+        $Progress = writeProgress($UUID,$Progress,"Getting Threat Actor Information (This may take a moment)");
         if (isset($ThreatActors)) {
-            $Progress = writeProgress($UUID,$Progress,"Getting Threat Actor Information (This may take a moment)");
-            $ThreatActorsCount = count(array_unique(array_column($ThreatActors, 'PortunusAggIPSummary.actor_id')));
-            $ThreatActorInfo = GetB1ThreatActorsById($ThreatActors);
+            // Removed for workaround
+            // $ThreatActorsCount = count(array_unique(array_column($ThreatActors, 'PortunusAggIPSummary.actor_id')));
+            // $ThreatActorInfo = GetB1ThreatActorsById2($ThreatActors);
+            $ThreatActorsCount = count(array_unique(array_column($ThreatActors, 'ThreatActors.ikbactorid')));
+            $ThreatActorInfo = GetB1ThreatActorsById3($ThreatActors,$unnamed,$substring);
+            // End of workaround
+
             if (isset($ThreatActorInfo->error)) {
                 $ThreatActorInfo = array();
                 $ThreatActorSlideCount = 0;
@@ -454,9 +465,16 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
             $ThreatActorIconString = '<p:pic><p:nvPicPr><p:cNvPr id="36" name="Graphic 35"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{898E1A10-3ABF-AED0-2C71-1F26BBB6304B}"/></a:ext></a:extLst></p:cNvPr><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="rId115"><a:extLst><a:ext uri="{96DAC541-7B7A-43D3-8B79-37D633B846F1}"><asvg:svgBlip xmlns:asvg="http://schemas.microsoft.com/office/drawing/2016/SVG/main" r:embed="rId115"/></a:ext></a:extLst></a:blip><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="5522998" y="2349624"/><a:ext cx="1246722" cy="1582377"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic></p:spTree>';
             $TASFile = str_replace('</p:spTree>',$ThreatActorIconString,$TASFile);
             // Append Virus Total Stuff if applicable to the slide
-            if (isset($TAI['related_indicators_with_dates'])) {
-                foreach ($TAI['related_indicators_with_dates'] as $TAII) {
-                    if (isset($TAII->vt_first_submission_date)) {
+
+            // Workaround Start
+            //if (isset($TAI['related_indicators_with_dates'])) {
+            //    foreach ($TAI['related_indicators_with_dates'] as $TAII) {
+            //        if (isset($TAII->vt_first_submission_date)) {
+            if (isset($TAI['observed_iocs'])) {
+                foreach ($TAI['observed_iocs'] as $TAII) {
+                    if (isset($TAII['ThreatActors.vtfirstdetectedts'])) {
+                    // End of workaround
+
                         $TASFileString = '<p:cxnSp><p:nvCxnSpPr><p:cNvPr id="6" name="Straight Connector 5"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{3B07D3CE-83DF-306C-1740-B15E60D50B68}"/></a:ext></a:extLst></p:cNvPr><p:cNvCxnSpPr><a:cxnSpLocks/></p:cNvCxnSpPr><p:nvPr/></p:nvCxnSpPr><p:spPr><a:xfrm><a:off x="2663429" y="6816436"/><a:ext cx="0" cy="445863"/></a:xfrm><a:prstGeom prst="line"><a:avLst/></a:prstGeom><a:ln w="9525"><a:solidFill><a:schemeClr val="accent3"><a:lumMod val="40000"/><a:lumOff val="60000"/></a:schemeClr></a:solidFill><a:prstDash val="dash"/></a:ln></p:spPr><p:style><a:lnRef idx="1"><a:schemeClr val="accent1"/></a:lnRef><a:fillRef idx="0"><a:schemeClr val="accent1"/></a:fillRef><a:effectRef idx="0"><a:schemeClr val="accent1"/></a:effectRef><a:fontRef idx="minor"><a:schemeClr val="tx1"/></a:fontRef></p:style></p:cxnSp><p:sp><p:nvSpPr><p:cNvPr id="11" name="Rectangle 10"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{5CF57A2B-9E16-9EF8-CC46-DEACEC1E9222}"/></a:ext></a:extLst></p:cNvPr><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="2390809" y="6646115"/><a:ext cx="546397" cy="151573"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:solidFill><a:schemeClr val="bg1"/></a:solidFill><a:ln><a:noFill/></a:ln></p:spPr><p:style><a:lnRef idx="2"><a:schemeClr val="accent1"><a:shade val="50000"/></a:schemeClr></a:lnRef><a:fillRef idx="1"><a:schemeClr val="accent1"/></a:fillRef><a:effectRef idx="0"><a:schemeClr val="accent1"/></a:effectRef><a:fontRef idx="minor"><a:schemeClr val="lt1"/></a:fontRef></p:style><p:txBody><a:bodyPr rtlCol="0" anchor="ctr"/><a:lstStyle/><a:p><a:pPr algn="ctr"/><a:endParaRPr lang="en-US" dirty="0" err="1"><a:solidFill><a:srgbClr val="101820"/></a:solidFill></a:endParaRPr></a:p></p:txBody></p:sp><p:pic><p:nvPicPr><p:cNvPr id="14" name="Graphic 13"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{6680C076-3929-2FD5-9B2D-C8EEC6FB5791}"/></a:ext></a:extLst></p:cNvPr><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="rId120"><a:extLst><a:ext uri="{96DAC541-7B7A-43D3-8B79-37D633B846F1}"><asvg:svgBlip xmlns:asvg="http://schemas.microsoft.com/office/drawing/2016/SVG/main" r:embed="rId121"/></a:ext></a:extLst></a:blip><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="2407408" y="6670008"/><a:ext cx="499438" cy="100897"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic><p:sp><p:nvSpPr><p:cNvPr id="15" name="Oval 14"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{BF608D1F-2449-B2E7-8286-C23F058ABA75}"/></a:ext></a:extLst></p:cNvPr><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="2641147" y="7268668"/><a:ext cx="45719" cy="45719"/></a:xfrm><a:prstGeom prst="ellipse"><a:avLst/></a:prstGeom><a:solidFill><a:schemeClr val="accent3"><a:lumMod val="20000"/><a:lumOff val="80000"/></a:schemeClr></a:solidFill><a:ln><a:noFill/></a:ln></p:spPr><p:style><a:lnRef idx="2"><a:schemeClr val="accent1"><a:shade val="50000"/></a:schemeClr></a:lnRef><a:fillRef idx="1"><a:schemeClr val="accent1"/></a:fillRef><a:effectRef idx="0"><a:schemeClr val="accent1"/></a:effectRef><a:fontRef idx="minor"><a:schemeClr val="lt1"/></a:fontRef></p:style><p:txBody><a:bodyPr rtlCol="0" anchor="ctr"/><a:lstStyle/><a:p><a:pPr algn="ctr"/><a:endParaRPr lang="en-US" dirty="0" err="1"><a:solidFill><a:srgbClr val="101820"/></a:solidFill></a:endParaRPr></a:p></p:txBody></p:sp></p:spTree>';
                         $TASFile = str_replace('</p:spTree>',$TASFileString,$TASFile);
                         $VTIndicatorFound = true;
@@ -656,14 +674,57 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
         // Set Tag Start Number
         $TagStart = 100;
         foreach ($ThreatActorInfo as $TAI) {
+
+            // Workaround Start
             // Get sorted list of observed IOCs not found in Virus Total
-            if (isset($TAI['related_indicators_with_dates'])) {
-                $ObservedIndicators = $TAI['related_indicators_with_dates'];
+            // if (isset($TAI['related_indicators_with_dates'])) {
+            //     $ObservedIndicators = $TAI['related_indicators_with_dates'];
+            //     $IndicatorCount = count($TAI['related_indicators_with_dates']);
+            //     $IndicatorsInVT = [];
+            //     if ($IndicatorCount > 0) {
+            //         foreach ($ObservedIndicators as $OI) {
+            //             if (array_key_exists('vt_first_submission_date', json_decode(json_encode($OI), true))) {
+            //                 $IndicatorsInVT[] = $OI;
+            //             }
+            //         }
+            //     }
+            //     if (count($IndicatorsInVT) > 0) {
+            //         // Sort the array based on the time difference
+            //         usort($IndicatorsInVT, function($a, $b) {
+            //             return calculateVirusTotalDifference($b) <=> calculateVirusTotalDifference($a);
+            //         });
+            //         $IndicatorsNotInVT = count($ObservedIndicators) - count($IndicatorsInVT);
+            //         $ExampleDomain = $IndicatorsInVT[0]->indicator;
+            //         $FirstSeen = new DateTime($IndicatorsInVT[0]->te_ik_submitted);
+            //         $LastSeen = new DateTime($IndicatorsInVT[0]->te_customer_last_dns_query);
+            //         $VTDate = new DateTime($IndicatorsInVT[0]->vt_first_submission_date);
+            //         $ProtectedFor = $FirstSeen->diff($LastSeen)->days;
+            //         $DaysAhead = 'Discovered '.($ProtectedFor - $LastSeen->diff($VTDate)->days).' days ahead';
+            //     } else {
+            //         $IndicatorsNotInVT = count($ObservedIndicators);
+            //         $ExampleDomain = $ObservedIndicators[0]->indicator;
+            //         $FirstSeen = new DateTime($ObservedIndicators[0]->te_ik_submitted);
+            //         $LastSeen = new DateTime($ObservedIndicators[0]->te_customer_last_dns_query);
+            //         $DaysAhead = 'Discovered';
+            //         $ProtectedFor = $FirstSeen->diff($LastSeen)->days;
+            //     }
+            // } else {
+            //     $IndicatorsNotInVT = 'N/A';
+            //     $ExampleDomain = 'N/A';
+            //     $FirstSeen = new DateTime('1901-01-01 00:00');
+            //     $LastSeen = new DateTime('1901-01-01 00:00');
+            //     $DaysAhead = 'Discovered';
+            //     $ProtectedFor = 'N/A';
+            //     $IndicatorCount = 'N/A';
+            // }
+
+            if (isset($TAI['observed_iocs'])) {
+                $ObservedIndicators = $TAI['observed_iocs'];
+                $IndicatorCount = $TAI['observed_count'];
                 $IndicatorsInVT = [];
-                $IndicatorCount = count($TAI['related_indicators_with_dates']);
                 if ($IndicatorCount > 0) {
                     foreach ($ObservedIndicators as $OI) {
-                        if (array_key_exists('vt_first_submission_date', json_decode(json_encode($OI), true))) {
+                        if (array_key_exists('ThreatActors.vtfirstdetectedts', json_decode(json_encode($OI), true))) {
                             $IndicatorsInVT[] = $OI;
                         }
                     }
@@ -673,23 +734,23 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
                     usort($IndicatorsInVT, function($a, $b) {
                         return calculateVirusTotalDifference($b) <=> calculateVirusTotalDifference($a);
                     });
-                    $IndicatorsNotInVT = count($ObservedIndicators) - count($IndicatorsInVT);
-                    $ExampleDomain = $IndicatorsInVT[0]->indicator;
-                    $FirstSeen = new DateTime($IndicatorsInVT[0]->te_ik_submitted);
-                    $LastSeen = new DateTime($IndicatorsInVT[0]->te_customer_last_dns_query);
-                    $VTDate = new DateTime($IndicatorsInVT[0]->vt_first_submission_date);
+                    $IndicatorsNotObserved = $TAI['related_count'] - $IndicatorCount;
+                    $ExampleDomain = $IndicatorsInVT[0]['ThreatActors.domain'];
+                    $FirstSeen = new DateTime($IndicatorsInVT[0]['ThreatActors.ikbfirstsubmittedts']);
+                    $LastSeen = new DateTime($IndicatorsInVT[0]['ThreatActors.lastdetectedts']);
+                    $VTDate = new DateTime($IndicatorsInVT[0]['ThreatActors.vtfirstdetectedts']);
                     $ProtectedFor = $FirstSeen->diff($LastSeen)->days;
                     $DaysAhead = 'Discovered '.($ProtectedFor - $LastSeen->diff($VTDate)->days).' days ahead';
                 } else {
-                    $IndicatorsNotInVT = count($ObservedIndicators);
-                    $ExampleDomain = $ObservedIndicators[0]->indicator;
-                    $FirstSeen = new DateTime($ObservedIndicators[0]->te_ik_submitted);
-                    $LastSeen = new DateTime($ObservedIndicators[0]->te_customer_last_dns_query);
+                    $IndicatorsNotObserved = $TAI['related_count'];
+                    $ExampleDomain = $ObservedIndicators[0]['ThreatActors.domain'];
+                    $FirstSeen = new DateTime($ObservedIndicators[0]['ThreatActors.ikbfirstsubmittedts']);
+                    $LastSeen = new DateTime($ObservedIndicators[0]['ThreatActors.lastdetectedts']);
                     $DaysAhead = 'Discovered';
                     $ProtectedFor = $FirstSeen->diff($LastSeen)->days;
                 }
             } else {
-                $IndicatorsNotInVT = 'N/A';
+                $IndicatorsNotObserved = 'N/A';
                 $ExampleDomain = 'N/A';
                 $FirstSeen = new DateTime('1901-01-01 00:00');
                 $LastSeen = new DateTime('1901-01-01 00:00');
@@ -697,11 +758,13 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID) {
                 $ProtectedFor = 'N/A';
                 $IndicatorCount = 'N/A';
             }
+            // Workaround End
+
 
             $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'01',ucwords($TAI['actor_name'])); // Threat Actor Name
             $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'02',$TAI['actor_description']); // Threat Actor Description
             $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'03',$IndicatorCount); // Number of Observed IOCs
-            $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'04',$IndicatorsNotInVT); // Number of Observed IOCs not found in Virus Total
+            $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'04',$IndicatorsNotObserved); // Number of Observed IOCs not observed
             $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'05',$TAI['related_count']); // Number of Related IOCs
             $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'06',$DaysAhead); // Discovered X Days Ahead
             $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'07',$FirstSeen->format('d/m/y')); // First Detection Date
@@ -791,7 +854,10 @@ function calculateProtectedDifference($te_ik_submitted,$te_customer_last_dns_que
 }
 
 function calculateVirusTotalDifference($obj) {
-    $submitted = new DateTime($obj->te_ik_submitted);
-    $vtsubmitted = new DateTime($obj->vt_first_submission_date);
+    // Workaround
+    // $submitted = new DateTime($obj->te_ik_submitted);
+    // $vtsubmitted = new DateTime($obj->vt_first_submission_date);
+    $submitted = new DateTime($obj['ThreatActors.ikbfirstsubmittedts']);
+    $vtsubmitted = new DateTime($obj['ThreatActors.vtfirstdetectedts']);
     return $vtsubmitted->getTimestamp() - $submitted->getTimestamp();
 }

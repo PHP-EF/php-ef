@@ -43,14 +43,6 @@ jQuery(function ($) {
         .addClass("active");
     }
   });
-
-
-  $("#close-sidebar").click(function() {
-    $(".page-wrapper").removeClass("toggled");
-  });
-  $("#show-sidebar").click(function() {
-    $(".page-wrapper").addClass("toggled");
-  });
 });
 
 function searchTable(searchId,tableId) {
@@ -442,7 +434,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const maxDaysApart = 30;
   const today = new Date();
   const maxPastDate = new Date(today);
-  maxPastDate.setDate(today.getDate() - maxDaysApart);
+  maxPastDate.setDate(today.getDate() - 31);
 
   flatpickr("#startDate", {
     enableTime: true,

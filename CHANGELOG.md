@@ -8,6 +8,7 @@
 - Move large number of functions to new classes
 - Implemented SAML Authentication for SSO
 - Implemented new configuration pages for Threat Actors/Security Assessment Templates
+- Overhaul UI
 
 ## v0.4.6
 - Fix bug where invalid API Keys would not always be reported
