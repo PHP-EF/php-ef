@@ -434,7 +434,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const maxDaysApart = 30;
   const today = new Date();
   const maxPastDate = new Date(today);
-  maxPastDate.setDate(today.getDate() - 31);
+  maxPastDate.setDate(today.getDate() - 45);
 
   flatpickr("#startDate", {
     enableTime: true,
