@@ -102,7 +102,16 @@ body.dark-theme input:disabled {
 body.dark-theme .home-section {
   background: #292f38;
 }
-
+body.dark-theme .accordion-button,
+body.dark-theme .accordion-item {
+  background: #36393e;
+  color: #FFF;
+  border: none;
+}
+body.dark-theme .accordion-body {
+  background: #474a50;
+  color: #FFF;
+}
 /* Light Mode */
 body.light-theme .bootstrap-table .fixed-table-container .fixed-table-body .fixed-table-loading.table.table-bordered.table-hover.open {
   background: #f8f8f6;
@@ -157,6 +166,11 @@ input, select {
 }
 input.changed, select.changed {
   border: 4px solid #ffbd43!important;
+}
+
+/* Row Labels */
+.rowLabel {
+  margin-top:10px;
 }
 
 /* Form Select / Control */
@@ -294,10 +308,12 @@ p.pNoMargin {
 .sidebar .logo-sm {
   height: 50px;
   margin: 10px 0px 0px 10px;
+  transition: 0.5s ease;
+  transition-delay: 0.1s;
 }
 .sidebar .logo-lg {
-  height: 41px;
-  margin: 0px 0px 0px 30px;
+  height: 37px;
+  margin: 0px 0px 0px 50px;
   transition: 0.3s ease;
   transition-delay: 0.1s;
 }
@@ -305,6 +321,11 @@ p.pNoMargin {
   transition-delay: 0s;
   opacity: 0;
   pointer-events: none;
+}
+.sidebar.close .logo-sm {
+  transform: rotate(-180deg);
+  transition: 0.5s ease;
+  transition-delay: 0.1s;
 }
 .sidebar .nav-links{
   height: 100%;
@@ -494,7 +515,7 @@ p.pNoMargin {
 .sidebar.close .sidebar-footer{
   width: 78px;
 }
-.sidebar.close .sidebar-footer i:not(:first-child){
+.sidebar.close .sidebar-footer a:not(:first-child){
   display: none;
 }
 .sidebar .nav-links li .sidebar-footer .fontDropdown-content {
@@ -505,10 +526,12 @@ p.pNoMargin {
   line-height: 25px;
 }
 @media (max-width: 400px) {
-  .sidebar.close .nav-links li .sub-menu{
+  .sidebar.close .nav-links li .sub-menu,
+  .sidebar.close .nav-links li.menu-item,
+  .sidebar.close .logo-details{
     display: none;
   }
-  .sidebar{
+  .sidebar {
     width: 78px;
   }
   .sidebar.close{
@@ -582,16 +605,20 @@ p.pNoMargin {
   width: calc(100% - 350px);
   transition: all 0.5s ease;
 }
+.sidebar.close ~ .home-section{
+  left: 78px;
+  width: calc(100% - 78px);
+}
 @media (max-width: 400px) {
   .home-section{
     left: 78px;
     width: calc(100% - 78px);
     z-index: 100;
   }
-}
-.sidebar.close ~ .home-section{
-  left: 78px;
-  width: calc(100% - 78px);
+  .sidebar.close ~ .home-section{
+    left: 0px;
+    width: 100%;
+  }
 }
 .home-section .nav-bar{
   height: 60px;

@@ -404,7 +404,6 @@ class Auth {
   }
 
   public function acs() {
-    // Implement Redis for expired assertions
     $this->sso->processResponse();
     $Login = false;
 

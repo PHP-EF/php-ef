@@ -188,7 +188,7 @@ if (!($_REQUEST['f'])) {
                 http_response_code(200);
             } else {
                 http_response_code(301);
-                echo "Timed out.";
+                echo "Session timed out.";
                 die();
             }
             break;

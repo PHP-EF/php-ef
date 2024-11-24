@@ -205,7 +205,7 @@
     }
   }
 
-  $(document).on('click', '.toggle', function(event) {
+  $('.toggle').on('click', function(event) {
     let id = $('#editGroupID').val();
     let toggle = $('#'+event.target.id).prop('checked');
     let group = $('#editModalLabel').text();
@@ -242,11 +242,11 @@
      });
   });
 
-  $(document).on('click', '#newgroup', function(event) {
+  $('#newgroup').on('click', function(event) {
     $('#newGroupModal').modal('show');
   });
 
-  $(document).on('click', '#newGroupSubmit', function(event) {
+  $('#newGroupSubmit').on('click', function(event) {
     event.preventDefault();
     let groupName = $('#groupName').val();
     let groupId = groupName.toLowerCase().replace(/ /g, '-');

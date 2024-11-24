@@ -63,7 +63,7 @@
             data-show-refresh="true"
             data-pagination="true"
             data-toolbar="#toolbar"
-            data-sort-name="Name"
+            data-sort-name="Status"
             data-sort-order="asc"
             data-page-size="25"
             data-buttons="templateButtons"

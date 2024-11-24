@@ -92,16 +92,30 @@ body.dark-theme .popover {
           <input type="text" class="form-control" id="editPasswordExpires" aria-describedby="editPasswordExpiresHelp" disabled>
           <small id="editPasswordExpiresHelp" class="form-text text-muted">The date/time of when the password for this account will expire.</small>
         </div>
-        <div class="form-group">
-          <label for="editUserPassword">Password</label>
-          <i class="fa fa-info-circle hover-target" aria-hidden="true"></i>
-          <input type="password" class="form-control" id="editUserPassword" aria-describedby="editUserPasswordHelp">
-          <small id="editUserPasswordHelp" class="form-text text-muted">The updated password for the user.</small>
-        </div>
-        <div class="form-group">
-          <label for="editUserPassword2">Verify Password</label>
-          <input type="password" class="form-control" id="editUserPassword2" aria-describedby="editUserPassword2Help">
-          <small id="editUserPassword2Help" class="form-text text-muted">Enter the updated password again.</small>
+        <hr>
+        <div class="accordion" id="resetPasswordAccordion">
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="resetPasswordHeading">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#resetPassword" aria-expanded="true" aria-controls="resetPassword">
+              Reset Password
+              </button>
+            </h2>
+            <div id="resetPassword" class="accordion-collapse collapse" aria-labelledby="resetPasswordHeading" data-bs-parent="#resetPasswordAccordion">
+              <div class="accordion-body">
+                <div class="form-group">
+                  <label for="editUserPassword">Password</label>
+                  <i class="fa fa-info-circle hover-target" aria-hidden="true"></i>
+                  <input type="password" class="form-control" id="editUserPassword" aria-describedby="editUserPasswordHelp">
+                  <small id="editUserPasswordHelp" class="form-text text-muted">The updated password for the user.</small>
+                </div>
+                <div class="form-group">
+                  <label for="editUserPassword2">Verify Password</label>
+                  <input type="password" class="form-control" id="editUserPassword2" aria-describedby="editUserPassword2Help">
+                  <small id="editUserPassword2Help" class="form-text text-muted">Enter the updated password again.</small>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <hr>
         <div id="popover" class="popover" role="alert">
