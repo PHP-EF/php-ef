@@ -188,7 +188,7 @@ if (!($_REQUEST['f'])) {
                 http_response_code(200);
             } else {
                 http_response_code(301);
-                echo "Timed out.";
+                echo "Session timed out.";
                 die();
             }
             break;
@@ -206,6 +206,18 @@ if (!($_REQUEST['f'])) {
                     unset($AuthContent['headers'][$UnsetHeader]);
                 }
                 echo json_encode($AuthContent,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+            }
+            break;
+        case 'passwordReset':
+            if ($method = checkRequestMethod('POST')) {
+                if (isset($_REQUEST['pw'])) {
+                    echo json_encode($ib->auth->passwordReset($_POST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                } else {
+                    echo json_encode(array(
+                        'Status' => 'Error',
+                        'Message' => 'New password missing from request'
+                    ));
+                }
             }
             break;
         case 'CheckAccess':
