@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
-  if (CheckAccess(null,"B1-SECURITY-ASSESSMENT") == false) {
+  if ($ib->auth->checkAccess(null,"B1-SECURITY-ASSESSMENT") == false) {
     die();
   }
 ?>
@@ -35,29 +35,55 @@
               </select>
           </div>
           <div class="col-md-2 ml-md-auto startDate">
-              <input class="dateTimePicker" type="text" id="startDate" placeholder="Start Date/Time">
+              <input type="text" id="startDate" placeholder="Start Date/Time">
           </div>
           <div class="col-md-2 ml-md-auto endDate">
-              <input class="dateTimePicker" type="text" id="endDate" placeholder="End Date/Time">
+              <input type="text" id="endDate" placeholder="End Date/Time">
           </div>
           <div class="col-md-2 ml-md-auto actions">
             <button class="btn btn-success" id="Generate">Generate</button>
           </div>
       </div>
+      <div class="row">
+        <div class="col-md-6 options">
+          <div class="form-group">
+            <div class="form-check form-switch">
+              <input class="form-check-input info-field" type="checkbox" id="unnamed" name="unnamed">
+              <label class="form-check-label" for="unnamed">Enable Unnamed Actors</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-check form-switch">
+              <input class="form-check-input info-field" type="checkbox" id="substring" name="substring">
+              <label class="form-check-label" for="substring">Enable Substring_* Actors</label>
+            </div>
+          </div>
+        </div>
+      </div>
       <br>
       <div class="alert alert-info genInfo" role="alert">
-        <center>It can take up to 2 minutes to generate the report, please be patient.</center>
+        <center>It can take up to 5 minutes to generate the report, please be patient.</center>
       </div>
-      <div class="calendar"></div>
+      <div class="loading-div"></div>
         <div class="loading-icon">
           <hr>
           <div class="progress">
             <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
           </div>
           <br>
-          <div class="spinner-border text-primary" role="status">
-              <span class="sr-only">Loading...</span>
+          <div id="spinner-container">
+            <div class="spinner-grow text-warning" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="spinner-grow text-success" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="spinner-grow text-info" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
           </div>
+          <p class="progressAction" id="progressAction"></p>
+          <small id="elapsed"></small>
         </div>
       </div>
 	  </div>
@@ -70,6 +96,36 @@
 <script>
 let haltProgress = false;
 
+const spinners = document.querySelectorAll('.spinner-grow');
+
+function showSpinners() {
+  // Show spinners one by one
+  spinners.forEach((spinner, i) => {
+    setTimeout(() => {
+      spinner.style.display = 'inline-block'; // Show spinner
+    }, i * 1000); // Delay of 1 second for each spinner
+  });
+
+  // Hide spinners in the same order
+  setTimeout(() => {
+    spinners.forEach((spinner, i) => {
+      setTimeout(() => {
+        spinner.style.display = 'none'; // Hide spinner
+      }, i * 1000); // Delay of 1 second for each spinner
+    });
+  }, (spinners.length * 1000) + 1000); // Start hiding after all are shown
+
+  setTimeout(function() {
+    showSpinners();
+  }, (spinners.length * 2) * 1000);
+}
+
+function hideSpinners() {
+  spinners.forEach((spinner) => {
+    spinner.style.display = 'none'; // Hide all spinners
+  });
+}
+
 function download(url) {
   const a = document.createElement('a')
   a.href = url
@@ -79,29 +135,38 @@ function download(url) {
   document.body.removeChild(a)
 }
 
-function showLoading(id) {
+function showLoading(id,timer) {
   document.querySelector('.loading-icon').style.display = 'block';
+  $('.spinner-grow').css('display','none');
+  showSpinners();
   haltProgress = false;
-  updateProgress(id);
+  updateProgress(id,timer);
 }
-function hideLoading() {
+function hideLoading(timer) {
   document.querySelector('.loading-icon').style.display = 'none';
   $('#progress-bar').css('width', '0%').attr('aria-valuenow', 0).text('0%');
   haltProgress = true;
+  stopTimer(timer);
 }
 
-function updateProgress(id) {
-  $.get('/api?function=getSecurityReportProgress&id='+id, function(data) {
-      var progress = parseFloat(data).toFixed(1); // Assuming the server returns a JSON object with a 'progress' field
+function updateProgress(id,timer) {
+  $.get('/api?f=getSecurityReportProgress&id='+id, function(data) {
+      var progress = parseFloat(data['Progress']).toFixed(1); // Assuming the server returns a JSON object with a 'progress' field
       $('#progress-bar').css('width', progress + '%').attr('aria-valuenow', progress).text(progress + '%');
+      $('#progressAction').text(data['Action'])
       if (progress < 100 && haltProgress == false) {
         setTimeout(function() {
-          updateProgress(id);
+          updateProgress(id,timer);
         }, 1000);
+      } else if (progress >= 100 && data['Action'] == 'Done..' ) {
+        toast("Success","","Security Assessment Successfully Generated","success","30000");
+        download('/api?f=downloadSecurityReport&id='+id);
+        hideLoading(timer);
+        $("#Generate").prop('disabled', false);
       }
   }).fail(function( data, status ) {
     setTimeout(function() {
-      updateProgress(id);
+      updateProgress(id,timer);
     }, 1000);
   });
 }
@@ -127,8 +192,9 @@ $("#Generate").click(function(){
   }
 
   $("#Generate").prop('disabled', true)
-  $.get( "/api?function=getUUID", function( id ) {
-    showLoading(id);
+  $.get( "/api?f=getUUID", function( id ) {
+    let timer = startTimer();
+    showLoading(id,timer);
     const startDateTime = new Date($('#startDate')[0].value)
     const endDateTime = new Date($('#endDate')[0].value)
     var postArr = {}
@@ -136,21 +202,24 @@ $("#Generate").click(function(){
     postArr.EndDateTime = endDateTime.toISOString()
     postArr.Realm = $('#Realm').find(":selected").val()
     postArr.id = id
+    postArr.unnamed = $('#unnamed')[0].checked;
+    postArr.substring = $('#substring')[0].checked;
     if ($('#APIKey')[0].value) {
       postArr.APIKey = $('#APIKey')[0].value
     }
-    $.post( "/api?function=createSecurityReport", postArr).done(function( data, status ) {
+    $.post( "/api?f=createSecurityReport", postArr).done(function( data, status ) {
       if (data['Status'] == 'Success') {
-        toast("Success","","The report has been successfully generated.","success","30000");
-        download('/api?function=downloadSecurityReport&id='+data['id'])
+        toast("Success","Do not refresh the page","Security Assessment Report Job Started Successfully","success","30000");
       } else {
         toast(data['Status'],"",data['Error'],"danger","30000");
+        hideLoading(timer);
+        $("#Generate").prop('disabled', false);
       }
     }).fail(function( data, status ) {
         toast("API Error","","Unknown API Error","danger","30000");
+        hideLoading(timer);
+        $("#Generate").prop('disabled', false);
     }).always(function() {
-        hideLoading()
-        $("#Generate").prop('disabled', false)
     });
   });
 });

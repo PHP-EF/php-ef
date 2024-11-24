@@ -1,32 +1,47 @@
 {
-    "Authenticated": {
+    "authenticated": {
+        "Name": "Authenticated",
         "Description": "This group applies to any authenticated user",
         "PermittedResources": [],
         "PermittedMenus": []
     },
-    "Everyone": {
+    "everyone": {
+        "Name": "Everyone",
         "Description": "This group applies to any user, regardless of if they are logged in or not",
         "PermittedResources": [
-            "DNS-TOOLBOX",
             "B1-THREAT-ACTORS",
-            "B1-SECURITY-ASSESSMENT"
+            "B1-SECURITY-ASSESSMENT",
+            "DNS-TOOLBOX"
         ],
         "PermittedMenus": []
     },
-    "Administrators": {
+    "administrators": {
+        "Name": "Administrators",
         "Description": "Infoblox SA Tools Admins",
         "PermittedResources": [
             "ADMIN-RBAC",
             "ADMIN-CONFIG",
             "ADMIN-LOGS",
-            "DNS-TOOLBOX",
             "B1-SECURITY-ASSESSMENT",
             "B1-THREAT-ACTORS",
-            "B1-LICENSE-USAGE"
+            "B1-LICENSE-USAGE",
+            "ADMIN-SECASS",
+            "ADMIN-USERS",
+            "DNS-TOOLBOX"
         ],
         "PermittedMenus": [
             "ADMIN-Menu",
             "DEV-Menu"
+        ]
+    },
+    "security-assessment-admins": {
+        "Name": "Security Assessment Admins",
+        "Description": "This group gives users access to manage the Security Assessment and Threat Actor configuration",
+        "PermittedResources": [
+            "ADMIN-SECASS"
+        ],
+        "PermittedMenus": [
+            "ADMIN-Menu"
         ]
     }
 }

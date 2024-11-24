@@ -1,8 +1,12 @@
 vendor/*
 files/*
 inc/logs/*
-!files/reports/placeholder.txt
-composer.lock
+app.db
 config.json
+!files/reports/placeholder.txt
+assets/images/Threat Actors/Uploads
+composer.lock
 _archive
 .DS_Store
+test.php
+php.error.log

@@ -9,280 +9,233 @@
   require_once(__DIR__.'/inc/inc.php');
   require_once(__DIR__.'/inc/me.php');
 
-  if (GetAuth()['Authenticated'] == true) {
+  if ($ib->auth->getAuth()['Authenticated'] == true) {
     $isAuth = true;
   } else {
     $isAuth = false;
   }
 ?>
+
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Infoblox SA Tools</title>
-</head>
 
-<style>
-#tabsJustifiedContent * p, #tabsJustifiedContent * small{
-  text-align:center;
-  display:block;
-}
-pre {
-  background-color: #000;
-  overflow: auto;
-  font-family: 'Monaco',monospace;
-  padding: 0 1em;
-}
-pre code {
-  display: block;
-  border: none;
-  background: none;
-  color: #FFF;
-  white-space: pre-wrap;
-  letter-spacing: normal;
-  line-height: 1em;
-}
-
-.fontDropBtn {
-  border: none;
-  cursor: pointer;
-}
-
-.fontDropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.fontDropdown-content {
-  bottom: 100%;
-  display: none;
-  position: absolute;
-  background-color: #31353d;
-  min-width: 20px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
-}
-
-.fontDropdown-content i {
-  color: #6c7b88;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
-}
-
-.fontDropdown-content i:hover {background-color: #393f4c;}
-
-.show {display:block;}
-</style>
-
-<div class="page-wrapper chiller-theme toggled">
-  <a id="show-sidebar" class="btn btn-sm btn-dark" href="#">
-    <i class="fas fa-bars"></i>
-  </a>
-  <nav id="sidebar" class="sidebar-wrapper">
-    <div class="sidebar-content">
-      <div class="sidebar-brand">
-        <a href="#page=default">Infoblox SA Tools</a>
-        <div id="close-sidebar">
-          <i class="fas fa-times"></i>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <title> Infoblox SA Tools </title>
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+  </head>
+<body>
+  <div class="sidebar">
+    <div class="logo-details">
+      <img class="logo-sm" src="/assets/images/Other/ib-diamonds.png"></img>
+      <!-- <span class="logo_name">Infoblox SA Tools</span> -->
+      <img class="logo-lg" src="/assets/images/Other/ib-logo-white.png"></img>
+    </div>
+    <ul class="nav-links">
+      <li class="menu-item">
+        <a href="#page=default" class="toggleFrame" data-page-name="Home">
+          <i class='fa fa-home' ></i>
+          <span class="link_name">Home</span>
+        </a>
+        <ul class="sub-menu blank">
+          <li><a class="link_name preventDefault" href="#">Home</a></li>
+        </ul>
+      </li>
+      <?php if ($ib->auth->checkAccess(null,'DNS-TOOLBOX')) { echo '
+      <li class="menu-item">
+        <div class="icon-link">
+          <a href="#page=tools/dnstoolbox" class="toggleFrame" data-page-name="DNS Toolbox">
+            <i class="fa fa-toolbox" ></i>
+            <span class="link_name">DNS Toolbox</span>
+          </a>
+          <ul class="sub-menu blank">
+            <li><a class="link_name preventDefault" href="#">DNS Toolbox</a></li>
+          </ul>
         </div>
-      </div>
-      <div class="sidebar-header">
-	      <div class="user-pic">
-          <svg id="UserSvg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 55 55" xml:space="preserve" role="img" class="jss11"><path d="M55,27.5C55,12.337,42.663,0,27.5,0S0,12.337,0,27.5c0,8.009,3.444,15.228,8.926,20.258l-0.026,0.023l0.892,0.752 c0.058,0.049,0.121,0.089,0.179,0.137c0.474,0.393,0.965,0.766,1.465,1.127c0.162,0.117,0.324,0.234,0.489,0.348 c0.534,0.368,1.082,0.717,1.642,1.048c0.122,0.072,0.245,0.142,0.368,0.212c0.613,0.349,1.239,0.678,1.88,0.98 c0.047,0.022,0.095,0.042,0.142,0.064c2.089,0.971,4.319,1.684,6.651,2.105c0.061,0.011,0.122,0.022,0.184,0.033 c0.724,0.125,1.456,0.225,2.197,0.292c0.09,0.008,0.18,0.013,0.271,0.021C25.998,54.961,26.744,55,27.5,55 c0.749,0,1.488-0.039,2.222-0.098c0.093-0.008,0.186-0.013,0.279-0.021c0.735-0.067,1.461-0.164,2.178-0.287 c0.062-0.011,0.125-0.022,0.187-0.034c2.297-0.412,4.495-1.109,6.557-2.055c0.076-0.035,0.153-0.068,0.229-0.104 c0.617-0.29,1.22-0.603,1.811-0.936c0.147-0.083,0.293-0.167,0.439-0.253c0.538-0.317,1.067-0.648,1.581-1 c0.185-0.126,0.366-0.259,0.549-0.391c0.439-0.316,0.87-0.642,1.289-0.983c0.093-0.075,0.193-0.14,0.284-0.217l0.915-0.764 l-0.027-0.023C51.523,42.802,55,35.55,55,27.5z M2,27.5C2,13.439,13.439,2,27.5,2S53,13.439,53,27.5 c0,7.577-3.325,14.389-8.589,19.063c-0.294-0.203-0.59-0.385-0.893-0.537l-8.467-4.233c-0.76-0.38-1.232-1.144-1.232-1.993v-2.957 c0.196-0.242,0.403-0.516,0.617-0.817c1.096-1.548,1.975-3.27,2.616-5.123c1.267-0.602,2.085-1.864,2.085-3.289v-3.545 c0-0.867-0.318-1.708-0.887-2.369v-4.667c0.052-0.52,0.236-3.448-1.883-5.864C34.524,9.065,31.541,8,27.5,8 s-7.024,1.065-8.867,3.168c-2.119,2.416-1.935,5.346-1.883,5.864v4.667c-0.568,0.661-0.887,1.502-0.887,2.369v3.545 c0,1.101,0.494,2.128,1.34,2.821c0.81,3.173,2.477,5.575,3.093,6.389v2.894c0,0.816-0.445,1.566-1.162,1.958l-7.907,4.313 c-0.252,0.137-0.502,0.297-0.752,0.476C5.276,41.792,2,35.022,2,27.5z"></path></svg>
+      </li>';}
+      if ($ib->auth->checkAccess(null,'B1-SECURITY-ASSESSMENT')) { echo '
+      <li class="menu-item">
+        <div class="icon-link">
+          <a href="#page=uddi/security-assessment" class="toggleFrame" data-page-name="Security Assessment Report Generator">
+            <i class="fa fa-magnifying-glass-chart" ></i>
+            <span class="link_name">Security Assessment</span>
+          </a>
+          <ul class="sub-menu blank">
+            <li><a class="link_name preventDefault" href="#">Security Assessment</a></li>
+          </ul>
         </div>
-	      <div class="user-info">
-          <?php if ($isAuth) { echo '
-	        <span class="display-name">'.GetAuth()['DisplayName'].'</span>
-	        <span class="user-name">'.GetAuth()['Username'].'</span>
-          <span class="user-status">
-            <i class="fa fa-circle"></i>
-            <span>Online</span>
-	        </span>';} else { echo '
-          <span class="user-status">
-            <span>Not Signed In</span>
-      	  </span>';}?>
+      </li>';}
+      if ($ib->auth->checkAccess(null,'B1-THREAT-ACTORS')) { echo '
+      <li class="menu-item">
+        <div class="icon-link">
+          <a href="#page=uddi/threat-actors" class="toggleFrame" data-page-name="Threat Actors">
+            <i class="fa fa-skull" ></i>
+            <span class="link_name">Threat Actors</span>
+          </a>
+          <ul class="sub-menu blank">
+            <li><a class="link_name preventDefault" href="#">Threat Actors</a></li>
+          </ul>
         </div>
-      </div>
-      <!-- sidebar-header  -->
-      <!--<div class="sidebar-search">
-        <div>
-          <div class="input-group">
-            <input type="text" class="form-control search-menu" placeholder="Search...">
-            <div class="input-group-append">
-              <span class="input-group-text">
-                <i class="fa fa-search" aria-hidden="true"></i>
-              </span>
-            </div>
+      </li>';}
+      if ($ib->auth->checkAccess(null,null,"DEV-Menu")) { echo '
+      <li class="menu-item">
+        <div class="icon-link">
+          <a href="#" class="preventDefault">
+            <i class="fa fa-toolbox" ></i>
+            <span class="link_name">Dev</span>
+          </a>
+          <i class="bx bxs-chevron-down arrow" ></i>
+        </div>
+        <ul class="sub-menu">
+          <li>
+            <a class="link_name preventDefault" href="#">Dev</a>
+          </li>';
+          if ($ib->auth->checkAccess(null,'B1-LICENSE-USAGE')) { echo '
+            <li>
+              <a href="#page=uddi/license-usage" class="toggleFrame" data-page-name="License Usage">
+                <i class="fas fa-certificate" ></i>
+                <span>License Utilization</span>
+              </a>
+            </li>';}
+            echo '
+        </ul>
+      </li>';}
+      if ($ib->auth->checkAccess(null,null,"ADMIN-Menu")) { echo '
+      <li class="menu-item">
+        <div class="icon-link">
+          <a href="#" class="preventDefault">
+            <i class="fas fa-user-shield" ></i>
+            <span class="link_name">Admin</span>
+          </a>
+          <i class="bx bxs-chevron-down arrow" ></i>
+        </div>
+        <ul class="sub-menu">
+          <div class="icon-link">
+            <a class="link_name preventDefault" href="#">Admin</a>
+            <a href="#" class="preventDefault">
+              <i class="fas fa-cog" ></i>
+              <span>Settings</span>
+            </a>
+            <i class="bx bxs-chevron-down arrow" ></i>
           </div>
-        </div>
-      </div>-->
-      <!-- sidebar-search -->
-      <div class="sidebar-menu dropdown">
-	      <ul>
-	        <li class="header-menu">
-            <a href="#page=default" class="toggleFrame">
-              <i class="fa fa-house"></i>
-	            <span>Home</span>
-            </a>
-	        </li>
-	        <!-- <li class="header-menu">
-            <span>Reports</span>
-	        </li> -->
-          <?php
-          if (CheckAccess(null,'DNS-TOOLBOX')) { echo '
-          <li class="header-menu">
-            <a href="#page=tools/dnstoolbox" class="toggleFrame">
-              <i class="fa fa-toolbox"></i>
-              <span>DNS Toolbox</span>
-            </a>
-          </li>';}
-          if (CheckAccess(null,'B1-SECURITY-ASSESSMENT')) { echo '
-          <li class="header-menu">
-            <a href="#page=uddi/security-assessment" class="toggleFrame">
-              <i class="fa fa-magnifying-glass-chart"></i>
-              <span>Security Assessment</span>
-            </a>
-          </li>';}
-          if (CheckAccess(null,'B1-THREAT-ACTORS')) { echo '
-          <li class="header-menu">
-            <a href="#page=uddi/threat-actors" class="toggleFrame">
-              <i class="fa fa-skull"></i>
-              <span>Threat Actors</span>
-            </a>
-          </li>';}
-          if (CheckAccess(null,null,"DEV-Menu")) { echo '
-	        <li class="header-menu">
-            <span>Dev</span>
-	        </li>
-          <li class="sidebar-dropdown">
-            <a href="#" class="preventDefault">
-              <i class="fa fa-toolbox"></i>
-              <span>Tools</span>
-            </a>
-            <div class="sidebar-submenu">';
-              if (CheckAccess(null,'B1-LICENSE-USAGE')) { echo '
-              <ul>
-                <li>
-                  <a href="#page=uddi/license-usage" class="toggleFrame">License Utilization</a>
-		            </li>
-
-              </ul>';}
-              echo '
-            </div>
-	        </li>';}
-
-          if (CheckAccess(null,null,"ADMIN-Menu")) { echo '
-          <li class="header-menu">
-            <span>Admin</span>
-          </li>
-	        <li class="sidebar-dropdown">
-            <a href="#" class="preventDefault">
-              <i class="fas fa-user-shield"></i>
-              <span>Admin</span>
-	          </a>
-            <div class="sidebar-submenu">
-              <ul>
-                <li class="sidebar-subdropdown">
-		              <a href="#">Settings</a>
-		              <ul class="sidebar-subsubmenu">';
-                    if (CheckAccess(null,"ADMIN-RBAC")) { echo '
-		                <li><a href="#page=core/rbac" class="toggleFrame">Role Based Access</a></li>
-                    ';}
-                    if (CheckAccess(null,"ADMIN-CONFIG")) { echo '
-                    <li><a href="#page=core/configuration" class="toggleFrame">Configuration</a></li>
-                    ';}
-                  echo '
-		              </ul>
-		            </li>';
-                if (CheckAccess(null,"ADMIN-LOGS")) { echo '
-                <li class="sidebar-subdropdown">
-		              <a href="#">Logs</a>
-                  <ul class="sidebar-subsubmenu">
-                    <li><a href="#page=core/logs" class="toggleFrame">Portal Logs</a></li>
-		              </ul>
-		            </li>
+          <li class="sub-menu-item">
+            <ul class="sub-sub-menu">
+              <li>';
+                if ($ib->auth->checkAccess(null,"ADMIN-USERS")) { echo '
+                <a href="#page=core/users" class="toggleFrame" data-page-name="Users">Users</a>
+                ';}
+                if ($ib->auth->checkAccess(null,"ADMIN-CONFIG")) { echo '
+                <a href="#page=core/configuration" class="toggleFrame" data-page-name="Configuration">Configuration</a>
+                ';}
+                if ($ib->auth->checkAccess(null,"ADMIN-RBAC")) { echo '
+                <a href="#page=core/rbac" class="toggleFrame" data-page-name="Role Based Access">Role Based Access</a>
+                ';}
+                if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) { echo '
+                <a href="#page=core/security-assessment-configuration" class="toggleFrame" data-page-name="Security Assessment Configuration">Security Assessment</a>
                 ';}
                 echo '
-	            </ul>
-	          </div>
-	        </li>';}?>
-
-          <li class="header-menu">
-            <span>Account</span>
+              </li>
+            </ul>
           </li>
-          <?php if ($isAuth) { echo '
-	        <li>
-            <a href="#" onclick="logout();" id="logoutBtn">
-              <i class="fa fa-sign-out"></i>
-              <span>Logout</span>
+        </ul>';
+        if ($ib->auth->checkAccess(null,"ADMIN-LOGS")) { echo '
+        <ul class="sub-menu">
+          <div class="icon-link">
+            <a href="#" class="preventDefault">
+              <i class="fa-regular fa-file" ></i>
+              <span>Logs</span>
             </a>
-	        </li>';} else { echo '
-	        <li>
-            <a href="#" onclick="login();" id="loginBtn">
-              <i class="fa fa-sign-in"></i>
-              <span>Login</span>
-            </a>
-	        </li>';}?>
-	      </ul>
-      </div>
-
-    <!-- sidebar-menu  -->
-    </div>
-    <!-- sidebar-content  -->
-    <div class="sidebar-footer">
-      <a href="#" class="infoBtn preventDefault">
-        <i class="fa fa-info infoBtn"></i>
-      </a>
-      <a href="#" class="toggleFontSizeBtn preventDefault">
-        <i class="fas fa-font fontDropBtn" id="fontSizeBtn"></i>
-        <div class="fontDropdown">
-          <div id="fontDropdown" class="fontDropdown-content">
-            <i onclick='setFontSize("12px")'>12px</i>
-            <i onclick='setFontSize("14px")'>13px</i>
-            <i onclick='setFontSize("14px")'>14px</i>
-            <i onclick='setFontSize("14px")'>15px</i>
-            <i onclick='setFontSize("16px")'>16px (default)</i>
-            <i onclick='setFontSize("16px")'>17px</i>
-            <i onclick='setFontSize("18px")'>18px</i>
+            <i class="bx bxs-chevron-down arrow" ></i>
           </div>
+          <li class="sub-menu-item">
+            <ul class="sub-sub-menu">
+              <li>';
+                if ($ib->auth->checkAccess(null,"ADMIN-USERS")) { echo '
+                <a href="#page=core/logs" class="toggleFrame" data-page-name="Logs">Portal Logs</a>
+                ';}
+                echo '
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>';}}?>
+      <li class="menu-item">
+        <div class="sidebar-footer">
+          <a href="#" class="infoBtn preventDefault">
+            <i class="fa fa-info infoBtn"></i>
+          </a>
+          <a href="#" class="toggleFontSizeBtn preventDefault">
+            <i class="fas fa-font fontDropBtn" id="fontSizeBtn"></i>
+            <div class="fontDropdown">
+              <div id="fontDropdown" class="fontDropdown-content">
+                <i onclick='setFontSize("12px")'>12px</i>
+                <i onclick='setFontSize("14px")'>13px</i>
+                <i onclick='setFontSize("14px")'>14px</i>
+                <i onclick='setFontSize("14px")'>15px</i>
+                <i onclick='setFontSize("16px")'>16px</i>
+                <i onclick='setFontSize("16px")'>17px</i>
+                <i onclick='setFontSize("18px")'>18px</i>
+              </div>
+            </div>
+          </a>
+          <a href="#" class="toggleThemeBtn preventDefault">
+            <i class="fa-solid fa-lightbulb toggler" id="themeToggle"></i>
+          </a>
         </div>
-      </a>
-      <a href="#" class="toggleThemeBtn preventDefault">
-        <i class="fas fa-circle toggler" id="themeToggle"></i>
-      </a>
-      <!--<a href="#">
-        <i class="fa fa-envelope"></i>
-        <span class="badge badge-pill badge-success notification">7</span>
-      </a>
-      <a href="#">
-        <i class="fa fa-cog"></i>
-        <span class="badge-sonar"></span>
-      </a>
-      <a href="#">
-        <i class="fa fa-power-off"></i>
-      </a>-->
-    </div>
-  </nav>
+      </li>
+    </ul>
+  </div>
 
-  <!-- sidebar-wrapper  -->
-  <main class="page-content" id="page-content">
-    <div class="container-fluid">
-      <?php
-      if (isset($iframe)) {
-      echo '<iframe id="mainFrame" name="mainFrame" height="100%" width="100%" frameborder="0" src="'.$iframe.'"></iframe>';
-      } else {
-      echo '<iframe id="mainFrame" name="mainFrame" height="100%" width="100%" frameborder="0" src="pages/default.php"></iframe>';
-      }
-      ?>
+  <section class="home-section">
+    <div class="nav-bar">
+      <i class='bx bx-menu' ></i>
+      <span class="title-text"></span>
+      <div class="profile-name-user ms-auto me-3">
+        <?php if ($ib->auth->getAuth()['Authenticated']) { echo '
+        <div class="dropdown">
+          <button class="dropbtn">'; echo $ib->auth->getAuth()['Username']. '
+            <i class="bx bxs-chevron-down arrow" ></i>
+          </button>
+          <div class="dropdown-content">
+            <ul>
+              <li>
+                <a href="#" class="profile">
+                  <span>Profile</span>
+                  <i class="fa fa-user"></i>
+                </a>
+              </li>
+              <li>
+                <a href="#" class="log-out" onclick="logout();">
+                  <span>Log Out</span>
+                  <i class="fa fa-sign-out" onclick="logout();"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>';} else {
+          echo '
+          <div class="dropdown">
+            <a href="#" class="login-btn preventDefault" onclick="login();">
+              <span>Login</span>
+              <i class="fa fa-sign-in" onclick="login();"></i>
+            </a>
+          </div>
+          ';} ?>
+      </div>
     </div>
-  </main>
-  <!-- page-content" -->
-</div>
+    <main class="page-content" id="page-content">
+      <div class="container-fluid">
+        <?php
+        if (isset($iframe)) {
+        echo '<iframe id="mainFrame" name="mainFrame" height="100%" width="100%" frameborder="0" src="'.$iframe.'"></iframe>';
+        } else {
+        echo '<iframe id="mainFrame" name="mainFrame" height="100%" width="100%" frameborder="0" src="pages/default.php"></iframe>';
+        }
+        ?>
+      </div>
+    </main>
+  </section>
 </body>
-</html>
 
 
 <!-- Info Modal -->
@@ -320,153 +273,321 @@ pre code {
               <!--/tabs-->
               <div id="tabsJustifiedContent" class="tab-content">
                 <div class="tab-pane fade active show p-1" id="about">
-                <p>The Infoblox SA Tools Portal offers a place for the Infoblox SA Team to leverage some web based tools.</p>
-                <p>Designed by <i class="fa fa-code" style="color:red"></i> by - <a target="_blank" rel="noopener noreferrer" href="https://github.com/TehMuffinMoo">Mat Cox</a></p>
-                <small>
-                  Created using Skeleton Framework made by - <a target="_blank" rel="noopener noreferrer" href="https://github.com/azouaoui-med">
-                    Mohamed Azouaoui
-                  </a>
-                </small>
-                <hr>
-                <small>
-                  Running Version: <?php echo getVersion()[0]; ?>
-                  </a>
-                </small>
-                <br>
-		          </div>
-              <div class="tab-pane fade" id="support">
-                <br>
-                <p>Issues and Feature Requests can be raised via Github issues page by clicking <a href="https://github.com/TehMuffinMoo/ib-sa-report/issues" target="_blank">here</a>.</p>
-              </div>
-              <div class="tab-pane fade" id="license">
-                <p>MIT License</p>
-                <p>Copyright &copy; 2021-2024 <a target="_blank" rel="noopener noreferrer" href="https://github.com/TehMuffinMoo">Mat Cox</a></p>
-                <p>
-                  Permission is hereby granted, free of charge, to any person obtaining a copy
-                  of this software and associated documentation files (the "Software"), to deal
-                  in the Software without restriction, including without limitation the rights
-                  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-                  copies of the Software, and to permit persons to whom the Software is
-                  furnished to do so, subject to the following conditions:
-                </p><p>
-                  The above copyright notice and this permission notice shall be included in all
-                  copies or substantial portions of the Software.
-                </p><p>
-                  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-                  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-                  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-                  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-                  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-                  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-                  SOFTWARE.
-                </p>
-              </div>
-              <div class="tab-pane fade" id="debugger">
-                <br>
-		            <pre>
-                  <code id="whoami"></code>
-                </pre>
-            </div>
-            <div class="tab-pane fade" id="changelog">
-              <div>
-                <iframe class="changeLogFrame" src="api?function=getChangelog"></iframe>
+                  <p>The Infoblox SA Tools Portal offers a place for the Infoblox SA Team to leverage some web based tools.</p>
+                  <p>Designed by <i class="fa fa-code" style="color:red"></i> by - <a target="_blank" rel="noopener noreferrer" href="https://github.com/TehMuffinMoo">Mat Cox</a></p>
+                  <hr>
+                  <small>
+                    Running Version: <?php echo $ib->getVersion()[0]; ?>
+                    </a>
+                  </small>
+                  <br>
+                </div>
+                <div class="tab-pane fade" id="support">
+                  <br>
+                  <p>Issues and Feature Requests can be raised via Github issues page by clicking <a href="https://github.com/TehMuffinMoo/ib-sa-report/issues" target="_blank">here</a>.</p>
+                </div>
+                <div class="tab-pane fade" id="license">
+                  <p>MIT License</p>
+                  <p>Copyright &copy; 2021-2024 <a target="_blank" rel="noopener noreferrer" href="https://github.com/TehMuffinMoo">Mat Cox</a></p>
+                  <p>
+                    Permission is hereby granted, free of charge, to any person obtaining a copy
+                    of this software and associated documentation files (the "Software"), to deal
+                    in the Software without restriction, including without limitation the rights
+                    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+                    copies of the Software, and to permit persons to whom the Software is
+                    furnished to do so, subject to the following conditions:
+                  </p><p>
+                    The above copyright notice and this permission notice shall be included in all
+                    copies or substantial portions of the Software.
+                  </p><p>
+                    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+                    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+                    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+                    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+                    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+                    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+                    SOFTWARE.
+                  </p>
+                </div>
+                <div class="tab-pane fade" id="debugger">
+                  <br>
+		              <pre>
+                    <code id="whoami"></code>
+                  </pre>
+                </div>
+                <div class="tab-pane fade" id="changelog">
+                  <div>
+                    <iframe class="changeLogFrame" src="api?f=getChangelog"></iframe>
+                  </div>
+                </div>
+                <!--/tabs content-->
               </div>
             </div>
-          <!--/tabs content-->
           </div>
+          <hr>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
       </div>
-      <hr>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
     </div>
   </div>
 </div>
+
+<!-- User Profile Modal -->
+<div class="modal fade" id="profileModal" tabindex="-1" role="dialog" aria-labelledby="profileModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="profileModalLabel">User Profile</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="modal-body" id="infoModelBody">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-4">
+              <p class="rowLabel">Username</p>
+            </div>
+            <div class="col-md-8">
+              <input type="text" class="form-control" id="userUsername" placeholder="Username" aria-describedby="userUsernameHelp" disabled>
+              <small id="userUsernameHelp" class="form-text text-muted">Username</small>
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="col-md-4">
+              <p class="rowLabel">Name</p>
+            </div>
+            <div class="col-md-4">
+              <input type="text" class="form-control" id="userFirstname" placeholder="First Name" aria-describedby="userFirstnameHelp" disabled>
+              <small id="userFirstnameHelp" class="form-text text-muted">First Name</small>
+            </div>
+            <div class="col-md-4">
+              <input type="text" class="form-control" id="userSurname" placeholder="Last Name" aria-describedby="userSurnameHelp" disabled>
+              <small id="userSurnameHelp" class="form-text text-muted">Last Name</small>
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="col-md-4">
+              <p class="rowLabel">Email Address</p>
+            </div>
+            <div class="col-md-8">
+              <input type="text" class="form-control" id="userEmail" placeholder="example@domain.com" aria-describedby="userEmailHelp" disabled>
+              <small id="userEmailHelp" class="form-text text-muted">Email Address</small>
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="accordion" id="resetPasswordAccordion">
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="resetPasswordHeading">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#resetPassword" aria-expanded="true" aria-controls="resetPassword">
+                  Reset Password
+                  </button>
+                </h2>
+                <div id="resetPassword" class="accordion-collapse collapse" aria-labelledby="resetPasswordHeading" data-bs-parent="#resetPasswordAccordion">
+                  <div class="accordion-body">
+                    <div class="card-body">
+                      <?php if ($ib->auth->getAuth()['Type'] == 'SSO') { echo '
+                        <div class="alert alert-warning" role="alert">
+                        <center>You must reset your password via the Single Sign On provider.</center>
+                        </div>';}
+                      ?>
+                      <div class="form-group">
+                        <label for="userPassword">Password</label>
+                        <i class="fa fa-info-circle hover-target" aria-hidden="true"></i>
+                        <input type="password" class="form-control" id="userPassword" aria-describedby="userPasswordHelp" <?php if ($ib->auth->getAuth()['Type'] == 'SSO') { echo 'disabled'; } ?> >
+                        <small id="userPasswordHelp" class="form-text text-muted">Enter the updated password.</small>
+                      </div>
+                      <div class="form-group">
+                        <label for="userPassword2">Verify Password</label>
+                        <input type="password" class="form-control" id="userPassword2" aria-describedby="userPassword2Help" <?php if ($ib->auth->getAuth()['Type'] == 'SSO') { echo 'disabled'; } ?> >
+                        <small id="userPassword2Help" class="form-text text-muted">Enter the updated password again.</small>
+                      </div>
+                      <div id="popover" class="popover" role="alert">
+                        <h4 class="alert-heading">Password Complexity</h4>
+                        <p>Minimum of 8 characters</p>
+                        <p>At least one uppercase letter</p>
+                        <p>At least one lowercase letter</p>
+                        <p>At least one number</p>
+                        <p>At least one special character</p>
+                      </div>
+                      <hr>
+                      <button type="button" class="btn btn-success" id="resetPasswordBtn">Save</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
 </div>
 
-
-
 <script>
-loadiFrame();
+  loadiFrame();
+  heartBeat();
 
-function login() {
-  location = "/login.php?redirect_uri="+window.location.href.replace("#","?");
-}
+  function login() {
+    location = "/login.php?redirect_uri="+window.location.href.replace("#","?");
+  }
 
-function logout() {
-  $.get('/api?function=logout', function(data) {
-  }).done(function (data, status) {
-    if (!data['Authenticated']) {
-        toast("Logged Out","","Successfully Logged Out.","success");
-      } else {
-        toast("Error","","Failed to Log Out. Your session may still be active.","danger");
+  function logout() {
+    $.get('/api?f=logout', function(data) {
+    }).done(function (data, status) {
+      if (!data['Authenticated']) {
+          toast("Logged Out","","Successfully Logged Out.","success");
+        } else {
+          toast("Error","","Failed to Log Out. Your session may still be active.","danger");
+        }
+        location.reload();
+    }).fail(function( data, status ) {
+      toast("Error","","Unknown API Error","danger");
+    });
+  }
+
+  function setFontSize(fontsize) {
+    console.log(fontsize);
+    $('html').css('font-size',fontsize);
+    setCookie('fontSize',fontsize,365);
+    location.reload();
+  }
+
+  $(document).ready(function() {
+    $('.hover-target').hover(
+      function() {
+          $('.popover').css({
+              display: 'block',
+          });
+      },
+      function() {
+          $('.popover').hide();
       }
-      location.reload();
-  }).fail(function( data, status ) {
-    toast("Error","","Unknown API Error","danger");
-  });
-}
+    );
 
-//$(document).ready(function() {
-//  $('#sidebar .toggleFrame').click(function(element) {
-//    loadiFrame(element.currentTarget.href);
-//  });
-//  window.onhashchange = function(hash) {
-//    console.log(hash);
-//    loadiFrame(hash.newURL);
-//  }
-//});
-
-var cookie = getCookie('theme');
-let toggle = document.getElementById('themeToggle');
-if (cookie == "dark") {
-  toggle.className = 'far fa-circle toggleon toggler';
-} else {
-  toggle.className = 'fas fa-circle toggleoff toggler';
-}
-
-
-$('.toggleThemeBtn').on('click', function () {
-  $('.toggler').toggleClass('fas far toggleoff toggleon');
-  if ($('.toggler').hasClass("toggleon")) {
-    setCookie('theme','dark',365);
-    location.reload();
-  } else {
-    setCookie('theme','light',365);
-    location.reload();
-  };
-});
-
-$('.infoBtn').on('click', function() {
-  $('#infoModal').modal('show');
-  $.getJSON('/api?function=whoami', function(whoami) {
-    if (whoami.headers['X-Authentik-Uid'] != null) {
-      if (whoami.Groups != null) {whoami.Groups = whoami.Groups.split('|')};
+    var cookie = getCookie('theme');
+    let toggle = document.getElementById('themeToggle');
+    if (cookie == "dark") {
+      toggle.className = 'fa-regular fa-lightbulb toggleon toggler';
     } else {
-      if (whoami.Groups != null) {whoami.Groups = whoami.Groups.split(',')};
+      toggle.className = 'fa-solid fa-lightbulb toggleoff toggler';
     }
-    if (whoami.headers.Cookie != null) {whoami.headers.Cookie = whoami.headers.Cookie.split('; ')};
-    $('#whoami').text(JSON.stringify(whoami, null, 2));
+
+
+    $('.toggleThemeBtn').on('click', function () {
+      $('.toggler').toggleClass('fas far toggleoff toggleon');
+      if ($('.toggler').hasClass("toggleon")) {
+        setCookie('theme','dark',365);
+        location.reload();
+      } else {
+        setCookie('theme','light',365);
+        location.reload();
+      };
+    });
+
+    $('.infoBtn').on('click', function() {
+      $('#infoModal').modal('show');
+      $.getJSON('/api?f=whoami', function(whoami) {
+        if (whoami.Groups != null) {whoami.Groups = whoami.Groups};
+        if (whoami.headers.Cookie != null) {whoami.headers.Cookie = whoami.headers.Cookie.split('; ')};
+        $('#whoami').text(JSON.stringify(whoami, null, 2));
+      });
+    });
+
+    $('.profile').on('click', function() {
+      $('#profileModal').modal('show');
+      $.getJSON('/api?f=whoami', function(whoami) {
+        $('#userUsername').val(whoami.Username);
+        $('#userFirstname').val(whoami.Firstname);
+        $('#userSurname').val(whoami.Surname);
+        $('#userEmail').val(whoami.Email);
+      });
+    });
+
+    $('.toggleFontSizeBtn, #fontDropdown-content').hover(function() {
+      $('#fontDropdown').toggleClass('show');
+    },function() {
+      $('#fontDropdown').toggleClass('show');
+    });
+
+    $('.preventDefault').click(function(event){
+      event.preventDefault();
+    });
+
+    $('.icon-link').on('click',function(elem) {
+      $(elem.currentTarget).parent().toggleClass('showMenu')
+    });
+    let sidebar = document.querySelector(".sidebar");
+    let sidebarBtn = document.querySelector(".bx-menu");
+    sidebarBtn.addEventListener("click", ()=>{
+      sidebar.classList.toggle("close");
+    });
+
+    $('#userPassword, #userPassword2').on('change', function() {
+      var password = $('#userPassword').val();
+      var confirmPassword = $('#userPassword2').val();
+      
+      if (password !== confirmPassword) {
+        if (password !== "" && confirmPassword !== "") {
+          toast("Warning","","The entered passwords do not match","danger","3000");
+          $('#resetPasswordBtn').attr('disabled',true);
+          $('#userPassword').css('color','red').css('border-color','red');
+          $('#userPassword2').css('color','red').css('border-color','red');
+        }
+      } else {
+        $('#resetPasswordBtn').attr('disabled',false);
+        $('#userPassword').css('color','green').css('border-color','green');
+        $('#userPassword2').css('color','green').css('border-color','green');
+      }
+    });
+
+    $('#resetPasswordBtn').on('click', function(event) {
+      // Prevent the default form submission
+      event.preventDefault();
+      isValid = true;
+
+      // Get values from the input fields
+      var password = $('#userPassword').val().trim();
+      var confirmPassword = $('#userPassword2').val().trim();
+
+      // Check if all fields are populated
+      if (!password || !confirmPassword) {
+        toast("Error","","Both the password and confirmation password are required","danger","30000");
+        isValid = false;
+      }
+
+      // Check if passwords match
+      if (password !== confirmPassword) {
+        toast("Error","","Passwords do not match","danger","30000");
+        isValid = false;
+      }
+
+      // Display error messages or proceed with form submission
+      if (isValid) {
+        var postArr = {}
+        postArr.pw = password;
+        $.post( "/api?f=passwordReset", postArr).done(function( data, status ) {
+          if (data['Status'] == 'Success') {
+            toast(data['Status'],"",data['Message'],"success");
+            populateUsers();
+            $('#profileModal').modal('hide');
+          } else if (data['Status'] == 'Error') {
+            toast(data['Status'],"",data['Message'],"danger","30000");
+          } else {
+            toast("Error","","Failed to reset password","danger","30000");
+          }
+        }).fail(function( data, status ) {
+            toast("API Error","","Failed to reset password","danger","30000");
+        })
+      }
+    });
   });
-});
-
-$('.toggleFontSizeBtn, #fontDropdown-content').hover(function() {
-  $('#fontDropdown').toggleClass('show');
-},function() {
-  $('#fontDropdown').toggleClass('show');
-});
-
-function setFontSize(fontsize) {
-  console.log(fontsize);
-  $('html').css('font-size',fontsize);
-  setCookie('fontSize',fontsize,365);
-  location.reload();
-}
-
-heartBeat();
-
-$('.preventDefault').click(function(event){
-  event.preventDefault();
-});
 </script>

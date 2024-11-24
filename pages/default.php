@@ -26,7 +26,7 @@
       </div>
       <div class="mb-2">
         <small>
-          Running Version: <?php echo getVersion()[0]; ?>
+          Running Version: <?php echo $ib->getVersion()[0]; ?>
           </a>
         </small>
       </div>

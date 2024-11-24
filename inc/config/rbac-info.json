@@ -39,6 +39,18 @@
 			"PermittedMenus": [
 				"ADMIN-Menu"
 			]
+		},
+		"ADMIN-USERS": {
+			"description": "Grants access to view and manage users & groups",
+			"PermittedMenus": [
+				"ADMIN-Menu"
+			]
+		},
+		"ADMIN-SECASS": {
+			"description": "Grants the ability to view and manage the Security Assessment Generator Configuration",
+			"PermittedMenus": [
+				"ADMIN-Menu"
+			]
 		}
 	}
 }

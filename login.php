@@ -70,25 +70,38 @@ html {
 
       }
 
-      button {
-        background: #e74c3c;
+      button.login {
+        background: #00BD4D;
         border:none;
         color: white;
         font-size: 18px;
         font-weight: 200;
         cursor: pointer;
         transition: box-shadow .4s ease;
-
         &:hover {
           box-shadow: 1px 1px 5px #555;
         }
-
         &:active {
             box-shadow: 1px 1px 7px #222;
         }
-
       }
 
+      button.sso {
+        background: #7f4bd6;
+        border:none;
+        color: white;
+        font-size: 18px;
+        font-weight: 200;
+        cursor: pointer;
+        transition: box-shadow .4s ease;
+        &:hover {
+          box-shadow: 1px 1px 5px #555;
+        }
+        &:active {
+            box-shadow: 1px 1px 7px #222;
+        }
+      }
+      
     }
 
     &:after{
@@ -97,7 +110,7 @@ html {
     top: 0;
     left: 0;
     right: 0;
-    background:-webkit-linear-gradient(left,
+    /* background:-webkit-linear-gradient(left,
         #27ae60 0%, #27ae60 20%,
         #8e44ad 20%, #8e44ad 40%,
         #3498db 40%, #3498db 60%,
@@ -110,7 +123,9 @@ html {
         #3498db 40%, #3498db 60%,
         #e74c3c 60%, #e74c3c 80%,
         #f1c40f 80%, #f1c40f 100%
-        );
+        ); */
+      background:-webkit-linear-gradient(left, #FDDD00 0%, #34C33D 25%, #00BD4D 50%, #00CD93 75%, #00E1E6 100%);
+      background:-moz-linear-gradient(left, #FDDD00 0%, #34C33D 25%, #00BD4D 50%, #00CD93 75%, #00E1E6 100%);
       height: 5px;
       border-radius: 5px 5px 0 0;
   }
@@ -126,13 +141,16 @@ html {
   <div class="form">
     <input type="text" placeholder="Username" name="un" id="un"/>
     <input type="password" placeholder="Password" name="pw" id="pw"/>
-    <button id="login"> Sign in </button>
+    <button id="login" class="login"> Sign in </button>
+    <?php if ($ib->config->getConfig('SAML','enabled')) {
+      echo '<button id="sso" class="sso"> Single Sign On </button>';
+    }?>
   </div>
 </div>
 
 <script>
 function login() {
-  $.post( "/api?function=login", {
+  $.post( "/api?f=login", {
       un: $('#un').val(),
       pw: $('#pw').val()
   }).done(function( data, status ) {
@@ -144,13 +162,14 @@ function login() {
       }
   }).fail(function( data, status ) {
       toast("Authentication Error","","Unknown Authentication Error","danger","30000");
-  }).always(function() {
-
-  });
+  })
 }
 
 $('#login').click(function() {
     login();
+})
+$('#sso').click(function() {
+    location = "/api?f=sso";
 })
 $('#un,#pw').keypress(function(event) {
   if (event.which == 13) {

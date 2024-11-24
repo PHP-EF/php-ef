@@ -1,6 +1,9 @@
 <?php
 $SkipCSS = true;
 require_once(__DIR__.'/../../inc/inc.php');
+if ($ib->auth->checkAccess(null,"DNS-TOOLBOX") == false) {
+  die();
+}
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
@@ -20,7 +23,7 @@ switch ($source) {
 }
 
 if(isset($domain) && $domain !=null){
-  writeLog("DNSToolbox","A query was performed using type: ".$_GET['request'],"debug",$_GET);
+  $ib->logging->writeLog("DNSToolbox","A query was performed using type: ".$_GET['request'],"debug",$_GET);
   switch ($_GET['request']) {
     case 'a':
       include_once('./A.php');

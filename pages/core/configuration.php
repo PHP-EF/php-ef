@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
-  if (CheckAccess(null,"ADMIN-CONFIG") == false) {
+  if ($ib->auth->checkAccess(null,"ADMIN-CONFIG") == false) {
     die();
   }
 
@@ -79,16 +79,116 @@
               <input type="password" class="form-control info-field" id="securitySalt" aria-describedby="securitySaltHelp" name="securitySalt">
               <small id="securitySaltHelp" class="form-text text-muted">The salt used to encrypt credentials.</small>
 	          </div>
-            <div class="form-group">
-              <label for="securityAdminPW">Admin Password</label>
-              <input type="password" class="form-control info-field" id="securityAdminPW" aria-describedby="securityAdminPWHelp" name="securityAdminPW">
-              <small id="securityAdminPWHelp" class="form-text text-muted">The password for the <b>admin</b> account.</small>
-	          </div>
+          </div>
+          <br>
+          <div class="card border-secondary">
+            <div class="card-title">
+              <h5>SAML Configuration</h5>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <h4>Service Provider (SP)</h4>
+                <div class="form-group">
+                    <label for="spEntityId">Entity ID</label>
+                    <input type="text" class="form-control info-field" id="spEntityId" name="spEntityId">
+                </div>
+                <div class="form-group">
+                    <label for="spAcsUrl">Assertion Consumer Service URL</label>
+                    <input type="text" class="form-control info-field" id="spAcsUrl" name="spAcsUrl">
+                </div>
+                <div class="form-group">
+                    <label for="spSloUrl">Single Logout Service URL</label>
+                    <input type="text" class="form-control info-field" id="spSloUrl" name="spSloUrl">
+                </div>
+                <div class="form-group">
+                    <label for="spX509Cert">X.509 Certificate</label>
+                    <textarea class="form-control info-field" id="spX509Cert" name="spX509Cert"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="spPrivateKey">Private Key</label>
+                    <textarea class="form-control info-field" id="spPrivateKey" name="spPrivateKey"></textarea>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <h4>Identity Provider (IdP)</h4>
+                <div class="form-group">
+                    <label for="idpEntityId">Entity ID</label>
+                    <input type="text" class="form-control info-field" id="idpEntityId" name="idpEntityId">
+                </div>
+                <div class="form-group">
+                    <label for="idpSsoUrl">Single Sign-On Service URL</label>
+                    <input type="text" class="form-control info-field" id="idpSsoUrl" name="idpSsoUrl">
+                </div>
+                <div class="form-group">
+                    <label for="idpSloUrl">Single Logout Service URL</label>
+                    <input type="text" class="form-control info-field" id="idpSloUrl" name="idpSloUrl">
+                </div>
+                <div class="form-group">
+                    <label for="idpX509Cert">X.509 Certificate</label>
+                    <textarea class="form-control info-field" id="idpX509Cert" name="idpX509Cert"></textarea>
+                </div>
+                <br>
+                <div class="form-group">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input info-field" type="checkbox" id="samlEnabled" name="samlEnabled">
+                    <label class="form-check-label" for="samlEnabled">Enable SAML</label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input info-field" type="checkbox" id="samlAutoCreateUsers" name="samlAutoCreateUsers">
+                    <label class="form-check-label" for="samlAutoCreateUsers">Auto-Create Users</label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input info-field" type="checkbox" id="samlStrict" name="samlStrict">
+                    <label class="form-check-label" for="samlStrict">Use Strict Mode</label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input info-field" type="checkbox" id="samlDebug" name="samlDebug">
+                    <label class="form-check-label" for="samlDebug">Use Debug Mode</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <hr>
+            <div class="row">
+              <h4>User Attribute Mapping</h4>
+              <p>Used for mapping SAML Attributes to the account information</p>
+              <div class="col-md-6">
+                <div class="form-group">
+                    <label for="attributeUsername">Username Attribute</label>
+                    <input type="text" class="form-control info-field" id="attributeUsername" name="attributeUsername">
+                </div>
+                <div class="form-group">
+                    <label for="attributeFirstName">First Name Attribute</label>
+                    <input type="text" class="form-control info-field" id="attributeFirstName" name="attributeFirstName">
+                </div>
+                <div class="form-group">
+                    <label for="attributeLastName">Last Name Attribute</label>
+                    <input type="text" class="form-control info-field" id="attributeLastName" name="attributeLastName">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                    <label for="attributeEmail">Email Attribute</label>
+                    <input class="form-control info-field" id="attributeEmail" name="attributeEmail">
+                </div>
+                <div class="form-group">
+                    <label for="attributeGroups">Groups Attribute</label>
+                    <input class="form-control info-field" id="attributeGroups" name="attributeGroups">
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 	    </form>
       <br>
-      <button class="btn btn-primary float-right" id="submitConfig">Submit</button>
+      <button class="btn btn-success float-end ms-1" id="submitConfig">Save Configuration</button>&nbsp;
+      <button class="btn btn-primary float-end" onclick="location.reload();">Discard Changes</button>
 	  </div>
   </div>
 </div>
@@ -96,7 +196,7 @@
 <script>
 
   function getConfig() {
-    $.getJSON('/api?function=GetConfig', function(config) {
+    $.getJSON('/api?f=GetConfig', function(config) {
       $("#systemLogFileName").val(config.System.logfilename);
       $("#systemLogDirectory").val(config.System.logdirectory);
       $("#systemLogLevel").val(config.System.loglevel);
@@ -106,13 +206,33 @@
       $("#systemRBACFile").val(config.System.rbacjson);
       $("#systemRBACInfoFile").val(config.System.rbacinfo);
       $("#securitySalt").val(config.Security.salt);
-      $("#securityAdminPW").val(config.Security.AdminPassword);
+      $("#spEntityId").val(config.SAML.sp.entityId);
+      $("#spAcsUrl").val(config.SAML.sp.assertionConsumerService.url);
+      $("#spSloUrl").val(config.SAML.sp.singleLogoutService.url);
+      $("#spX509Cert").val(config.SAML.sp.x509cert);
+      $("#spPrivateKey").val(config.SAML.sp.privateKey);
+      $("#idpEntityId").val(config.SAML.idp.entityId);
+      $("#idpSsoUrl").val(config.SAML.idp.singleSignOnService.url);
+      $("#idpSloUrl").val(config.SAML.idp.singleLogoutService.url);
+      $("#idpX509Cert").text(config.SAML.idp.x509cert);
+      $("#samlEnabled").prop('checked',config.SAML.enabled);
+      $("#samlAutoCreateUsers").prop('checked',config.SAML.AutoCreateUsers);
+      $("#samlStrict").prop('checked',config.SAML.strict);
+      $("#samlDebug").prop('checked',config.SAML.debug);
+      $("#attributeUsername").val(config.SAML.attributes.Username);
+      $("#attributeFirstName").val(config.SAML.attributes.FirstName);
+      $("#attributeLastName").val(config.SAML.attributes.LastName);
+      $("#attributeEmail").val(config.SAML.attributes.Email);
+      $("#attributeGroups").val(config.SAML.attributes.Groups);
     });
   }
 
   getConfig();
 
-  $(".info-field").change(function() {
+  $(".info-field").change(function(elem) {
+    console.log(elem);
+    console.log($(elem.target.previousElementSibling).text());
+    toast("Configuration","",$(elem.target.previousElementSibling).text()+' has changed.<br><small>Save configuration to apply changes.</small>',"warning");
     $(this).addClass("changed");
   });
 
@@ -122,9 +242,14 @@
     var inspectForm = document.querySelector('#configurationForm').getElementsByClassName("changed");
     for ( var i = 0; i < inspectForm.length; i++ ) {
       var e = inspectForm[i];
-      kvpairs[e.name] = encodeURIComponent(e.value);
+      if (inspectForm[i]['type'] == 'checkbox') {
+        console.log('checkbox!');
+        kvpairs[e.name] = encodeURIComponent(e.checked);
+      } else {
+        kvpairs[e.name] = encodeURIComponent(e.value);
+      }
     }
-    $.post( "/api?function=SetConfig", kvpairs).done(function( data, status ) {
+    $.post( "/api?f=SetConfig", kvpairs).done(function( data, status ) {
       if (data != null) {
         toast("Success","","Successfully saved configuration","success");
       } else {

@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
-  if (CheckAccess(null,"B1-LICENSE-USAGE") == false) {
+  if ($ib->auth->checkAccess(null,"B1-LICENSE-USAGE") == false) {
     die();
   }
 ?>
@@ -34,10 +34,10 @@
                 </select>
             </div>
             <div class="col-md-2 ml-md-auto startDate">
-                <input class="dateTimePicker" type="text" id="startDate" placeholder="Start Date/Time">
+                <input type="text" id="startDate" placeholder="Start Date/Time">
             </div>
             <div class="col-md-2 ml-md-auto endDate">
-                <input class="dateTimePicker" type="text" id="endDate" placeholder="End Date/Time">
+                <input type="text" id="endDate" placeholder="End Date/Time">
             </div>
             <div class="col-md-2 ml-md-auto actions">
               <button class="btn btn-success" id="Generate">Get Usage</button>
@@ -124,7 +124,7 @@ $("#Generate").click(function(){
       if ($('#APIKey')[0].value) {
         postArr.APIKey = $('#APIKey')[0].value
       }
-      $.post( "/api?function=createLicenseReport", postArr).done(function( data, status ) {
+      $.post( "/api?f=createLicenseReport", postArr).done(function( data, status ) {
         if (data['Status'] == 'Error') {
           toast(data['Status'],"",data['Error'],"danger","30000");
         } else {

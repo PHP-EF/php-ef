@@ -1,12 +1,12 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and Deploy Production
+name: Build and Deploy Staging
 
 on:
   push:
     branches:
-      - main
+      - stage
   workflow_dispatch:
 
 jobs:
@@ -61,15 +61,15 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_A263BE2A555340A1BC44461708BD2EE4 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E69B37F5734E4E70AB3B356D4BF339F3 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_37CAD37F581C4C37AFFEFCD9F1F6F617 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_088D2B19D89A40BDB25EBAE9EABCAA86 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_BC2FAEFE624548B9BDE74BC5FC1A4D02 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_720AF6B0C4454A148620BE54EC6C3E9A }}
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'ib-sa-report'
+          app-name: 'ib-sa-tools-stage'
           slot-name: 'Production'
           package: .
           

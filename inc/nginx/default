@@ -7,7 +7,8 @@ server {
     index  index.php index.html index.htm;
     server_name  example.com www.example.com;
     port_in_redirect off;
-
+    client_max_body_size 100M;
+    
     rewrite ^/api$ /api/index.php?$query_string;
 
     location / {

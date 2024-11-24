@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
-  if (CheckAccess(null,"B1-THREAT-ACTORS") == false) {
+  if ($ib->auth->checkAccess(null,"B1-THREAT-ACTORS") == false) {
     die();
   }
 ?>
@@ -35,20 +35,37 @@
               </select>
           </div>
           <div class="col-md-2 ml-md-auto startDate">
-              <input class="dateTimePicker" type="text" id="startDate" placeholder="Start Date/Time">
+              <input type="text" id="startDate" placeholder="Start Date/Time">
           </div>
           <div class="col-md-2 ml-md-auto endDate">
-              <input class="dateTimePicker" type="text" id="endDate" placeholder="End Date/Time">
+              <input type="text" id="endDate" placeholder="End Date/Time">
           </div>
           <div class="col-md-2 ml-md-auto actions">
             <button class="btn btn-success" id="Actors">Get Actors</button>
           </div>
       </div>
-      <br>
+      <div class="row">
+        <div class="col-md-6 options">
+          <div class="form-group">
+            <div class="form-check form-switch">
+              <input class="form-check-input info-field" type="checkbox" id="unnamed" name="unnamed">
+              <label class="form-check-label" for="unnamed">Enable Unnamed Actors</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-check form-switch">
+              <input class="form-check-input info-field" type="checkbox" id="substring" name="substring">
+              <label class="form-check-label" for="substring">Enable Substring_* Actors</label>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="alert alert-info genInfo" role="alert">
         <center>It can take up to 2 minutes to generate the list of Threat Actors, please be patient.</center>
       </div>
-      <div class="calendar"></div>
+      <br>
+
+      <div class="loading-div"></div>
           <div class="loading-icon">
           <hr>
           <div class="spinner-border text-primary" role="status">
@@ -62,7 +79,7 @@
 
 
     <div class="modal fade" id="observedIOCModal" tabindex="-1" role="dialog" aria-labelledby="observedIOCModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="observedIOCModalLabel">Observed Indicators</h5>
@@ -109,10 +126,16 @@
     ].join('')
   }
 
+  function dateFormatter(value, row, index) {
+    var d = new Date(value) // The 0 there is the key, which sets the date to the epoch
+    return d.toGMTString();
+  }
+
+  // Workaround
   function populateObservedIOCs(row) {
     $('#threatActorObservedIOCTable').bootstrapTable('destroy');
     $('#threatActorObservedIOCTable').bootstrapTable({
-      data: row['related_indicators_with_dates'],
+      data: row['observed_iocs'],
       sortable: true,
       pagination: true,
       search: true,
@@ -120,24 +143,56 @@
       exportTypes: ['json', 'xml', 'csv', 'txt', 'excel', 'sql'],
       showColumns: true,
       columns: [{
-        field: 'indicator',
+        field: 'ThreatActors.domain',
         title: 'Indicator',
         sortable: true
       },{
-        field: 'te_ik_submitted',
+        field: 'ThreatActors.ikbfirstsubmittedts',
         title: 'Submitted',
-        sortable: true
+        sortable: true,
+        formatter: 'dateFormatter'
       },{
-        field: 'te_customer_last_dns_query',
-        title: 'Last Queried',
-        sortable: true
+        field: 'ThreatActors.lastdetectedts',
+        title: 'Last Detected',
+        sortable: true,
+        formatter: 'dateFormatter'
       },{
-        field: 'vt_first_submission_date',
-        title: 'Virus Total Submitted',
-        sortable: true
+        field: 'ThreatActors.vtfirstdetectedts',
+        title: 'Virus Total Detected',
+        sortable: true,
+        formatter: 'dateFormatter'
       }]
     });
   }
+  // function populateObservedIOCs(row) {
+  //   $('#threatActorObservedIOCTable').bootstrapTable('destroy');
+  //   $('#threatActorObservedIOCTable').bootstrapTable({
+  //     data: row['related_indicators_with_dates'],
+  //     sortable: true,
+  //     pagination: true,
+  //     search: true,
+  //     showExport: true,
+  //     exportTypes: ['json', 'xml', 'csv', 'txt', 'excel', 'sql'],
+  //     showColumns: true,
+  //     columns: [{
+  //       field: 'indicator',
+  //       title: 'Indicator',
+  //       sortable: true
+  //     },{
+  //       field: 'te_ik_submitted',
+  //       title: 'Submitted',
+  //       sortable: true
+  //     },{
+  //       field: 'te_customer_last_dns_query',
+  //       title: 'Last Queried',
+  //       sortable: true
+  //     },{
+  //       field: 'vt_first_submission_date',
+  //       title: 'Virus Total Submitted',
+  //       sortable: true
+  //     }]
+  //   });
+  // }
 
   window.actionEvents = {
     'click .inspect': function (e, value, row, index) {
@@ -170,12 +225,16 @@
     postArr.StartDateTime = startDateTime.toISOString()
     postArr.EndDateTime = endDateTime.toISOString()
     postArr.Realm = $('#Realm').find(":selected").val()
+    postArr.unnamed = $('#unnamed')[0].checked;
+    postArr.substring = $('#substring')[0].checked;
     if ($('#APIKey')[0].value) {
       postArr.APIKey = $('#APIKey')[0].value
     }
-    $.post( "/api?function=getThreatActors", postArr).done(function( data, status ) {
+    $.post( "/api?f=getThreatActors", postArr).done(function( data, status ) {
       if (data['Status'] == 'Error') {
         toast(data['Status'],"",data['Error'],"danger","30000");
+      } else if (data['error']) {
+        toast('Error',"",data['error'][0]['message'],"danger","30000");
       } else {
         $('#threatActorTable').bootstrapTable('destroy');
         $('#threatActorTable').bootstrapTable({
@@ -194,8 +253,14 @@
             field: 'actor_description',
             title: 'Description',
             sortable: true
-          },{
-            field: 'related_indicators_with_dates',
+          },
+          //{
+          //  field: 'related_indicators_with_dates',
+          //  title: 'Observed IOCs',
+          //  formatter: 'iocCountFormatter',
+          //  sortable: true
+          {
+            field: 'observed_iocs',
             title: 'Observed IOCs',
             formatter: 'iocCountFormatter',
             sortable: true

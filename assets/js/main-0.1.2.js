@@ -43,14 +43,6 @@ jQuery(function ($) {
         .addClass("active");
     }
   });
-
-
-  $("#close-sidebar").click(function() {
-    $(".page-wrapper").removeClass("toggled");
-  });
-  $("#show-sidebar").click(function() {
-    $(".page-wrapper").addClass("toggled");
-  });
 });
 
 function searchTable(searchId,tableId) {
@@ -169,10 +161,10 @@ function getCookie(name) {
 async function heartBeat() {
   const delay = ms => new Promise(res => setTimeout(res, ms));
   try {
-    const response = await fetch('/api?function=heartbeat', {cache: "no-cache"});
+    const response = await fetch('/api?f=heartbeat', {cache: "no-cache"});
     if (response.status == "200") {
       while (true) {
-	      let response2 = await fetch('/api?function=heartbeat', {cache: "no-cache"});
+	      let response2 = await fetch('/api?f=heartbeat', {cache: "no-cache"});
         if (response2.status == "301") {
       	  console.log("Session timed out.");
           window.location.href = "/login.php?redirect_uri="+window.location.href.replace("#","?");
@@ -272,6 +264,10 @@ function stringValidate(element, min, max, type) {
 function loadiFrame(element = null) {
   if (element != null) {
     var hashsplit = element.split('#page=');
+    var linkElem = $('a[href="#page='+hashsplit[1]+'"]');
+    console.log(element);
+    $('.toggleFrame').removeClass('active');
+    linkElem.addClass('active');
     if (hashsplit[1].startsWith('prx')) {
       var prxsplit = hashsplit[1].split('prx');
       window.parent.document.getElementById('mainFrame').src = prxsplit[1];
@@ -280,6 +276,24 @@ function loadiFrame(element = null) {
     }
   } else if (window.parent.location.hash) {
     var hashsplit = window.parent.location.hash.split('#page=');
+    // Auto-expand and set navbar to active
+    var linkElem = $('a[href="'+window.parent.location.hash+'"]');
+    linkElem.addClass('active');
+    $('.title-text').text(linkElem.data('pageName'));
+    var doubleParent = $('.toggleFrame.active').parent().parent();
+    if (doubleParent.hasClass('sub-sub-menu')) {
+      if (!doubleParent.parent().parent().hasClass('showMenu')) {
+        doubleParent.parent().parent().addClass('showMenu');
+      }
+      if (!doubleParent.parent().parent().parent().hasClass('showMenu')) {
+          doubleParent.parent().parent().parent().addClass('showMenu');
+      }
+    } else if (doubleParent.hasClass('sub-menu')) {
+      if (!doubleParent.parent().hasClass('showMenu')) {
+        doubleParent.parent().addClass('showMenu');
+      }
+    }
+
     if (hashsplit[1].startsWith('prx')) {
       var prxsplit = hashsplit[1].split('prx');
       window.parent.document.getElementById('mainFrame').src = prxsplit[1];
@@ -292,6 +306,7 @@ function loadiFrame(element = null) {
 $(document).ready(function() {
   $('.toggleFrame').click(function(element) {
     loadiFrame(element.currentTarget.href);
+    $('.title-text').text($(element.currentTarget).data('pageName'));
   });
 });
 
@@ -325,7 +340,7 @@ applyFontSize();
 
 // New Stuff
 function saveAPIKey(key) {
-  $.post( "/api?function=crypt", {key: key}).done(function( data, status ) {
+  $.post( "/api?f=crypt", {key: key}).done(function( data, status ) {
       setCookie('crypt',data,7);
       checkAPIKey();
       toast("Success","","Saved API Key.","success","30000");
@@ -372,13 +387,54 @@ function enableDateTime() {
   });
 }
 
+let seconds = 0;
+
+function startTimer() {
+    let timer;
+    seconds = 0;
+    timer = setInterval(() => {
+        seconds++;
+        if (seconds > 60) {
+          const minutes = Math.floor(seconds / 60);
+          const remainingSeconds = seconds % 60;
+          $('#elapsed').text(`Elapsed: ${minutes}m ${remainingSeconds}s`);
+        } else {
+          $('#elapsed').text(`Elapsed: ${seconds}s`);
+        }
+    }, 1000);
+    return timer;
+}
+
+function stopTimer(timer) {
+    clearInterval(timer);
+    console.log(`Timer stopped at ${seconds} seconds`);
+}
+
+function dateFormatter(value) {
+  const date = new Date(value);
+  return date.toLocaleDateString('en-US'); // Format as MM/DD/YYYY
+}
+
+function datetimeFormatter(value) {
+  const date = new Date(value);
+  return date.toLocaleString('en-GB', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true // Format as MM/DD/YYYY
+  });
+}
+
 // END
 
 document.addEventListener('DOMContentLoaded', function() {
   const maxDaysApart = 30;
   const today = new Date();
   const maxPastDate = new Date(today);
-  maxPastDate.setDate(today.getDate() - maxDaysApart);
+  maxPastDate.setDate(today.getDate() - 45);
 
   flatpickr("#startDate", {
     enableTime: true,
