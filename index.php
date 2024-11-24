@@ -193,7 +193,7 @@
       <div class="profile-name-user ms-auto me-3">
         <?php if ($ib->auth->getAuth()['Authenticated']) { echo '
         <div class="dropdown">
-          <button class="dropbtn">Mat Cox
+          <button class="dropbtn">'; echo $ib->auth->getAuth()['Username']. '
             <i class="bx bxs-chevron-down arrow" ></i>
           </button>
           <div class="dropdown-content">
@@ -391,19 +391,32 @@
                 <div id="resetPassword" class="accordion-collapse collapse" aria-labelledby="resetPasswordHeading" data-bs-parent="#resetPasswordAccordion">
                   <div class="accordion-body">
                     <div class="card-body">
+                      <?php if ($ib->auth->getAuth()['Type'] == 'SSO') { echo '
+                        <div class="alert alert-warning" role="alert">
+                        <center>You must reset your password via the Single Sign On provider.</center>
+                        </div>';}
+                      ?>
                       <div class="form-group">
                         <label for="userPassword">Password</label>
                         <i class="fa fa-info-circle hover-target" aria-hidden="true"></i>
-                        <input type="password" class="form-control" id="userPassword" aria-describedby="userPasswordHelp">
+                        <input type="password" class="form-control" id="userPassword" aria-describedby="userPasswordHelp" <?php if ($ib->auth->getAuth()['Type'] == 'SSO') { echo 'disabled'; } ?> >
                         <small id="userPasswordHelp" class="form-text text-muted">Enter the updated password.</small>
                       </div>
                       <div class="form-group">
                         <label for="userPassword2">Verify Password</label>
-                        <input type="password" class="form-control" id="userPassword2" aria-describedby="userPassword2Help">
+                        <input type="password" class="form-control" id="userPassword2" aria-describedby="userPassword2Help" <?php if ($ib->auth->getAuth()['Type'] == 'SSO') { echo 'disabled'; } ?> >
                         <small id="userPassword2Help" class="form-text text-muted">Enter the updated password again.</small>
                       </div>
+                      <div id="popover" class="popover" role="alert">
+                        <h4 class="alert-heading">Password Complexity</h4>
+                        <p>Minimum of 8 characters</p>
+                        <p>At least one uppercase letter</p>
+                        <p>At least one lowercase letter</p>
+                        <p>At least one number</p>
+                        <p>At least one special character</p>
+                      </div>
                       <hr>
-                      <button type="button" class="btn btn-success" data-bs-dismiss="modal">Save</button>
+                      <button type="button" class="btn btn-success" id="resetPasswordBtn">Save</button>
                     </div>
                   </div>
                 </div>
@@ -441,51 +454,6 @@
     });
   }
 
-  var cookie = getCookie('theme');
-  let toggle = document.getElementById('themeToggle');
-  if (cookie == "dark") {
-    toggle.className = 'fa-regular fa-lightbulb toggleon toggler';
-  } else {
-    toggle.className = 'fa-solid fa-lightbulb toggleoff toggler';
-  }
-
-
-  $('.toggleThemeBtn').on('click', function () {
-    $('.toggler').toggleClass('fas far toggleoff toggleon');
-    if ($('.toggler').hasClass("toggleon")) {
-      setCookie('theme','dark',365);
-      location.reload();
-    } else {
-      setCookie('theme','light',365);
-      location.reload();
-    };
-  });
-
-  $('.infoBtn').on('click', function() {
-    $('#infoModal').modal('show');
-    $.getJSON('/api?f=whoami', function(whoami) {
-      if (whoami.Groups != null) {whoami.Groups = whoami.Groups};
-      if (whoami.headers.Cookie != null) {whoami.headers.Cookie = whoami.headers.Cookie.split('; ')};
-      $('#whoami').text(JSON.stringify(whoami, null, 2));
-    });
-  });
-
-  $('.profile').on('click', function() {
-    $('#profileModal').modal('show');
-    $.getJSON('/api?f=whoami', function(whoami) {
-      $('#userUsername').val(whoami.Username);
-      $('#userFirstname').val(whoami.Firstname);
-      $('#userSurname').val(whoami.Surname);
-      $('#userEmail').val(whoami.Email);
-    });
-  });
-
-  $('.toggleFontSizeBtn, #fontDropdown-content').hover(function() {
-    $('#fontDropdown').toggleClass('show');
-  },function() {
-    $('#fontDropdown').toggleClass('show');
-  });
-
   function setFontSize(fontsize) {
     console.log(fontsize);
     $('html').css('font-size',fontsize);
@@ -493,16 +461,133 @@
     location.reload();
   }
 
-  $('.preventDefault').click(function(event){
-    event.preventDefault();
-  });
+  $(document).ready(function() {
+    $('.hover-target').hover(
+      function() {
+          $('.popover').css({
+              display: 'block',
+          });
+      },
+      function() {
+          $('.popover').hide();
+      }
+    );
 
-  $('.icon-link').on('click',function(elem) {
-    $(elem.currentTarget).parent().toggleClass('showMenu')
-  });
-  let sidebar = document.querySelector(".sidebar");
-  let sidebarBtn = document.querySelector(".bx-menu");
-  sidebarBtn.addEventListener("click", ()=>{
-    sidebar.classList.toggle("close");
+    var cookie = getCookie('theme');
+    let toggle = document.getElementById('themeToggle');
+    if (cookie == "dark") {
+      toggle.className = 'fa-regular fa-lightbulb toggleon toggler';
+    } else {
+      toggle.className = 'fa-solid fa-lightbulb toggleoff toggler';
+    }
+
+
+    $('.toggleThemeBtn').on('click', function () {
+      $('.toggler').toggleClass('fas far toggleoff toggleon');
+      if ($('.toggler').hasClass("toggleon")) {
+        setCookie('theme','dark',365);
+        location.reload();
+      } else {
+        setCookie('theme','light',365);
+        location.reload();
+      };
+    });
+
+    $('.infoBtn').on('click', function() {
+      $('#infoModal').modal('show');
+      $.getJSON('/api?f=whoami', function(whoami) {
+        if (whoami.Groups != null) {whoami.Groups = whoami.Groups};
+        if (whoami.headers.Cookie != null) {whoami.headers.Cookie = whoami.headers.Cookie.split('; ')};
+        $('#whoami').text(JSON.stringify(whoami, null, 2));
+      });
+    });
+
+    $('.profile').on('click', function() {
+      $('#profileModal').modal('show');
+      $.getJSON('/api?f=whoami', function(whoami) {
+        $('#userUsername').val(whoami.Username);
+        $('#userFirstname').val(whoami.Firstname);
+        $('#userSurname').val(whoami.Surname);
+        $('#userEmail').val(whoami.Email);
+      });
+    });
+
+    $('.toggleFontSizeBtn, #fontDropdown-content').hover(function() {
+      $('#fontDropdown').toggleClass('show');
+    },function() {
+      $('#fontDropdown').toggleClass('show');
+    });
+
+    $('.preventDefault').click(function(event){
+      event.preventDefault();
+    });
+
+    $('.icon-link').on('click',function(elem) {
+      $(elem.currentTarget).parent().toggleClass('showMenu')
+    });
+    let sidebar = document.querySelector(".sidebar");
+    let sidebarBtn = document.querySelector(".bx-menu");
+    sidebarBtn.addEventListener("click", ()=>{
+      sidebar.classList.toggle("close");
+    });
+
+    $('#userPassword, #userPassword2').on('change', function() {
+      var password = $('#userPassword').val();
+      var confirmPassword = $('#userPassword2').val();
+      
+      if (password !== confirmPassword) {
+        if (password !== "" && confirmPassword !== "") {
+          toast("Warning","","The entered passwords do not match","danger","3000");
+          $('#resetPasswordBtn').attr('disabled',true);
+          $('#userPassword').css('color','red').css('border-color','red');
+          $('#userPassword2').css('color','red').css('border-color','red');
+        }
+      } else {
+        $('#resetPasswordBtn').attr('disabled',false);
+        $('#userPassword').css('color','green').css('border-color','green');
+        $('#userPassword2').css('color','green').css('border-color','green');
+      }
+    });
+
+    $('#resetPasswordBtn').on('click', function(event) {
+      // Prevent the default form submission
+      event.preventDefault();
+      isValid = true;
+
+      // Get values from the input fields
+      var password = $('#userPassword').val().trim();
+      var confirmPassword = $('#userPassword2').val().trim();
+
+      // Check if all fields are populated
+      if (!password || !confirmPassword) {
+        toast("Error","","Both the password and confirmation password are required","danger","30000");
+        isValid = false;
+      }
+
+      // Check if passwords match
+      if (password !== confirmPassword) {
+        toast("Error","","Passwords do not match","danger","30000");
+        isValid = false;
+      }
+
+      // Display error messages or proceed with form submission
+      if (isValid) {
+        var postArr = {}
+        postArr.pw = password;
+        $.post( "/api?f=passwordReset", postArr).done(function( data, status ) {
+          if (data['Status'] == 'Success') {
+            toast(data['Status'],"",data['Message'],"success");
+            populateUsers();
+            $('#profileModal').modal('hide');
+          } else if (data['Status'] == 'Error') {
+            toast(data['Status'],"",data['Message'],"danger","30000");
+          } else {
+            toast("Error","","Failed to reset password","danger","30000");
+          }
+        }).fail(function( data, status ) {
+            toast("API Error","","Failed to reset password","danger","30000");
+        })
+      }
+    });
   });
 </script>

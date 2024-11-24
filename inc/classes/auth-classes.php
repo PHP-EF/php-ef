@@ -15,7 +15,7 @@ class CoreJwt {
     }
 
     // Generate a JWT
-    public function generateToken($UN,$FN,$SN,$EM,$Groups) {
+    public function generateToken($UN,$FN,$SN,$EM,$Groups,$Type) {
         $payload = [
           'iat' => time(), // Issued at
           'exp' => time() + (86400 * 30), // Expiration time (30 days)
@@ -24,7 +24,8 @@ class CoreJwt {
           'surname' => $SN,
           'email' => $EM,
           'fullname' => $FN.' '.$SN,
-          'groups' => $Groups
+          'groups' => $Groups,
+          'type' => $Type
         ];
         $this->logging->writeLog("Authentication","Issued JWT token","debug",$payload);
         return JWT::encode($payload, $this->config->getConfig()['Security']['salt'], 'HS256');
@@ -199,7 +200,7 @@ class Auth {
     if ($AllColumns) {
       $stmt = $this->db->prepare("SELECT * FROM users WHERE id = :id");
     } else {
-      $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires FROM users WHERE id = :id");
+      $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires, type FROM users WHERE id = :id");
     }
     $stmt->execute([':id' => $id]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -214,7 +215,7 @@ class Auth {
     if ($AllColumns) {
       $stmt = $this->db->prepare("SELECT * FROM users WHERE username = :username");
     } else {
-      $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires FROM users WHERE username = :username");
+      $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires, type FROM users WHERE username = :username");
     }
     $stmt->execute([':username' => $username]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -229,7 +230,7 @@ class Auth {
     if ($AllColumns) {
       $stmt = $this->db->prepare("SELECT * FROM users WHERE username = :username OR email = :email");
     } else {
-      $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires FROM users WHERE username = :username OR email = :email");
+      $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires, type FROM users WHERE username = :username OR email = :email");
     }
     $stmt->execute([':username' => $username,':email' => $email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -324,6 +325,60 @@ class Auth {
     }
   }
 
+  public function passwordReset($password) {
+    if ($this->getAuth()['Authenticated']) {
+      $CurrentAuth = $this->getAuth();
+      $CurrentUser = $this->getUserByUsername($CurrentAuth['Username']);
+      if (isset($CurrentUser['username'])) {
+        if ($CurrentUser['type'] != 'SSO') {
+          if ($this->isPasswordComplex($password)) {
+            // Hash the password for security
+            $pepper = $this->hashAndSalt($password);
+  
+            $currentDateTime = date('Y-m-d H:i:s');
+            $passwordExpiryDate = new DateTime();
+            $passwordExpiryDate->modify('+90 days');
+            $passwordExpires = $passwordExpiryDate->format('Y-m-d H:i:s');
+  
+            try {
+              $stmt = $this->db->prepare("UPDATE users SET passwordexpires = :passwordexpires, password = :password, salt = :salt WHERE id = :id");
+              $stmt->execute([':id' => $CurrentUser['id'], ':password' => $pepper['hash'], ':salt' => $pepper['salt'], ':passwordexpires' => $passwordExpires]);
+              return array(
+                'Status' => 'Success',
+                'Message' => 'Password reset successfully'
+              );
+            } catch (PDOException $e) {
+              return array(
+                  'Status' => 'Error',
+                  'Message' => $e
+              );
+            }
+          } else {
+            return array(
+              'Status' => 'Error',
+              'Message' => 'New password does not meet the complexity requirements'
+            );
+          }
+        } else {
+          return array(
+            'Status' => 'Error',
+            'Message' => 'Cannot reset password for SSO Account'
+          );
+        }
+      } else {
+        return array(
+          'Status' => 'Error',
+          'Message' => 'Failed to retrieve user information'
+        );
+      }
+    } else {
+      return array(
+        'Status' => 'Error',
+        'Message' => 'Not Authenticated'
+      );
+    }
+  }
+
   public function getAllUsers() {
     $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires, type FROM users");
     $stmt->execute();
@@ -367,7 +422,7 @@ class Auth {
       $this->updateLastLogin($user['id']);
 
       // Generate JWT token
-      $jwt = $this->CoreJwt->generateToken($user['username'],$user['firstname'],$user['surname'],$user['email'],explode(',',$user['groups']));
+      $jwt = $this->CoreJwt->generateToken($user['username'],$user['firstname'],$user['surname'],$user['email'],explode(',',$user['groups']),$user['type']);
       // Set JWT as a cookie
       setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
 
@@ -509,11 +564,12 @@ class Auth {
               'FirstName' => $userinfo['firstname'],
               'LastName' => $userinfo['surname'],
               'Email' => $userinfo['email'],
-              'Groups' => explode(',',$userinfo['groups'])
+              'Groups' => explode(',',$userinfo['groups']),
+              'Type' => $userinfo['type']
             );
 
             // Generate JWT token
-            $jwt = $this->CoreJwt->generateToken($LoginArr['Username'],$LoginArr['FirstName'],$LoginArr['LastName'],$LoginArr['Email'],$LoginArr['Groups']);
+            $jwt = $this->CoreJwt->generateToken($LoginArr['Username'],$LoginArr['FirstName'],$LoginArr['LastName'],$LoginArr['Email'],$LoginArr['Groups'],$LoginArr['Type']);
             // Set JWT as a cookie
             setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
             // Redirect
@@ -626,11 +682,11 @@ class Auth {
             'everyone'
           ];
         }
-  
-        if (isset($decodedJWT->email)) {
-          $Email = $decodedJWT->email;
+
+        if (isset($decodedJWT->type)) {
+          $Type = $decodedJWT->type;
         } else {
-          $Email = null;
+          $Type = null;
         }
   
         $AuthResult = array(
@@ -641,7 +697,8 @@ class Auth {
           'Email' => $Email,
           'DisplayName' => $FullName,
           'IPAddress' => $IPAddress,
-          'Groups' => $Groups
+          'Groups' => $Groups,
+          'Type' => $Type
         );
       } else {
         $AuthResult = array(

@@ -208,6 +208,18 @@ if (!($_REQUEST['f'])) {
                 echo json_encode($AuthContent,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
             }
             break;
+        case 'passwordReset':
+            if ($method = checkRequestMethod('POST')) {
+                if (isset($_REQUEST['pw'])) {
+                    echo json_encode($ib->auth->passwordReset($_POST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                } else {
+                    echo json_encode(array(
+                        'Status' => 'Error',
+                        'Message' => 'New password missing from request'
+                    ));
+                }
+            }
+            break;
         case 'CheckAccess':
             if (isset($_REQUEST['node']) && $ib->auth->getAuth()['Authenticated'] == true) {
                 $Result = array(

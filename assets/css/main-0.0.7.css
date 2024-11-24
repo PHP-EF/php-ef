@@ -112,6 +112,9 @@ body.dark-theme .accordion-body {
   background: #474a50;
   color: #FFF;
 }
+body.dark-theme .popover {
+background-color: #2b2e34;
+}
 /* Light Mode */
 body.light-theme .bootstrap-table .fixed-table-container .fixed-table-body .fixed-table-loading.table.table-bordered.table-hover.open {
   background: #f8f8f6;
@@ -202,6 +205,19 @@ p.pNoMargin {
   left: 0;
   transition: left 0.3s;
   visibility: hidden;
+}
+
+/* Popover */
+body .popover {
+  display: none;
+  position: absolute;
+  background-color: #f8f9fa;
+  border: 1px solid #007bff;
+  padding: 10px;
+  border-radius: 5px;
+  z-index: 1000;
+  width: 300px; /* Adjust as needed */
+  top: 35%;
 }
 
 /* Show */

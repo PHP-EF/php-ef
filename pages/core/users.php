@@ -5,24 +5,6 @@
   }
 ?>
 
-<style>
-.popover {
-    display: none;
-    position: absolute;
-    background-color: #f8f9fa;
-    border: 1px solid #007bff;
-    padding: 10px;
-    border-radius: 5px;
-    z-index: 1000;
-    width: 300px; /* Adjust as needed */
-    top: 35%;
-}
-
-body.dark-theme .popover {
-  background-color: #2b2e34;
-}
-</style>
-
 <div class="container">
   <div class="row justify-content-center">
     <div class="col-12 col-lg-12 mx-auto">
@@ -416,18 +398,7 @@ body.dark-theme .popover {
           title: "Add a new user to the Infoblox SA Tools Portal",
           style: "background-color:#4bbe40;border-color:#4bbe40;"
         }
-	    }//,
-      // btnBulkDelete: {
-      //   text: "Bulk Delete",
-      //   icon: "bi bi-trash",
-      //   event: function() {
-      //     bulkDelete();
-      //   },
-      //   attributes: {
-      //     title: "Delete one or more users from the Infoblox SA Tools Portal.",
-      //     style: "background-color:#ff3c4e;border-color:#ff3c4e;"
-      //   }
-      // }
+	    }
     }
   }
 
@@ -546,30 +517,38 @@ body.dark-theme .popover {
       groupinfo = groupres;
       populateUsers();
     });
-    $('#newUserPassword2').on('change', function() {
+    $('#newUserPassword, #newUserPassword2').on('change', function() {
       var password = $('#newUserPassword').val();
-      var confirmPassword = $(this).val();
+      var confirmPassword = $('#newUserPassword2').val();
       
       if (password !== confirmPassword) {
-        toast("Warning","","The entered passwords do not match","danger","30000");
-        $('#newUserSubmit').attr('disabled',true);
-        $(this).css('color','red').css('border-color','red');
+        if (password !== "" && confirmPassword !== "") {
+          toast("Warning","","The entered passwords do not match","danger","3000");
+          $('#newUserSubmit').attr('disabled',true);
+          $('#newUserPassword').css('color','red').css('border-color','red');
+          $('#newUserPassword2').css('color','red').css('border-color','red');
+        }
       } else {
         $('#newUserSubmit').attr('disabled',false);
-        $(this).css('color','green');
+        $('#newUserPassword').css('color','green').css('border-color','green');
+        $('#newUserPassword2').css('color','green').css('border-color','green');
       }
     });
-    $('#editUserPassword2').on('change', function() {
+    $('#editUserPassword, #editUserPassword2').on('change', function() {
       var password = $('#editUserPassword').val();
-      var confirmPassword = $(this).val();
+      var confirmPassword = $('#editUserPassword2').val();
       
       if (password !== confirmPassword) {
-        toast("Warning","","The entered passwords do not match","danger","30000");
-        $('#editUserSubmit').attr('disabled',true);
-        $(this).css('color','red').css('border-color','red');
+        if (password !== "" && confirmPassword !== "") {
+          toast("Warning","","The entered passwords do not match","danger","3000");
+          $('#editUserSubmit').attr('disabled',true);
+          $('#editUserPassword').css('color','red').css('border-color','red');
+          $('#editUserPassword2').css('color','red').css('border-color','red');
+        }
       } else {
-        $('#editUserSubmit').attr('disabled',false);
-        $(this).css('color','green');
+        $('#newUserSubmit').attr('disabled',false);
+        $('#editUserPassword').css('color','green').css('border-color','green');
+        $('#editUserPassword2').css('color','green').css('border-color','green');
       }
     });
   });
