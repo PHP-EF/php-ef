@@ -714,8 +714,15 @@ if (!($_REQUEST['f'])) {
                     if (isset($_GET['request']) && isset($_GET['domain'])) {
 
                         $domain = $_GET['domain'];
+                        if ($domain == '.') {
+                            echo json_encode(array(
+                                'Status' => 'Error',
+                                'Message' => 'Domain Name or IP missing from request'
+                            ));
+                            break;
+                        }
                         if ($_GET['request'] != 'port') {
-                            if (!isset($_GET['source'])) {
+                            if (!isset($_GET['source']) || $_GET['source'] == 'null') {
                                 echo json_encode(array(
                                     'Status' => 'Error',
                                     'Message' => 'DNS Server missing from request'
@@ -770,6 +777,9 @@ if (!($_REQUEST['f'])) {
                                 break;
                             case 'soa':
                                 echo json_encode($DNSToolbox->soa($domain,$sourceserver));
+                                break;
+                            case 'reverse':
+                                echo json_encode($DNSToolbox->reverse($domain,$sourceserver));
                                 break;
                             default:
                                 echo json_encode(array(
