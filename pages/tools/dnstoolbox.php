@@ -52,7 +52,7 @@ if ($ib->auth->checkAccess(null,"DNS-TOOLBOX") == false) {
                       <option value="port">Check If Port Open</option>
                      <!-- <option value="hinfo">Hinfo/Get Hardware Information</option> -->
                       <option value="all">Query All DNS Records</option>
-                      <!-- <option value="reverseLookup">IP/Reverse DNS Lookup</option> -->
+                      <option value="reverse">IP/Reverse DNS Lookup</option>
                       <option value="nameserverLookup">Query Authoritative Nameservers</option>
                       <option value="soa">Query Start of Authority (SOA)</option>
                     </select>

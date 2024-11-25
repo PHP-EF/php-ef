@@ -1,3 +1,6 @@
+## v0.5.2
+- Add Reverse Lookup to DNS Toolbox
+
 ## v0.5.1
 - More UI Updates
 - Move DNS Toolbox to native class and fix some minor bugs

@@ -66,10 +66,16 @@ class DNSToolbox {
 
     public function reverse($ip,$source) {
         if((bool)ip2long($ip)){
-            $response = gethostbyaddr($ip);  
-            return '[{"'.$ip.'": "'.$response.'"}]';
+            $response = gethostbyaddr($ip);
+            return [array(
+                'ip' => $ip,
+                'hostname' => $response
+            )];
         } else {
-            return '[{"error": "Please enter a valid IP"}]';
+            return array(
+                'Status' => 'Error',
+                'Message' => 'Invalid IP Address'
+            );
         }
     }
 
@@ -95,7 +101,3 @@ class DNSToolbox {
         return $portList;
     }
 }
-
-class Port {
-
-  }
