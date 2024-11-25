@@ -1,3 +1,7 @@
+## v0.5.1
+- More UI Updates
+- Move DNS Toolbox to native class and fix some minor bugs
+
 ## v0.5.0
 - Threat Actor slides are now automated when using the security assessment generator, with one slide created for each threat actor found.
 - Add additional error checking when Infoblox APIs timeout
