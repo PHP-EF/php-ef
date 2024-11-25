@@ -5,111 +5,134 @@
   }
 ?>
 
-<!doctype html>
-<html lang="en">
-<head>
-	<meta charset="utf-8" />
-	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-
-	<title>Threat Actors</title>
-
-	<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
-  <meta name="viewport" content="width=device-width" />
-</head>
-<body>
-
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-12 col-lg-12 col-xl-12 mx-auto">
-      <h2 class="h3 mb-4 page-title">Threat Actors</h2>
-
-      <div class="row justify-content-md-center toolsMenu">
-          <div class="col-md-4 ml-md-auto apiKey">
-              <input onkeyup="checkInput(this.value)" id="APIKey" type="password" placeholder="Enter API Key" required>
-              <i class="fas fa-save saveBtn" id="saveBtn"></i>
-          </div>
-          <div class="col-md-2 ml-md-auto realm">
-              <select id="Realm" class="form-select" aria-label="Realm Selection">
-                  <option value="US" selected>US Realm</option>
-                  <option value="EU">EU Realm</option>
-              </select>
-          </div>
-          <div class="col-md-2 ml-md-auto startDate">
-              <input type="text" id="startDate" placeholder="Start Date/Time">
-          </div>
-          <div class="col-md-2 ml-md-auto endDate">
-              <input type="text" id="endDate" placeholder="End Date/Time">
-          </div>
-          <div class="col-md-2 ml-md-auto actions">
-            <button class="btn btn-success" id="Actors">Get Actors</button>
-          </div>
+<section class="section">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <center>
+            <h4>Threat Actor Query</h4>
+            <p>You can use this tool to perform queries on Threat Actors found in a particular Infoblox Portal account.</p>
+          </center>
+        </div>
       </div>
-      <div class="row">
-        <div class="col-md-6 options">
-          <div class="form-group">
-            <div class="form-check form-switch">
-              <input class="form-check-input info-field" type="checkbox" id="unnamed" name="unnamed">
-              <label class="form-check-label" for="unnamed">Enable Unnamed Actors</label>
-            </div>
-          </div>
-          <div class="form-group">
-            <div class="form-check form-switch">
-              <input class="form-check-input info-field" type="checkbox" id="substring" name="substring">
-              <label class="form-check-label" for="substring">Enable Substring_* Actors</label>
+    </div>
+  </div>
+  <br>
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="container">
+            <div class="row justify-content-center">
+              <div class="col-12 col-lg-12 col-xl-12 mx-auto">
+                <div class="row justify-content-md-center toolsMenu">
+                    <div class="col-md-4 ml-md-auto apiKey">
+                        <input onkeyup="checkInput(this.value)" id="APIKey" type="password" placeholder="Enter API Key" required>
+                        <i class="fas fa-save saveBtn" id="saveBtn"></i>
+                    </div>
+                    <div class="col-md-2 ml-md-auto realm">
+                        <select id="Realm" class="form-select" aria-label="Realm Selection">
+                            <option value="US" selected>US Realm</option>
+                            <option value="EU">EU Realm</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 ml-md-auto startDate">
+                        <input type="text" id="startDate" placeholder="Start Date/Time">
+                    </div>
+                    <div class="col-md-2 ml-md-auto endDate">
+                        <input type="text" id="endDate" placeholder="End Date/Time">
+                    </div>
+                    <div class="col-md-2 ml-md-auto actions">
+                      <button class="btn btn-success" id="Actors">Get Actors</button>
+                    </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 options">
+                    <div class="form-group">
+                      <div class="form-check form-switch">
+                        <input class="form-check-input info-field" type="checkbox" id="unnamed" name="unnamed">
+                        <label class="form-check-label" for="unnamed">Enable Unnamed Actors</label>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="form-check form-switch">
+                        <input class="form-check-input info-field" type="checkbox" id="substring" name="substring">
+                        <label class="form-check-label" for="substring">Enable Substring_* Actors</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <br>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="alert alert-info genInfo" role="alert">
-        <center>It can take up to 2 minutes to generate the list of Threat Actors, please be patient.</center>
-      </div>
-      <br>
-
-      <div class="loading-div"></div>
-          <div class="loading-icon">
-          <hr>
-          <div class="spinner-border text-primary" role="status">
-              <span class="sr-only">Loading...</span>
-          </div>
-      </div>
-      <table id="threatActorTable" class="table table-striped rounded"></table>
-	  </div>
+    </div>
   </div>
-</div>
+  <br>
+  <div class="row loading-div">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="loading-icon">
+            <div class="alert alert-info genInfo" role="alert">
+              <center>It can take up to 2 minutes to generate the list of Threat Actors, please be patient.</center>
+            </div>
+            <hr>
+            <div class="progress">
+              <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+            </div>
+            <br>
+            <div id="spinner-container">
+              <div class="spinner-bounce">
+                <div class="spinner-child spinner-bounce1"></div>
+                <div class="spinner-child spinner-bounce2"></div>
+                <div class="spinner-child spinner-bounce3"></div>
+              </div>
+            </div>
+            <small id="elapsed"></small>
+          </div>
+          <table id="threatActorTable" class="table table-striped rounded"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-
-    <div class="modal fade" id="observedIOCModal" tabindex="-1" role="dialog" aria-labelledby="observedIOCModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="observedIOCModalLabel">Observed Indicators</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true"></span>
-                    </button>
-                </div>
-                <div class="modal-body" id="observedIOCModalBody">
-                    <table id="threatActorObservedIOCTable" class="table table-striped rounded"></table>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
+<!-- Observed IOC Modal -->
+<div class="modal fade" id="observedIOCModal" tabindex="-1" role="dialog" aria-labelledby="observedIOCModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="observedIOCModalLabel">Observed Indicators</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="modal-body" id="observedIOCModalBody">
+                <table id="threatActorObservedIOCTable" class="table table-striped rounded"></table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
 
-</body>
-
-</html>
-
 <script>
-  function showLoading() {
-    document.querySelector('.loading-icon').style.display = 'block';
+  function showLoading(timer) {
     $("#GetActors").prop('disabled', true)
+    document.querySelector('.loading-icon').style.display = 'block';
+    document.querySelector('.loading-div').style.display = 'block';
   }
-  function hideLoading() {
-    document.querySelector('.loading-icon').style.display = 'none';
+
+  function hideLoading(timer) {
     $("#GetActors").prop('disabled', false)
+    document.querySelector('.loading-icon').style.display = 'none';
+    $('#progress-bar').css('width', '0%').attr('aria-valuenow', 0).text('0%');
+    stopTimer(timer);
   }
 
   function iocCountFormatter(value, row, index) {
@@ -218,7 +241,8 @@
         return null;
     }
 
-    showLoading();
+    let timer = startTimer();
+    showLoading(timer);
     const startDateTime = new Date($('#startDate')[0].value)
     const endDateTime = new Date($('#endDate')[0].value)
     var postArr = {}
@@ -233,8 +257,10 @@
     $.post( "/api?f=getThreatActors", postArr).done(function( data, status ) {
       if (data['Status'] == 'Error') {
         toast(data['Status'],"",data['Error'],"danger","30000");
+        hideLoading(timer);
       } else if (data['error']) {
         toast('Error',"",data['error'][0]['message'],"danger","30000");
+        hideLoading(timer);
       } else {
         $('#threatActorTable').bootstrapTable('destroy');
         $('#threatActorTable').bootstrapTable({
@@ -278,13 +304,13 @@
             events: 'actionEvents',
           }]
         });
-        hideLoading();
+        hideLoading(timer);
         return false;
       }
     }).fail(function( data, status ) {
-        toast("API Error","","Unknown API Error","danger","30000");
+      toast("API Error","","Unknown API Error","danger","30000");
     }).always(function() {
-        hideLoading()
-    });;
+      hideLoading(timer);
+    });
   });
 </script>

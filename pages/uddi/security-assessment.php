@@ -5,126 +5,106 @@
   }
 ?>
 
-<!doctype html>
-<html lang="en">
-<head>
-	<meta charset="utf-8" />
-	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-
-	<title>Security Assessment Report Generator</title>
-
-	<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
-  <meta name="viewport" content="width=device-width" />
-</head>
-<body>
-
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-12 col-lg-12 col-xl-12 mx-auto">
-      <h2 class="h3 mb-4 page-title">Security Assessment Report Generator</h2>
-
-      <div class="row justify-content-md-center toolsMenu">
-          <div class="col-md-4 ml-md-auto apiKey">
-              <input onkeyup="checkInput(this.value)" id="APIKey" type="password" placeholder="Enter API Key" required>
-              <i class="fas fa-save saveBtn" id="saveBtn"></i>
-          </div>
-          <div class="col-md-2 ml-md-auto realm">
-              <select id="Realm" class="form-select" aria-label="Realm Selection">
-                  <option value="US" selected>US Realm</option>
-                  <option value="EU">EU Realm</option>
-              </select>
-          </div>
-          <div class="col-md-2 ml-md-auto startDate">
-              <input type="text" id="startDate" placeholder="Start Date/Time">
-          </div>
-          <div class="col-md-2 ml-md-auto endDate">
-              <input type="text" id="endDate" placeholder="End Date/Time">
-          </div>
-          <div class="col-md-2 ml-md-auto actions">
-            <button class="btn btn-success" id="Generate">Generate</button>
-          </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6 options">
-          <div class="form-group">
-            <div class="form-check form-switch">
-              <input class="form-check-input info-field" type="checkbox" id="unnamed" name="unnamed">
-              <label class="form-check-label" for="unnamed">Enable Unnamed Actors</label>
-            </div>
-          </div>
-          <div class="form-group">
-            <div class="form-check form-switch">
-              <input class="form-check-input info-field" type="checkbox" id="substring" name="substring">
-              <label class="form-check-label" for="substring">Enable Substring_* Actors</label>
-            </div>
-          </div>
+<section class="section">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <center>
+            <h4>Security Assessment Report Generator</h4>
+            <p>You can use this tool to generate Security Assessment Reports for Infoblox Portal accounts.</p>
+          </center>
         </div>
       </div>
-      <br>
-      <div class="alert alert-info genInfo" role="alert">
-        <center>It can take up to 5 minutes to generate the report, please be patient.</center>
-      </div>
-      <div class="loading-div"></div>
-        <div class="loading-icon">
-          <hr>
-          <div class="progress">
-            <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-          </div>
-          <br>
-          <div id="spinner-container">
-            <div class="spinner-grow text-warning" role="status">
-              <span class="visually-hidden">Loading...</span>
-            </div>
-            <div class="spinner-grow text-success" role="status">
-              <span class="visually-hidden">Loading...</span>
-            </div>
-            <div class="spinner-grow text-info" role="status">
-              <span class="visually-hidden">Loading...</span>
-            </div>
-          </div>
-          <p class="progressAction" id="progressAction"></p>
-          <small id="elapsed"></small>
-        </div>
-      </div>
-	  </div>
+    </div>
   </div>
-</div>
-</body>
+  <br>
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="container">
+            <div class="row justify-content-center">
+              <div class="col-12 col-lg-12 col-xl-12 mx-auto">
+                <div class="row justify-content-md-center toolsMenu">
+                    <div class="col-md-4 ml-md-auto apiKey">
+                        <input onkeyup="checkInput(this.value)" id="APIKey" type="password" placeholder="Enter API Key" required>
+                        <i class="fas fa-save saveBtn" id="saveBtn"></i>
+                    </div>
+                    <div class="col-md-2 ml-md-auto realm">
+                        <select id="Realm" class="form-select" aria-label="Realm Selection">
+                            <option value="US" selected>US Realm</option>
+                            <option value="EU">EU Realm</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 ml-md-auto startDate">
+                        <input type="text" id="startDate" placeholder="Start Date/Time">
+                    </div>
+                    <div class="col-md-2 ml-md-auto endDate">
+                        <input type="text" id="endDate" placeholder="End Date/Time">
+                    </div>
+                    <div class="col-md-2 ml-md-auto actions">
+                      <button class="btn btn-success" id="Generate">Generate</button>
+                    </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 options">
+                    <div class="form-group">
+                      <div class="form-check form-switch">
+                        <input class="form-check-input info-field" type="checkbox" id="unnamed" name="unnamed">
+                        <label class="form-check-label" for="unnamed">Enable Unnamed Actors</label>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="form-check form-switch">
+                        <input class="form-check-input info-field" type="checkbox" id="substring" name="substring">
+                        <label class="form-check-label" for="substring">Enable Substring_* Actors</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <br>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <br>
+  <div class="row loading-div">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="loading-icon">
+            <br>
+            <div class="alert alert-info genInfo" role="alert">
+              <center>It can take up to 3 minutes to generate the report, please be patient.</center>
+            </div>
+            <hr>
+            <div class="progress">
+              <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+            </div>
+            <br>
+            <div id="spinner-container">
+              <div class="spinner-bounce">
+                <div class="spinner-child spinner-bounce1"></div>
+                <div class="spinner-child spinner-bounce2"></div>
+                <div class="spinner-child spinner-bounce3"></div>
+              </div>
+            </div>
+            <p class="progressAction" id="progressAction"></p>
+            <small id="elapsed"></small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-</html>
 
 <script>
 let haltProgress = false;
-
-const spinners = document.querySelectorAll('.spinner-grow');
-
-function showSpinners() {
-  // Show spinners one by one
-  spinners.forEach((spinner, i) => {
-    setTimeout(() => {
-      spinner.style.display = 'inline-block'; // Show spinner
-    }, i * 1000); // Delay of 1 second for each spinner
-  });
-
-  // Hide spinners in the same order
-  setTimeout(() => {
-    spinners.forEach((spinner, i) => {
-      setTimeout(() => {
-        spinner.style.display = 'none'; // Hide spinner
-      }, i * 1000); // Delay of 1 second for each spinner
-    });
-  }, (spinners.length * 1000) + 1000); // Start hiding after all are shown
-
-  setTimeout(function() {
-    showSpinners();
-  }, (spinners.length * 2) * 1000);
-}
-
-function hideSpinners() {
-  spinners.forEach((spinner) => {
-    spinner.style.display = 'none'; // Hide all spinners
-  });
-}
 
 function download(url) {
   const a = document.createElement('a')
@@ -137,14 +117,14 @@ function download(url) {
 
 function showLoading(id,timer) {
   document.querySelector('.loading-icon').style.display = 'block';
-  $('.spinner-grow').css('display','none');
-  showSpinners();
+  document.querySelector('.loading-div').style.display = 'block';
   haltProgress = false;
   updateProgress(id,timer);
 }
+
 function hideLoading(timer) {
   document.querySelector('.loading-icon').style.display = 'none';
-  $('#progress-bar').css('width', '0%').attr('aria-valuenow', 0).text('0%');
+  document.querySelector('.loading-div').style.display = 'none';
   haltProgress = true;
   stopTimer(timer);
 }
