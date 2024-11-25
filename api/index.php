@@ -708,5 +708,79 @@ if (!($_REQUEST['f'])) {
                 }
             }
             break;
+        case 'DNSToolbox':
+            if ($ib->auth->checkAccess(null,"DNS-TOOLBOX")) {
+                if ($method = checkRequestMethod('GET')) {
+                    if (isset($_GET['request']) && isset($_GET['domain'])) {
+
+                        $domain = $_GET['domain'];
+                        if ($_GET['request'] != 'port') {
+                            if (!isset($_GET['source'])) {
+                                echo json_encode(array(
+                                    'Status' => 'Error',
+                                    'Message' => 'DNS Server missing from request'
+                                ));
+                                break;
+                            } else {
+                                $source = $_GET['source'];
+                                switch ($source) {
+                                    case 'google':
+                                        $sourceserver = 'dns.google';
+                                        break;
+                                    case 'cloudflare':
+                                        $sourceserver = 'one.one.one.one';
+                                        break;
+                                }
+                            }
+                        } else {
+                            if ($_GET['port'] == "") {
+                                $port = [];
+                            } else {
+                                $port = explode(',',$_GET['port']);
+                            }
+                        }
+                        
+                        $DNSToolbox = new DNSToolbox();
+
+                        $ib->logging->writeLog("DNSToolbox","A query was performed using type: ".$_GET['request'],"debug",$_GET);
+                        switch ($_GET['request']) {
+                            case 'a':
+                                echo json_encode($DNSToolbox->a($domain,$sourceserver));
+                                break;
+                            case 'aaaa':
+                                echo json_encode($DNSToolbox->aaaa($domain,$sourceserver));
+                                break;
+                            case 'all':
+                                echo json_encode($DNSToolbox->all($domain,$sourceserver));
+                                break;
+                            case 'mx':
+                                echo json_encode($DNSToolbox->mx($domain,$sourceserver));
+                                break;
+                            case 'port':
+                                echo json_encode($DNSToolbox->port($domain,$port));
+                                break;
+                            case 'txt':
+                                echo json_encode($DNSToolbox->txt($domain,$sourceserver));
+                                break;
+                            case 'dmarc':
+                                echo json_encode($DNSToolbox->dmarc($domain,$sourceserver));
+                                break;
+                            case 'nameserverLookup':
+                                echo json_encode($DNSToolbox->ns($domain,$sourceserver));
+                                break;
+                            case 'soa':
+                                echo json_encode($DNSToolbox->soa($domain,$sourceserver));
+                                break;
+                            default:
+                                echo json_encode(array(
+                                    'Status' => 'Error',
+                                    'Message' => 'Invalid Request Type'
+                                ));
+                                break;
+                        }
+                    }
+                }
+            break;
+            }
     }
 }

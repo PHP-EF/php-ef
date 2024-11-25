@@ -198,6 +198,13 @@
           </button>
           <div class="dropdown-content">
             <ul>
+              <li class="dropdown-header">
+                <h6>'; echo $ib->auth->getAuth()['DisplayName'].'</h6>
+                <small>'; echo $ib->auth->getAuth()['Email'].'</small>
+              </li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
               <li>
                 <a href="#" class="profile">
                   <span>Profile</span>
@@ -213,14 +220,14 @@
             </ul>
           </div>
         </div>';} else {
-          echo '
-          <div class="dropdown">
-            <a href="#" class="login-btn preventDefault" onclick="login();">
-              <span>Login</span>
-              <i class="fa fa-sign-in" onclick="login();"></i>
-            </a>
-          </div>
-          ';} ?>
+        echo '
+        <div class="dropdown">
+          <a href="#" class="login-btn preventDefault" onclick="login();">
+            <span>Login</span>
+            <i class="fa fa-sign-in" onclick="login();"></i>
+          </a>
+        </div>
+        ';} ?>
       </div>
     </div>
     <main class="page-content" id="page-content">
@@ -391,7 +398,7 @@
                 <div id="resetPassword" class="accordion-collapse collapse" aria-labelledby="resetPasswordHeading" data-bs-parent="#resetPasswordAccordion">
                   <div class="accordion-body">
                     <div class="card-body">
-                      <?php if ($ib->auth->getAuth()['Type'] == 'SSO') { echo '
+                      <?php if ($ib->auth->getAuth()['Authenticated'] && $ib->auth->getAuth()['Type'] == 'SSO') { echo '
                         <div class="alert alert-warning" role="alert">
                         <center>You must reset your password via the Single Sign On provider.</center>
                         </div>';}
@@ -399,12 +406,12 @@
                       <div class="form-group">
                         <label for="userPassword">Password</label>
                         <i class="fa fa-info-circle hover-target" aria-hidden="true"></i>
-                        <input type="password" class="form-control" id="userPassword" aria-describedby="userPasswordHelp" <?php if ($ib->auth->getAuth()['Type'] == 'SSO') { echo 'disabled'; } ?> >
+                        <input type="password" class="form-control" id="userPassword" aria-describedby="userPasswordHelp" <?php if ($ib->auth->getAuth()['Authenticated'] && $ib->auth->getAuth()['Type'] == 'SSO') { echo 'disabled'; } ?> >
                         <small id="userPasswordHelp" class="form-text text-muted">Enter the updated password.</small>
                       </div>
                       <div class="form-group">
                         <label for="userPassword2">Verify Password</label>
-                        <input type="password" class="form-control" id="userPassword2" aria-describedby="userPassword2Help" <?php if ($ib->auth->getAuth()['Type'] == 'SSO') { echo 'disabled'; } ?> >
+                        <input type="password" class="form-control" id="userPassword2" aria-describedby="userPassword2Help" <?php if ($ib->auth->getAuth()['Authenticated'] && $ib->auth->getAuth()['Type'] == 'SSO') { echo 'disabled'; } ?> >
                         <small id="userPassword2Help" class="form-text text-muted">Enter the updated password again.</small>
                       </div>
                       <div id="popover" class="popover" role="alert">

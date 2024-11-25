@@ -68,7 +68,7 @@ body.dark-theme .page-content {
   background-color: #292f38;
 }
 body.dark-theme .card {
-  background-color: #48505b;
+  background-color: #3e4147;
   color: #FFF;
 }
 body.dark-theme {
@@ -122,9 +122,11 @@ body.light-theme .bootstrap-table .fixed-table-container .fixed-table-body .fixe
 }
 body.light-theme,
 body.light-theme .page-wrapper, 
-body.light-theme .page-content,
-body.light-theme .card {
+body.light-theme .page-content {
   background-color: #f8f8f6;
+}
+body.light-theme .card {
+  background-color: #faf9f6;
 }
 body.light-theme {
   background: #f8f8f6!important;
@@ -258,16 +260,21 @@ body .popover {
 }
 
 /* Form Actions */
-.apiKey > input {
-  width:90%!important;
-}
-.realm > select {
+.toolsMenu select {
   margin-top:10px;
+}
+.btn-group > button {
+  margin-top: 12px;
 }
 
 /* License Usage Page */
 .license-card-group {
   margin: 1% 10% 1% 10%;
+}
+
+/* Cards */
+.card-body p {
+  margin-bottom: 0px;
 }
 
 /* Page Content */
@@ -733,6 +740,18 @@ body .popover {
   padding-left: 5px;
 }
 
+.nav-bar .profile-name-user .dropdown-header {
+  text-align: center;
+}
+.nav-bar .profile-name-user .dropdown-header h6 {
+  font-size: 1rem;
+  color: #FFF;
+}
+.nav-bar .profile-name-user .dropdown-header small {
+  font-size: 1em;
+  color: #6c757d;
+}
+
 /* Add a dark background on nav-bar links and the dropdown button on hover */
 .nav-bar a:hover, .dropdown:hover button {
   background-color: #1d1b31;
@@ -862,6 +881,9 @@ pre code {
 table {
   font-size: 1rem;
 }
+.fixed-table-body {
+  height: auto;
+}
 
 /* Bootstrap Table - Form Control */
 .fixed-table-toolbar .btn-group .form-control {
@@ -869,14 +891,18 @@ table {
 }
 
 /* Bootstrap Table - Tools Menu */
-.toolsMenu > div > input, .toolsMenu > div > button { /* Table Buttons */
+.toolsMenu > div > input,
+.toolsMenu > div > div > input,
+.toolsMenu > div > button { /* Table Buttons */
   margin-top: 10px!important;
   margin-bottom: 10px!important;
   padding: 10px;
   border-radius: 5px;
 }
-.toolsMenu > div > input, .toolsMenu > div > select { /* Table Select */
-  width:100%;
+.toolsMenu > div > input,
+.toolsMenu > div > div > input,
+.toolsMenu > div > select { /* Table Select */
+  width:90%;
 }
 
 /* Progress Bar */
@@ -912,6 +938,58 @@ table {
 }
 .spinner-container {
   margin-bottom: 10px;
+}
+.spinner-bounce {
+  margin: auto;
+  width: 130px;
+  text-align: center; 
+}
+.spinner-bounce .spinner-child {
+  width: 35px;
+  height: 35px;
+  border-radius: 100%;
+  display: inline-block;
+  -webkit-animation: spinner-bounce 1.4s ease-in-out 0s infinite both;
+          animation: spinner-bounce 1.4s ease-in-out 0s infinite both; 
+}
+.spinner-bounce .spinner-bounce1 {
+  -webkit-animation-delay: -0.32s;
+          animation-delay: -0.32s;
+  background-color: #FDDD00;
+}
+.spinner-bounce .spinner-bounce2 {
+  -webkit-animation-delay: -0.16s;
+          animation-delay: -0.16s;
+  background-color: #34C33D;
+}
+.spinner-bounce .spinner-bounce3 {
+  background-color: #00E1E6;
+}
+@-webkit-keyframes spinner-bounce {
+  0%, 80%, 100% {
+    -webkit-transform: scale(0);
+            transform: scale(0);
+  }
+  40% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+}
+@keyframes spinner-bounce {
+  0%, 80%, 100% {
+    -webkit-transform: scale(0);
+            transform: scale(0);
+  }
+  40% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+}
+
+
+/* Loading Div */
+.row.loading-div {
+  display: none;
 }
 
 /* General Info Alert */
