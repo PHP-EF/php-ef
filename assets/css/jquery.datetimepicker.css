@@ -311,6 +311,10 @@
 
 .xdsoft_datetimepicker .xdsoft_calendar th {
 	background: #f1f1f1;
+	font-weight: 700;
+	text-align: center;
+	color: #999;
+	cursor: default;
 }
 
 .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_today {
@@ -369,13 +373,6 @@
 	color: inherit	!important;
 	background: inherit !important;
 	box-shadow: inherit !important;
-}
-
-.xdsoft_datetimepicker .xdsoft_calendar th {
-	font-weight: 700;
-	text-align: center;
-	color: #999;
-	cursor: default;
 }
 
 .xdsoft_datetimepicker .xdsoft_copyright {
