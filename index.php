@@ -38,7 +38,7 @@
           <span class="link_name">Home</span>
         </a>
         <ul class="sub-menu blank">
-          <li><a class="link_name preventDefault" href="#">Home</a></li>
+          <li><a class="link_name toggleFrame" href="#page=default" data-page-name="Home">Home</a></li>
         </ul>
       </li>
       <?php if ($ib->auth->checkAccess(null,'DNS-TOOLBOX')) { echo '
@@ -49,7 +49,7 @@
             <span class="link_name">DNS Toolbox</span>
           </a>
           <ul class="sub-menu blank">
-            <li><a class="link_name preventDefault" href="#">DNS Toolbox</a></li>
+            <li><a class="link_name toggleFrame" href="#page=tools/dnstoolbox" data-page-name="DNS Toolbox">DNS Toolbox</a></li>
           </ul>
         </div>
       </li>';}
@@ -61,7 +61,7 @@
             <span class="link_name">Security Assessment</span>
           </a>
           <ul class="sub-menu blank">
-            <li><a class="link_name preventDefault" href="#">Security Assessment</a></li>
+            <li><a class="link_name toggleFrame" href="#page=uddi/security-assessment" data-page-name="Security Assessment Report Generator">Security Assessment</a></li>
           </ul>
         </div>
       </li>';}
@@ -73,13 +73,13 @@
             <span class="link_name">Threat Actors</span>
           </a>
           <ul class="sub-menu blank">
-            <li><a class="link_name preventDefault" href="#">Threat Actors</a></li>
+            <li><a class="link_name toggleFrame" href="#page=uddi/threat-actors" data-page-name="Threat Actors">Threat Actors</a></li>
           </ul>
         </div>
       </li>';}
       if ($ib->auth->checkAccess(null,null,"DEV-Menu")) { echo '
       <li class="menu-item">
-        <div class="icon-link">
+        <div class="icon-link menu-item-dropdown">
           <a href="#" class="preventDefault">
             <i class="fa fa-toolbox" ></i>
             <span class="link_name">Dev</span>
@@ -87,9 +87,7 @@
           <i class="bx bxs-chevron-down arrow" ></i>
         </div>
         <ul class="sub-menu">
-          <li>
-            <a class="link_name preventDefault" href="#">Dev</a>
-          </li>';
+          <a class="link_name preventDefault" href="#">Dev</a>';
           if ($ib->auth->checkAccess(null,'B1-LICENSE-USAGE')) { echo '
             <li>
               <a href="#page=uddi/license-usage" class="toggleFrame" data-page-name="License Usage">
@@ -102,7 +100,7 @@
       </li>';}
       if ($ib->auth->checkAccess(null,null,"ADMIN-Menu")) { echo '
       <li class="menu-item">
-        <div class="icon-link">
+        <div class="icon-link menu-item-dropdown">
           <a href="#" class="preventDefault">
             <i class="fas fa-user-shield" ></i>
             <span class="link_name">Admin</span>
@@ -110,15 +108,15 @@
           <i class="bx bxs-chevron-down arrow" ></i>
         </div>
         <ul class="sub-menu">
-          <div class="icon-link">
-            <a class="link_name preventDefault" href="#">Admin</a>
-            <a href="#" class="preventDefault">
-              <i class="fas fa-cog" ></i>
-              <span>Settings</span>
-            </a>
-            <i class="bx bxs-chevron-down arrow" ></i>
-          </div>
+          <a class="link_name preventDefault" href="#">Admin</a>
           <li class="sub-menu-item">
+            <div class="icon-link menu-item-dropdown">
+              <a href="#" class="preventDefault">
+                <i class="fas fa-cog" ></i>
+                <span>Settings</span>
+              </a>
+              <i class="bx bxs-chevron-down arrow" ></i>
+            </div>
             <ul class="sub-sub-menu">
               <li>';
                 if ($ib->auth->checkAccess(null,"ADMIN-USERS")) { echo '
@@ -136,54 +134,50 @@
                 echo '
               </li>
             </ul>
-          </li>
-        </ul>';
-        if ($ib->auth->checkAccess(null,"ADMIN-LOGS")) { echo '
-        <ul class="sub-menu">
-          <div class="icon-link">
-            <a href="#" class="preventDefault">
-              <i class="fa-regular fa-file" ></i>
-              <span>Logs</span>
-            </a>
-            <i class="bx bxs-chevron-down arrow" ></i>
-          </div>
+          </li>';
+          if ($ib->auth->checkAccess(null,"ADMIN-LOGS")) { echo '
           <li class="sub-menu-item">
+            <div class="icon-link menu-item-dropdown">
+              <a href="#" class="preventDefault">
+                <i class="fa-regular fa-file" ></i>
+                <span>Logs</span>
+              </a>
+              <i class="bx bxs-chevron-down arrow" ></i>
+            </div>
             <ul class="sub-sub-menu">
               <li>';
-                if ($ib->auth->checkAccess(null,"ADMIN-USERS")) { echo '
+                if ($ib->auth->checkAccess(null,"ADMIN-LOGS")) { echo '
                 <a href="#page=core/logs" class="toggleFrame" data-page-name="Logs">Portal Logs</a>
                 ';}
                 echo '
               </li>
             </ul>
-          </li>
+          </li>';} echo '
         </ul>
-      </li>';}}?>
-      <li class="menu-item">
-        <div class="sidebar-footer">
-          <a href="#" class="infoBtn preventDefault">
-            <i class="fa fa-info infoBtn"></i>
-          </a>
-          <a href="#" class="toggleFontSizeBtn preventDefault">
-            <i class="fas fa-font fontDropBtn" id="fontSizeBtn"></i>
-            <div class="fontDropdown">
-              <div id="fontDropdown" class="fontDropdown-content">
-                <i onclick='setFontSize("12px")'>12px</i>
-                <i onclick='setFontSize("14px")'>13px</i>
-                <i onclick='setFontSize("14px")'>14px</i>
-                <i onclick='setFontSize("14px")'>15px</i>
-                <i onclick='setFontSize("16px")'>16px</i>
-                <i onclick='setFontSize("16px")'>17px</i>
-                <i onclick='setFontSize("18px")'>18px</i>
-              </div>
-            </div>
-          </a>
-          <a href="#" class="toggleThemeBtn preventDefault">
-            <i class="fa-solid fa-lightbulb toggler" id="themeToggle"></i>
-          </a>
-        </div>
-      </li>
+      </li>';}?>
     </ul>
+    <div class="sidebar-footer">
+      <a href="#" class="infoBtn preventDefault">
+        <i class="fa fa-info infoBtn"></i>
+      </a>
+      <a href="#" class="toggleFontSizeBtn preventDefault">
+        <i class="fas fa-font fontDropBtn" id="fontSizeBtn"></i>
+        <div class="fontDropdown">
+          <div id="fontDropdown" class="fontDropdown-content">
+            <i onclick='setFontSize("12px")'>12px</i>
+            <i onclick='setFontSize("14px")'>13px</i>
+            <i onclick='setFontSize("14px")'>14px</i>
+            <i onclick='setFontSize("14px")'>15px</i>
+            <i onclick='setFontSize("16px")'>16px</i>
+            <i onclick='setFontSize("16px")'>17px</i>
+            <i onclick='setFontSize("18px")'>18px</i>
+          </div>
+        </div>
+      </a>
+      <a href="#" class="toggleThemeBtn preventDefault">
+        <i class="fa-solid fa-lightbulb toggler" id="themeToggle"></i>
+      </a>
+    </div>
   </div>
 
   <section class="home-section">
@@ -527,8 +521,11 @@
       event.preventDefault();
     });
 
-    $('.icon-link').on('click',function(elem) {
+    $('.menu-item .menu-item-dropdown').on('click',function(elem) {
       $(elem.currentTarget).parent().toggleClass('showMenu')
+    });
+    $('.sub-menu .menu-item-dropdown').on('click',function(elem) {
+      $(elem.currentTarget).next().toggleClass('showMenu')
     });
     let sidebar = document.querySelector(".sidebar");
     let sidebarBtn = document.querySelector(".bx-menu");
@@ -593,6 +590,11 @@
             toast("API Error","","Failed to reset password","danger","30000");
         })
       }
+    });
+
+    $('.toggleFrame').click(function(element) {
+      loadiFrame(element.currentTarget.href);
+      $('.title-text').text($(element.currentTarget).data('pageName'));
     });
   });
 </script>

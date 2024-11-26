@@ -391,7 +391,7 @@ body .popover {
   color: #30d22a;
 }
 .sidebar .nav-links li.showMenu > .icon-link i.arrow,
-.sidebar .nav-links li ul.sub-menu.showMenu i.arrow,
+.sidebar .nav-links li ul.sub-menu-item.showMenu i.arrow,
 .home-section .nav-bar .profile-name-user .dropdown.showMenu i.arrow{
   transform: rotate(-180deg);
 }
@@ -429,15 +429,18 @@ body .popover {
   /* margin-top: -10px; */
   background: #1d1b31;
 }
-.sidebar .nav-links li .sub-menu.showMenu .sub-sub-menu {
+.sidebar .nav-links li .sub-menu .sub-menu-item.showMenu .sub-sub-menu {
   display: block;
+}
+.sidebar.close .nav-links li .sub-menu li sub-sub-menu.showMenu li{
+  margin-top: -10px;
 }
 .sidebar .nav-links li.showMenu .sub-menu li,
 .sidebar .nav-links li .sub-menu.showMenu li sub-sub-menu.showMenu li{
   margin-top: -10px;
 }
 .sidebar .nav-links li .sub-menu li{
-  padding: 6px 6px 6px 0px;
+  /* padding: 6px 6px 6px 0px; */
   /* margin-top: -10px; */
   background: #1d1b31;
 }
@@ -475,7 +478,7 @@ body .popover {
   left: 100%;
   top: -10px;
   margin-top: 0;
-  padding: 10px 20px;
+  padding-top: 10px;
   border-radius: 0 6px 6px 0;
   opacity: 0;
   display: block;
@@ -483,10 +486,18 @@ body .popover {
   transition: 0s;
 }
 .sidebar.close .nav-links li:hover .sub-menu,
-.sidebar.close .nav-links li:hover .sub-menu li:hover .sub-sub-menu{
+.sidebar.close .nav-links li:hover .sub-menu li:hover .sub-sub-menu,
+.sidebar.close .nav-links li .sub-menu .sub-menu-item .sub-sub-menu:hover{
   top: 0;
   pointer-events: auto;
   transition: all 0.4s ease;
+  opacity: 1;
+}
+.sidebar.close .nav-links li:hover .sub-menu a{
+  padding-right: 25px;
+}
+.sidebar.close .nav-links li:hover .sub-menu li:hover .sub-sub-menu li {
+  padding: 10px 10px 10px 25px;
 }
 .sidebar .nav-links li .sub-menu .link_name,
 .sidebar .nav-links li .sub-menu .sub-sub-menu .link_name{
@@ -500,7 +511,7 @@ body .popover {
 }
 .sidebar .nav-links li .sub-menu.blank,
 .sidebar .nav-links li .sub-menu .sub-sub-menu.blank{
-  opacity: 1;
+  /* opacity: 1; */
   pointer-events: auto;
   padding: 3px 20px 6px 16px;
   opacity: 0;
@@ -619,8 +630,11 @@ body .popover {
 }
 .sidebar-footer .fa,
 .sidebar-footer .far,
-.sidebar-footer .fas {
+.sidebar-footer .fas,
+.sidebar-footer .fa-regular,
+.sidebar-footer .fa-solid {
   line-height: unset;
+  color: #FFF;
 }
 
 /* Home Section */
