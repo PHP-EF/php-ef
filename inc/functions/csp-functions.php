@@ -136,12 +136,10 @@ function QueryCSP($Method, $Uri, $Data = null, $APIKey = "", $Realm = "US") {
         $LogArr['Error'] = "Invalid API Key.";
         $ib->logging->writeLog("CSP","Failed to authenticate to the CSP","debug",$LogArr);
         return array("Status" => "Error", "Error" => "Invalid API Key.");
-        break;
       default:
         $Output = json_decode($Result->body);
         $ib->logging->writeLog("CSP","Queried the CSP","debug",$LogArr);
         return $Output;
-        break;
     }
   } elseif ($ErrorOnEmpty) {
     echo "Warning. No results from API.".$CSPConfig->Url;
