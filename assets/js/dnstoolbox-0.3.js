@@ -23,50 +23,6 @@ function requestSource(source){
     }
 }
 
-function requestTitle(callType){
-    switch(callType){
-        case "txt":
-            return "SPF/TXT Lookup";
-            break;
-        case "mx":
-            return "MX Lookup";
-            break;
-        case "dmarc":
-            return "DMARC";
-            break;
-        case "a":
-            return "IP Lookup";
-            break;
-        case "all":
-            return "All available DNS records";
-            break;
-        case "aaaa":
-            return "IPV6 Lookup";
-            break;
-        case "whois":
-            return "Who Is Lookup";
-            break;
-        case "hinfo":
-            return "H Info Lookup";
-            break;
-        case "blacklist":
-            return "Blacklist Lookup";
-            break;
-        case "port":
-            return "Ports Lookup";
-            break;
-        case "reverseLookup":
-            return "Host Lookup";
-            break;
-        case "nameserverLookup":
-            return "Authoritative Nameserver Lookup";
-            break;
-    case "soa":
-    return "Start of Authority Lookup";
-    break;
-    }
-}
-
 function showLoading() {
   document.querySelector('.loading-icon').style.display = 'block';
   document.querySelector('.loading-div').style.display = 'block';
@@ -80,12 +36,13 @@ function hideLoading() {
 $("#submit").on('click', function(event) {
     event.preventDefault();
     showLoading();
-    if (document.getElementById("domain").value.endsWith(".")) {
+    var type = document.getElementById("file").value;
+    if (document.getElementById("domain").value.endsWith(".") || type == "reverse") {
       var domain = document.getElementById("domain").value;
     } else {
       var domain = document.getElementById("domain").value+".";
     }
-    returnDnsDetails(domain, document.getElementById("file").value, document.getElementById("port").value, $('#source').val());
+    returnDnsDetails(domain, type, document.getElementById("port").value, $('#source').val());
 });
 
 //Get DNS Details
@@ -94,21 +51,44 @@ function returnDnsDetails(domain, callType, port, source) {
   
     $.get( "/api?f=DNSToolbox&domain=" + domain + "&request=" + callType + "&port=" + port + "&source=" + source).done(function( data, status ) {
         if (data['Status'] == 'Error') {
-            toast(data['Status'],"",data['Error'],"danger","30000");
-            hideLoading();
-        } else if (data['error']) {
-            toast('Error',"",data['error'][0]['message'],"danger","30000");
+            toast(data['Status'],"",data['Message'],"danger","30000");
             hideLoading();
         } else {
-            const columns = [
-                {
-                    field: 'hostname',
-                    title: 'Hostname',
-                    sortable: true
-                }
-            ];
-            if (callType != "port") {
-                columns.push({
+            const columns = [];
+            switch(callType) {
+                case 'port':
+                    columns.push({
+                        field: 'hostname',
+                        title: 'Hostname',
+                        sortable: true
+                    },{
+                        field: 'port',
+                        title: 'Port',
+                        sortable: true
+                    },
+                    {
+                        field: 'result',
+                        title: 'Status',
+                        sortable: true
+                    });
+                    break;
+                case 'reverse':
+                    columns.push({
+                        field: 'ip',
+                        title: 'IP Address',
+                        sortable: true
+                    },{
+                        field: 'hostname',
+                        title: 'Hostname',
+                        sortable: true
+                    });
+                    break;
+                default:
+                    columns.push({
+                        field: 'hostname',
+                        title: 'Hostname',
+                        sortable: true
+                    },{
                         field: 'type',
                         title: 'Type',
                         sortable: true
@@ -122,21 +102,10 @@ function returnDnsDetails(domain, callType, port, source) {
                         field: 'class',
                         title: 'Class',
                         sortable: true
-                    }
-                );
-            } else {
-                columns.push({
-                        field: 'port',
-                        title: 'Port',
-                        sortable: true
-                    },
-                    {
-                        field: 'result',
-                        title: 'Status',
-                        sortable: true
-                    }
-                );
+                    });
+                    break;
             }
+
 
             if ((["a","aaaa","all"]).includes(callType)) {
                 columns.push({
@@ -145,7 +114,7 @@ function returnDnsDetails(domain, callType, port, source) {
                     sortable: true
                 })
             }
-            if ((["mx","txt","dmarc","all","nameserver","soa"]).includes(callType)) {
+            if ((["mx","txt","dmarc","all","nameserver","soa","cname"]).includes(callType)) {
                 columns.push({
                     field: 'data',
                     title: 'Data',
@@ -184,19 +153,19 @@ function cleanString(data) {
 }
 
 function showAdditionalFields() {
-  var file = document.getElementById("file");
-  var port = document.getElementById("port-container")
+  var file = $("#file");
+  var port = $("#port-container");
   var source = document.getElementById("source");
-  if(file.value === 'port') {
-    port.style.visibility="visible";
+  if(file.val() === 'port') {
+    port.css('visibility','visible');
     source.disabled = true;
-    source.value = "private";
-  } else if (file.value === 'reverseLookup') {
-    port.style.visibility="hidden";
+  } else if (file.val() === 'reverseLookup') {
+    port.css('visibility','hidden');
+    $('#port').val('');
     source.disabled = true;
-    source.value = "private";
   } else {
-    port.style.visibility="hidden";
+    port.css('visibility','hidden');
+    $('#port').val('');
     source.disabled = false;
   }
 }

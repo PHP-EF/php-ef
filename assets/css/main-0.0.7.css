@@ -557,6 +557,9 @@ body .popover {
   .sidebar {
     width: 78px;
   }
+  .sidebar .sidebar-footer {
+    width: 78px;
+  }
   .sidebar.close{
     width: 0;
   }
@@ -836,27 +839,18 @@ body .popover {
 }
 
 /* Code Windows */
-pre {
+body pre {
   background-color: #000;
   overflow: auto;
   font-family: 'Monaco', monospace;
   padding: 0 1em;
 }
-
-code {
-  font-family: Monaco, monospace;
-  /* font-size: $base-font-size; */
-  line-height: 100%;
-  padding: 0.2em;
-  letter-spacing: -0.05em;
-  word-break: normal;
-}
-
-pre code {
+body pre code {
   border: none;
   background: none;
-  /* font-size: $base-font-size * 0.875; */
-  line-height: 1em;
+  font-family: Monaco, monospace;
+  line-height: 1.2em;
+  padding: 0.1em;
   letter-spacing: normal;
   word-break: break-all;
   color:#FFF;
@@ -881,7 +875,7 @@ pre code {
 table {
   font-size: 1rem;
 }
-.fixed-table-body {
+body .bootstrap-table .fixed-table-container .fixed-table-body {
   height: auto;
 }
 

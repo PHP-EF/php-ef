@@ -714,8 +714,15 @@ if (!($_REQUEST['f'])) {
                     if (isset($_GET['request']) && isset($_GET['domain'])) {
 
                         $domain = $_GET['domain'];
+                        if ($domain == '.') {
+                            echo json_encode(array(
+                                'Status' => 'Error',
+                                'Message' => 'Domain Name or IP missing from request'
+                            ));
+                            break;
+                        }
                         if ($_GET['request'] != 'port') {
-                            if (!isset($_GET['source'])) {
+                            if (!isset($_GET['source']) || $_GET['source'] == 'null') {
                                 echo json_encode(array(
                                     'Status' => 'Error',
                                     'Message' => 'DNS Server missing from request'
@@ -750,6 +757,9 @@ if (!($_REQUEST['f'])) {
                             case 'aaaa':
                                 echo json_encode($DNSToolbox->aaaa($domain,$sourceserver));
                                 break;
+                            case 'cname':
+                                echo json_encode($DNSToolbox->cname($domain,$sourceserver));
+                                break;
                             case 'all':
                                 echo json_encode($DNSToolbox->all($domain,$sourceserver));
                                 break;
@@ -765,11 +775,14 @@ if (!($_REQUEST['f'])) {
                             case 'dmarc':
                                 echo json_encode($DNSToolbox->dmarc($domain,$sourceserver));
                                 break;
-                            case 'nameserverLookup':
+                            case 'nameserver':
                                 echo json_encode($DNSToolbox->ns($domain,$sourceserver));
                                 break;
                             case 'soa':
                                 echo json_encode($DNSToolbox->soa($domain,$sourceserver));
+                                break;
+                            case 'reverse':
+                                echo json_encode($DNSToolbox->reverse($domain,$sourceserver));
                                 break;
                             default:
                                 echo json_encode(array(

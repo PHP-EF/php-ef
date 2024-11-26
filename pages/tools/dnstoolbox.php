@@ -42,19 +42,20 @@ if ($ib->auth->checkAccess(null,"DNS-TOOLBOX") == false) {
                   <div class="col-auto">
                     <label for="file" class="visually-hidden">Domain</label>
                     <select onchange="showAdditionalFields()" id="file" class="form-select">
-                      <option value="a">IP/Get A Record</option>
-                      <option value="aaaa">IPV6/Get AAAA Record</option>
-                      <option value="mx">MX/Get MX Record</option>
-                      <option value="txt">SPF/TXT</option>
-                      <option value="dmarc">DMARC</option>
+                      <option value="a">A Record</option>
+                      <option value="aaaa">AAAA Record</option>
+                      <option value="cname">CNAME Record</option>
+                      <option value="mx">MX Record</option>
+                      <option value="txt">SPF/TXT Record</option>
+                      <option value="dmarc">DMARC Record</option>
                      <!-- <option value="blacklist">Blacklist Check</option> -->
                      <!-- <option value="whois">Whois</option> -->
-                      <option value="port">Check If Port Open</option>
                      <!-- <option value="hinfo">Hinfo/Get Hardware Information</option> -->
+                      <option value="nameserver">NS Record</option>
+                      <option value="soa">SOA Record</option>
                       <option value="all">Query All DNS Records</option>
-                      <!-- <option value="reverseLookup">IP/Reverse DNS Lookup</option> -->
-                      <option value="nameserverLookup">Query Authoritative Nameservers</option>
-                      <option value="soa">Query Start of Authority (SOA)</option>
+                      <option value="reverse">IP/Reverse DNS Lookup</option>
+                      <option value="port">Check If Port Open</option>
                     </select>
                   </div>
                   <div class="col-auto">
@@ -73,7 +74,7 @@ if ($ib->auth->checkAccess(null,"DNS-TOOLBOX") == false) {
                   </div>
                   <div class="col-auto">
                     <div style="visibility: hidden" id="port-container">
-                      <input type="text" name="port" id="port" class="form-control" placeholder="Port number (i.e 22)">
+                      <input type="text" name="port" id="port" class="form-control" placeholder="Port number(s) (i.e 22,80)">
                     </div>
                   </div>
                 </div>
@@ -104,23 +105,27 @@ if ($ib->auth->checkAccess(null,"DNS-TOOLBOX") == false) {
                     <th>Description</th>
                   </tr>
                   <tr>
-                    <td>IP/Get A Record</td>
+                    <td>A Record</td>
                     <td>An A Record is used to associate a domain name with an IP(v4) address. This query returns any A records associated with the queried domain.</td>
                   </tr>
                   <tr>
-                    <td>IPV6/Get AAAA Record</td>
+                    <td>AAAA Record</td>
                     <td>An AAAA Record is used to associate a domain name with an IP(v6) address. This query returns any AAAA records associated with the queried domain.</td>
                   </tr>
                   <tr>
-                    <td>MX/Get MX Record</td>
+                    <td>CNAME Record</td>
+                    <td>An CNAME Record is used to alias a domain name with another domain name. This query returns any CNAME records associated with the queried domain.</td>
+                  </tr>
+                  <tr>
+                    <td>MX Record</td>
                     <td>MX is a Mail Exchange record type. This is used to identify the mail server(s) used which are authoritative for the queried domain.</td>
                   </tr>
                   <tr>
-                    <td>SPF/TXT</td>
+                    <td>SPF/TXT Record</td>
                     <td>An TXT record is used to store text based information within DNS for various services. SPF specifically is for authentication of public email servers and identifies which mail servers are permitted to send mail on the queried domain's behalf. This query will return associated TXT records.</td>
                   </tr>
                   <tr>
-                    <td>DMARC</td>
+                    <td>DMARC Record</td>
                     <td>A DMARC Record is used to authenticate email addresses and defines how and where report both authorized and unauthorized mail.</td>
                   </tr>
   <!--                <tr>
@@ -128,24 +133,24 @@ if ($ib->auth->checkAccess(null,"DNS-TOOLBOX") == false) {
                     <td>This queries the public Whois database(s) to identify registrar level information about the queried domain.</td>
                   </tr>-->
                   <tr>
-                    <td>Open Port Check</td>
-                    <td>Identify if the specified port is open. If you do not specify a port, a default check against these ports will occur: 22(SSH), 25(SMTP), 53(DNS), 80(HTTP), 443(HTTPS), 445(SMB), 3389(RDP)</td>
+                    <td>NS Records</td>
+                    <td>The query will do a query a list of Authoritative Nameservers for the queried domain.</td>
+                  </tr>
+                  <tr>
+                    <td>SOA Records</td>
+                    <td>Start of Authority (SOA) records contains administrative information about the zone, primarily useful for identifying the master server(s) for DNS Zone Transfers.</td>
+                  </tr>
+                  <tr>
+                    <td>IP/Reverse DNS Lookup</td>
+                    <td>The query will do a reverse DNS lookup based on the IP Address queried.</td>
                   </tr>
                   <tr>
                     <td>Query All DNS Records</td>
                     <td>This query <u>attempts</u> to request all available information for the specified domain.</td>
                   </tr>
-                  <!-- <tr>
-                    <td>IP/Reverse DNS Lookup</td>
-                    <td>The query will do a reverse DNS lookup based on the IP Address queried.</td>
-                  </tr> -->
                   <tr>
-                    <td>Query Authoritative Nameservers</td>
-                    <td>The query will do a query a list of Authoritative Nameservers for the queried domain.</td>
-                  </tr>
-                  <tr>
-                    <td>Query Start of Authority (SOA)</td>
-                    <td>Start of Authority (SOA) records contains administrative information about the zone, primarily useful for identifying the master server(s) for DNS Zone Transfers.</td>
+                    <td>Open Port Check</td>
+                    <td>Identify if the specified port is open. Multiple ports can be entered separated by commas. If you do not specify a port, a default check against these ports will occur: 22(SSH), 25(SMTP), 53(DNS), 80(HTTP), 443(HTTPS), 445(SMB), 3389(RDP)</td>
                   </tr>
                 </table>
               </div>
@@ -153,7 +158,6 @@ if ($ib->auth->checkAccess(null,"DNS-TOOLBOX") == false) {
             <div class="row">
               <div class="col-md-12 col-md-offset-2">
                 <div id="responseArea" class="col-md-12">
-                  <div  class="responseTable"></div>
                   <table id="dnsResponseTable" class="table table-striped rounded"></table>
                 </div>
                 <footer>

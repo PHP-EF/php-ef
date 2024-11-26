@@ -18,6 +18,13 @@ class DNSToolbox {
         return $records;
     }
 
+    public function cname($hostname,$sourceserver) {
+        $nameserver = new Entities\Hostname($sourceserver);
+        $resolver = new Resolvers\Dig(null,null,$nameserver);
+        $records = $resolver->getCNAMERecords($hostname);
+        return $records;
+    }
+
     public function all($hostname,$sourceserver) {
         $nameserver = new Entities\Hostname($sourceserver);
         $resolver = new Resolvers\Dig(null,null,$nameserver);
@@ -66,10 +73,16 @@ class DNSToolbox {
 
     public function reverse($ip,$source) {
         if((bool)ip2long($ip)){
-            $response = gethostbyaddr($ip);  
-            return '[{"'.$ip.'": "'.$response.'"}]';
+            $response = gethostbyaddr($ip);
+            return [array(
+                'ip' => $ip,
+                'hostname' => $response
+            )];
         } else {
-            return '[{"error": "Please enter a valid IP"}]';
+            return array(
+                'Status' => 'Error',
+                'Message' => 'Invalid IP Address'
+            );
         }
     }
 
@@ -95,7 +108,3 @@ class DNSToolbox {
         return $portList;
     }
 }
-
-class Port {
-
-  }
