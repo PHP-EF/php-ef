@@ -1,3 +1,6 @@
+## v0.5.3
+- Minor style changes, cleanup & bugfixes
+
 ## v0.5.2
 - Add CNAME & Reverse Lookup to DNS Toolbox
 
