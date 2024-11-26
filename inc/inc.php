@@ -5,7 +5,7 @@ ini_set('error_log',__DIR__.'/logs/php.error.log');
 require_once(__DIR__.'/../vendor/autoload.php');
 
 // Include Classes
-foreach (glob(__DIR__.'/classes/' . '*.php') as $class) {
+foreach (glob(__DIR__.'/classes/*.php') as $class) {
   require_once $class; // Include each PHP file
 }
 
@@ -13,7 +13,7 @@ foreach (glob(__DIR__.'/classes/' . '*.php') as $class) {
 $ib = new ib();
 
 // Include Functions
-foreach (glob(__DIR__.'/functions/' . '*.php') as $function) {
+foreach (glob(__DIR__.'/functions/*.php') as $function) {
   require_once $function; // Include each PHP file
 }
 
