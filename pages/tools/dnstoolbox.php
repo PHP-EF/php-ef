@@ -10,7 +10,7 @@ if ($ib->auth->checkAccess(null,"DNS-TOOLBOX") == false) {
 }
 ?>
 
-<link href="/assets/css/dnstoolbox-0.2.css" rel="stylesheet">
+<link href="/assets/css/dnstoolbox-0.3.css" rel="stylesheet">
 
 
 <section class="section">
@@ -174,7 +174,7 @@ if ($ib->auth->checkAccess(null,"DNS-TOOLBOX") == false) {
   </div>
 </section>
 
-<script src ="/assets/js/dnstoolbox-0.3.js"></script>
+<script src ="/assets/js/dnstoolbox-0.4.js"></script>
 <script>
 
 <?php

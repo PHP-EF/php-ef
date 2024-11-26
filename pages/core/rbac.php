@@ -175,6 +175,27 @@
           $("#"+grouproleinfo.PermittedResources[key]).prop("checked", "true");
         }
       });
+      $('.toggle').on('click', function(event) {
+      let id = $('#editGroupID').val();
+      let toggle = $('#'+event.target.id).prop('checked');
+      let group = $('#editModalLabel').text();
+      let targetid = event.target.id
+      $.getJSON('/api?f=SetRBAC&id='+encodeURIComponent(id)+'&key='+targetid+'&value='+toggle, function(setRBACResults) {
+        if (setRBACResults[id]['PermittedResources'].includes(targetid)) {
+          if (toggle) {
+            toast("Success","","Successfully added "+targetid+" to "+group,"success");
+          } else {
+            toast("Error","","Failed to add "+targetid+" to "+group,"danger");
+          }
+        } else {
+          if (toggle) {
+            toast("Error","","Failed to remove "+targetid+" from "+group,"danger");
+          } else {
+            toast("Success","","Successfully removed "+targetid+" from "+group,"success");
+          }
+        }
+      }); 
+    });
     });
   }
 
@@ -204,28 +225,6 @@
       }
     }
   }
-
-  $('.toggle').on('click', function(event) {
-    let id = $('#editGroupID').val();
-    let toggle = $('#'+event.target.id).prop('checked');
-    let group = $('#editModalLabel').text();
-    let targetid = event.target.id
-    $.getJSON('/api?f=SetRBAC&id='+encodeURIComponent(id)+'&key='+targetid+'&value='+toggle, function(setRBACResults) {
-      if (setRBACResults[id]['PermittedResources'].includes(targetid)) {
-        if (toggle) {
-          toast("Success","","Successfully added "+targetid+" to "+group,"success");
-        } else {
-          toast("Error","","Failed to add "+targetid+" to "+group,"danger");
-	      }
-      } else {
-        if (toggle) {
-          toast("Error","","Failed to remove "+targetid+" from "+group,"danger");
-	      } else {
-          toast("Success","","Successfully removed "+targetid+" from "+group,"success");
-	      }
-      }
-     }); 
-  });
 
   $('#groupDescriptionSaveButton').on('click', function(elem) {
     let id = $('#editGroupID').val();
