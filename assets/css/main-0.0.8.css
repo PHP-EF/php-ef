@@ -229,9 +229,6 @@ body .popover {
 }
 
 /* Portal Info */
-.info-nav {
-  flex-wrap: nowrap!important;
-}
 .tab-content {
   margin-left: 10px;
   margin-top: 5px;
@@ -356,7 +353,7 @@ body .popover {
   overflow: auto;
 }
 .sidebar.close .nav-links{
-  overflow: visible;
+  overflow: auto;
 }
 .sidebar .nav-links::-webkit-scrollbar{
   display: none;
@@ -544,9 +541,6 @@ body .popover {
   font-size: 18px;
 }
 .sidebar.close .sidebar-footer{
-  background: none;
-}
-.sidebar.close .sidebar-footer{
   width: 78px;
 }
 .sidebar.close .sidebar-footer a:not(:first-child){
@@ -571,12 +565,22 @@ body .popover {
   .sidebar .sidebar-footer {
     width: 78px;
   }
+  .sidebar .sidebar-footer a:not(:first-child){
+    display: none;
+  }
   .sidebar.close{
     width: 0;
   }
   .sidebar.close ~ .home-section{
     width: 100%;
     left: 0;
+  }
+  .sidebar .nav-links {
+    overflow-x: hidden;
+  }
+  .sidebar.close .sidebar-footer{
+    display:none;
+    transition: all 0.5s ease;
   }
 }
 
@@ -1010,6 +1014,9 @@ body .bootstrap-table .fixed-table-container .fixed-table-body {
 @media (min-width: 576px) {
   body .container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl {
       max-width: 540px;
+  }
+  .sidebar .nav-links {
+    overflow-x: hidden;
   }
 }
 @media (min-width: 768px) {
