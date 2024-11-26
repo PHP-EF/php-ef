@@ -757,6 +757,9 @@ if (!($_REQUEST['f'])) {
                             case 'aaaa':
                                 echo json_encode($DNSToolbox->aaaa($domain,$sourceserver));
                                 break;
+                            case 'cname':
+                                echo json_encode($DNSToolbox->cname($domain,$sourceserver));
+                                break;
                             case 'all':
                                 echo json_encode($DNSToolbox->all($domain,$sourceserver));
                                 break;
@@ -772,7 +775,7 @@ if (!($_REQUEST['f'])) {
                             case 'dmarc':
                                 echo json_encode($DNSToolbox->dmarc($domain,$sourceserver));
                                 break;
-                            case 'nameserverLookup':
+                            case 'nameserver':
                                 echo json_encode($DNSToolbox->ns($domain,$sourceserver));
                                 break;
                             case 'soa':
