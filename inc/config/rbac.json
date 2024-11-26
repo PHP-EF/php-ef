@@ -21,13 +21,13 @@
         "PermittedResources": [
             "ADMIN-RBAC",
             "ADMIN-CONFIG",
-            "ADMIN-LOGS",
-            "B1-SECURITY-ASSESSMENT",
-            "B1-THREAT-ACTORS",
-            "B1-LICENSE-USAGE",
-            "ADMIN-SECASS",
             "ADMIN-USERS",
-            "DNS-TOOLBOX"
+            "ADMIN-SECASS",
+            "ADMIN-LOGS",
+            "B1-LICENSE-USAGE",
+            "DNS-TOOLBOX",
+            "B1-SECURITY-ASSESSMENT",
+            "B1-THREAT-ACTORS"
         ],
         "PermittedMenus": [
             "ADMIN-Menu",
