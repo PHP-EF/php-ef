@@ -16,10 +16,8 @@ function requestSource(source){
     switch (source){
     case 'google':
         return "Google DNS";
-        break;
     case 'cloudflare':
         return "Cloudflare DNS";
-        break;
     }
 }
 
@@ -49,7 +47,7 @@ $("#submit").on('click', function(event) {
 function returnDnsDetails(domain, callType, port, source) {
     $('#txtHint, .info').html('');
   
-    $.get( "/api?f=DNSToolbox&domain=" + domain + "&request=" + callType + "&port=" + port + "&source=" + source).done(function( data, status ) {
+    $.get( "/api?f=DNSToolbox&domain=" + domain + "&request=" + callType + "&port=" + port + "&source=" + source).done(function( data ) {
         if (data['Status'] == 'Error') {
             toast(data['Status'],"",data['Message'],"danger","30000");
             hideLoading();
@@ -136,7 +134,7 @@ function returnDnsDetails(domain, callType, port, source) {
             hideLoading();
             return false;
         }
-    }).fail(function( data, status ) {
+    }).fail(function() {
         toast("API Error","","Unknown API Error","danger","30000");
     }).always(function() {
         hideLoading();

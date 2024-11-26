@@ -55,10 +55,6 @@ body.dark-theme [class*="responseRow"] table tr:nth-child(2n) td {
 }
 
 .oneCol:last-child td {
-    border-radius: 10px 10px 0 0;
-}
-
-.oneCol:last-child td {
     border-radius: 0 0 10px 10px;
 }
 
@@ -74,9 +70,6 @@ table {
     text-align: center;
     font-weight: bold;
     font-size: 1.5em;
-}
-
-.thead {
     border-radius: 10px 10px 0 0;
 }
 
@@ -94,11 +87,11 @@ td {
     background-color: white !important;
 }
 
-caption { 
+caption {
     background-color: rgb(90,85,90);
     font-weight: bold;
-    padding-top: .7em; 
-    padding-bottom: .7em; 
+    padding-top: .7em;
+    padding-bottom: .7em;
     letter-spacing: .085em;
     text-align: center !important;
 }
@@ -109,7 +102,7 @@ caption {
     float: left;
     margin: 10px 10px 10px 0;
     text-align: center;
-    padding:10 0 10 0;
+    padding:10 0;
 }
 
 .logo-style1 {

@@ -266,7 +266,7 @@ body .popover {
 
 /* License Usage Page */
 .license-card-group {
-  margin: 1% 10% 1% 10%;
+  margin: 1% 10%;
 }
 
 /* Cards */
@@ -349,7 +349,7 @@ body .popover {
 }
 .sidebar .nav-links{
   height: 100%;
-  padding: 30px 0 150px 0;
+  padding: 30px 0px 150px;
   overflow: auto;
 }
 .sidebar.close .nav-links{
@@ -512,7 +512,6 @@ body .popover {
   pointer-events: auto;
   padding: 3px 20px 6px 16px;
   opacity: 0;
-  pointer-events: none;
 }
 .sidebar .nav-links li:hover .sub-menu.blank,
 .sidebar .nav-links li:hover .sub-menu .sub-sub-menu.blank{
@@ -880,7 +879,7 @@ body pre code {
   padding: 0!important;
 }
 .flatpickr-time > div > input {
-  padding: 0 0 20 0!important;
+  padding: 0 0 20!important;
 }
 .flatpickr-current-month > .numInputWrapper span.arrowDown, .flatpickr-current-month > .numInputWrapper span.arrowUp {
   display: none;

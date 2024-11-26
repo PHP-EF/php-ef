@@ -136,12 +136,10 @@ function QueryCSP($Method, $Uri, $Data = null, $APIKey = "", $Realm = "US") {
         $LogArr['Error'] = "Invalid API Key.";
         $ib->logging->writeLog("CSP","Failed to authenticate to the CSP","debug",$LogArr);
         return array("Status" => "Error", "Error" => "Invalid API Key.");
-        break;
       default:
         $Output = json_decode($Result->body);
         $ib->logging->writeLog("CSP","Queried the CSP","debug",$LogArr);
         return $Output;
-        break;
     }
   } elseif ($ErrorOnEmpty) {
     echo "Warning. No results from API.".$CSPConfig->Url;
@@ -206,11 +204,9 @@ function GetB1ThreatActorsById3($Actors,$unnamed,$substring) {
       }
       if ($Actor->actor_id != "" && $Actor->actor_name != "") {
         // Ignore Unnamed & Substring Actors
-        if ($unnamed == 'false' && str_starts_with($Actor->actor_name,'unnamed_actor')) {
-          // Skip
-        } else if ($substring == 'false' && str_starts_with($Actor->actor_name,'substring_')) {
-          // Skip
-        } else {
+        $UnnamedActor = str_starts_with($Actor->actor_name,'unnamed_actor');
+        $SubstringActor = str_starts_with($Actor->actor_name,'unnamed_actor');
+        if (($UnnamedActor && $unnamed == 'true') || ($SubstringActor && $substring == 'true') || (!$UnnamedActor && !$SubstringActor)) {
           $NewArr = array(
             'actor_id' => $Actor->actor_id,
             'actor_name' => $Actor->actor_name,
