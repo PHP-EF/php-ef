@@ -40,7 +40,7 @@ if (!($_REQUEST['f'])) {
             break;
         case 'acs':
             if ($ib->config->getConfig('SAML','enabled')) {
-                if ($method = checkRequestMethod('POST') && isset($_POST['SAMLResponse'])) {
+                if (checkRequestMethod('POST') && isset($_POST['SAMLResponse'])) {
                     echo json_encode($ib->auth->acs(),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                 }
             } else {
@@ -61,7 +61,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'getUsers':
-            if ($method = checkRequestMethod('GET')) {
+            if (checkRequestMethod('GET')) {
                 if ($ib->auth->checkAccess(null,"ADMIN-USERS")) {
                     $users = $ib->auth->getAllUsers();
                     echo json_encode($users,JSON_PRETTY_PRINT);
@@ -69,7 +69,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'newUser':
-            if ($method = checkRequestMethod('POST')) {
+            if (checkRequestMethod('POST')) {
                 if ($ib->auth->checkAccess(null,"ADMIN-USERS")) {
                     if (isset($_POST['un'])) {
                         $UN = $_POST['un'];
@@ -127,7 +127,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'setUser':
-            if ($method = checkRequestMethod('POST')) {
+            if (checkRequestMethod('POST')) {
                 if ($ib->auth->checkAccess(null,"ADMIN-USERS")) {
                     if (isset($_POST['id'])) {
                         $ID = $_POST['id'];
@@ -174,7 +174,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'removeUser':
-            if ($method = checkRequestMethod('POST')) {
+            if (checkRequestMethod('POST')) {
                 if ($ib->auth->checkAccess(null,"ADMIN-USERS")) {
                     if (isset($_POST['id'])) {
                         $remove = $ib->auth->removeUser($_POST['id']);
@@ -209,7 +209,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'passwordReset':
-            if ($method = checkRequestMethod('POST')) {
+            if (checkRequestMethod('POST')) {
                 if (isset($_REQUEST['pw'])) {
                     echo json_encode($ib->auth->passwordReset($_POST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                 } else {
@@ -315,7 +315,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'SetConfig':
-            if ($method = checkRequestMethod('POST')) {
+            if (checkRequestMethod('POST')) {
                 if ($ib->auth->checkAccess(null,"ADMIN-CONFIG")) {
                     $config = $ib->config->getConfig();
                     $config['Security']['salt'] = "********";
@@ -416,7 +416,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'getChangelog':
-            if ($method = checkRequestMethod('GET')) {
+            if (checkRequestMethod('GET')) {
                 $MD = generate_markdown(__DIR__.'/../CHANGELOG.md');
                 header('Content-Type: text/html; charset=utf-8');
                 echo '<link href="/assets/css/changelog.css" rel="stylesheet">';
@@ -430,7 +430,7 @@ if (!($_REQUEST['f'])) {
             break;
         case 'createSecurityReport':
             if ($ib->auth->checkAccess(null,"B1-SECURITY-ASSESSMENT")) {
-                if ($method = checkRequestMethod('POST')) {
+                if (checkRequestMethod('POST')) {
                     if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm']) AND isset($_POST['id']) AND isset($_POST['unnamed']) AND isset($_POST['substring'])) {
                         if (isValidUuid($_POST['id'])) {
                             $response = generateSecurityReport($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm'],$_POST['id'],$_POST['unnamed'],$_POST['substring']);
@@ -442,7 +442,7 @@ if (!($_REQUEST['f'])) {
             break;
         case 'downloadSecurityReport':
             if ($ib->auth->checkAccess(null,"B1-SECURITY-ASSESSMENT")) {
-                if ($method = checkRequestMethod('GET')) {
+                if (checkRequestMethod('GET')) {
                     $ib->logging->writeLog("SecurityAssessment","Downloaded security report","info");
                     if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
                         $id = $_REQUEST['id'];
@@ -462,7 +462,7 @@ if (!($_REQUEST['f'])) {
             break;
         case 'getSecurityReportProgress':
             if ($ib->auth->checkAccess(null,"B1-SECURITY-ASSESSMENT")) {
-                if ($method = checkRequestMethod('GET')) {
+                if (checkRequestMethod('GET')) {
                     if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
                         $id = $_REQUEST['id'];
                         echo json_encode(getProgress($id,38)); // Produces percentage for use on progress bar
@@ -472,7 +472,7 @@ if (!($_REQUEST['f'])) {
             break;
         case 'createLicenseReport':
             if ($ib->auth->checkAccess(null,"B1-LICENSE-USAGE")) {
-                if ($method = checkRequestMethod('POST')) {
+                if (checkRequestMethod('POST')) {
                     if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
                         $response = getLicenseCount($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm']);
                         echo json_encode($response,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
@@ -481,7 +481,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'crypt':
-            if ($method = checkRequestMethod('POST')) {
+            if (checkRequestMethod('POST')) {
                 if (isset($_POST['key'])) {
                     echo json_encode(array(encrypt($_POST['key'],$ib->config->getConfig("Security","salt"))));
                 }
@@ -489,14 +489,14 @@ if (!($_REQUEST['f'])) {
             break;
         case 'getSecurityAssessmentTemplates':
             if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
-                if ($method = checkRequestMethod('GET')) {
+                if (checkRequestMethod('GET')) {
                     echo json_encode($ib->templates->getTemplateConfigs(),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                 }
             }
             break;
         case 'newSecurityAssessmentTemplate':
             if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
-                if ($method = checkRequestMethod('POST')) {
+                if (checkRequestMethod('POST')) {
                     if (isset($_POST['TemplateName'])) {
                         $TemplateName = $_POST['TemplateName'];
                         if (isset($_POST['Status'])) { $Status = $_POST['Status']; } else { $Status = null; }
@@ -510,7 +510,7 @@ if (!($_REQUEST['f'])) {
             break;
         case 'setSecurityAssessmentTemplate':
             if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
-                if ($method = checkRequestMethod('POST')) {
+                if (checkRequestMethod('POST')) {
                     if (isset($_POST['id'])) {
                         $ID = $_POST['id'];
                         if (isset($_POST['TemplateName'])) { $TemplateName = $_POST['TemplateName']; } else { $TemplateName = null; }
@@ -525,7 +525,7 @@ if (!($_REQUEST['f'])) {
             break;
         case 'removeSecurityAssessmentTemplate':
             if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
-                if ($method = checkRequestMethod('POST')) {
+                if (checkRequestMethod('POST')) {
                     if (isset($_POST['id'])) {
                         echo json_encode($ib->templates->removeTemplateConfig($_POST['id']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                     }
@@ -534,7 +534,7 @@ if (!($_REQUEST['f'])) {
             break;
         case 'uploadSecurityAssessmentTemplate':
             if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
-                if ($method = checkRequestMethod('POST')) {
+                if (checkRequestMethod('POST')) {
                     $uploadDir = __DIR__.'/../files/templates/';
                     if (!is_dir($uploadDir)) {
                         mkdir($uploadDir, 0755, true);
@@ -580,14 +580,14 @@ if (!($_REQUEST['f'])) {
             break;
         case 'getThreatActorConfig':
             if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
-                if ($method = checkRequestMethod('GET')) {
+                if (checkRequestMethod('GET')) {
                     echo json_encode($ib->threatactors->getThreatActorConfigs(),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                 }
             }
             break;
         case 'newThreatActorConfig':
             if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
-                if ($method = checkRequestMethod('POST')) {
+                if (checkRequestMethod('POST')) {
                     if (isset($_POST['name'])) {
                         if (isset($_POST['SVG'])) { $SVG = $_POST['SVG'] . '.svg'; } else { $SVG = null; }
                         if (isset($_POST['PNG'])) { $PNG = $_POST['PNG'] . '.png'; } else { $PNG = null; }
@@ -599,7 +599,7 @@ if (!($_REQUEST['f'])) {
             break;
         case 'setThreatActorConfig':
             if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
-                if ($method = checkRequestMethod('POST')) {
+                if (checkRequestMethod('POST')) {
                     if (isset($_POST['id'])) {
                         if (isset($_POST['name'])) { $Name = $_POST['name']; } else { $Name = null; }
                         if (isset($_POST['SVG'])) { $SVG = $_POST['SVG'] . '.svg'; } else { $SVG = null; }
@@ -612,7 +612,7 @@ if (!($_REQUEST['f'])) {
             break;
         case 'removeThreatActorConfig':
             if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
-                if ($method = checkRequestMethod('POST')) {
+                if (checkRequestMethod('POST')) {
                     if (isset($_POST['id'])) {
                         echo json_encode($ib->threatactors->removeThreatActorConfig($_POST['id']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                     }
@@ -621,7 +621,7 @@ if (!($_REQUEST['f'])) {
             break;
         case 'getThreatActors':
             if ($ib->auth->checkAccess(null,"B1-THREAT-ACTORS")) {
-                if ($method = checkRequestMethod('POST')) {
+                if (checkRequestMethod('POST')) {
                     if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
                         $UserInfo = GetCSPCurrentUser();
                         if (isset($UserInfo)) {
@@ -639,7 +639,7 @@ if (!($_REQUEST['f'])) {
             break;
         case 'uploadThreatActorImage':
             if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
-                if ($method = checkRequestMethod('POST')) {
+                if (checkRequestMethod('POST')) {
                     $uploadDir = __DIR__.'/../assets/images/Threat Actors/Uploads/';
                     if (!is_dir($uploadDir)) {
                         mkdir($uploadDir, 0755, true);
@@ -710,7 +710,7 @@ if (!($_REQUEST['f'])) {
             break;
         case 'DNSToolbox':
             if ($ib->auth->checkAccess(null,"DNS-TOOLBOX")) {
-                if ($method = checkRequestMethod('GET')) {
+                if (checkRequestMethod('GET')) {
                     if (isset($_GET['request']) && isset($_GET['domain'])) {
 
                         $domain = $_GET['domain'];
