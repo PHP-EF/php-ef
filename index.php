@@ -318,9 +318,7 @@
                 </div>
                 <div class="tab-pane fade" id="debugger">
                   <br>
-		              <pre>
-                    <code id="whoami"></code>
-                  </pre>
+		              <pre><code id="whoami"></code></pre>
                 </div>
                 <div class="tab-pane fade" id="changelog">
                   <div>

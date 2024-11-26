@@ -1,5 +1,5 @@
 ## v0.5.2
-- Add Reverse Lookup to DNS Toolbox
+- Add CNAME & Reverse Lookup to DNS Toolbox
 
 ## v0.5.1
 - More UI Updates

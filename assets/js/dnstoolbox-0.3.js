@@ -114,7 +114,7 @@ function returnDnsDetails(domain, callType, port, source) {
                     sortable: true
                 })
             }
-            if ((["mx","txt","dmarc","all","nameserver","soa"]).includes(callType)) {
+            if ((["mx","txt","dmarc","all","nameserver","soa","cname"]).includes(callType)) {
                 columns.push({
                     field: 'data',
                     title: 'Data',

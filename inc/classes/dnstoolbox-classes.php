@@ -18,6 +18,13 @@ class DNSToolbox {
         return $records;
     }
 
+    public function cname($hostname,$sourceserver) {
+        $nameserver = new Entities\Hostname($sourceserver);
+        $resolver = new Resolvers\Dig(null,null,$nameserver);
+        $records = $resolver->getCNAMERecords($hostname);
+        return $records;
+    }
+
     public function all($hostname,$sourceserver) {
         $nameserver = new Entities\Hostname($sourceserver);
         $resolver = new Resolvers\Dig(null,null,$nameserver);
