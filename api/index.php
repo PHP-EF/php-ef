@@ -637,6 +637,19 @@ if (!($_REQUEST['f'])) {
                 }
             }
             break;
+        case 'getThreatActor':
+            if ($ib->auth->checkAccess(null,"B1-THREAT-ACTORS")) {
+                if (checkRequestMethod('POST')) {
+                    if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['Realm']) AND isset($_POST['ActorID']) AND isset($_POST['Page'])) {
+                        $UserInfo = GetCSPCurrentUser();
+                        if (isset($UserInfo)) {
+                            $ib->logging->writeLog("ThreatActors",$UserInfo->result->name." queried list of Threat Actor IOCs","info");
+                        }
+                        echo json_encode(QueryCSP('get','/tide/threat-enrichment/clusterfox/actors/search?actor_id='.$_POST['ActorID'].'&page='.$_POST['Page']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                    }
+                }
+            }
+            break;
         case 'uploadThreatActorImage':
             if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
                 if (checkRequestMethod('POST')) {
