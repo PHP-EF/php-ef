@@ -1,3 +1,6 @@
+## v0.5.4
+- Add ability to query related IOCs for Threat Actors
+
 ## v0.5.3
 - Minor style changes, cleanup & bugfixes
 

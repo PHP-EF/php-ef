@@ -222,12 +222,6 @@ body .popover {
   top: 35%;
 }
 
-/* Show */
-.show {
-  left: -25px;
-  visibility: visible;
-}
-
 /* Portal Info */
 .tab-content {
   margin-left: 10px;
