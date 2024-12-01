@@ -361,9 +361,9 @@ function removeAPIKey() {
 
 function checkInput(text) {
   if (text) {
-      $("#saveBtn").addClass("show");
+      $("#saveBtn").addClass("saveBtnShow");
   } else {
-      $("#saveBtn").removeClass("show");
+      $("#saveBtn").removeClass("saveBtnShow");
   }
 }
 

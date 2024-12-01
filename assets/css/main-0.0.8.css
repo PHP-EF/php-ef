@@ -250,6 +250,12 @@ body .popover {
   color: #000;
 }
 
+/* Save Button Show */
+.saveBtnShow {
+  left: -25px;
+  visibility: visible;
+}
+
 /* Form Actions */
 .toolsMenu select {
   margin-top:10px;
