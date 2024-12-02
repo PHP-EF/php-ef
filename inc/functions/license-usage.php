@@ -1,5 +1,12 @@
 <?php
 
+function getLicenseCount2() {
+    // Set Time Dimensions
+    // $StartDimension = str_replace('Z','',$StartDateTime);
+    // $EndDimension = str_replace('Z','',$EndDateTime);
+    return QueryCubeJS('{"segments":[],"dimensions":["NstarDnsActivity.ip_space_id"],"ungrouped":false,"measures":["NstarDnsActivity.total_query_count"],"timeDimensions":[{"dateRange":["2024-10-30T21:58:43.000","2024-11-30T21:58:44.000"],"dimension":"NstarDnsActivity.timestamp","granularity":null}]}');
+}
+
 function getLicenseCount($StartDateTime,$EndDateTime,$Realm) {
     // Set Time Dimensions
     $StartDimension = str_replace('Z','',$StartDateTime);

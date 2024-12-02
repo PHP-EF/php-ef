@@ -154,6 +154,27 @@
             </ul>
           </li>';} echo '
         </ul>
+      </li>';}
+      if ($ib->auth->checkAccess(null,null,"REPORT-Menu")) { echo '
+      <li class="menu-item">
+        <div class="icon-link menu-item-dropdown">
+          <a href="#" class="preventDefault">
+            <i class="fa-solid fa-chart-simple" ></i>
+            <span class="link_name">Reports</span>
+          </a>
+          <i class="bx bxs-chevron-down arrow" ></i>
+        </div>
+        <ul class="sub-menu">
+          <a class="link_name preventDefault" href="#">Reports</a>';
+          if ($ib->auth->checkAccess(null,'REPORT-ASSESSMENTS')) { echo '
+            <li>
+              <a href="#page=reports/assessments" class="toggleFrame" data-page-name="Assessment Reporting">
+                <i class="fa-solid fa-arrows-to-eye" ></i>
+                <span>Assessments</span>
+              </a>
+            </li>';}
+            echo '
+        </ul>
       </li>';}?>
     </ul>
     <div class="sidebar-footer">

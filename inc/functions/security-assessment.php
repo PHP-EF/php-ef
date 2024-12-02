@@ -18,6 +18,12 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID,$unname
         ));
         fastcgi_finish_request();
 
+        // Logging / Reporting
+        $AccountInfo = QueryCSP("get","v2/current_user/accounts");
+        $CurrentAccount = $AccountInfo->results[array_search($UserInfo->result->account_id, array_column($AccountInfo->results, 'id'))];
+        $ib->logging->writeLog("SecurityAssessment",$UserInfo->result->name." requested a security assessment report for: ".$CurrentAccount->name,"info");
+        $ib->reporting->newReportEntry('Security Assessment',null,$UserInfo->result->name,$CurrentAccount->name);
+
         // Set Progress
         $Progress = 0;
 
@@ -591,9 +597,6 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID,$unname
         $Progress = writeProgress($UUID,$Progress,"Injecting Powerpoint Strings");
         ##// Slide 2 / 45 - Title Page & Contact Page
         // Get & Inject Customer Name, Contact Name & Email
-        $AccountInfo = QueryCSP("get","v2/current_user/accounts");
-        $CurrentAccount = $AccountInfo->results[array_search($UserInfo->result->account_id, array_column($AccountInfo->results, 'id'))];
-        $ib->logging->writeLog("SecurityAssessment",$UserInfo->result->name." requested a security assessment report for: ".$CurrentAccount->name,"info");
         $mapping = replaceTag($mapping,'#TAG01',$CurrentAccount->name);
         $mapping = replaceTag($mapping,'#DATE',date("dS F Y"));
         $mapping = replaceTag($mapping,'#NAME',$UserInfo->result->name);
