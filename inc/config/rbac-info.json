@@ -1,6 +1,7 @@
 {
 	"Menus": {
 		"ADMIN-Menu": "Grants access to the Admin Menu.",
+		"REPORT-Menu": "Grants access to the Reports Menu.",
 		"DEV-Menu": "Grants access to the Dev Menu."
 	},
 	"Resources": {
@@ -50,6 +51,12 @@
 			"description": "Grants the ability to view and manage the Security Assessment Generator Configuration",
 			"PermittedMenus": [
 				"ADMIN-Menu"
+			]
+		},
+		"REPORT-ASSESSMENTS": {
+			"description": "Grants the ability to view the Assessment Reports",
+			"PermittedMenus": [
+				"REPORT-Menu"
 			]
 		}
 	}

@@ -222,12 +222,6 @@ body .popover {
   top: 35%;
 }
 
-/* Show */
-.show {
-  left: -25px;
-  visibility: visible;
-}
-
 /* Portal Info */
 .tab-content {
   margin-left: 10px;
@@ -256,6 +250,12 @@ body .popover {
   color: #000;
 }
 
+/* Save Button Show */
+.saveBtnShow {
+  left: -25px;
+  visibility: visible;
+}
+
 /* Form Actions */
 .toolsMenu select {
   margin-top:10px;
@@ -273,6 +273,175 @@ body .popover {
 .card-body p {
   margin-bottom: 0px;
 }
+
+/*--------------------------------------------------------------
+# Reports
+--------------------------------------------------------------*/
+/* Filter dropdown */
+.assessment-reporting .filter {
+  position: absolute;
+  right: 0px;
+  top: 15px;
+}
+
+.assessment-reporting .filter .icon {
+  color: #aab7cf;
+  padding-right: 20px;
+  padding-bottom: 5px;
+  transition: 0.3s;
+  font-size: 16px;
+}
+
+.assessment-reporting .filter .icon:hover,
+.assessment-reporting .filter .icon:focus {
+  color: #4154f1;
+}
+
+.assessment-reporting .filter .dropdown-header {
+  padding: 8px 15px;
+}
+
+.assessment-reporting .filter .dropdown-header h6 {
+  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #aab7cf;
+  margin-bottom: 0;
+  padding: 0;
+}
+
+.assessment-reporting .filter .dropdown-item {
+  padding: 8px 15px;
+}
+
+/* Info Cards */
+.assessment-reporting .info-card {
+  padding-bottom: 10px;
+}
+
+.assessment-reporting .info-card h6 {
+  font-size: 28px;
+  color: #012970;
+  font-weight: 700;
+  margin: 0;
+  padding: 0;
+}
+
+.assessment-reporting .card-icon {
+  font-size: 32px;
+  line-height: 0;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+
+.assessment-reporting .reports-today-card .card-icon {
+  color: #4154f1;
+  background: #f6f6fe;
+}
+
+.assessment-reporting .reports-month-card .card-icon {
+  color: #2eca6a;
+  background: #e0f8e9;
+}
+
+.assessment-reporting .reports-year-card .card-icon {
+  color: #ff771d;
+  background: #ffecdf;
+}
+
+/* Activity */
+.assessment-reporting .activity {
+  font-size: 14px;
+}
+
+.assessment-reporting .activity .activity-item .activite-label {
+  color: #888;
+  position: relative;
+  flex-shrink: 0;
+  flex-grow: 0;
+  min-width: 64px;
+}
+
+.assessment-reporting .activity .activity-item .activite-label::before {
+  content: "";
+  position: absolute;
+  right: -11px;
+  width: 4px;
+  top: 0;
+  bottom: 0;
+  background-color: #eceefe;
+}
+
+.assessment-reporting .activity .activity-item .activity-badge {
+  margin-top: 3px;
+  z-index: 1;
+  font-size: 11px;
+  line-height: 0;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 3px solid #fff;
+  flex-grow: 0;
+}
+
+.assessment-reporting .activity .activity-item .activity-content {
+  padding-left: 10px;
+  padding-bottom: 20px;
+}
+
+.assessment-reporting .activity .activity-item:first-child .activite-label::before {
+  top: 5px;
+}
+
+.assessment-reporting .activity .activity-item:last-child .activity-content {
+  padding-bottom: 0;
+}
+
+/* News & Updates */
+.assessment-reporting .news .post-item+.post-item {
+  margin-top: 15px;
+}
+
+.assessment-reporting .news img {
+  width: 80px;
+  float: left;
+  border-radius: 5px;
+}
+
+.assessment-reporting .news h4 {
+  font-size: 15px;
+  margin-left: 95px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.assessment-reporting .news h4 a {
+  color: #012970;
+  transition: 0.3s;
+}
+
+.assessment-reporting .news h4 a:hover {
+  color: #4154f1;
+}
+
+.assessment-reporting .news p {
+  font-size: 14px;
+  color: #777777;
+  margin-left: 95px;
+}
+
+.assessment-reporting .row {
+  margin-bottom: 10px;
+}
+
+/* Recent Assessments */
+.assessment-reporting .recent-assessments {
+  font-size: 14px;
+}
+
+/* Reports End */
 
 /* Page Content */
 .page-content{

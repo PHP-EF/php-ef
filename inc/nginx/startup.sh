@@ -5,9 +5,9 @@ service nginx restart
 # Cleanup Release.zip
 rm /home/site/wwwroot/release.zip
 
-# Install, Configure & Start crontab & Redis
+# Install, Configure & Start crontab, Redis & sqlite3
 apt-get update -y
-apt-get install -y cron redis-server
+apt-get install -y cron redis-server sqlite3
 echo "* * * * * /usr/local/bin/php /home/site/wwwroot/inc/scheduler/scheduler.php 1>> /dev/null 2>&1" | crontab -
 service cron start
 

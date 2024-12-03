@@ -637,6 +637,19 @@ if (!($_REQUEST['f'])) {
                 }
             }
             break;
+        case 'getThreatActor':
+            if ($ib->auth->checkAccess(null,"B1-THREAT-ACTORS")) {
+                if (checkRequestMethod('POST')) {
+                    if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['Realm']) AND isset($_POST['ActorID']) AND isset($_POST['Page'])) {
+                        $UserInfo = GetCSPCurrentUser();
+                        if (isset($UserInfo)) {
+                            $ib->logging->writeLog("ThreatActors",$UserInfo->result->name." queried list of Threat Actor IOCs","info");
+                        }
+                        echo json_encode(GetB1ThreatActor($_POST['ActorID'],$_POST['Page']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                    }
+                }
+            }
+            break;
         case 'uploadThreatActorImage':
             if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
                 if (checkRequestMethod('POST')) {
@@ -795,5 +808,33 @@ if (!($_REQUEST['f'])) {
                 }
             break;
             }
+        case 'getAssessmentReportTypes':
+            if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS")) {
+                if (checkRequestMethod('GET')) {
+                    echo json_encode($ib->reporting->getAssessmentReportTypes(),JSON_PRETTY_PRINT);
+                }
+            }
+            break;
+        case 'getAssessmentReports':
+            if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS")) {
+                if (checkRequestMethod('GET')) {
+                    echo json_encode($ib->reporting->getAssessmentReports($_REQUEST['granularity']),JSON_PRETTY_PRINT);
+                }
+            }
+            break;
+        case 'getAssessmentReportsStats':
+            if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS")) {
+                if (checkRequestMethod('GET')) {
+                    echo json_encode($ib->reporting->getAssessmentReportsStats($_REQUEST['granularity']),JSON_PRETTY_PRINT);
+                }
+            }
+            break;
+        case 'getAssessmentReportsSummary':
+            if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS")) {
+                if (checkRequestMethod('GET')) {
+                    echo json_encode($ib->reporting->getAssessmentReportsSummary(),JSON_PRETTY_PRINT);
+                }
+            }
+            break;
     }
 }

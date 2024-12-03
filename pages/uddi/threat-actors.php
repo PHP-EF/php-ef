@@ -121,6 +121,27 @@
     </div>
 </div>
 
+<!-- Related IOC Modal -->
+<div class="modal fade" id="relatedIOCModal" tabindex="-1" role="dialog" aria-labelledby="relatedIOCModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="relatedIOCModalLabel">Related Indicators</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="modal-body" id="relatedIOCModalBody">
+                <input id="threatActorID" hidden></input>
+                <table id="threatActorRelatedIOCTable" class="table table-striped rounded"></table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
   function showLoading(timer) {
     $("#GetActors").prop('disabled', true)
@@ -143,8 +164,11 @@
 
   function actionFormatter(value, row, index) {
     return [
-      '<a class="inspect" title="inspect" style="padding:5px">',
-      '<i class="fa fa-magnifying-glass"></i>',
+      '<a class="observed" title="Observed IOCs" style="padding:5px">',
+      '<i class="fa-regular fa-eye"></i>',
+      '</a>',
+      '<a class="related" title="Related IOCs" style="padding:5px">',
+      '<i class="fa-solid fa-bullseye"></i>',
       '</a>'
     ].join('')
   }
@@ -152,6 +176,52 @@
   function dateFormatter(value, row, index) {
     var d = new Date(value) // The 0 there is the key, which sets the date to the epoch
     return d.toGMTString();
+  }
+
+  function populateRelatedIOCs(row) {
+    // var related_indicators = []
+    // row['related_indicators'].forEach(function(val) {
+    //   related_indicators.push({'ioc':val})
+    // })
+    $('#threatActorID').val(row.actor_id);
+    $('#threatActorRelatedIOCTable').bootstrapTable('destroy');
+    $('#threatActorRelatedIOCTable').bootstrapTable({
+      ajax: 'getThreatActor',
+      sortable: true,
+      pagination: true,
+      sidePagination: 'server',
+      pageSize: '10000',
+      queryParamsType: '',
+      paginationVAlign: 'both',
+      showExport: true,
+      exportTypes: ['json', 'xml', 'csv', 'txt', 'excel', 'sql'],
+      showColumns: true,
+      paginationParts: ['pageInfo','pageList'],
+      columns: [{
+        field: 'ioc',
+        title: 'Indicator',
+        sortable: true
+      }]
+    });
+  }
+  function getThreatActor(params) {
+    console.log(params)
+    var postArr = {}
+    postArr.Realm = $('#Realm').find(":selected").val();
+    postArr.ActorID = $('#threatActorID').val();
+    postArr.Page = params.data.pageNumber || 1;
+    if ($('#APIKey')[0].value) {
+      postArr.APIKey = $('#APIKey')[0].value
+    }
+    $.post( "/api?f=getThreatActor", postArr).done(function( data, status ) {
+      const mappedObject = {
+        total: data['actors'][0]['related_count'],
+        rows: data['actors'][0]['related_indicators'].map(indicator => ({ ioc: indicator }))
+      };
+      params.success(mappedObject);
+    }).fail(function( data, status ) {
+        toast("API Error","","Failed to query IOCs","danger","30000");
+    })
   }
 
   // Workaround
@@ -218,10 +288,13 @@
   // }
 
   window.actionEvents = {
-    'click .inspect': function (e, value, row, index) {
-      console.log(row);
+    'click .observed': function (e, value, row, index) {
       populateObservedIOCs(row);
       $('#observedIOCModal').modal('show');
+    },
+    'click .related': function (e, value, row, index) {
+      populateRelatedIOCs(row);
+      $('#relatedIOCModal').modal('show');
     }
   }
 

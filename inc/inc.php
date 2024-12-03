@@ -61,6 +61,10 @@ if (!(isset($SkipCSS))) {
       <!-- Boxiocns CDN Link -->
       <link href="https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet">
 
+      <!-- Charts -->
+      <script src="/assets/js/apexcharts.min.js"></script>
+      <script src="/assets/js/echarts.min.js"></script>
+
     </head>
     ';
 

@@ -10,6 +10,7 @@ class ib {
   public $config;
   public $logging;
   public $db;
+  public $reporting;
   public $templates;
   public $threatactors;
 
@@ -20,12 +21,13 @@ class ib {
       $this->rbac = new RBAC($this->core,$this->db);
       $this->config = $this->core->config;
       $this->logging = $this->core->logging;
+      $this->reporting = new Reporting($this->db);
       $this->templates = new TemplateConfig($this->db);
       $this->threatactors = new ThreatActorConfig($this->db);
   }
 
   public function getVersion() {
-    return ['v0.5.3'];
+    return ['v0.5.4'];
   }
 }
 

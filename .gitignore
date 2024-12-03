@@ -8,5 +8,5 @@ assets/images/Threat Actors/Uploads
 composer.lock
 _archive
 .DS_Store
-test.php
+test.*
 php.error.log

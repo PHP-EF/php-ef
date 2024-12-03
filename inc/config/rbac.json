@@ -27,11 +27,13 @@
             "B1-LICENSE-USAGE",
             "DNS-TOOLBOX",
             "B1-SECURITY-ASSESSMENT",
-            "B1-THREAT-ACTORS"
+            "B1-THREAT-ACTORS",
+            "REPORT-ASSESSMENTS"
         ],
         "PermittedMenus": [
             "ADMIN-Menu",
-            "DEV-Menu"
+            "DEV-Menu",
+            "REPORT-Menu"
         ]
     },
     "security-assessment-admins": {

@@ -179,6 +179,13 @@ function GetB1ThreatActors($StartDateTime,$EndDateTime,$APIKey = "", $Realm = "U
   }
 }
 
+function GetB1ThreatActor($ActorID,$Page,$APIKey = "", $Realm = "US") {
+  $Results = QueryCSP('get','/tide/threat-enrichment/clusterfox/actors/search?actor_id='.$ActorID.'&page='.$Page);
+  if ($Results) {
+    return $Results;
+  }
+}
+
 // Workaround to new issue
 function GetB1ThreatActorsById3($Actors,$unnamed,$substring) {
   $ActorArr = json_decode(json_encode($Actors),true);
@@ -224,6 +231,16 @@ function GetB1ThreatActorsById3($Actors,$unnamed,$substring) {
             $NewArr['infoblox_references'] = $Actor->infoblox_references;
           } else {
             $NewArr['infoblox_references'] = [];
+          }
+          if (isset($Actor->purpose)) {
+            $NewArr['purpose'] = $Actor->purpose;
+          } else {
+            $NewArr['purpose'] = [];
+          }
+          if (isset($Actor->ttp)) {
+            $NewArr['ttp'] = $Actor->ttp;
+          } else {
+            $NewArr['ttp'] = [];
           }
           array_push($Results,$NewArr);
         }
