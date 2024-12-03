@@ -143,7 +143,7 @@ class Auth {
     $stmt->execute([':id' => $id, ':lastlogin' => $currentDateTime]);
   }
 
-  public function newUser($username, $password, $firstname = '', $surname = '', $email = '', $groups = '', $type = 'Local') {
+  public function newUser($username, $password, $firstname = '', $surname = '', $email = '', $groups = '', $type = 'Local', $expire = 'false') {
     // Set random password for SSO accounts
     if ($type == 'SSO') {
       $password = $this->random_password(32);
@@ -154,7 +154,11 @@ class Auth {
       // Get current date/time
       $currentDateTime = date('Y-m-d H:i:s');
       $passwordExpiryDate = new DateTime();
-      $passwordExpiryDate->modify('+90 days');
+      if ($expire == 'true') {
+        $passwordExpiryDate->modify('-1 days');
+      } else {
+        $passwordExpiryDate->modify('+90 days');
+      }
       $passwordExpires = $passwordExpiryDate->format('Y-m-d H:i:s');
 
       $stmt = $this->db->prepare("INSERT INTO users (username, firstname, surname, email, password, salt, groups, created, passwordexpires, type) VALUES (:username, :firstname, :surname, :email, :password, :salt, :groups, :created, :passwordexpires, :type)");
@@ -325,7 +329,64 @@ class Auth {
     }
   }
 
-  public function passwordReset($password) {
+
+  public function resetExpiredPassword($username,$currentPassword,$newPassword) {
+    $user = $this->getUserByUsernameOrEmail($username,$username,true);
+    if ($user && password_verify($user['salt'].$currentPassword, $user['password'])) { // Login Successful
+      $this->logging->writeLog("Authentication",$username." successfully reset password","info");
+
+      if (isset($user['username'])) {
+        if ($user['type'] != 'SSO') {
+          if ($this->isPasswordComplex($newPassword)) {
+            // Hash the password for security
+            $pepper = $this->hashAndSalt($newPassword);
+
+            $currentDateTime = date('Y-m-d H:i:s');
+            $passwordExpiryDate = new DateTime();
+            $passwordExpiryDate->modify('+90 days');
+            $passwordExpires = $passwordExpiryDate->format('Y-m-d H:i:s');
+
+            try {
+              $stmt = $this->db->prepare("UPDATE users SET passwordexpires = :passwordexpires, password = :password, salt = :salt WHERE id = :id");
+              $stmt->execute([':id' => $user['id'], ':password' => $pepper['hash'], ':salt' => $pepper['salt'], ':passwordexpires' => $passwordExpires]);
+              return array(
+                'Status' => 'Success',
+                'Message' => 'Password reset successfully'
+              );
+            } catch (PDOException $e) {
+              return array(
+                  'Status' => 'Error',
+                  'Message' => $e
+              );
+            }
+          } else {
+            return array(
+              'Status' => 'Error',
+              'Message' => 'New password does not meet the complexity requirements'
+            );
+          }
+        } else {
+          return array(
+            'Status' => 'Error',
+            'Message' => 'Cannot reset password for SSO Account'
+          );
+        }
+      } else {
+        return array(
+          'Status' => 'Error',
+          'Message' => 'Failed to retrieve user information'
+        );
+      }
+    } else { // Verify failed
+      $this->logging->writeLog("Authentication",$username." failed to reset password","warning");
+      return array(
+        'Status' => 'Error',
+        'Message' => 'The submitted current password is invalid'
+      );
+    }
+  }
+
+  public function resetPassword($password) {
     if ($this->getAuth()['Authenticated']) {
       $CurrentAuth = $this->getAuth();
       $CurrentUser = $this->getUserByUsername($CurrentAuth['Username']);
@@ -418,6 +479,14 @@ class Auth {
   public function login($username, $password) {
     $user = $this->getUserByUsernameOrEmail($username,$username,true);
     if ($user && password_verify($user['salt'].$password, $user['password'])) { // Login Successful
+      $now = new DateTime();
+      $expires = new DateTime($user['passwordexpires']);
+      if ($expires < $now)  {
+        return array(
+          'Status' => 'Expired',
+          'Message' => 'Password Expired'
+        );
+      }
       // Update last login
       $this->updateLastLogin($user['id']);
 
