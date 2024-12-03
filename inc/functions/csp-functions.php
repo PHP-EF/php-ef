@@ -74,7 +74,7 @@ function QueryCSPMulti($MultiQuery,$APIKey = "",$Realm = "US") {
   }
   // Send the requests simultaneously
   $responses = Requests::request_multiple($requests);
-  
+
   $Results = [];
   $IdStepIn = 0;
   foreach ($responses as $index => $response) {
@@ -406,7 +406,7 @@ function GetB1ThreatActorsById($Actors) {
         }
         array_push($Results,$NewArr);
       }
-    } 
+    }
   }
   return $Results;
 }

@@ -63,7 +63,6 @@ if (!(isset($SkipCSS))) {
 
       <!-- Charts -->
       <script src="/assets/js/apexcharts.min.js"></script>
-      <script src="/assets/js/echarts.min.js"></script>
 
     </head>
     ';

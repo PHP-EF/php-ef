@@ -63,7 +63,7 @@ body.dark-theme .modal-body .fstlist {
   color: #000;
 }
 body.dark-theme,
-body.dark-theme .page-wrapper, 
+body.dark-theme .page-wrapper,
 body.dark-theme .page-content {
   background-color: #292f38;
 }
@@ -73,9 +73,6 @@ body.dark-theme .card {
 }
 body.dark-theme {
   background: #292f38;
-}
-body.dark-theme .chart-card {
-  background-color: #FFF!important;
 }
 body.dark-theme .list-group-item {
   background: #36393e;
@@ -115,6 +112,16 @@ body.dark-theme .accordion-body {
 body.dark-theme .popover {
 background-color: #2b2e34;
 }
+body.dark-theme .dropdown-menu {
+  background-color: #2b2e34;
+  border: solid 1px #110f1e
+}
+body.dark-theme .dropdown-menu a {
+  color: #FFF;
+}
+body.dark-theme .dropdown-menu a:hover {
+  background-color: #110f1e;
+}
 /* Dark Mode - Apex Charts */
 body.dark-theme .apexcharts-legend-text {
   color: #FFF!important;
@@ -130,7 +137,7 @@ body.light-theme .bootstrap-table .fixed-table-container .fixed-table-body .fixe
   color: #000;
 }
 body.light-theme,
-body.light-theme .page-wrapper, 
+body.light-theme .page-wrapper,
 body.light-theme .page-content {
   background-color: #f8f8f6;
 }
@@ -328,6 +335,17 @@ body .popover {
 .assessment-reporting .info-card {
   padding-bottom: 10px;
   height: calc(100% - 5px);
+}
+
+/* Chart Cards */
+.assessment-reporting .chart-card {
+  padding-bottom: 10px;
+  height: calc(100% - 15px);
+}
+
+/* Chart Cards */
+.assessment-reporting .bar-chart-card {
+  margin-bottom: 10px;
 }
 
 .assessment-reporting .info-card h6 {
@@ -1106,7 +1124,7 @@ body .bootstrap-table .fixed-table-container .fixed-table-body {
   margin: auto;
 }
 .progress-bar {
-  background: -webkit-linear-gradient(left, #FDDD00 0%, #34C33D 25%, #00BD4D 50%, #00CD93 75%, #00E1E6 100%);
+  background: -webkit-linear-gradient(left, #fedd01 0%, #00bd4d 35%, #00bd4d 65%, #00f9ff 100%);
 }
 
 /* Progress Action */
@@ -1137,7 +1155,7 @@ body .bootstrap-table .fixed-table-container .fixed-table-body {
 .spinner-bounce {
   margin: auto;
   width: 130px;
-  text-align: center; 
+  text-align: center;
 }
 .spinner-bounce .spinner-child {
   width: 35px;
@@ -1145,7 +1163,7 @@ body .bootstrap-table .fixed-table-container .fixed-table-body {
   border-radius: 100%;
   display: inline-block;
   -webkit-animation: spinner-bounce 1.4s ease-in-out 0s infinite both;
-          animation: spinner-bounce 1.4s ease-in-out 0s infinite both; 
+          animation: spinner-bounce 1.4s ease-in-out 0s infinite both;
 }
 .spinner-bounce .spinner-bounce1 {
   -webkit-animation-delay: -0.32s;
