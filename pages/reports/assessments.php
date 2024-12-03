@@ -71,19 +71,20 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
               <div class="card-body">
                 <h5 class="card-title">Granularity</span></h5>
                 <div class="d-flex align-items-center">
-                  <span>Granularity</span>&nbsp;<a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start granularity-select">
-                      <h6>Granularity</h6>
-                    </li>
-                    <li><a class="dropdown-item granularity-select" data-granularity="today">Today</a></li>
-                    <li><a class="dropdown-item granularity-select" data-granularity="last30Days">Last 30 Days</a></li>
-                    <li><a class="dropdown-item granularity-select" data-granularity="thisWeek">This Week</a></li>
-                    <li><a class="dropdown-item granularity-select" data-granularity="thisMonth">This Month</a></li>
-                    <li><a class="dropdown-item granularity-select" data-granularity="thisYear">This Year</a></li>
-                    <li><a class="dropdown-item granularity-select" data-granularity="lastMonth">Last Month</a></li>
-                    <li><a class="dropdown-item granularity-select" data-granularity="lastYear">Last Year</a></li>
-                  </ul>
+                  <div class="btn-group">
+                    <button id="granularityBtn" class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Last 30 Days
+                    </button>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item granularity-select preventDefault" data-granularity="today" href="#">Today</a>
+                      <a class="dropdown-item granularity-select preventDefault" data-granularity="last30Days" href="#">Last 30 Days</a>
+                      <a class="dropdown-item granularity-select preventDefault" data-granularity="thisWeek" href="#">This Week</a>
+                      <a class="dropdown-item granularity-select preventDefault" data-granularity="thisMonth" href="#">This Month</a>
+                      <a class="dropdown-item granularity-select preventDefault" data-granularity="thisYear" href="#">This Year</a>
+                      <a class="dropdown-item granularity-select preventDefault" data-granularity="lastMonth" href="#">Last Month</a>
+                      <a class="dropdown-item granularity-select preventDefault" data-granularity="lastYear" href="#">Last Year</a>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -120,8 +121,6 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
             <div class="card top-users overflow-auto">
               <div class="card-body pb-0">
                 <h5 class="card-title">Top Users | <span class="granularity-title">Last 30 Days</span></h5>
-
-                <!-- <table id="topUsersTable"></table> -->
                 <div id="topUsersChart"></div>
               </div>
             </div>
@@ -131,8 +130,6 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
             <div class="card top-customers overflow-auto">
               <div class="card-body pb-0">
                 <h5 class="card-title">Top Customers | <span class="granularity-title">Last 30 Days</span></h5>
-
-                <!-- <table id="topCustomersTable"></table> -->
                 <div id="topCustomersChart"></div>
               </div>
             </div>
@@ -144,8 +141,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
             <div class="card recent-assessments overflow-auto">
               <div class="card-body">
                 <h5 class="card-title">Assessments List | <span class="granularity-title">Last 30 Days</span></h5>
-
-                <table id="assessmentTable"></table>
+                <table id="assessmentTable" class="table-striped"></table>
               </div>
             </div>
           </div><!-- End Assessments List -->
@@ -163,6 +159,14 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
   }
 
   document.addEventListener("DOMContentLoaded", () => {
+    if ($('.dark-theme').length > 0) {
+      var chartTextColour = '#FFF';
+      var theme = 'dark';
+    } else {
+      var chartTextColour = '#000';
+      var theme = 'light';
+    }
+
     const renderChart = (granularity) => {
       $.get( "/api?f=getAssessmentReportsStats&granularity="+granularity).done(function( data, status ) {
         // Extract all unique dates
@@ -173,7 +177,6 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
             }
         }
         const categories = Array.from(categoriesSet).sort();
-        console.log(categories);
         // Prepare the series data
         const series = [];
         for (const key in data) {
@@ -186,40 +189,41 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
             }
         }
 
-        console.log(series);
-
         const options = {
-            chart: {
-              height: 350,
-              type: 'area',
-              toolbar: {
-                show: false
-              },
+          tooltip: {
+            theme: theme
+          },
+          chart: {
+            height: 350,
+            type: 'area',
+            toolbar: {
+              show: false
             },
-            markers: {
-              size: 4
-            },
-            colors: ['#4154f1', '#2eca6a', '#ff771d'],
-            fill: {
-              type: "gradient",
-              gradient: {
-                shadeIntensity: 1,
-                opacityFrom: 0.3,
-                opacityTo: 0.4,
-                stops: [0, 90, 100]
-              }
-            },
-            dataLabels: {
-              enabled: false
-            },
-            stroke: {
-              curve: 'smooth',
-              width: 2
-            },
-            series: series,
-            xaxis: {
-                categories: categories
+          },
+          markers: {
+            size: 4
+          },
+          colors: ['#4154f1', '#2eca6a', '#ff771d'],
+          fill: {
+            type: "gradient",
+            gradient: {
+              shadeIntensity: 1,
+              opacityFrom: 0.3,
+              opacityTo: 0.4,
+              stops: [0, 90, 100]
             }
+          },
+          dataLabels: {
+            enabled: false
+          },
+          stroke: {
+            curve: 'smooth',
+            width: 2
+          },
+          series: series,
+          xaxis: {
+              categories: categories
+          }
         };
 
         const chart = new ApexCharts(document.querySelector("#reportsChart"), options);
@@ -249,6 +253,9 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
           showExport: true,
           exportTypes: ['json', 'xml', 'csv', 'txt', 'excel', 'sql'],
           showColumns: true,
+          filterControl: true,
+          filterControlVisible: false,
+          showFilterControlSwitch: true,
           columns: [{
             field: 'id',
             title: 'ID',
@@ -258,25 +265,30 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
           {
             field: 'customer',
             title: 'Customer',
-            sortable: true
+            sortable: true,
+            filterControl: 'select'
           },{
             field: 'type',
             title: 'Type',
-            sortable: true
+            sortable: true,
+            filterControl: 'select'
           },{
             field: 'userid',
             title: 'User ID',
             sortable: true,
-            visible: false
+            visible: false,
+            filterControl: 'select'
           },{
             field: 'apiuser',
             title: 'API User',
-            sortable: true
+            sortable: true,
+            filterControl: 'select'
           },{
             field: 'created',
             title: 'Generated At',
             sortable: true,
-            formatter: 'dateFormatter'
+            formatter: 'dateFormatter',
+            filterControl: 'input'
           }]
         });
         updateTopApiUsers(data,granularity);
@@ -302,7 +314,10 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
         },
         legend: {
           top: '5%',
-          left: 'center'
+          left: 'center',
+          textStyle: {
+            color: chartTextColour // Set your desired color here
+          }
         },
         series: [{
           name: 'Assessment Type',
@@ -311,7 +326,8 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
           avoidLabelOverlap: false,
           label: {
             show: false,
-            position: 'center'
+            position: 'center',
+            color: chartTextColour
           },
           emphasis: {
             label: {
@@ -329,81 +345,97 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
     }
 
     const updateTopApiUsers = (data,granularity) => {
-        const apiUserCount = {};
+      const apiUserCount = {};
 
-        data.forEach(entry => {
-            const apiUser = entry.apiuser;
-            if (apiUser) {
-                if (!apiUserCount[apiUser]) {
-                    apiUserCount[apiUser] = 0;
-                }
-                apiUserCount[apiUser]++;
-            }
-        });
-
-        const sortedApiUsers = Object.entries(apiUserCount).sort((a, b) => b[1] - a[1]);
-        const apiUsers = sortedApiUsers.map(user => ({ apiuser: user[0], count: user[1] }));
-        const options = {
-          chart: {
-              type: 'bar',
-              height: 350
-          },
-          plotOptions: {
-              bar: {
-                  horizontal: true
-              }
-          },
-          dataLabels: {
-              enabled: false
-          },
-          series: [{
-              data: apiUsers.map(user => user.count)
-          }],
-          xaxis: {
-              categories: apiUsers.map(user => user.apiuser)
+      data.forEach(entry => {
+        const apiUser = entry.apiuser;
+        if (apiUser) {
+          if (!apiUserCount[apiUser]) {
+              apiUserCount[apiUser] = 0;
           }
-        };
-        const chart = new ApexCharts(document.querySelector("#topUsersChart"), options);
-        chart.render();
+          apiUserCount[apiUser]++;
+        }
+      });
+
+      const sortedApiUsers = Object.entries(apiUserCount).sort((a, b) => b[1] - a[1]);
+      const apiUsers = sortedApiUsers.map(user => ({ apiuser: user[0], count: user[1] }));
+      const options = {
+        theme: {
+          pallette: 'pallette1'
+        },
+        tooltip: {
+          theme: theme
+        },
+        chart: {
+          type: 'bar',
+          height: 350
+        },
+        plotOptions: {
+          bar: {
+            horizontal: true,
+            distributed: true // This enables different colors for each bar
+          }
+        },
+        dataLabels: {
+          enabled: false
+        },
+        series: [{
+          data: apiUsers.map(user => user.count),
+          name: 'Assessment Count'
+        }],
+        xaxis: {
+          categories: apiUsers.map(user => user.apiuser)
+        }
+      };
+      const chart = new ApexCharts(document.querySelector("#topUsersChart"), options);
+      chart.render();
     }
 
     const updateTopCustomers = (data,granularity) => {
-        const customerCount = {};
+      const customerCount = {};
 
-        data.forEach(entry => {
-            const customer = entry.customer;
-            if (customer) {
-                if (!customerCount[customer]) {
-                    customerCount[customer] = 0;
-                }
-                customerCount[customer]++;
-            }
-        });
-
-        const sortedCustomers = Object.entries(customerCount).sort((a, b) => b[1] - a[1]);
-        const customers = sortedCustomers.map(user => ({ customer: user[0], count: user[1] }));
-        const options = {
-          chart: {
-              type: 'bar',
-              height: 350
-          },
-          plotOptions: {
-              bar: {
-                  horizontal: true
-              }
-          },
-          dataLabels: {
-              enabled: false
-          },
-          series: [{
-              data: customers.map(user => user.count)
-          }],
-          xaxis: {
-              categories: customers.map(user => user.customer)
+      data.forEach(entry => {
+        const customer = entry.customer;
+        if (customer) {
+          if (!customerCount[customer]) {
+              customerCount[customer] = 0;
           }
-        };
-        const chart = new ApexCharts(document.querySelector("#topCustomersChart"), options);
-        chart.render();
+          customerCount[customer]++;
+        }
+      });
+
+      const sortedCustomers = Object.entries(customerCount).sort((a, b) => b[1] - a[1]);
+      const customers = sortedCustomers.map(user => ({ customer: user[0], count: user[1] }));
+      const options = {
+        theme: {
+          pallette: 'pallette1'
+        },
+        tooltip: {
+          theme: theme
+        },
+        chart: {
+          type: 'bar',
+          height: 350
+        },
+        plotOptions: {
+          bar: {
+            horizontal: true,
+            distributed: true // This enables different colors for each bar
+          }
+        },
+        dataLabels: {
+          enabled: false
+        },
+        series: [{
+          data: customers.map(user => user.count),
+          name: 'Assessment Count'
+        }],
+        xaxis: {
+          categories: customers.map(user => user.customer)
+        },
+      };
+      const chart = new ApexCharts(document.querySelector("#topCustomersChart"), options);
+      chart.render();
     }
 
     $('.granularity-select').on('click', function(event) {
@@ -411,6 +443,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
       renderChart($(event.currentTarget).data('granularity'));
       updateRecentAssessments($(event.currentTarget).data('granularity'));
       $('.granularity-title').text($(event.currentTarget).text());
+      $('#granularityBtn').text($(event.currentTarget).text())
     });
 
     // Initial render

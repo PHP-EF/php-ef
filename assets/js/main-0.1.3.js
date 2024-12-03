@@ -265,7 +265,6 @@ function loadiFrame(element = null) {
   if (element != null) {
     var hashsplit = element.split('#page=');
     var linkElem = $('a[href="#page='+hashsplit[1]+'"]');
-    console.log(element);
     $('.toggleFrame').removeClass('active');
     linkElem.addClass('active');
     if (hashsplit[1].startsWith('prx')) {
@@ -289,7 +288,6 @@ function loadiFrame(element = null) {
           doubleParent.parent().parent().parent().addClass('showMenu');
       }
     } else if (doubleParent.hasClass('sub-menu') && doubleParent.not('.blank')) {
-      console.log(doubleParent)
       if (!doubleParent.parent().hasClass('showMenu')) {
         doubleParent.parent().addClass('showMenu');
       }

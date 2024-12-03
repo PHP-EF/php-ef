@@ -115,6 +115,15 @@ body.dark-theme .accordion-body {
 body.dark-theme .popover {
 background-color: #2b2e34;
 }
+/* Dark Mode - Apex Charts */
+body.dark-theme .apexcharts-legend-text {
+  color: #FFF!important;
+}
+body.dark-theme .apexcharts-xaxis tspan,
+body.dark-theme .apexcharts-yaxis tspan {
+  fill: #FFF;
+}
+
 /* Light Mode */
 body.light-theme .bootstrap-table .fixed-table-container .fixed-table-body .fixed-table-loading.table.table-bordered.table-hover.open {
   background: #f8f8f6;
@@ -318,11 +327,12 @@ body .popover {
 /* Info Cards */
 .assessment-reporting .info-card {
   padding-bottom: 10px;
+  height: calc(100% - 5px);
 }
 
 .assessment-reporting .info-card h6 {
   font-size: 28px;
-  color: #012970;
+  /* color: #012970; */
   font-weight: 700;
   margin: 0;
   padding: 0;
@@ -439,6 +449,11 @@ body .popover {
 /* Recent Assessments */
 .assessment-reporting .recent-assessments {
   font-size: 14px;
+}
+
+/* Granularity */
+.granularity-card button {
+  width: 150px;
 }
 
 /* Reports End */
