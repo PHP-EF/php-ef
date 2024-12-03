@@ -31,7 +31,7 @@ class TemplateConfig {
     public function getTemplateConfigById($id) {
         $stmt = $this->db->prepare("SELECT * FROM templates WHERE id = :id");
         $stmt->execute([':id' => $id]);
-    
+
         $templates = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($templates) {
           return $templates;
@@ -43,7 +43,7 @@ class TemplateConfig {
     public function getActiveTemplate() {
         $stmt = $this->db->prepare("SELECT * FROM templates WHERE Status = :Status");
         $stmt->execute([':Status' => 'Active']);
-    
+
         $template = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($template) {
           return $template;
@@ -81,7 +81,7 @@ class TemplateConfig {
                 foreach ($ActiveTemplates as $AT) {
                     $setStatusStmt = $this->db->prepare("UPDATE templates SET Status = :Status WHERE id == :id AND id != :thisid");
                     $setStatusStmt->execute([':Status' => 'Inactive',':id' => $AT['id'],':thisid' => $id]);
-                }   
+                }
             }
             return array(
                 'Status' => 'Success',
@@ -128,7 +128,7 @@ class TemplateConfig {
                     foreach ($ActiveTemplates as $AT) {
                         $setStatusStmt = $this->db->prepare("UPDATE templates SET Status = :Status WHERE id == :id AND id != :thisid");
                         $setStatusStmt->execute([':Status' => 'Inactive',':id' => $AT['id'],':thisid' => $id]);
-                    }   
+                    }
                 }
                 $prepare[] = 'Status = :Status';
                 $execute[':Status'] = urldecode($Status);
@@ -258,7 +258,7 @@ class ThreatActorConfig {
 
     public function newThreatActorConfig($Name,$SVG,$PNG,$URLStub) {
         if ($Name != "") {
-            $ThreatActorConfig = $this->getThreatActorConfigs(); 
+            $ThreatActorConfig = $this->getThreatActorConfigs();
             try {
                 // Check if filename already exists
                 $checkStmt = $this->db->prepare("SELECT COUNT(*) FROM threat_actors WHERE Name = :Name");
@@ -295,7 +295,7 @@ class ThreatActorConfig {
             );
         }
     }
-    
+
     public function setThreatActorConfig($id,$Name,$SVG,$PNG,$URLStub) {
         if ($Name != "") {
             $ThreatActorConfig = $this->getThreatActorConfigById($id);
@@ -354,7 +354,7 @@ class ThreatActorConfig {
             );
         }
     }
-    
+
     public function removeThreatActorConfig($id) {
         $ThreatActorConfig = $this->getThreatActorConfigById($id);
         if ($ThreatActorConfig) {

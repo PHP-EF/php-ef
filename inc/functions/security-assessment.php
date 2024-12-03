@@ -431,10 +431,10 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID,$unname
             $ThreatActorSlideStart = $ib->templates->getActiveTemplate()['ThreatActorSlide'];
             // Calculate the slide position based on above value
             $ThreatActorSlidePosition = $ThreatActorSlideStart-2;
-    
+
             // Tag Numbers Start
             $TagStart = 100;
-    
+
             // Open PPTX Presentation _rels XML
             $xml_rels = new DOMDocument('1.0', 'utf-8');
             $xml_rels->formatOutput = true;
@@ -475,7 +475,7 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID,$unname
                 $ThreatActorIconString = '<p:pic><p:nvPicPr><p:cNvPr id="36" name="Graphic 35"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{898E1A10-3ABF-AED0-2C71-1F26BBB6304B}"/></a:ext></a:extLst></p:cNvPr><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="rId115"><a:extLst><a:ext uri="{96DAC541-7B7A-43D3-8B79-37D633B846F1}"><asvg:svgBlip xmlns:asvg="http://schemas.microsoft.com/office/drawing/2016/SVG/main" r:embed="rId115"/></a:ext></a:extLst></a:blip><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="5522998" y="2349624"/><a:ext cx="1246722" cy="1582377"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic></p:spTree>';
                 $TASFile = str_replace('</p:spTree>',$ThreatActorIconString,$TASFile);
                 // Append Virus Total Stuff if applicable to the slide
-    
+
                 // Workaround Start
                 //if (isset($TAI['related_indicators_with_dates'])) {
                 //    foreach ($TAI['related_indicators_with_dates'] as $TAII) {
@@ -484,7 +484,7 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID,$unname
                     foreach ($TAI['observed_iocs'] as $TAII) {
                         if (isset($TAII['ThreatActors.vtfirstdetectedts'])) {
                         // End of workaround
-    
+
                             $TASFileString = '<p:cxnSp><p:nvCxnSpPr><p:cNvPr id="6" name="Straight Connector 5"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{3B07D3CE-83DF-306C-1740-B15E60D50B68}"/></a:ext></a:extLst></p:cNvPr><p:cNvCxnSpPr><a:cxnSpLocks/></p:cNvCxnSpPr><p:nvPr/></p:nvCxnSpPr><p:spPr><a:xfrm><a:off x="2663429" y="6816436"/><a:ext cx="0" cy="445863"/></a:xfrm><a:prstGeom prst="line"><a:avLst/></a:prstGeom><a:ln w="9525"><a:solidFill><a:schemeClr val="accent3"><a:lumMod val="40000"/><a:lumOff val="60000"/></a:schemeClr></a:solidFill><a:prstDash val="dash"/></a:ln></p:spPr><p:style><a:lnRef idx="1"><a:schemeClr val="accent1"/></a:lnRef><a:fillRef idx="0"><a:schemeClr val="accent1"/></a:fillRef><a:effectRef idx="0"><a:schemeClr val="accent1"/></a:effectRef><a:fontRef idx="minor"><a:schemeClr val="tx1"/></a:fontRef></p:style></p:cxnSp><p:sp><p:nvSpPr><p:cNvPr id="11" name="Rectangle 10"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{5CF57A2B-9E16-9EF8-CC46-DEACEC1E9222}"/></a:ext></a:extLst></p:cNvPr><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="2390809" y="6646115"/><a:ext cx="546397" cy="151573"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:solidFill><a:schemeClr val="bg1"/></a:solidFill><a:ln><a:noFill/></a:ln></p:spPr><p:style><a:lnRef idx="2"><a:schemeClr val="accent1"><a:shade val="50000"/></a:schemeClr></a:lnRef><a:fillRef idx="1"><a:schemeClr val="accent1"/></a:fillRef><a:effectRef idx="0"><a:schemeClr val="accent1"/></a:effectRef><a:fontRef idx="minor"><a:schemeClr val="lt1"/></a:fontRef></p:style><p:txBody><a:bodyPr rtlCol="0" anchor="ctr"/><a:lstStyle/><a:p><a:pPr algn="ctr"/><a:endParaRPr lang="en-US" dirty="0" err="1"><a:solidFill><a:srgbClr val="101820"/></a:solidFill></a:endParaRPr></a:p></p:txBody></p:sp><p:pic><p:nvPicPr><p:cNvPr id="14" name="Graphic 13"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{6680C076-3929-2FD5-9B2D-C8EEC6FB5791}"/></a:ext></a:extLst></p:cNvPr><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="rId120"><a:extLst><a:ext uri="{96DAC541-7B7A-43D3-8B79-37D633B846F1}"><asvg:svgBlip xmlns:asvg="http://schemas.microsoft.com/office/drawing/2016/SVG/main" r:embed="rId121"/></a:ext></a:extLst></a:blip><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="2407408" y="6670008"/><a:ext cx="499438" cy="100897"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic><p:sp><p:nvSpPr><p:cNvPr id="15" name="Oval 14"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{BF608D1F-2449-B2E7-8286-C23F058ABA75}"/></a:ext></a:extLst></p:cNvPr><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="2641147" y="7268668"/><a:ext cx="45719" cy="45719"/></a:xfrm><a:prstGeom prst="ellipse"><a:avLst/></a:prstGeom><a:solidFill><a:schemeClr val="accent3"><a:lumMod val="20000"/><a:lumOff val="80000"/></a:schemeClr></a:solidFill><a:ln><a:noFill/></a:ln></p:spPr><p:style><a:lnRef idx="2"><a:schemeClr val="accent1"><a:shade val="50000"/></a:schemeClr></a:lnRef><a:fillRef idx="1"><a:schemeClr val="accent1"/></a:fillRef><a:effectRef idx="0"><a:schemeClr val="accent1"/></a:effectRef><a:fontRef idx="minor"><a:schemeClr val="lt1"/></a:fontRef></p:style><p:txBody><a:bodyPr rtlCol="0" anchor="ctr"/><a:lstStyle/><a:p><a:pPr algn="ctr"/><a:endParaRPr lang="en-US" dirty="0" err="1"><a:solidFill><a:srgbClr val="101820"/></a:solidFill></a:endParaRPr></a:p></p:txBody></p:sp></p:spTree>';
                             $TASFile = str_replace('</p:spTree>',$TASFileString,$TASFile);
                             $VTIndicatorFound = true;
@@ -531,7 +531,7 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID,$unname
                     $xml_tas_f->appendXML('<Relationship Id="rId115" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/logo-only.png"/>');
                     $xml_tas_f->appendXML('<Relationship Id="rId116" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/logo-only.svg"/>');
                 }
-    
+
                 // Virus Total PNG / SVG
                 if ($VTIndicatorFound) {
                     copy($AssetsDir.'/images/Other/virustotal.png',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/virustotal.png');
@@ -539,7 +539,7 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID,$unname
                     $xml_tas_f->appendXML('<Relationship Id="rId120" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/virustotal.png"/>');
                     $xml_tas_f->appendXML('<Relationship Id="rId121" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/virustotal.svg"/>');
                 }
-    
+
                 // Infoblox Blog URL
                 // ** // Use the following code to link based on presence of 'infoblox_references' parameter
                 // if ($InfobloxReferenceFound) {
@@ -552,7 +552,7 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID,$unname
                     $URL = $KnownActor['URLStub'];
                     $xml_tas_f->appendXML('<Relationship Id="rId122" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="'.$URL.'" TargetMode="External"/>');
                 }
-    
+
                 $xml_tas->getElementsByTagName('Relationships')->item(0)->appendChild($xml_tas_f);
                 $xml_tas->save($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/_rels/slide'.$SlideNumber.'.xml.rels');
                 $TagStart += 10;
@@ -560,16 +560,16 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID,$unname
                 $SlideNumber++;
                 $ThreatActorSlideCount--;
             }
-    
+
             // Append Elements to Core XML Files
             $xml_rels->getElementsByTagName('Relationships')->item(0)->appendChild($xml_rels_f);
             // Append new slides to specific position
             $xml_pres->getElementsByTagName('sldId')->item($ThreatActorSlidePosition)->after($xml_pres_f);
-    
+
             // Save Core XML Files
             $xml_rels->save($FilesDir.'/reports/report-'.$UUID.'/ppt/_rels/presentation.xml.rels');
             $xml_pres->save($FilesDir.'/reports/report-'.$UUID.'/ppt/presentation.xml');
-    
+
             //
             // End of Threat Actors
             //

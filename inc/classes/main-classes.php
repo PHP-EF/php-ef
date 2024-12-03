@@ -135,13 +135,13 @@ class Logging {
       $log->$Level($Message);
     }
   }
-  
+
   public function getLogFiles() {
     global $ib;
     $files = array_diff(scandir(__DIR__.'/../'.$this->config->getConfig("System","logdirectory")),array('.', '..','php.error.log'));
     return $files;
   }
-  
+
   public function getLog($date = "") {
     $this->writeLog("LOG","Queried logs","debug");
     if ($date == "") {

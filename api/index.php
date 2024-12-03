@@ -359,7 +359,7 @@ if (!($_REQUEST['f'])) {
                         }
                         $ib->config->setConfig("SAML","sp",$spconfig);
                     }
-                    
+
                     // IdP
                     if (isset($_POST['idpEntityId']) || isset($_POST['idpSsoUrl']) || isset($_POST['idpSloUrl']) || isset($_POST['idpX509Cert'])) {
                         $idpconfig = $config['SAML']['idp'];
@@ -544,7 +544,7 @@ if (!($_REQUEST['f'])) {
                             if (isValidFileType($_FILES['pptx']['name'],['pptx'])) {
                                 $pptxFileName = basename($_FILES['pptx']['name']);
                                 $pptxFilePath = $uploadDir . urldecode($_POST['TemplateName']) . '.pptx';
-                            
+
                                 // Move the uploaded file to the designated directory
                                 if (move_uploaded_file($_FILES['pptx']['tmp_name'], $pptxFilePath)) {
                                     echo json_encode(array(
@@ -662,7 +662,7 @@ if (!($_REQUEST['f'])) {
                             if (isValidFileType($_FILES['svgImage']['name'],['svg'])) {
                                 $svgFileName = basename($_FILES['svgImage']['name']);
                                 $svgFilePath = $uploadDir . urldecode($_POST['svgFileName']) . '.svg';
-                            
+
                                 // Move the uploaded file to the designated directory
                                 if (move_uploaded_file($_FILES['svgImage']['tmp_name'], $svgFilePath)) {
                                     $response['svg'] = "SVG image uploaded successfully: $svgFileName";
@@ -684,7 +684,7 @@ if (!($_REQUEST['f'])) {
                             break;
                         }
                     }
-                    
+
                     // Handle PNG image upload
                     if (isset($_FILES['pngImage']) && $_FILES['pngImage']['error'] == UPLOAD_ERR_OK) {
                         if (isset($_POST['pngFileName'])) {
@@ -759,7 +759,7 @@ if (!($_REQUEST['f'])) {
                                 $port = explode(',',$_GET['port']);
                             }
                         }
-                        
+
                         $DNSToolbox = new DNSToolbox();
 
                         $ib->logging->writeLog("DNSToolbox","A query was performed using type: ".$_GET['request'],"debug",$_GET);
@@ -808,13 +808,6 @@ if (!($_REQUEST['f'])) {
                 }
             break;
             }
-        case 'getAssessmentReportTypes':
-            if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS")) {
-                if (checkRequestMethod('GET')) {
-                    echo json_encode($ib->reporting->getAssessmentReportTypes(),JSON_PRETTY_PRINT);
-                }
-            }
-            break;
         case 'getAssessmentReports':
             if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS")) {
                 if (checkRequestMethod('GET')) {

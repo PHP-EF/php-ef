@@ -110,7 +110,7 @@
         </div>
         <h4>Groups</h4>
         <p>Enable or Disable the following groups to provide granular control to specific areas of the Infoblox SA Tools Portal.</p>
-	      <div class="list-group mb-5 shadow" id="modalListGroup"></div> 
+	      <div class="list-group mb-5 shadow" id="modalListGroup"></div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -233,7 +233,7 @@
   }
 
   window.actionEvents = {
-    'click .edit': function (e, value, row, index) { 
+    'click .edit': function (e, value, row, index) {
       listUserConfig(row);
       listGroups(row);
       $('#editModal').modal('show');
@@ -476,7 +476,7 @@
             filterControl: 'input',
             sortable: false,
             visible: false,
-            formatter: 'datetimeFormatter'            
+            formatter: 'datetimeFormatter'
           },{
             field: 'passwordexpires',
             title: 'Password Expiry Date',
@@ -520,7 +520,7 @@
     $('#newUserPassword, #newUserPassword2').on('change', function() {
       var password = $('#newUserPassword').val();
       var confirmPassword = $('#newUserPassword2').val();
-      
+
       if (password !== confirmPassword) {
         if (password !== "" && confirmPassword !== "") {
           toast("Warning","","The entered passwords do not match","danger","3000");
@@ -537,7 +537,7 @@
     $('#editUserPassword, #editUserPassword2').on('change', function() {
       var password = $('#editUserPassword').val();
       var confirmPassword = $('#editUserPassword2').val();
-      
+
       if (password !== confirmPassword) {
         if (password !== "" && confirmPassword !== "") {
           toast("Warning","","The entered passwords do not match","danger","3000");
