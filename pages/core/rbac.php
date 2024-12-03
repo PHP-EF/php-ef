@@ -15,7 +15,7 @@
         <table  data-url="/api?f=GetRBAC&action=listgroups"
           data-toggle="table"
           data-search="true"
-          data-filter-control="true" 
+          data-filter-control="true"
           data-show-refresh="true"
           data-pagination="true"
           data-toolbar="#toolbar"
@@ -69,7 +69,7 @@
 	      <hr>
         <h4>Group Roles</h4>
         <p>Enable or Disable the following roles to provide granular control to specific areas of the Infoblox SA Tools Portal.</p>
-	      <div class="list-group mb-5 shadow" id="modalListGroup"></div> 
+	      <div class="list-group mb-5 shadow" id="modalListGroup"></div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -194,7 +194,7 @@
             toast("Success","","Successfully removed "+targetid+" from "+group,"success");
           }
         }
-      }); 
+      });
     });
     });
   }
@@ -208,7 +208,7 @@
   }
 
   window.actionEvents = {
-    'click .edit': function (e, value, row, index) { 
+    'click .edit': function (e, value, row, index) {
       roleList(row);
       $('#editModal').modal('show');
     },
@@ -260,7 +260,7 @@
         }
       }).fail(function( data, status ) {
           toast("API Error","","Failed to add new group","danger","30000");
-      }); 
+      });
   });
 
 

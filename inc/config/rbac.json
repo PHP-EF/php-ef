@@ -40,10 +40,12 @@
         "Name": "Security Assessment Admins",
         "Description": "This group gives users access to manage the Security Assessment and Threat Actor configuration",
         "PermittedResources": [
-            "ADMIN-SECASS"
+            "ADMIN-SECASS",
+            "REPORT-ASSESSMENTS"
         ],
         "PermittedMenus": [
-            "ADMIN-Menu"
+            "ADMIN-Menu",
+            "REPORT-Menu"
         ]
     }
 }

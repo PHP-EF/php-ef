@@ -25,7 +25,7 @@
           <table  data-url="/api?f=getThreatActorConfig"
             data-toggle="table"
             data-search="true"
-            data-filter-control="true" 
+            data-filter-control="true"
             data-show-refresh="true"
             data-pagination="true"
             data-toolbar="#toolbar"
@@ -50,7 +50,7 @@
         </div>
 
         <hr>
-        
+
         <div class="card border-secondary">
           <div class="card-title">
             <h5>Template Configuration</h5>
@@ -59,7 +59,7 @@
           <table  data-url="/api?f=getSecurityAssessmentTemplates"
             data-toggle="table"
             data-search="true"
-            data-filter-control="true" 
+            data-filter-control="true"
             data-show-refresh="true"
             data-pagination="true"
             data-toolbar="#toolbar"
@@ -440,7 +440,7 @@
   });
 
   window.actionEvents = {
-    'click .editThreatActor': function (e, value, row, index) { 
+    'click .editThreatActor': function (e, value, row, index) {
       listThreatActor(row);
       $('#editThreatActorModal').modal('show');
     },
@@ -462,7 +462,7 @@
         })
       }
     },
-    'click .editTemplate': function (e, value, row, index) { 
+    'click .editTemplate': function (e, value, row, index) {
       listTemplate(row);
       $('#editTemplateModal').modal('show');
     },

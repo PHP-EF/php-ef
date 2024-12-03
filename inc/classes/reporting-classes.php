@@ -2,12 +2,12 @@
 
 class Reporting {
     private $db;
-  
+
     public function __construct($db) {
       $this->db = $db;
       $this->createAssessmentReportingTable();
     }
-  
+
     private function createAssessmentReportingTable() {
       // Create users table if it doesn't exist
       $this->db->exec("CREATE TABLE IF NOT EXISTS reporting_assessments (
@@ -24,20 +24,7 @@ class Reporting {
         $stmt = $this->db->prepare("INSERT INTO reporting_assessments (type, apiuser, customer, created) VALUES (:type, :apiuser, :customer, :created)");
         $stmt->execute([':type' => $type,':apiuser' => $apiuser,':customer' => $customer,':created' => date('Y-m-d H:i:s')]);
     }
-  
-    public function getAssessmentReportTypes() {
-      try {
-        $stmt = $this->db->prepare("SELECT DISTINCT type FROM reporting_assessments");
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-      } catch (PDOException $e) {
-          return array(
-              'Status' => 'Error',
-              'Message' => $e
-          );
-      }
-    }
-  
+
     public function getAssessmentReports($granularity) {
       switch ($granularity) {
         case 'today':
@@ -102,10 +89,10 @@ class Reporting {
     private function filterDataByGranularity($data, $granularity) {
       $filteredData = [];
       $currentDate = new DateTime();
-      
+
       foreach ($data as $item) {
           $createdDate = new DateTime($item['created']);
-          
+
           switch ($granularity) {
               case 'today':
                   if ($createdDate->format('Y-m-d') == $currentDate->format('Y-m-d')) {
@@ -150,18 +137,18 @@ class Reporting {
                   break;
           }
       }
-      
+
       return $filteredData;
   }
-  
+
   // Function to summarize data by type and date
   private function summarizeByTypeAndDate($data, $granularity) {
       $summary = [];
-      
+
       foreach ($data as $item) {
           $type = $item['type'];
           $createdDate = new DateTime($item['created']);
-          
+
           switch ($granularity) {
               case 'today':
                   $dateKey = $createdDate->format('Y-m-d H:00');
@@ -183,18 +170,18 @@ class Reporting {
                   $dateKey = $createdDate->format('Y-m');
                   break;
           }
-          
+
           if (!isset($summary[$type])) {
               $summary[$type] = [];
           }
-          
+
           if (!isset($summary[$type][$dateKey])) {
               $summary[$type][$dateKey] = 0;
           }
-          
+
           $summary[$type][$dateKey]++;
       }
-      
+
       return $summary;
   }
 }

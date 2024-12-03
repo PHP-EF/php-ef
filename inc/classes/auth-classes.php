@@ -158,7 +158,7 @@ class Auth {
       $passwordExpires = $passwordExpiryDate->format('Y-m-d H:i:s');
 
       $stmt = $this->db->prepare("INSERT INTO users (username, firstname, surname, email, password, salt, groups, created, passwordexpires, type) VALUES (:username, :firstname, :surname, :email, :password, :salt, :groups, :created, :passwordexpires, :type)");
-      
+
       try {
           // Check if username or email already exists
           $checkStmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE username = :username OR email = :email");
@@ -334,12 +334,12 @@ class Auth {
           if ($this->isPasswordComplex($password)) {
             // Hash the password for security
             $pepper = $this->hashAndSalt($password);
-  
+
             $currentDateTime = date('Y-m-d H:i:s');
             $passwordExpiryDate = new DateTime();
             $passwordExpiryDate->modify('+90 days');
             $passwordExpires = $passwordExpiryDate->format('Y-m-d H:i:s');
-  
+
             try {
               $stmt = $this->db->prepare("UPDATE users SET passwordexpires = :passwordexpires, password = :password, salt = :salt WHERE id = :id");
               $stmt->execute([':id' => $CurrentUser['id'], ':password' => $pepper['hash'], ':salt' => $pepper['salt'], ':passwordexpires' => $passwordExpires]);
@@ -605,7 +605,7 @@ class Auth {
         return $e->getMessage();
     }
   }
-  
+
   public function getAuth() {
     if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
       $IPAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
@@ -615,7 +615,7 @@ class Auth {
       $IPAddress = "N/A";
     }
     $IPAddress = explode(':',$IPAddress)[0];
-    
+
     if (isset($_COOKIE['jwt'])) {
       $secretKey = $this->config->getConfig()['Security']['salt']; // Change this to a secure key
       if ($this->CoreJwt->isRevoked($_COOKIE['jwt']) == true) {
@@ -638,16 +638,16 @@ class Auth {
           );
         }
       }
- 
+
       if ($decodedJWT) {
         if (isset($decodedJWT->username)) {
           $Username = $decodedJWT->username;
         } else {
           $Username = null;
         }
-  
+
         $FullNameArr = [];
-        
+
         if (isset($decodedJWT->firstname)) {
           $Firstname = $decodedJWT->firstname;
           $FullNameArr[] = $Firstname;
@@ -671,7 +671,7 @@ class Auth {
         } else {
           $Email = null;
         }
-  
+
         if (isset($decodedJWT->groups[0]) && $decodedJWT->groups[0] != "") {
           $decodedJWT->groups[] = 'authenticated';
           $decodedJWT->groups[] = 'everyone';
@@ -688,7 +688,7 @@ class Auth {
         } else {
           $Type = null;
         }
-  
+
         $AuthResult = array(
           'Authenticated' => true,
           'Username' => $Username,
@@ -860,7 +860,7 @@ class RBAC {
         }
     }
   }
-  
+
   public function setRBAC($GroupID,$GroupName,$Description = null,$Key = null,$Value = null) {
     $rbac = $this->getRBAC();
     $roles = $this->getRBAC(null,"listroles");
@@ -881,7 +881,7 @@ class RBAC {
               file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
               $this->logging->writeLog("RBAC","Added $Key to ".$rbac[$GroupID]['Name'],"warning",$rbac[$GroupID]);
             }
-  
+
             ## Add Menus to Array
             foreach ($roles['Resources'][$Key]['PermittedMenus'] as $PermittedMenu) {
               if (in_array($PermittedMenu,$rbac[$GroupID]['PermittedMenus'])) {
@@ -953,7 +953,7 @@ class RBAC {
     }
     return $rbac;
   }
-  
+
   public function deleteRBAC($Group) {
     $this->logging->writeLog("RBAC","Deleted RBAC Group: $Group","debug",$_REQUEST);
     $rbacJson = file_get_contents($this->rbacJson);
