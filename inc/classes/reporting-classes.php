@@ -20,7 +20,7 @@ class Reporting {
       )");
     }
 
-    public function newReportEntry($type,$userid = '',$apiuser,$customer) {
+    public function newReportEntry($type,$apiuser,$customer,$userid = '') {
         $stmt = $this->db->prepare("INSERT INTO reporting_assessments (type, apiuser, customer, created) VALUES (:type, :apiuser, :customer, :created)");
         $stmt->execute([':type' => $type,':apiuser' => $apiuser,':customer' => $customer,':created' => date('Y-m-d H:i:s')]);
     }
@@ -129,7 +129,6 @@ class Reporting {
                   break;
               case 'last30Days':
                 $thirtyDaysAgo = (new DateTime())->modify('-30 days');
-                $createdDate = new DateTime($item['createdDate']);
                 if ($createdDate >= $thirtyDaysAgo) {
                   $filteredData[] = $item;
                 }
