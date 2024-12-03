@@ -120,7 +120,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
           <div class="col-6">
             <div class="card top-users overflow-auto">
               <div class="card-body pb-0">
-                <h5 class="card-title">Top Users | <span class="granularity-title">Last 30 Days</span></h5>
+                <h5 class="card-title">Top 10 Users | <span class="granularity-title">Last 30 Days</span></h5>
                 <div id="topUsersChart"></div>
               </div>
             </div>
@@ -129,7 +129,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
           <div class="col-6">
             <div class="card top-customers overflow-auto">
               <div class="card-body pb-0">
-                <h5 class="card-title">Top Customers | <span class="granularity-title">Last 30 Days</span></h5>
+                <h5 class="card-title">Top 10 Customers | <span class="granularity-title">Last 30 Days</span></h5>
                 <div id="topCustomersChart"></div>
               </div>
             </div>
@@ -166,6 +166,8 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
       var chartTextColour = '#000';
       var theme = 'light';
     }
+
+    var chartColorPallete = ['#FDDD00','#E1DD1A','#C5DE33','#A9DE4D','#8DDF66','#70DF80','#54E099','#38E0B3','#1CE1CC','#00E1E6'];
 
     const renderChart = (granularity) => {
       $.get( "/api?f=getAssessmentReportsStats&granularity="+granularity).done(function( data, status ) {
@@ -358,11 +360,8 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
       });
 
       const sortedApiUsers = Object.entries(apiUserCount).sort((a, b) => b[1] - a[1]);
-      const apiUsers = sortedApiUsers.map(user => ({ apiuser: user[0], count: user[1] }));
+      const apiUsers = sortedApiUsers.slice(0,10).map(user => ({ apiuser: user[0], count: user[1] }));
       const options = {
-        theme: {
-          pallette: 'pallette1'
-        },
         tooltip: {
           theme: theme
         },
@@ -385,7 +384,8 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
         }],
         xaxis: {
           categories: apiUsers.map(user => user.apiuser)
-        }
+        },
+        colors: chartColorPallete
       };
       const chart = new ApexCharts(document.querySelector("#topUsersChart"), options);
       chart.render();
@@ -405,11 +405,8 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
       });
 
       const sortedCustomers = Object.entries(customerCount).sort((a, b) => b[1] - a[1]);
-      const customers = sortedCustomers.map(user => ({ customer: user[0], count: user[1] }));
+      const customers = sortedCustomers.slice(0,10).map(user => ({ customer: user[0], count: user[1] }));
       const options = {
-        theme: {
-          pallette: 'pallette1'
-        },
         tooltip: {
           theme: theme
         },
@@ -433,6 +430,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
         xaxis: {
           categories: customers.map(user => user.customer)
         },
+        colors: chartColorPallete
       };
       const chart = new ApexCharts(document.querySelector("#topCustomersChart"), options);
       chart.render();
