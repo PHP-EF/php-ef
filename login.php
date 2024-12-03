@@ -137,7 +137,6 @@ html {
 
 <div class="login-wrap">
   <h2>Login</h2>
-
   <div class="form">
     <input type="text" placeholder="Username" name="un" id="un"/>
     <input type="password" placeholder="Password" name="pw" id="pw"/>
@@ -154,17 +153,93 @@ function login() {
       un: $('#un').val(),
       pw: $('#pw').val()
   }).done(function( data, status ) {
-      if (data['Status'] == 'Error') {
-          toast("Authentication Error","",data['Message'],"danger","30000");
-      } else if (data['Status'] == 'Success') {
-          toast("Success!","","Successfully logged in.","success","30000");
-          location = "<?php echo $RedirectUri; ?>"
-      }
+    if (data['Status'] == 'Error') {
+      toast("Authentication Error","",data['Message'],"danger","30000");
+    } else if (data['Status'] == 'Expired') {
+      toast("Password expired","","You must reset your password before logging in.","danger","30000");
+      var un = $('#un').val()
+      $('.login-wrap').html('');
+      $('.login-wrap').html(`<h2>Password Reset</h2>
+      <div class="form">
+        <input type="text" value="`+un+`" name="un" id="un"/>
+        <input type="password" placeholder="Current Password" name="cpw" id="cpw"/>
+        <input type="password" placeholder="New Password" name="pw" id="pw"/>
+        <input type="password" placeholder="New Password Again" name="pw2" id="pw2"/>
+        <button id="reset" class="btn btn-success reset"> Reset </button>
+      </div>`);
+      $('#reset').click(function() {
+        reset();
+      });
+      $('#un,#cpw,#pw,#pw2').keypress(function(event) {
+        if (event.which == 13) {
+          reset();
+        }
+      });
+      $('#pw, #pw2').on('change', function() {
+        validatePW();
+      });
+    } else if (data['Status'] == 'Success') {
+        toast("Success!","","Successfully logged in.","success","30000");
+        location = "<?php echo $RedirectUri; ?>"
+    }
   }).fail(function( data, status ) {
       toast("Authentication Error","","Unknown Authentication Error","danger","30000");
   })
 }
 
+function reset() {
+  $.post( "/api?f=resetExpiredPassword", {
+      un: $('#un').val(),
+      cpw: $('#cpw').val(),
+      pw: $('#pw').val()
+  }).done(function( data, status ) {
+    if (data['Status'] == 'Success') {
+      toast("Success!","","Successfully reset password.","success","30000");
+      $('.login-wrap').html('');
+      $('.login-wrap').html(`<h2>Login</h2>
+      <div class="form">
+        <input type="text" placeholder="Username" name="un" id="un"/>
+        <input type="password" placeholder="Password" name="pw" id="pw"/>
+        <button id="login" class="login"> Sign in </button>
+        <?php if ($ib->config->getConfig('SAML','enabled')) {
+          echo '<button id="sso" class="sso"> Single Sign On </button>';
+        }?>
+      </div>`);
+      $('#login').click(function() {
+        login();
+      })
+      $('#sso').click(function() {
+        location = "/api?f=sso";
+      })
+      $('#un,#pw').keypress(function(event) {
+        if (event.which == 13) {
+            login();
+        }
+      });
+    } else if (data['Status'] == 'Error') {
+      toast("Error","",data['Message'],"danger","30000");
+    }
+  }).fail(function( data, status ) {
+    toast("Authentication Error","","Unknown Authentication Error","danger","30000");
+  })
+}
+function validatePW() {
+  var password = $('#pw').val();
+  var confirmPassword = $('#pw2').val();
+
+  if (password !== confirmPassword) {
+    if (password !== "" && confirmPassword !== "") {
+      toast("Warning","","The entered passwords do not match","danger","3000");
+      $('#reset').attr('disabled',true);
+      $('#pw').css('color','red').css('border-color','red');
+      $('#pw2').css('color','red').css('border-color','red');
+    }
+  } else {
+    $('#reset').attr('disabled',false);
+    $('#pw').css('color','green').css('border-color','green');
+    $('#pw2').css('color','green').css('border-color','green');
+  }
+}
 $('#login').click(function() {
     login();
 })

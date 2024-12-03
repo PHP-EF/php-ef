@@ -121,7 +121,12 @@ if (!($_REQUEST['f'])) {
                     } else {
                         $Groups = null;
                     }
-                    $new = $ib->auth->newUser($UN,$PW,$FN,$SN,$EM,$Groups);
+                    if (isset($_POST['expire'])) {
+                        $Expire = $_POST['expire'];
+                    } else {
+                        $Expire = 'false';
+                    }
+                    $new = $ib->auth->newUser($UN,$PW,$FN,$SN,$EM,$Groups,'Local',$Expire);
                     echo json_encode($new,JSON_PRETTY_PRINT);
                 }
             }
@@ -208,14 +213,26 @@ if (!($_REQUEST['f'])) {
                 echo json_encode($AuthContent,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
             }
             break;
-        case 'passwordReset':
+        case 'resetPassword':
             if (checkRequestMethod('POST')) {
-                if (isset($_REQUEST['pw'])) {
-                    echo json_encode($ib->auth->passwordReset($_POST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                if (isset($_POST['pw'])) {
+                    echo json_encode($ib->auth->resetPassword($_POST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                 } else {
                     echo json_encode(array(
                         'Status' => 'Error',
                         'Message' => 'New password missing from request'
+                    ));
+                }
+            }
+            break;
+        case 'resetExpiredPassword':
+            if (checkRequestMethod('POST')) {
+                if (isset($_POST['un']) && isset($_POST['cpw']) && isset($_POST['pw'])) {
+                    echo json_encode($ib->auth->resetExpiredPassword($_REQUEST['un'],$_POST['cpw'],$_REQUEST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                } else {
+                    echo json_encode(array(
+                        'Status' => 'Error',
+                        'Message' => 'Required values missing from the request'
                     ));
                 }
             }

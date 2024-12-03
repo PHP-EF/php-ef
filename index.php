@@ -597,7 +597,7 @@
       if (isValid) {
         var postArr = {}
         postArr.pw = password;
-        $.post( "/api?f=passwordReset", postArr).done(function( data, status ) {
+        $.post( "/api?f=resetPassword", postArr).done(function( data, status ) {
           if (data['Status'] == 'Success') {
             toast(data['Status'],"",data['Message'],"success");
             populateUsers();

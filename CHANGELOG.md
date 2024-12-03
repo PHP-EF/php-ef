@@ -1,3 +1,6 @@
+## v0.5.5
+- Add password reset functionality at first logon
+
 ## v0.5.4
 - Add ability to query related IOCs for Threat Actors
 - Add new assessment reporting dashboard
