@@ -163,6 +163,11 @@
           <input type="password" class="form-control" id="newUserPassword2" aria-describedby="newUserPassword2Help">
           <small id="newUserPassword2Help" class="form-text text-muted">Enter the password again.</small>
         </div>
+        <br>
+        <div class="form-check form-switch">
+          <input class="form-check-input info-field" type="checkbox" id="expire" name="expire">
+          <label class="form-check-label" for="expire">Require Password Reset At First Login</label>
+        </div>
         <hr>
         <div id="popover" class="popover" role="alert">
           <h4 class="alert-heading">Password Complexity</h4>
@@ -321,6 +326,7 @@
     var firstname = $('#newUserFirstname').val().trim();
     var surname = $('#newUserSurname').val().trim();
     var email = $('#newUserEmail').val().trim();
+    var expire = $('#expire')[0].checked;
 
     // Initialize a flag for validation
     var isValid = true;
@@ -345,6 +351,7 @@
       postArr.fn = firstname;
       postArr.sn = surname;
       postArr.em = email;
+      postArr.expire = expire;
       $.post( "/api?f=newUser", postArr).done(function( data, status ) {
         if (data['Status'] == 'Success') {
           toast(data['Status'],"",data['Message'],"success");

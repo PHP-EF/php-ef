@@ -122,6 +122,13 @@ body.dark-theme .dropdown-menu a {
 body.dark-theme .dropdown-menu a:hover {
   background-color: #110f1e;
 }
+/* IB Text Colours */
+body.dark-theme .ib-green {
+  color: #00bd4d;
+}
+body.dark-theme .ib-black {
+  color: #fff;
+}
 /* Dark Mode - Apex Charts */
 body.dark-theme .apexcharts-legend-text {
   color: #FFF!important;
@@ -149,6 +156,13 @@ body.light-theme {
 }
 body.light-theme .home-section {
   background: #f8f8f6;
+}
+/* IB Text Colours */
+body.light-theme .ib-green {
+  color: #00bd4d;
+}
+body.light-theme .ib-black {
+  color: #11101d;
 }
 
 /* Body */
@@ -353,7 +367,6 @@ body .popover {
   /* color: #012970; */
   font-weight: 700;
   margin: 0;
-  padding: 0;
 }
 
 .assessment-reporting .card-icon {
@@ -363,6 +376,12 @@ body .popover {
   height: 64px;
   flex-shrink: 0;
   flex-grow: 0;
+}
+
+.assessment-reporting .metric-circle {
+  border: solid 2px #00bd4d;
+  border-radius: 100px;
+  padding: 10px 15px;
 }
 
 .assessment-reporting .reports-today-card .card-icon {

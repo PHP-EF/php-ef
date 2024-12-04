@@ -31,13 +31,62 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID,$unname
         $StartDimension = str_replace('Z','',$StartDateTime);
         $EndDimension = str_replace('Z','',$EndDateTime);
 
+        $HighRiskCategoryList = implode('","',[
+            "Risky Activity",
+            "Suspicious and Malicious Software",
+            // "Uncategorized",
+            "Adult",
+            "Abortion",
+            "Abortion Pro Choice",
+            "Abortion Pro Life",
+            "Child Inappropriate",
+            "Gambling",
+            "Gay",
+            "Lingerie",
+            "Nudity",
+            "Pornography",
+            "Profanity",
+            "R-Rated",
+            "Sex & Erotic",
+            "Sex Education",
+            "Tobacco",
+            "Anonymizer",
+            "Criminal Skills",
+            "Self Harm",
+            "Criminal Activities - Other",
+            "Illegal Drugs",
+            "Marijuana",
+            "Child Abuse Images",
+            "Hacking",
+            "Hate Speech",
+            "Piracy & Copyright Theft",
+            "Torrent Repository",
+            "Terrorism",
+            "Peer-to-Peer",
+            "Violence",
+            "Weapons",
+            "School Cheating",
+            "Ad Fraud",
+            "Botnet",
+            "Command and Control Centers",
+            "Compromised & Links To Malware",
+            "Malware Call-Home",
+            "Malware Distribution Point",
+            "Phishing/Fraud",
+            "Spam URLs",
+            "Spyware & Questionable Software",
+            "Cryptocurrency Mining",
+            "Sexuality",
+            "Parked & For Sale Domains"
+        ]);
         $Progress = writeProgress($UUID,$Progress,"Collecting Metrics");
         $CubeJSRequests = array(
             'TopThreatFeeds' => '{"measures":["PortunusAggSecurity.feednameCount"],"dimensions":["PortunusAggSecurity.feed_name"],"timeDimensions":[{"dimension":"PortunusAggSecurity.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggSecurity.type","operator":"equals","values":["2"]},{"member":"PortunusAggSecurity.severity","operator":"equals","values":["High"]}],"limit":"10","ungrouped":false}',
             'TopDetectedProperties' => '{"measures":["PortunusDnsLogs.tpropertyCount"],"dimensions":["PortunusDnsLogs.tproperty"],"timeDimensions":[{"dimension":"PortunusDnsLogs.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusDnsLogs.type","operator":"equals","values":["2"]},{"member":"PortunusDnsLogs.feed_name","operator":"notEquals","values":["Public_DOH","public-doh","Public_DOH_IP","public-doh-ip"]},{"member":"PortunusDnsLogs.severity","operator":"notEquals","values":["Low","Info"]}],"limit":"10","ungrouped":false}',
             // Switch to using the Web Content Discovery APIs, rather than those called via the Dashboard.
             //'ContentFiltration' => '{"measures":["PortunusAggWebcontent.categoryCount"],"dimensions":["PortunusAggWebcontent.category"],"timeDimensions":[{"dimension":"PortunusAggWebcontent.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[],"limit":"10","ungrouped":false}',
-            'ContentFiltration' => '{"timeDimensions":[{"dimension":"PortunusAggWebContentDiscovery.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"measures":["PortunusAggWebContentDiscovery.count"],"dimensions":["PortunusAggWebContentDiscovery.domain_category"],"filters":[{"member":"PortunusAggWebContentDiscovery.domain_category","operator":"set"},{"member":"PortunusAggWebContentDiscovery.domain_category","operator":"notEquals","values":[""]}],"order":{"PortunusAggWebContentDiscovery.count":"desc"},"limit":"10"}',
+            // Switch to using data from High-Risk websites instead, this is now an unneccessary API call
+            //'ContentFiltration' => '{"timeDimensions":[{"dimension":"PortunusAggWebContentDiscovery.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"measures":["PortunusAggWebContentDiscovery.count"],"dimensions":["PortunusAggWebContentDiscovery.domain_category"],"filters":[{"member":"PortunusAggWebContentDiscovery.domain_category","operator":"set"},{"member":"PortunusAggWebContentDiscovery.domain_category","operator":"notEquals","values":[""]}],"order":{"PortunusAggWebContentDiscovery.count":"desc"},"limit":"10"}',
             'InsightDistribution' => '{"measures":["InsightsAggregated.count"],"dimensions":["InsightsAggregated.threatType"],"filters":[{"member":"InsightsAggregated.insightStatus","operator":"equals","values":["Active"]}]}',
             'DNSFirewallActivity' => '{"measures":["PortunusAggSecurity.severityCount"],"dimensions":["PortunusAggSecurity.severity"],"timeDimensions":[{"dimension":"PortunusAggSecurity.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggSecurity.type","operator":"equals","values":["2","3"]},{"member":"PortunusAggSecurity.severity","operator":"equals","values":["High","Medium","Low"]}],"limit":"3","ungrouped":false}',
             'DNSActivity' => '{"measures":["PortunusAggInsight.requests"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"equals","values":["1"]}],"limit":"1","ungrouped":false}',
@@ -46,10 +95,10 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID,$unname
             'DataExfilEvents' => '{"measures":["PortunusAggInsight.requests"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"equals","values":["4"]},{"member":"PortunusAggInsight.tclass","operator":"equals","values":["TI-DNST"]}],"ungrouped":false}',
             'ZeroDayDNSEvents' => '{"measures":["PortunusAggInsight.requests"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"equals","values":["2","3"]},{"member":"PortunusAggInsight.tclass","operator":"equals","values":["Zero Day DNS"]}],"ungrouped":false}',
             'SuspiciousEvents' => '{"measures":["PortunusAggInsight.requests"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"equals","values":["2"]},{"member":"PortunusAggInsight.tclass","operator":"equals","values":["Suspicious"]}],"ungrouped":false}',
-            'HighRiskWebsites' => '{"timeDimensions":[{"dimension":"PortunusAggWebContentDiscovery.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"measures":["PortunusAggWebContentDiscovery.count","PortunusAggWebContentDiscovery.deviceCount"],"dimensions":["PortunusAggWebContentDiscovery.domain_category"],"order":{"PortunusAggWebContentDiscovery.count":"desc"},"filters":[{"member":"PortunusAggWebContentDiscovery.domain_category","operator":"equals","values":["Risky Activity","Suspicious and Malicious Software","Uncategorized","Adult","Abortion","Abortion Pro Choice","Abortion Pro Life","Child Inappropriate","Gambling","Gay","Lingerie","Nudity","Pornography","Profanity","R-Rated","Sex & Erotic","Sex Education","Tobacco","Anonymizer","Criminal Skills","Self Harm","Criminal Activities - Other","Illegal Drugs","Marijuana","Child Abuse Images","Hacking","Hate Speech","Piracy & Copyright Theft","Torrent Repository","Terrorism","Peer-to-Peer","Violence","Weapons","School Cheating","Ad Fraud","Botnet","Command and Control Centers","Compromised & Links To Malware","Malware Call-Home","Malware Distribution Point","Phishing/Fraud","Spam URLs","Spyware & Questionable Software","Cryptocurrency Mining","Sexuality","Parked & For Sale Domains"]}]}',
+            'HighRiskWebsites' => '{"timeDimensions":[{"dimension":"PortunusAggWebContentDiscovery.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"measures":["PortunusAggWebContentDiscovery.count","PortunusAggWebContentDiscovery.deviceCount"],"dimensions":["PortunusAggWebContentDiscovery.domain_category"],"order":{"PortunusAggWebContentDiscovery.count":"desc"},"filters":[{"member":"PortunusAggWebContentDiscovery.domain_category","operator":"equals","values":["'.$HighRiskCategoryList.'"]}]}',
             'DOHEvents' => '{"measures":["PortunusAggInsight.requests"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"equals","values":["2"]},{"member":"PortunusAggInsight.tproperty","operator":"equals","values":["DoHService"]}],"ungrouped":false}',
             'NODEvents' => '{"measures":["PortunusAggInsight.requests"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"equals","values":["2"]},{"member":"PortunusAggInsight.tproperty","operator":"equals","values":["NewlyObservedDomains"]}],"ungrouped":false}',
-            'DGAEvents' => '{"measures":["PortunusAggInsight.requests"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"or":[{"member":"PortunusAggInsight.tproperty","operator":"equals","values":["suspicious_rdga","DGA"]},{"member":"PortunusAggInsight.tclass","operator":"equals","values":["DGA","MalwareC2DGA"]}]},{"member":"PortunusAggInsight.type","operator":"equals","values":["2","3"]}],"ungrouped":false}',
+            'DGAEvents' => '{"measures":["PortunusAggInsight.requests"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"or":[{"member":"PortunusAggInsight.tproperty","operator":"equals","values":["suspicious_rdga","suspicious_dga","DGA"]},{"member":"PortunusAggInsight.tclass","operator":"equals","values":["DGA","MalwareC2DGA"]}]},{"member":"PortunusAggInsight.type","operator":"equals","values":["2","3"]}],"ungrouped":false}',
             'UniqueApplications' => '{"measures":["PortunusAggAppDiscovery.requests"],"dimensions":["PortunusAggAppDiscovery.app_name","PortunusAggAppDiscovery.app_approval"],"timeDimensions":[{"dimension":"PortunusAggAppDiscovery.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggAppDiscovery.app_name","operator":"set"},{"member":"PortunusAggAppDiscovery.app_name","operator":"notEquals","values":[""]}],"order":{}}',
             'ThreatActivityEvents' => '{"measures":["PortunusAggInsight.threatCount"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"member":"PortunusAggInsight.type","operator":"equals","values":["2"]},{"member":"PortunusAggInsight.severity","operator":"equals","values":["High","Medium","Low"]},{"member":"PortunusAggInsight.threat_indicator","operator":"notEquals","values":[""]}],"limit":"1","ungrouped":false}',
             'DNSFirewallEvents' => '{"measures":["PortunusAggInsight.requests"],"dimensions":[],"timeDimensions":[{"dimension":"PortunusAggInsight.timestamp","dateRange":["'.$StartDimension.'","'.$EndDimension.'"]}],"filters":[{"and":[{"member":"PortunusAggInsight.type","operator":"equals","values":["2"]},{"or":[{"member":"PortunusAggInsight.severity","operator":"equals","values":["High","Medium","Low"]},{"and":[{"member":"PortunusAggInsight.severity","operator":"equals","values":["Info"]},{"member":"PortunusAggInsight.policy_action","operator":"equals","values":["Block","Log"]}]}]},{"member":"PortunusAggInsight.confidence","operator":"equals","values":["High","Medium","Low"]}]}],"limit":"1","ungrouped":false}',
@@ -110,11 +159,15 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID,$unname
 
         // Content filtration
         $Progress = writeProgress($UUID,$Progress,"Building Content Filters");
-        $ContentFiltration = $CubeJSResults['ContentFiltration']['Body'];
+        // $ContentFiltration = $CubeJSResults['ContentFiltration']['Body'];
+        // Re-use High-Risk Websites data
+        $ContentFiltration = $CubeJSResults['HighRiskWebsites']['Body'];
         if (isset($ContentFiltration->result->data)) {
             $ContentFiltrationSS = IOFactory::load($FilesDir.'/reports/report-'.$UUID.'/ppt/embeddings/Microsoft_Excel_Worksheet2.xlsx');
             $RowNo = 2;
-            foreach ($ContentFiltration->result->data as $ContentFilter) {
+            // Slice Array to limit size to 10
+            $ContentFiltrationSliced = array_slice($ContentFiltration->result->data,0,10);
+            foreach ($ContentFiltrationSliced as $ContentFilter) {
                 $ContentFiltrationS = $ContentFiltrationSS->getActiveSheet();
                 // $ContentFiltrationS->setCellValue('A'.$RowNo, $ContentFilter->{'PortunusAggWebcontent.category'});
                 // $ContentFiltrationS->setCellValue('B'.$RowNo, $ContentFilter->{'PortunusAggWebcontent.categoryCount'});
@@ -325,9 +378,9 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID,$unname
 
         // Threat Actors Metrics
         $Progress = writeProgress($UUID,$Progress,"Building Threat Actor Metrics");
-        $ThreatActors = $CubeJSResults['ThreatActors']['Body']->result->data;
         $Progress = writeProgress($UUID,$Progress,"Getting Threat Actor Information (This may take a moment)");
-        if (isset($ThreatActors)) {
+        if (isset($CubeJSResults['ThreatActors']['Body']->result)) {
+            $ThreatActors = $CubeJSResults['ThreatActors']['Body']->result->data;
             // Removed for workaround
             // $ThreatActorsCount = count(array_unique(array_column($ThreatActors, 'PortunusAggIPSummary.actor_id')));
             // $ThreatActorInfo = GetB1ThreatActorsById2($ThreatActors);
@@ -456,123 +509,125 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID,$unname
             // Copy Blank Threat Actor Image
             copy($AssetsDir.'/images/Threat Actors/logo-only.png',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/logo-only.png');
             // Build new Threat Actor Slides & Update PPTX Resources
-            foreach  ($ThreatActorInfo as $TAI) {
-                $KnownActor = $ib->threatactors->getThreatActorConfigByName($TAI['actor_name']);
-                if (($ThreatActorSlideCount - 1) > 0) {
-                    $xml_rels_f->appendXML('<Relationship Id="rId'.$xml_rels_fstart.'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide'.$SlideNumber.'.xml"/>');
-                    $xml_pres_f->appendXML('<p:sldId id="'.$xml_pres_fstart.'" r:id="rId'.$xml_rels_fstart.'"/>');
-                    $xml_rels_fstart++;
-                    $xml_pres_fstart++;
-                    copy($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/slide'.$ThreatActorSlideStart.'.xml',$FilesDir.'/reports/report-'.$UUID.'/ppt/slides/slide'.$SlideNumber.'.xml');
-                    copy($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/_rels/slide'.$ThreatActorSlideStart.'.xml.rels',$FilesDir.'/reports/report-'.$UUID.'/ppt/slides/_rels/slide'.$SlideNumber.'.xml.rels');
-                } else {
-                    $SlideNumber = $ThreatActorSlideStart;
-                }
-                // Update Tag Numbers
-                $TASFile = file_get_contents($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/slide'.$SlideNumber.'.xml');
-                $TASFile = str_replace('#TATAG00', '#TATAG'.$TagStart, $TASFile);
-                // Add Threat Actor Icon
-                $ThreatActorIconString = '<p:pic><p:nvPicPr><p:cNvPr id="36" name="Graphic 35"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{898E1A10-3ABF-AED0-2C71-1F26BBB6304B}"/></a:ext></a:extLst></p:cNvPr><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="rId115"><a:extLst><a:ext uri="{96DAC541-7B7A-43D3-8B79-37D633B846F1}"><asvg:svgBlip xmlns:asvg="http://schemas.microsoft.com/office/drawing/2016/SVG/main" r:embed="rId115"/></a:ext></a:extLst></a:blip><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="5522998" y="2349624"/><a:ext cx="1246722" cy="1582377"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic></p:spTree>';
-                $TASFile = str_replace('</p:spTree>',$ThreatActorIconString,$TASFile);
-                // Append Virus Total Stuff if applicable to the slide
+            if (isset($ThreatActorInfo)) {
+                foreach  ($ThreatActorInfo as $TAI) {
+                    $KnownActor = $ib->threatactors->getThreatActorConfigByName($TAI['actor_name']);
+                    if (($ThreatActorSlideCount - 1) > 0) {
+                        $xml_rels_f->appendXML('<Relationship Id="rId'.$xml_rels_fstart.'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide'.$SlideNumber.'.xml"/>');
+                        $xml_pres_f->appendXML('<p:sldId id="'.$xml_pres_fstart.'" r:id="rId'.$xml_rels_fstart.'"/>');
+                        $xml_rels_fstart++;
+                        $xml_pres_fstart++;
+                        copy($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/slide'.$ThreatActorSlideStart.'.xml',$FilesDir.'/reports/report-'.$UUID.'/ppt/slides/slide'.$SlideNumber.'.xml');
+                        copy($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/_rels/slide'.$ThreatActorSlideStart.'.xml.rels',$FilesDir.'/reports/report-'.$UUID.'/ppt/slides/_rels/slide'.$SlideNumber.'.xml.rels');
+                    } else {
+                        $SlideNumber = $ThreatActorSlideStart;
+                    }
+                    // Update Tag Numbers
+                    $TASFile = file_get_contents($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/slide'.$SlideNumber.'.xml');
+                    $TASFile = str_replace('#TATAG00', '#TATAG'.$TagStart, $TASFile);
+                    // Add Threat Actor Icon
+                    $ThreatActorIconString = '<p:pic><p:nvPicPr><p:cNvPr id="36" name="Graphic 35"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{898E1A10-3ABF-AED0-2C71-1F26BBB6304B}"/></a:ext></a:extLst></p:cNvPr><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="rId115"><a:extLst><a:ext uri="{96DAC541-7B7A-43D3-8B79-37D633B846F1}"><asvg:svgBlip xmlns:asvg="http://schemas.microsoft.com/office/drawing/2016/SVG/main" r:embed="rId115"/></a:ext></a:extLst></a:blip><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="5522998" y="2349624"/><a:ext cx="1246722" cy="1582377"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic></p:spTree>';
+                    $TASFile = str_replace('</p:spTree>',$ThreatActorIconString,$TASFile);
+                    // Append Virus Total Stuff if applicable to the slide
 
-                // Workaround Start
-                //if (isset($TAI['related_indicators_with_dates'])) {
-                //    foreach ($TAI['related_indicators_with_dates'] as $TAII) {
-                //        if (isset($TAII->vt_first_submission_date)) {
-                if (isset($TAI['observed_iocs'])) {
-                    foreach ($TAI['observed_iocs'] as $TAII) {
-                        if (isset($TAII['ThreatActors.vtfirstdetectedts'])) {
-                        // End of workaround
+                    // Workaround Start
+                    //if (isset($TAI['related_indicators_with_dates'])) {
+                    //    foreach ($TAI['related_indicators_with_dates'] as $TAII) {
+                    //        if (isset($TAII->vt_first_submission_date)) {
+                    if (isset($TAI['observed_iocs'])) {
+                        foreach ($TAI['observed_iocs'] as $TAII) {
+                            if (isset($TAII['ThreatActors.vtfirstdetectedts'])) {
+                            // End of workaround
 
-                            $TASFileString = '<p:cxnSp><p:nvCxnSpPr><p:cNvPr id="6" name="Straight Connector 5"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{3B07D3CE-83DF-306C-1740-B15E60D50B68}"/></a:ext></a:extLst></p:cNvPr><p:cNvCxnSpPr><a:cxnSpLocks/></p:cNvCxnSpPr><p:nvPr/></p:nvCxnSpPr><p:spPr><a:xfrm><a:off x="2663429" y="6816436"/><a:ext cx="0" cy="445863"/></a:xfrm><a:prstGeom prst="line"><a:avLst/></a:prstGeom><a:ln w="9525"><a:solidFill><a:schemeClr val="accent3"><a:lumMod val="40000"/><a:lumOff val="60000"/></a:schemeClr></a:solidFill><a:prstDash val="dash"/></a:ln></p:spPr><p:style><a:lnRef idx="1"><a:schemeClr val="accent1"/></a:lnRef><a:fillRef idx="0"><a:schemeClr val="accent1"/></a:fillRef><a:effectRef idx="0"><a:schemeClr val="accent1"/></a:effectRef><a:fontRef idx="minor"><a:schemeClr val="tx1"/></a:fontRef></p:style></p:cxnSp><p:sp><p:nvSpPr><p:cNvPr id="11" name="Rectangle 10"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{5CF57A2B-9E16-9EF8-CC46-DEACEC1E9222}"/></a:ext></a:extLst></p:cNvPr><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="2390809" y="6646115"/><a:ext cx="546397" cy="151573"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:solidFill><a:schemeClr val="bg1"/></a:solidFill><a:ln><a:noFill/></a:ln></p:spPr><p:style><a:lnRef idx="2"><a:schemeClr val="accent1"><a:shade val="50000"/></a:schemeClr></a:lnRef><a:fillRef idx="1"><a:schemeClr val="accent1"/></a:fillRef><a:effectRef idx="0"><a:schemeClr val="accent1"/></a:effectRef><a:fontRef idx="minor"><a:schemeClr val="lt1"/></a:fontRef></p:style><p:txBody><a:bodyPr rtlCol="0" anchor="ctr"/><a:lstStyle/><a:p><a:pPr algn="ctr"/><a:endParaRPr lang="en-US" dirty="0" err="1"><a:solidFill><a:srgbClr val="101820"/></a:solidFill></a:endParaRPr></a:p></p:txBody></p:sp><p:pic><p:nvPicPr><p:cNvPr id="14" name="Graphic 13"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{6680C076-3929-2FD5-9B2D-C8EEC6FB5791}"/></a:ext></a:extLst></p:cNvPr><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="rId120"><a:extLst><a:ext uri="{96DAC541-7B7A-43D3-8B79-37D633B846F1}"><asvg:svgBlip xmlns:asvg="http://schemas.microsoft.com/office/drawing/2016/SVG/main" r:embed="rId121"/></a:ext></a:extLst></a:blip><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="2407408" y="6670008"/><a:ext cx="499438" cy="100897"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic><p:sp><p:nvSpPr><p:cNvPr id="15" name="Oval 14"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{BF608D1F-2449-B2E7-8286-C23F058ABA75}"/></a:ext></a:extLst></p:cNvPr><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="2641147" y="7268668"/><a:ext cx="45719" cy="45719"/></a:xfrm><a:prstGeom prst="ellipse"><a:avLst/></a:prstGeom><a:solidFill><a:schemeClr val="accent3"><a:lumMod val="20000"/><a:lumOff val="80000"/></a:schemeClr></a:solidFill><a:ln><a:noFill/></a:ln></p:spPr><p:style><a:lnRef idx="2"><a:schemeClr val="accent1"><a:shade val="50000"/></a:schemeClr></a:lnRef><a:fillRef idx="1"><a:schemeClr val="accent1"/></a:fillRef><a:effectRef idx="0"><a:schemeClr val="accent1"/></a:effectRef><a:fontRef idx="minor"><a:schemeClr val="lt1"/></a:fontRef></p:style><p:txBody><a:bodyPr rtlCol="0" anchor="ctr"/><a:lstStyle/><a:p><a:pPr algn="ctr"/><a:endParaRPr lang="en-US" dirty="0" err="1"><a:solidFill><a:srgbClr val="101820"/></a:solidFill></a:endParaRPr></a:p></p:txBody></p:sp></p:spTree>';
-                            $TASFile = str_replace('</p:spTree>',$TASFileString,$TASFile);
-                            $VTIndicatorFound = true;
-                            break;
-                        } else {
-                            $VTIndicatorFound = false;
+                                $TASFileString = '<p:cxnSp><p:nvCxnSpPr><p:cNvPr id="6" name="Straight Connector 5"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{3B07D3CE-83DF-306C-1740-B15E60D50B68}"/></a:ext></a:extLst></p:cNvPr><p:cNvCxnSpPr><a:cxnSpLocks/></p:cNvCxnSpPr><p:nvPr/></p:nvCxnSpPr><p:spPr><a:xfrm><a:off x="2663429" y="6816436"/><a:ext cx="0" cy="445863"/></a:xfrm><a:prstGeom prst="line"><a:avLst/></a:prstGeom><a:ln w="9525"><a:solidFill><a:schemeClr val="accent3"><a:lumMod val="40000"/><a:lumOff val="60000"/></a:schemeClr></a:solidFill><a:prstDash val="dash"/></a:ln></p:spPr><p:style><a:lnRef idx="1"><a:schemeClr val="accent1"/></a:lnRef><a:fillRef idx="0"><a:schemeClr val="accent1"/></a:fillRef><a:effectRef idx="0"><a:schemeClr val="accent1"/></a:effectRef><a:fontRef idx="minor"><a:schemeClr val="tx1"/></a:fontRef></p:style></p:cxnSp><p:sp><p:nvSpPr><p:cNvPr id="11" name="Rectangle 10"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{5CF57A2B-9E16-9EF8-CC46-DEACEC1E9222}"/></a:ext></a:extLst></p:cNvPr><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="2390809" y="6646115"/><a:ext cx="546397" cy="151573"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:solidFill><a:schemeClr val="bg1"/></a:solidFill><a:ln><a:noFill/></a:ln></p:spPr><p:style><a:lnRef idx="2"><a:schemeClr val="accent1"><a:shade val="50000"/></a:schemeClr></a:lnRef><a:fillRef idx="1"><a:schemeClr val="accent1"/></a:fillRef><a:effectRef idx="0"><a:schemeClr val="accent1"/></a:effectRef><a:fontRef idx="minor"><a:schemeClr val="lt1"/></a:fontRef></p:style><p:txBody><a:bodyPr rtlCol="0" anchor="ctr"/><a:lstStyle/><a:p><a:pPr algn="ctr"/><a:endParaRPr lang="en-US" dirty="0" err="1"><a:solidFill><a:srgbClr val="101820"/></a:solidFill></a:endParaRPr></a:p></p:txBody></p:sp><p:pic><p:nvPicPr><p:cNvPr id="14" name="Graphic 13"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{6680C076-3929-2FD5-9B2D-C8EEC6FB5791}"/></a:ext></a:extLst></p:cNvPr><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="rId120"><a:extLst><a:ext uri="{96DAC541-7B7A-43D3-8B79-37D633B846F1}"><asvg:svgBlip xmlns:asvg="http://schemas.microsoft.com/office/drawing/2016/SVG/main" r:embed="rId121"/></a:ext></a:extLst></a:blip><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="2407408" y="6670008"/><a:ext cx="499438" cy="100897"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic><p:sp><p:nvSpPr><p:cNvPr id="15" name="Oval 14"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{BF608D1F-2449-B2E7-8286-C23F058ABA75}"/></a:ext></a:extLst></p:cNvPr><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="2641147" y="7268668"/><a:ext cx="45719" cy="45719"/></a:xfrm><a:prstGeom prst="ellipse"><a:avLst/></a:prstGeom><a:solidFill><a:schemeClr val="accent3"><a:lumMod val="20000"/><a:lumOff val="80000"/></a:schemeClr></a:solidFill><a:ln><a:noFill/></a:ln></p:spPr><p:style><a:lnRef idx="2"><a:schemeClr val="accent1"><a:shade val="50000"/></a:schemeClr></a:lnRef><a:fillRef idx="1"><a:schemeClr val="accent1"/></a:fillRef><a:effectRef idx="0"><a:schemeClr val="accent1"/></a:effectRef><a:fontRef idx="minor"><a:schemeClr val="lt1"/></a:fontRef></p:style><p:txBody><a:bodyPr rtlCol="0" anchor="ctr"/><a:lstStyle/><a:p><a:pPr algn="ctr"/><a:endParaRPr lang="en-US" dirty="0" err="1"><a:solidFill><a:srgbClr val="101820"/></a:solidFill></a:endParaRPr></a:p></p:txBody></p:sp></p:spTree>';
+                                $TASFile = str_replace('</p:spTree>',$TASFileString,$TASFile);
+                                $VTIndicatorFound = true;
+                                break;
+                            } else {
+                                $VTIndicatorFound = false;
+                            }
+                        }
+                    } else {
+                        $VTIndicatorFound = false;
+                    }
+                    // Add Report Link
+                    // ** // Use the following code to link based on presence of 'infoblox_references' parameter
+                    // if (isset($TAI['infoblox_references'][0])) {
+                    // ** // Use the following code to link based on the Threat Actor config
+                    //$InfobloxReferenceFound = false;
+                    if ($KnownActor && $KnownActor['URLStub'] !== "") {
+                        $ThreatActorExternalLinkString = '<p:sp><p:nvSpPr><p:cNvPr id="7" name="Text Placeholder 20"><a:hlinkClick r:id="rId122"/><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{4A652F23-47D6-59A0-1D85-972482B29234}"/></a:ext></a:extLst></p:cNvPr><p:cNvSpPr txBox="1"><a:spLocks/></p:cNvSpPr><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="5574269" y="3869404"/><a:ext cx="1168604" cy="271567"/></a:xfrm><a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val 20777"/></a:avLst></a:prstGeom><a:noFill/><a:ln w="19050"><a:solidFill><a:schemeClr val="accent1"/></a:solidFill></a:ln><a:effectLst><a:glow rad="63500"><a:srgbClr val="00B24C"><a:alpha val="40000"/></a:srgbClr></a:glow></a:effectLst></p:spPr><p:txBody><a:bodyPr lIns="0" tIns="0" rIns="0" bIns="0" anchor="ctr" anchorCtr="0"/><a:lstStyle><a:lvl1pPr marL="141755" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="620"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1736" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl1pPr><a:lvl2pPr marL="425265" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1488" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl2pPr><a:lvl3pPr marL="708774" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1240" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl3pPr><a:lvl4pPr marL="992284" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl4pPr><a:lvl5pPr marL="1275794" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl5pPr><a:lvl6pPr marL="1559303" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl6pPr><a:lvl7pPr marL="1842813" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl7pPr><a:lvl8pPr marL="2126323" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl8pPr><a:lvl9pPr marL="2409833" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl9pPr></a:lstStyle><a:p><a:pPr marL="0" indent="0" algn="ctr"><a:lnSpc><a:spcPct val="100000"/></a:lnSpc><a:spcBef><a:spcPts val="300"/></a:spcBef><a:spcAft><a:spcPts val="600"/></a:spcAft><a:buClr><a:schemeClr val="tx1"/></a:buClr><a:buNone/></a:pPr><a:r><a:rPr lang="en-US" sz="600" b="1" dirty="0"><a:solidFill><a:schemeClr val="bg1"/></a:solidFill><a:latin typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="77"/><a:ea typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="0"/><a:cs typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="0"/></a:rPr><a:t>THREAT ACTOR REPORT</a:t></a:r><a:endParaRPr lang="en-US" sz="600" dirty="0"><a:solidFill><a:schemeClr val="bg1"/></a:solidFill><a:latin typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="77"/><a:ea typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="0"/><a:cs typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="0"/></a:endParaRPr></a:p></p:txBody></p:sp></p:spTree>';
+                        $TASFile = str_replace('</p:spTree>',$ThreatActorExternalLinkString,$TASFile);
+                        //$InfobloxReferenceFound = true;
+                    }
+                    // Update Slide XML with changes
+                    file_put_contents($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/slide'.$SlideNumber.'.xml', $TASFile);
+                    $xml_tas = new DOMDocument('1.0', 'utf-8');
+                    $xml_tas->formatOutput = true;
+                    $xml_tas->preserveWhiteSpace = false;
+                    $xml_tas->load($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/_rels/slide'.$SlideNumber.'.xml.rels');
+                    foreach ($xml_tas->getElementsByTagName('Relationship') as $element) {
+                        // Remove notes references to avoid having to create unneccessary notes resources
+                        if ($element->getAttribute('Type') == "http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesSlide") {
+                            $element->remove();
                         }
                     }
-                } else {
-                    $VTIndicatorFound = false;
-                }
-                // Add Report Link
-                // ** // Use the following code to link based on presence of 'infoblox_references' parameter
-                // if (isset($TAI['infoblox_references'][0])) {
-                // ** // Use the following code to link based on the Threat Actor config
-                //$InfobloxReferenceFound = false;
-                if ($KnownActor && $KnownActor['URLStub'] !== "") {
-                    $ThreatActorExternalLinkString = '<p:sp><p:nvSpPr><p:cNvPr id="7" name="Text Placeholder 20"><a:hlinkClick r:id="rId122"/><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{4A652F23-47D6-59A0-1D85-972482B29234}"/></a:ext></a:extLst></p:cNvPr><p:cNvSpPr txBox="1"><a:spLocks/></p:cNvSpPr><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="5574269" y="3869404"/><a:ext cx="1168604" cy="271567"/></a:xfrm><a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val 20777"/></a:avLst></a:prstGeom><a:noFill/><a:ln w="19050"><a:solidFill><a:schemeClr val="accent1"/></a:solidFill></a:ln><a:effectLst><a:glow rad="63500"><a:srgbClr val="00B24C"><a:alpha val="40000"/></a:srgbClr></a:glow></a:effectLst></p:spPr><p:txBody><a:bodyPr lIns="0" tIns="0" rIns="0" bIns="0" anchor="ctr" anchorCtr="0"/><a:lstStyle><a:lvl1pPr marL="141755" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="620"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1736" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl1pPr><a:lvl2pPr marL="425265" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1488" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl2pPr><a:lvl3pPr marL="708774" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1240" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl3pPr><a:lvl4pPr marL="992284" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl4pPr><a:lvl5pPr marL="1275794" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl5pPr><a:lvl6pPr marL="1559303" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl6pPr><a:lvl7pPr marL="1842813" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl7pPr><a:lvl8pPr marL="2126323" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl8pPr><a:lvl9pPr marL="2409833" indent="-141755" algn="l" defTabSz="567019" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPts val="310"/></a:spcBef><a:buFont typeface="Arial" panose="020B0604020202020204" pitchFamily="34" charset="0"/><a:buChar char="•"/><a:defRPr sz="1116" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl9pPr></a:lstStyle><a:p><a:pPr marL="0" indent="0" algn="ctr"><a:lnSpc><a:spcPct val="100000"/></a:lnSpc><a:spcBef><a:spcPts val="300"/></a:spcBef><a:spcAft><a:spcPts val="600"/></a:spcAft><a:buClr><a:schemeClr val="tx1"/></a:buClr><a:buNone/></a:pPr><a:r><a:rPr lang="en-US" sz="600" b="1" dirty="0"><a:solidFill><a:schemeClr val="bg1"/></a:solidFill><a:latin typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="77"/><a:ea typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="0"/><a:cs typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="0"/></a:rPr><a:t>THREAT ACTOR REPORT</a:t></a:r><a:endParaRPr lang="en-US" sz="600" dirty="0"><a:solidFill><a:schemeClr val="bg1"/></a:solidFill><a:latin typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="77"/><a:ea typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="0"/><a:cs typeface="Lato" panose="020F0502020204030203" pitchFamily="34" charset="0"/></a:endParaRPr></a:p></p:txBody></p:sp></p:spTree>';
-                    $TASFile = str_replace('</p:spTree>',$ThreatActorExternalLinkString,$TASFile);
-                    //$InfobloxReferenceFound = true;
-                }
-                // Update Slide XML with changes
-                file_put_contents($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/slide'.$SlideNumber.'.xml', $TASFile);
-                $xml_tas = new DOMDocument('1.0', 'utf-8');
-                $xml_tas->formatOutput = true;
-                $xml_tas->preserveWhiteSpace = false;
-                $xml_tas->load($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/_rels/slide'.$SlideNumber.'.xml.rels');
-                foreach ($xml_tas->getElementsByTagName('Relationship') as $element) {
-                    // Remove notes references to avoid having to create unneccessary notes resources
-                    if ($element->getAttribute('Type') == "http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesSlide") {
-                        $element->remove();
+                    $xml_tas_f = $xml_tas->createDocumentFragment();
+                    if ($KnownActor && $KnownActor['PNG'] !== "" && $KnownActor['SVG'] !== "") {
+                        $SVG = $KnownActor['SVG'];
+                        $PNG = $KnownActor['PNG'];
+                        // Threat Actor PNG
+                        copy($AssetsDir.'/images/Threat Actors/Uploads/'.$PNG,$FilesDir.'/reports/report-'.$UUID.'/ppt/media/'.$PNG);
+                        copy($AssetsDir.'/images/Threat Actors/Uploads/'.$SVG,$FilesDir.'/reports/report-'.$UUID.'/ppt/media/'.$SVG);
+                        $xml_tas_f->appendXML('<Relationship Id="rId115" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/'.$PNG.'"/>');
+                        $xml_tas_f->appendXML('<Relationship Id="rId116" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/'.$SVG.'"/>');
+                    } else {
+                        $xml_tas_f->appendXML('<Relationship Id="rId115" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/logo-only.png"/>');
+                        $xml_tas_f->appendXML('<Relationship Id="rId116" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/logo-only.svg"/>');
                     }
-                }
-                $xml_tas_f = $xml_tas->createDocumentFragment();
-                if ($KnownActor && $KnownActor['PNG'] !== "" && $KnownActor['SVG'] !== "") {
-                    $SVG = $KnownActor['SVG'];
-                    $PNG = $KnownActor['PNG'];
-                    // Threat Actor PNG
-                    copy($AssetsDir.'/images/Threat Actors/Uploads/'.$PNG,$FilesDir.'/reports/report-'.$UUID.'/ppt/media/'.$PNG);
-                    copy($AssetsDir.'/images/Threat Actors/Uploads/'.$SVG,$FilesDir.'/reports/report-'.$UUID.'/ppt/media/'.$SVG);
-                    $xml_tas_f->appendXML('<Relationship Id="rId115" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/'.$PNG.'"/>');
-                    $xml_tas_f->appendXML('<Relationship Id="rId116" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/'.$SVG.'"/>');
-                } else {
-                    $xml_tas_f->appendXML('<Relationship Id="rId115" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/logo-only.png"/>');
-                    $xml_tas_f->appendXML('<Relationship Id="rId116" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/logo-only.svg"/>');
+
+                    // Virus Total PNG / SVG
+                    if ($VTIndicatorFound) {
+                        copy($AssetsDir.'/images/Other/virustotal.png',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/virustotal.png');
+                        copy($AssetsDir.'/images/Other/virustotal.svg',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/virustotal.svg');
+                        $xml_tas_f->appendXML('<Relationship Id="rId120" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/virustotal.png"/>');
+                        $xml_tas_f->appendXML('<Relationship Id="rId121" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/virustotal.svg"/>');
+                    }
+
+                    // Infoblox Blog URL
+                    // ** // Use the following code to link based on presence of 'infoblox_references' parameter
+                    // if ($InfobloxReferenceFound) {
+                    //     $xml_tas_f2 = $xml_tas->createDocumentFragment();
+                    //     $xml_tas_f2->appendXML('<Relationship Id="rId122" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="'.$TAI['infoblox_references'][0].'" TargetMode="External"/>');
+                    //     $xml_tas->getElementsByTagName('Relationships')->item(0)->appendChild($xml_tas_f2);
+                    // }
+                    // ** // Use the following code to link based on the Threat Actor config
+                    if ($KnownActor && $KnownActor['URLStub'] !== "") {
+                        $URL = $KnownActor['URLStub'];
+                        $xml_tas_f->appendXML('<Relationship Id="rId122" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="'.$URL.'" TargetMode="External"/>');
+                    }
+
+                    $xml_tas->getElementsByTagName('Relationships')->item(0)->appendChild($xml_tas_f);
+                    $xml_tas->save($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/_rels/slide'.$SlideNumber.'.xml.rels');
+                    $TagStart += 10;
+                    // Iterate slide number
+                    $SlideNumber++;
+                    $ThreatActorSlideCount--;
                 }
 
-                // Virus Total PNG / SVG
-                if ($VTIndicatorFound) {
-                    copy($AssetsDir.'/images/Other/virustotal.png',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/virustotal.png');
-                    copy($AssetsDir.'/images/Other/virustotal.svg',$FilesDir.'/reports/report-'.$UUID.'/ppt/media/virustotal.svg');
-                    $xml_tas_f->appendXML('<Relationship Id="rId120" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/virustotal.png"/>');
-                    $xml_tas_f->appendXML('<Relationship Id="rId121" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/virustotal.svg"/>');
-                }
+                // Append Elements to Core XML Files
+                $xml_rels->getElementsByTagName('Relationships')->item(0)->appendChild($xml_rels_f);
+                // Append new slides to specific position
+                $xml_pres->getElementsByTagName('sldId')->item($ThreatActorSlidePosition)->after($xml_pres_f);
 
-                // Infoblox Blog URL
-                // ** // Use the following code to link based on presence of 'infoblox_references' parameter
-                // if ($InfobloxReferenceFound) {
-                //     $xml_tas_f2 = $xml_tas->createDocumentFragment();
-                //     $xml_tas_f2->appendXML('<Relationship Id="rId122" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="'.$TAI['infoblox_references'][0].'" TargetMode="External"/>');
-                //     $xml_tas->getElementsByTagName('Relationships')->item(0)->appendChild($xml_tas_f2);
-                // }
-                // ** // Use the following code to link based on the Threat Actor config
-                if ($KnownActor && $KnownActor['URLStub'] !== "") {
-                    $URL = $KnownActor['URLStub'];
-                    $xml_tas_f->appendXML('<Relationship Id="rId122" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="'.$URL.'" TargetMode="External"/>');
-                }
+                // Save Core XML Files
+                $xml_rels->save($FilesDir.'/reports/report-'.$UUID.'/ppt/_rels/presentation.xml.rels');
+                $xml_pres->save($FilesDir.'/reports/report-'.$UUID.'/ppt/presentation.xml');
 
-                $xml_tas->getElementsByTagName('Relationships')->item(0)->appendChild($xml_tas_f);
-                $xml_tas->save($FilesDir.'/reports/report-'.$UUID.'/ppt/slides/_rels/slide'.$SlideNumber.'.xml.rels');
-                $TagStart += 10;
-                // Iterate slide number
-                $SlideNumber++;
-                $ThreatActorSlideCount--;
+                //
+                // End of Threat Actors
+                //
             }
-
-            // Append Elements to Core XML Files
-            $xml_rels->getElementsByTagName('Relationships')->item(0)->appendChild($xml_rels_f);
-            // Append new slides to specific position
-            $xml_pres->getElementsByTagName('sldId')->item($ThreatActorSlidePosition)->after($xml_pres_f);
-
-            // Save Core XML Files
-            $xml_rels->save($FilesDir.'/reports/report-'.$UUID.'/ppt/_rels/presentation.xml.rels');
-            $xml_pres->save($FilesDir.'/reports/report-'.$UUID.'/ppt/presentation.xml');
-
-            //
-            // End of Threat Actors
-            //
         } else {
             $Progress = writeProgress($UUID,$Progress,"Skipping Threat Actor Slides");
         }
@@ -682,105 +737,115 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID,$unname
         // This is where the Threat Actor Tag replacement occurs
         // Set Tag Start Number
         $TagStart = 100;
-        foreach ($ThreatActorInfo as $TAI) {
+        if (isset($ThreatActorInfo)) {
+            foreach ($ThreatActorInfo as $TAI) {
 
-            // Workaround Start
-            // Get sorted list of observed IOCs not found in Virus Total
-            // if (isset($TAI['related_indicators_with_dates'])) {
-            //     $ObservedIndicators = $TAI['related_indicators_with_dates'];
-            //     $IndicatorCount = count($TAI['related_indicators_with_dates']);
-            //     $IndicatorsInVT = [];
-            //     if ($IndicatorCount > 0) {
-            //         foreach ($ObservedIndicators as $OI) {
-            //             if (array_key_exists('vt_first_submission_date', json_decode(json_encode($OI), true))) {
-            //                 $IndicatorsInVT[] = $OI;
-            //             }
-            //         }
-            //     }
-            //     if (count($IndicatorsInVT) > 0) {
-            //         // Sort the array based on the time difference
-            //         usort($IndicatorsInVT, function($a, $b) {
-            //             return calculateVirusTotalDifference($b) <=> calculateVirusTotalDifference($a);
-            //         });
-            //         $IndicatorsNotInVT = count($ObservedIndicators) - count($IndicatorsInVT);
-            //         $ExampleDomain = $IndicatorsInVT[0]->indicator;
-            //         $FirstSeen = new DateTime($IndicatorsInVT[0]->te_ik_submitted);
-            //         $LastSeen = new DateTime($IndicatorsInVT[0]->te_customer_last_dns_query);
-            //         $VTDate = new DateTime($IndicatorsInVT[0]->vt_first_submission_date);
-            //         $ProtectedFor = $FirstSeen->diff($LastSeen)->days;
-            //         $DaysAhead = 'Discovered '.($ProtectedFor - $LastSeen->diff($VTDate)->days).' days ahead';
-            //     } else {
-            //         $IndicatorsNotInVT = count($ObservedIndicators);
-            //         $ExampleDomain = $ObservedIndicators[0]->indicator;
-            //         $FirstSeen = new DateTime($ObservedIndicators[0]->te_ik_submitted);
-            //         $LastSeen = new DateTime($ObservedIndicators[0]->te_customer_last_dns_query);
-            //         $DaysAhead = 'Discovered';
-            //         $ProtectedFor = $FirstSeen->diff($LastSeen)->days;
-            //     }
-            // } else {
-            //     $IndicatorsNotInVT = 'N/A';
-            //     $ExampleDomain = 'N/A';
-            //     $FirstSeen = new DateTime('1901-01-01 00:00');
-            //     $LastSeen = new DateTime('1901-01-01 00:00');
-            //     $DaysAhead = 'Discovered';
-            //     $ProtectedFor = 'N/A';
-            //     $IndicatorCount = 'N/A';
-            // }
+                // Workaround Start
+                // Get sorted list of observed IOCs not found in Virus Total
+                // if (isset($TAI['related_indicators_with_dates'])) {
+                //     $ObservedIndicators = $TAI['related_indicators_with_dates'];
+                //     $IndicatorCount = count($TAI['related_indicators_with_dates']);
+                //     $IndicatorsInVT = [];
+                //     if ($IndicatorCount > 0) {
+                //         foreach ($ObservedIndicators as $OI) {
+                //             if (array_key_exists('vt_first_submission_date', json_decode(json_encode($OI), true))) {
+                //                 $IndicatorsInVT[] = $OI;
+                //             }
+                //         }
+                //     }
+                //     if (count($IndicatorsInVT) > 0) {
+                //         // Sort the array based on the time difference
+                //         usort($IndicatorsInVT, function($a, $b) {
+                //             return calculateVirusTotalDifference($b) <=> calculateVirusTotalDifference($a);
+                //         });
+                //         $IndicatorsNotInVT = count($ObservedIndicators) - count($IndicatorsInVT);
+                //         $ExampleDomain = $IndicatorsInVT[0]->indicator;
+                //         $FirstSeen = new DateTime($IndicatorsInVT[0]->te_ik_submitted);
+                //         $LastSeen = new DateTime($IndicatorsInVT[0]->te_customer_last_dns_query);
+                //         $VTDate = new DateTime($IndicatorsInVT[0]->vt_first_submission_date);
+                //         $ProtectedFor = $FirstSeen->diff($LastSeen)->days;
+                //         $DaysAhead = 'Discovered '.($ProtectedFor - $LastSeen->diff($VTDate)->days).' days ahead';
+                //     } else {
+                //         $IndicatorsNotInVT = count($ObservedIndicators);
+                //         $ExampleDomain = $ObservedIndicators[0]->indicator;
+                //         $FirstSeen = new DateTime($ObservedIndicators[0]->te_ik_submitted);
+                //         $LastSeen = new DateTime($ObservedIndicators[0]->te_customer_last_dns_query);
+                //         $DaysAhead = 'Discovered';
+                //         $ProtectedFor = $FirstSeen->diff($LastSeen)->days;
+                //     }
+                // } else {
+                //     $IndicatorsNotInVT = 'N/A';
+                //     $ExampleDomain = 'N/A';
+                //     $FirstSeen = new DateTime('1901-01-01 00:00');
+                //     $LastSeen = new DateTime('1901-01-01 00:00');
+                //     $DaysAhead = 'Discovered';
+                //     $ProtectedFor = 'N/A';
+                //     $IndicatorCount = 'N/A';
+                // }
 
-            if (isset($TAI['observed_iocs'])) {
-                $ObservedIndicators = $TAI['observed_iocs'];
-                $IndicatorCount = $TAI['observed_count'];
-                $IndicatorsInVT = [];
-                if ($IndicatorCount > 0) {
-                    foreach ($ObservedIndicators as $OI) {
-                        if (array_key_exists('ThreatActors.vtfirstdetectedts', json_decode(json_encode($OI), true))) {
-                            $IndicatorsInVT[] = $OI;
+                if (isset($TAI['observed_iocs'])) {
+                    $ObservedIndicators = $TAI['observed_iocs'];
+                    $IndicatorCount = $TAI['observed_count'];
+                    $IndicatorsInVT = [];
+                    if ($IndicatorCount > 0) {
+                        foreach ($ObservedIndicators as $OI) {
+                            if (array_key_exists('ThreatActors.vtfirstdetectedts', json_decode(json_encode($OI), true))) {
+                                $IndicatorsInVT[] = $OI;
+                            }
                         }
                     }
-                }
-                if (count($IndicatorsInVT) > 0) {
-                    // Sort the array based on the time difference
-                    usort($IndicatorsInVT, function($a, $b) {
-                        return calculateVirusTotalDifference($b) <=> calculateVirusTotalDifference($a);
-                    });
-                    $IndicatorsNotObserved = $TAI['related_count'] - $IndicatorCount;
-                    $ExampleDomain = $IndicatorsInVT[0]['ThreatActors.domain'];
-                    $FirstSeen = new DateTime($IndicatorsInVT[0]['ThreatActors.ikbfirstsubmittedts']);
-                    $LastSeen = new DateTime($IndicatorsInVT[0]['ThreatActors.lastdetectedts']);
-                    $VTDate = new DateTime($IndicatorsInVT[0]['ThreatActors.vtfirstdetectedts']);
-                    $ProtectedFor = $FirstSeen->diff($LastSeen)->days;
-                    $DaysAhead = 'Discovered '.($ProtectedFor - $LastSeen->diff($VTDate)->days).' days ahead';
+                    if (count($IndicatorsInVT) > 0) {
+                        // Sort the array based on the time difference
+                        usort($IndicatorsInVT, function($a, $b) {
+                            return calculateVirusTotalDifference($b) <=> calculateVirusTotalDifference($a);
+                        });
+                        $IndicatorsNotObserved = $TAI['related_count'] - $IndicatorCount;
+                        $ExampleDomain = $IndicatorsInVT[0]['ThreatActors.domain'];
+                        $FirstSeen = new DateTime($IndicatorsInVT[0]['ThreatActors.ikbfirstsubmittedts']);
+                        $LastSeen = new DateTime($IndicatorsInVT[0]['ThreatActors.lastdetectedts']);
+                        $VTDate = new DateTime($IndicatorsInVT[0]['ThreatActors.vtfirstdetectedts']);
+                        $ProtectedFor = $FirstSeen->diff($LastSeen)->days;
+                        $DaysAhead = 'Discovered '.($ProtectedFor - $LastSeen->diff($VTDate)->days).' days ahead';
+                    } else {
+                        $IndicatorsNotObserved = $TAI['related_count'];
+                        $ExampleDomain = $ObservedIndicators[0]['ThreatActors.domain'];
+                        $FirstSeen = new DateTime($ObservedIndicators[0]['ThreatActors.ikbfirstsubmittedts']);
+                        $LastSeen = new DateTime($ObservedIndicators[0]['ThreatActors.lastdetectedts']);
+                        $DaysAhead = 'Discovered';
+                        $ProtectedFor = $FirstSeen->diff($LastSeen)->days;
+                    }
                 } else {
-                    $IndicatorsNotObserved = $TAI['related_count'];
-                    $ExampleDomain = $ObservedIndicators[0]['ThreatActors.domain'];
-                    $FirstSeen = new DateTime($ObservedIndicators[0]['ThreatActors.ikbfirstsubmittedts']);
-                    $LastSeen = new DateTime($ObservedIndicators[0]['ThreatActors.lastdetectedts']);
+                    $IndicatorsNotObserved = 'N/A';
+                    $ExampleDomain = 'N/A';
+                    $FirstSeen = new DateTime('1901-01-01 00:00');
+                    $LastSeen = new DateTime('1901-01-01 00:00');
                     $DaysAhead = 'Discovered';
-                    $ProtectedFor = $FirstSeen->diff($LastSeen)->days;
+                    $ProtectedFor = 'N/A';
+                    $IndicatorCount = 'N/A';
                 }
-            } else {
-                $IndicatorsNotObserved = 'N/A';
-                $ExampleDomain = 'N/A';
-                $FirstSeen = new DateTime('1901-01-01 00:00');
-                $LastSeen = new DateTime('1901-01-01 00:00');
-                $DaysAhead = 'Discovered';
-                $ProtectedFor = 'N/A';
-                $IndicatorCount = 'N/A';
+                // Workaround End
+
+                $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'01',ucwords($TAI['actor_name'])); // Threat Actor Name
+                $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'02',$TAI['actor_description']); // Threat Actor Description
+                $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'03',$IndicatorCount); // Number of Observed IOCs
+                $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'04',$IndicatorsNotObserved); // Number of Observed IOCs not observed
+                $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'05',$TAI['related_count']); // Number of Related IOCs
+                $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'06',$DaysAhead); // Discovered X Days Ahead
+                $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'07',$FirstSeen->format('d/m/y')); // First Detection Date
+                $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'08',$LastSeen->format('d/m/y')); // Last Detection Date
+                $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'09',$ProtectedFor); // Protected X Days
+                $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'10',$ExampleDomain); // Example Domain
+                $TagStart += 10;
+
+                // if ($TAI['actor_name'] == 'Vigorish Viper') {
+                //     echo 'Found!';
+                //     echo ucwords($TAI['actor_name']);
+                //     echo '#TATAG'.$TagStart.'01';
+                //     $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'01','Whee');
+                //     print_r($mapping);
+                //     die();
+                // }
             }
-            // Workaround End
-
-
-            $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'01',ucwords($TAI['actor_name'])); // Threat Actor Name
-            $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'02',$TAI['actor_description']); // Threat Actor Description
-            $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'03',$IndicatorCount); // Number of Observed IOCs
-            $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'04',$IndicatorsNotObserved); // Number of Observed IOCs not observed
-            $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'05',$TAI['related_count']); // Number of Related IOCs
-            $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'06',$DaysAhead); // Discovered X Days Ahead
-            $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'07',$FirstSeen->format('d/m/y')); // First Detection Date
-            $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'08',$LastSeen->format('d/m/y')); // Last Detection Date
-            $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'09',$ProtectedFor); // Protected X Days
-            $mapping = replaceTag($mapping,'#TATAG'.$TagStart.'10',$ExampleDomain); // Example Domain
-            $TagStart += 10;
         }
 
         // Rebuild Powerpoint
