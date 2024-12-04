@@ -10,7 +10,7 @@ foreach ($logFiles as $logFile) {
   if (isset($matches[1])) {
     if (strtotime($matches[1]) < strtotime('-'.$daysBeforeExpiry.' days')) {
       echo $logFile." is over ".$daysBeforeExpiry." days old.";
-      $fullFilePath = $ib->config->getConfig("System","logdirectory").$logFile;
+      $fullFilePath = __DIR__.'/../../'.$ib->config->getConfig("System","logdirectory").$logFile;
       if (!unlink($fullFilePath)) {
         $ib->logging->writeLog("LogCleanup","Error! Unable to delete: ".$logFile,"error");
       } else {

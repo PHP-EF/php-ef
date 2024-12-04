@@ -1,3 +1,6 @@
+## v0.5.6
+- Various bugfixes
+
 ## v0.5.5
 - Add password reset functionality at first logon
 

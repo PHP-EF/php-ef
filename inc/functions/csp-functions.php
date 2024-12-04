@@ -212,7 +212,7 @@ function GetB1ThreatActorsById3($Actors,$unnamed,$substring) {
       if ($Actor->actor_id != "" && $Actor->actor_name != "") {
         // Ignore Unnamed & Substring Actors
         $UnnamedActor = str_starts_with($Actor->actor_name,'unnamed_actor');
-        $SubstringActor = str_starts_with($Actor->actor_name,'unnamed_actor');
+        $SubstringActor = str_starts_with($Actor->actor_name,'substring');
         if (($UnnamedActor && $unnamed == 'true') || ($SubstringActor && $substring == 'true') || (!$UnnamedActor && !$SubstringActor)) {
           $NewArr = array(
             'actor_id' => $Actor->actor_id,

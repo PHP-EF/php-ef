@@ -12,7 +12,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
       <div class="col-lg-12">
         <div class="row">
           <!-- Reports Today Card -->
-          <div class="col-lg-3 col-md-3 col-sm-6 col-6">
+          <div class="col-lg-2 col-md-4 col-sm-6 col-12">
             <div class="card info-card reports-today-card">
               <div class="card-body">
                 <h5 class="card-title">Assessments <span>| Today</span></h5>
@@ -30,7 +30,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
           </div><!-- Reports Today Card -->
 
           <!-- Reports This Month Card -->
-          <div class="col-lg-3 col-md-3 col-sm-6 col-6">
+          <div class="col-lg-2 col-md-4 col-sm-6 col-12">
             <div class="card info-card reports-month-card">
               <div class="card-body">
                 <h5 class="card-title">Assessments <span>| This Month</span></h5>
@@ -48,7 +48,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
           </div><!-- Reports This Month Card -->
 
           <!-- Reports This Year Card -->
-          <div class="col-lg-3 col-md-3 col-sm-6 col-6">
+          <div class="col-lg-2 col-md-4 col-sm-6 col-12">
             <div class="card info-card reports-year-card">
               <div class="card-body">
                 <h5 class="card-title">Assessments <span>| This Year</span></h5>
@@ -65,8 +65,44 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
             </div>
           </div><!-- Reports This Year Card -->
 
-          <!-- Reports This Year Card -->
-          <div class="col-lg-3 col-md-3 col-sm-6 col-6">
+          <!-- Users Card -->
+          <div class="col-lg-2 col-md-4 col-sm-6 col-12">
+            <div class="card info-card reports-today-card">
+              <div class="card-body">
+                <h5 class="card-title">Assessments <span>| Today</span></h5>
+                <div class="d-flex align-items-center">
+                  <!-- <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                    <i class="bi bi-cart"></i>
+                  </div> -->
+                  <div class="ps-3">
+                    <h6 id="reportsThisDayVal"></h6>
+                    <span class="text-success small pt-1 fw-bold" id="reportsThisDayValPerc"></span> <span class="text-muted small pt-2 ps-1" id="reportsThisDayValPercDir"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- Users Card -->
+
+          <!-- Customers Card -->
+          <div class="col-lg-2 col-md-4 col-sm-6 col-12">
+            <div class="card info-card reports-today-card">
+              <div class="card-body">
+                <h5 class="card-title">Assessments <span>| Today</span></h5>
+                <div class="d-flex align-items-center">
+                  <!-- <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                    <i class="bi bi-cart"></i>
+                  </div> -->
+                  <div class="ps-3">
+                    <h6 id="reportsThisDayVal"></h6>
+                    <span class="text-success small pt-1 fw-bold" id="reportsThisDayValPerc"></span> <span class="text-muted small pt-2 ps-1" id="reportsThisDayValPercDir"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- Customers Card -->
+
+          <!-- Granularity Card -->
+          <div class="col-lg-2 col-md-4 col-sm-6 col-12">
             <div class="card info-card granularity-card">
               <div class="card-body">
                 <h5 class="card-title">Granularity</span></h5>
@@ -88,7 +124,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
                 </div>
               </div>
             </div>
-          </div><!-- Reports This Year Card -->
+          </div><!-- Granularity Card -->
         </div>
 
         <div class="row">
@@ -113,7 +149,28 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
               </div><!-- End Assessment Pie -->
             </div>
           </div>
+
+          <!-- Customers Pie -->
+          <div class="col-xxl-3 col-lg-4 col-md-5 col-sm-6 col-12">
+            <div class="card chart-card">
+              <div class="card-body pb-0">
+                <h5 class="card-title">Customers | <span class="granularity-title">Last 30 Days</span></h5>
+                <div id="customersChart"></div>
+              </div><!-- End Assessment Pie -->
+            </div>
+          </div>
+
+          <!-- Users Pie -->
+          <div class="col-xxl-3 col-lg-4 col-md-5 col-sm-6 col-12">
+            <div class="card chart-card">
+              <div class="card-body pb-0">
+                <h5 class="card-title">Users | <span class="granularity-title">Last 30 Days</span></h5>
+                <div id="usersChart"></div>
+              </div><!-- End Assessment Pie -->
+            </div>
+          </div>
         </div>
+        
 
         <div class="row">
           <!-- Top Users -->
@@ -168,7 +225,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
     var barChartColorPallete = ['#FDDD00','#E1DD1A','#C5DE33','#A9DE4D','#8DDF66','#70DF80','#54E099','#38E0B3','#1CE1CC','#00E1E6'];
     var pieChartColorPallete = ['#0fbe4d','#94ce36','#00F9FF','#00d69b','#00F9FF'];
 
-    const renderChart = (granularity) => {
+    const updateAssessmentsChart = (granularity) => {
       $.get( "/api?f=getAssessmentReportsStats&granularity="+granularity).done(function( data, status ) {
         // Extract all unique dates
         const categoriesSet = new Set();
@@ -299,6 +356,40 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
     }
 
     const updateAssessmentTypes = (data) => {
+      const countByCustomer = data.reduce((acc, obj) => {
+        acc[obj.customer] = (acc[obj.customer] || 0) + 1;
+        return acc;
+      }, {});
+
+      const types = Object.keys(countByType).map(type => ({ type: type, count: countByType[type] }));
+      const options = {
+        tooltip: {
+          theme: theme
+        },
+        chart: {
+          type: 'donut',
+          height: 350
+        },
+        plotOptions: {
+          pie: {
+            expandOnClick: true
+          }
+        },
+        legend: {
+          position: 'top'
+        },
+        dataLabels: {
+          enabled: false
+        },
+        series: types.map(type => type.count),
+        labels: types.map(type => type.type),
+        colors: pieChartColorPallete
+      };
+      const chart = new ApexCharts(document.querySelector("#assessmentTypesChart"), options);
+      chart.render();
+    }
+
+    const updateAssessmentCustomers = (data) => {
       const countByType = data.reduce((acc, obj) => {
         acc[obj.type] = (acc[obj.type] || 0) + 1;
         return acc;
@@ -424,14 +515,14 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
 
     $('.granularity-select').on('click', function(event) {
       $("#reportsChart,#topUsersChart,#topCustomersChart,#assessmentTypesChart").html('');
-      renderChart($(event.currentTarget).data('granularity'));
+      updateAssessmentsChart($(event.currentTarget).data('granularity'));
       updateRecentAssessments($(event.currentTarget).data('granularity'));
       $('.granularity-title').text($(event.currentTarget).text());
       $('#granularityBtn').text($(event.currentTarget).text())
     });
 
     // Initial render
-    renderChart('last30Days');
+    updateAssessmentsChart('last30Days');
     updateSummaryValues();
     updateRecentAssessments('last30Days');
   });
