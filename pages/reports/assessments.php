@@ -12,7 +12,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
       <div class="col-lg-12">
         <div class="row">
           <!-- Reports Today Card -->
-          <div class="col-lg-2 col-md-4 col-sm-6 col-12">
+          <div class="col-lg-3 col-md-4 col-sm-6 col-12">
             <div class="card info-card reports-today-card">
               <div class="card-body">
                 <h5 class="card-title">Assessments <span>| Today</span></h5>
@@ -20,9 +20,12 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
                   <!-- <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                     <i class="bi bi-cart"></i>
                   </div> -->
-                  <div class="ps-3">
-                    <h6 id="reportsThisDayVal"></h6>
-                    <span class="text-success small pt-1 fw-bold" id="reportsThisDayValPerc"></span> <span class="text-muted small pt-2 ps-1" id="reportsThisDayValPercDir"></span>
+                  <div class="pt-1 ps-3">
+                    <h6 id="reportsThisDayVal" class="metric-circle border-5"></h6>
+                  </div>
+                  <div class="p-2 pt-2 ps-4">
+                    <span id="customersThisDayVal" class="ib-green small pt-1 mt-1 fw-bold"></span>
+                    <span id="usersThisDayVal" class="ib-black small pt-1 mt-1 fw-bold" style="display:flex;"></span>
                   </div>
                 </div>
               </div>
@@ -30,7 +33,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
           </div><!-- Reports Today Card -->
 
           <!-- Reports This Month Card -->
-          <div class="col-lg-2 col-md-4 col-sm-6 col-12">
+          <div class="col-lg-3 col-md-4 col-sm-6 col-12">
             <div class="card info-card reports-month-card">
               <div class="card-body">
                 <h5 class="card-title">Assessments <span>| This Month</span></h5>
@@ -38,9 +41,12 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
                   <!-- <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                     <i class="bi bi-currency-dollar"></i>
                   </div> -->
-                  <div class="ps-3">
-                    <h6 id="reportsThisMonthVal"></h6>
-                    <span class="text-success small pt-1 fw-bold" id="reportsThisMonthValPerc"></span> <span class="text-muted small pt-2 ps-1" id="reportsThisMonthValPercDir"></span>
+                  <div class="pt-1 ps-3">
+                    <h6 id="reportsThisMonthVal" class="metric-circle border-5"></h6>
+                  </div>
+                  <div class="p-2 pt-2 ps-4">
+                    <span id="customersThisMonthVal" class="ib-green small pt-1 mt-1 fw-bold"></span>
+                    <span id="usersThisMonthVal" class="ib-black small pt-1 mt-1 fw-bold" style="display:flex;"></span>
                   </div>
                 </div>
               </div>
@@ -48,7 +54,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
           </div><!-- Reports This Month Card -->
 
           <!-- Reports This Year Card -->
-          <div class="col-lg-2 col-md-4 col-sm-6 col-12">
+          <div class="col-lg-3 col-md-4 col-sm-6 col-12">
             <div class="card info-card reports-year-card">
               <div class="card-body">
                 <h5 class="card-title">Assessments <span>| This Year</span></h5>
@@ -56,53 +62,20 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
                   <!-- <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                     <i class="bi bi-people"></i>
                   </div> -->
-                  <div class="ps-3">
-                    <h6 id="reportsThisYearVal"></h6>
-                    <span class="text-success small pt-1 fw-bold" id="reportsThisYearValPerc"></span> <span class="text-muted small pt-2 ps-1" id="reportsThisYearValPercDir"></span>
+                  <div class="pt-1 ps-3">
+                    <h6 id="reportsThisYearVal" class="metric-circle border-5"></h6>
+                  </div>
+                  <div class="p-2 pt-2 ps-4">
+                    <span id="customersThisYearVal" class="ib-green small pt-1 mt-1 fw-bold"></span>
+                    <span id="usersThisYearVal" class="ib-black small pt-1 mt-1 fw-bold" style="display:flex;"></span>
                   </div>
                 </div>
               </div>
             </div>
           </div><!-- Reports This Year Card -->
 
-          <!-- Users Card -->
-          <div class="col-lg-2 col-md-4 col-sm-6 col-12">
-            <div class="card info-card reports-today-card">
-              <div class="card-body">
-                <h5 class="card-title">Assessments <span>| Today</span></h5>
-                <div class="d-flex align-items-center">
-                  <!-- <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                    <i class="bi bi-cart"></i>
-                  </div> -->
-                  <div class="ps-3">
-                    <h6 id="reportsThisDayVal"></h6>
-                    <span class="text-success small pt-1 fw-bold" id="reportsThisDayValPerc"></span> <span class="text-muted small pt-2 ps-1" id="reportsThisDayValPercDir"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div><!-- Users Card -->
-
-          <!-- Customers Card -->
-          <div class="col-lg-2 col-md-4 col-sm-6 col-12">
-            <div class="card info-card reports-today-card">
-              <div class="card-body">
-                <h5 class="card-title">Assessments <span>| Today</span></h5>
-                <div class="d-flex align-items-center">
-                  <!-- <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                    <i class="bi bi-cart"></i>
-                  </div> -->
-                  <div class="ps-3">
-                    <h6 id="reportsThisDayVal"></h6>
-                    <span class="text-success small pt-1 fw-bold" id="reportsThisDayValPerc"></span> <span class="text-muted small pt-2 ps-1" id="reportsThisDayValPercDir"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div><!-- Customers Card -->
-
           <!-- Granularity Card -->
-          <div class="col-lg-2 col-md-4 col-sm-6 col-12">
+          <div class="col-lg-3 col-md-4 col-sm-6 col-12">
             <div class="card info-card granularity-card">
               <div class="card-body">
                 <h5 class="card-title">Granularity</span></h5>
@@ -149,28 +122,6 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
               </div><!-- End Assessment Pie -->
             </div>
           </div>
-
-          <!-- Customers Pie -->
-          <div class="col-xxl-3 col-lg-4 col-md-5 col-sm-6 col-12">
-            <div class="card chart-card">
-              <div class="card-body pb-0">
-                <h5 class="card-title">Customers | <span class="granularity-title">Last 30 Days</span></h5>
-                <div id="customersChart"></div>
-              </div><!-- End Assessment Pie -->
-            </div>
-          </div>
-
-          <!-- Users Pie -->
-          <div class="col-xxl-3 col-lg-4 col-md-5 col-sm-6 col-12">
-            <div class="card chart-card">
-              <div class="card-body pb-0">
-                <h5 class="card-title">Users | <span class="granularity-title">Last 30 Days</span></h5>
-                <div id="usersChart"></div>
-              </div><!-- End Assessment Pie -->
-            </div>
-          </div>
-        </div>
-        
 
         <div class="row">
           <!-- Top Users -->
@@ -293,8 +244,14 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
       $.get( "/api?f=getAssessmentReportsSummary").done(function( data, status ) {
         const total = data.find(item => item.type === "Total")
         $('#reportsThisDayVal').text(total['count_today']);
+        $('#customersThisDayVal').text(total['unique_customers_today']+' Customers');
+        $('#usersThisDayVal').text(total['unique_apiusers_today']+' Users');
         $('#reportsThisMonthVal').text(total['count_this_month']);
+        $('#customersThisMonthVal').text(total['unique_customers_this_month']+' Customers');
+        $('#usersThisMonthVal').text(total['unique_apiusers_this_month']+' Users');
         $('#reportsThisYearVal').text(total['count_this_year']);
+        $('#customersThisYearVal').text(total['unique_customers_this_year']+' Customers');
+        $('#usersThisYearVal').text(total['unique_apiusers_this_year']+' Users');
       });
     };
 
@@ -356,40 +313,6 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
     }
 
     const updateAssessmentTypes = (data) => {
-      const countByCustomer = data.reduce((acc, obj) => {
-        acc[obj.customer] = (acc[obj.customer] || 0) + 1;
-        return acc;
-      }, {});
-
-      const types = Object.keys(countByType).map(type => ({ type: type, count: countByType[type] }));
-      const options = {
-        tooltip: {
-          theme: theme
-        },
-        chart: {
-          type: 'donut',
-          height: 350
-        },
-        plotOptions: {
-          pie: {
-            expandOnClick: true
-          }
-        },
-        legend: {
-          position: 'top'
-        },
-        dataLabels: {
-          enabled: false
-        },
-        series: types.map(type => type.count),
-        labels: types.map(type => type.type),
-        colors: pieChartColorPallete
-      };
-      const chart = new ApexCharts(document.querySelector("#assessmentTypesChart"), options);
-      chart.render();
-    }
-
-    const updateAssessmentCustomers = (data) => {
       const countByType = data.reduce((acc, obj) => {
         acc[obj.type] = (acc[obj.type] || 0) + 1;
         return acc;
@@ -401,8 +324,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
           theme: theme
         },
         chart: {
-          type: 'donut',
-          height: 350
+          type: 'donut'
         },
         plotOptions: {
           pie: {
