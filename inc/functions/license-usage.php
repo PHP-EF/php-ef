@@ -1,10 +1,69 @@
 <?php
 
-function getLicenseCount2() {
+function getLicenseCount2($StartDateTime,$EndDateTime,$Realm) {
     // Set Time Dimensions
-    // $StartDimension = str_replace('Z','',$StartDateTime);
-    // $EndDimension = str_replace('Z','',$EndDateTime);
-    return QueryCubeJS('{"segments":[],"dimensions":["NstarDnsActivity.ip_space_id"],"ungrouped":false,"measures":["NstarDnsActivity.total_query_count"],"timeDimensions":[{"dateRange":["2024-10-30T21:58:43.000","2024-11-30T21:58:44.000"],"dimension":"NstarDnsActivity.timestamp","granularity":null}]}');
+    $StartDimension = str_replace('Z','',$StartDateTime);
+    $EndDimension = str_replace('Z','',$EndDateTime);
+    $SpacesWithDNSData = QueryCubeJS('{"segments":[],"dimensions":["NstarDnsActivity.ip_space_id"],"ungrouped":false,"measures":["NstarDnsActivity.total_query_count"],"timeDimensions":[{"dateRange":["'.$StartDimension.'","'.$EndDimension.'"],"dimension":"NstarDnsActivity.timestamp","granularity":null}]}');
+    $CSPRequests = [];
+    $CubeJSRequests = [];
+    $CSPRequests[] = QueryCSPMultiRequestBuilder("get",'api/infra/v1/detail_hosts?_limit=10001&_fields=id,display_name,ip_space,site_id',null,'uddi_hosts'); // Collect list of UDDI Hosts
+    $Responses = QueryCSPMulti($CSPRequests);
+    $Hosts = $Responses['uddi_hosts']['Body']->results;
+    // return json_decode(json_encode($Hosts),false);
+    $filtered_hosts = array_values(array_filter(json_decode(json_encode($Hosts),true), function($item) {
+        return array_key_exists('ip_space', $item);
+    }));
+    foreach ($SpacesWithDNSData->result->data as $SpaceWithDNSData) {
+        if ($SpaceWithDNSData->{'NstarDnsActivity.ip_space_id'} != '') {
+            $Space = 'ipam/ip_space/'.$SpaceWithDNSData->{'NstarDnsActivity.ip_space_id'};
+            $SiteIds = [];
+            $HostsWithThisSpace = array_keys(array_column($filtered_hosts,'ip_space'),$Space);
+            foreach ($HostsWithThisSpace as $HostWithThisSpace) {
+                $SiteIds[] = $filtered_hosts[$HostWithThisSpace]['site_id'];
+            }
+            if (count($SiteIds) > 0) {
+                $Query = json_encode(array(
+                    "dimensions" => [
+                        "NstarDnsActivity.device_ip"
+                    ],
+                    "ungrouped" => false,
+                    "timeDimensions" => [
+                        array(
+                            "dateRange" => [
+                                $StartDimension,
+                                $EndDimension
+                            ],
+                            "dimension" => "NstarDnsActivity.timestamp",
+                            "granularity" => null
+                        )
+                    ],
+                    "measures" => [
+                        "NstarDnsActivity.total_query_count"
+                    ],
+                    "filters" => [
+                        array(
+                            "member" => "NstartDnsActivity.site_id",
+                            "values" => $SiteIds,
+                            "operator" => "equals"
+                        )
+                    ]
+                ));
+                $CubeJSRequests[$Space] = $Query;
+            }   
+        }
+    }
+    // return $CubeJSRequests;
+    $CubeJSResults = QueryCubeJSMulti($CubeJSRequests);
+    $ResultsArr = array();
+    foreach ($CubeJSResults as $CubeJSResultKey => $CubeJSResultVal) {
+        $ResultsArr[] = array(
+            'IP Space' => $CubeJSResultKey,
+            'Count' => count($CubeJSResultVal['Body']->result->data),
+            'Data' => $CubeJSResultVal['Body']->result->data
+        );
+    }
+    return $ResultsArr;
 }
 
 function getLicenseCount($StartDateTime,$EndDateTime,$Realm) {

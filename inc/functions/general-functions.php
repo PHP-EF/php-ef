@@ -132,15 +132,17 @@ function rmdirRecursive($dir)
 
 function array_search_partial($keyword,$arr) {
     foreach($arr as $index => $string) {
-        if (strpos($string, $keyword) !== FALSE)
+        if (preg_match('/'.$keyword.'\b/', $string)) {
             return $index;
+        }
     }
 }
 
 function replaceTag($Mapping,$TagName,$Value) {
     $TAG = array_search_partial($TagName,$Mapping);
     if ($TAG) {
-        $Mapping[$TAG] = str_replace($TagName, $Value, $Mapping[$TAG]);
+        $pattern = '/'.$TagName.'\b/';
+        $Mapping[$TAG] = preg_replace($pattern, $Value, $Mapping[$TAG]);
     }
     return $Mapping;
 }

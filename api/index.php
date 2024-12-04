@@ -497,6 +497,16 @@ if (!($_REQUEST['f'])) {
                 }
             }
             break;
+        case 'createLicenseReport2':
+            // if ($ib->auth->checkAccess(null,"B1-LICENSE-USAGE")) {
+                if (checkRequestMethod('POST')) {
+                    if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
+                        $response = getLicenseCount2($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm']);
+                        echo json_encode($response,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                    }
+                }
+            // }
+            break;
         case 'crypt':
             if (checkRequestMethod('POST')) {
                 if (isset($_POST['key'])) {
