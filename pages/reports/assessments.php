@@ -283,6 +283,11 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
             sortable: true,
             filterControl: 'select'
           },{
+            field: 'realm',
+            title: 'Realm',
+            sortable: true,
+            filterControl: 'select'
+          },{
             field: 'type',
             title: 'Type',
             sortable: true,
