@@ -1,3 +1,7 @@
+## v0.5.8
+- Add realms chart to assessment reporting
+- Minor visual bugfixes
+
 ## v0.5.7
 - Implement temporary workaround to enable Threat Actor generation in EU whilst it is not aligned to US
 
