@@ -49,7 +49,7 @@ function getLicenseCount2($StartDateTime,$EndDateTime,$Realm) {
                         )
                     ]
                 ));
-                $CubeJSRequests[$Space] = $Query;
+                $CubeJSRequests[$Space.'-DNS'] = $Query;
             }   
         }
     }
@@ -58,9 +58,12 @@ function getLicenseCount2($StartDateTime,$EndDateTime,$Realm) {
     $ResultsArr = array();
     foreach ($CubeJSResults as $CubeJSResultKey => $CubeJSResultVal) {
         $ResultsArr[] = array(
-            'IP Space' => $CubeJSResultKey,
-            'Count' => count($CubeJSResultVal['Body']->result->data),
-            'Data' => $CubeJSResultVal['Body']->result->data
+            'IP_Space_ID' => $CubeJSResultKey,
+            'IP_Space_Name' => 'Placeholder',
+            'DNS' => array(
+                'DNS_IP_Count' => count($CubeJSResultVal['Body']->result->data),
+                'DNS_IP_Data' => $CubeJSResultVal['Body']->result->data
+            )
         );
     }
     return $ResultsArr;

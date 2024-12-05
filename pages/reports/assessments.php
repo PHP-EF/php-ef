@@ -299,6 +299,17 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
             sortable: true,
             filterControl: 'select'
           },{
+            field: 'status',
+            title: 'Status',
+            sortable: true,
+            filterControl: 'select'
+          },{
+            field: 'uuid',
+            title: 'UUID',
+            sortable: true,
+            visible: false,
+            filterControl: 'input'
+          },{
             field: 'created',
             title: 'Generated At',
             sortable: true,
