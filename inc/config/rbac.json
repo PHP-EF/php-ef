@@ -47,5 +47,15 @@
             "ADMIN-Menu",
             "REPORT-Menu"
         ]
+    },
+    "assessment-reporting": {
+        "Name": "Assessment Reporting",
+        "Description": "This group gives users access to the Assessment Reporting page",
+        "PermittedResources": [
+            "REPORT-ASSESSMENTS"
+        ],
+        "PermittedMenus": [
+            "REPORT-Menu"
+        ]
     }
 }
