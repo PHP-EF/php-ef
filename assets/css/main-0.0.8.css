@@ -493,6 +493,11 @@ body .popover {
   width: 150px;
 }
 
+/* ApexCharts */
+.apexcharts-legend {
+  margin-bottom: 20px;
+}
+
 /* Reports End */
 
 /* Page Content */

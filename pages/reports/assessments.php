@@ -102,26 +102,36 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
 
         <div class="row">
           <!-- Assessments Chart -->
-          <div class="col-xxl-9 col-lg-8 col-md-7 col-sm-6 col-12">
+          <div class="col-xxl-8 col-lg-6 col-md-12 col-sm-12 col-12">
             <div class="card chart-card">
               <div class="card-body">
                 <h5 class="card-title">Assessments | <span class="granularity-title">Last 30 Days</span></h5>
                 <!-- Line Chart -->
-                <div id="reportsChart"></div>
+                <div id="assessmentsChart"></div>
                 <!-- End Line Chart -->
               </div>
             </div>
           </div><!-- End Assessments -->
 
-          <!-- Assessment Pie -->
-          <div class="col-xxl-3 col-lg-4 col-md-5 col-sm-6 col-12">
+          <div class="col-xxl-2 col-lg-3 col-md-6 col-sm-6 col-6"> <!-- Assessment Types Pie -->
             <div class="card chart-card">
               <div class="card-body pb-0">
                 <h5 class="card-title">Assessment Types | <span class="granularity-title">Last 30 Days</span></h5>
                 <div id="assessmentTypesChart"></div>
-              </div><!-- End Assessment Pie -->
+              </div>
             </div>
-          </div>
+          </div><!-- End Assessment Pie -->
+
+          <div class="col-xxl-2 col-lg-3 col-md-6 col-sm-6 col-6"> <!-- Assessment Realm Pie -->
+            <div class="card chart-card">
+              <div class="card-body pb-0">
+                <h5 class="card-title">Infoblox Realms | <span class="granularity-title">Last 30 Days</span></h5>
+                <div id="assessmentRealmsChart"></div>
+              </div>
+            </div>
+          </div><!-- Assessment Realm Pie -->
+
+        </div>
 
         <div class="row">
           <!-- Top Users -->
@@ -175,70 +185,6 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
 
     var barChartColorPallete = ['#FDDD00','#E1DD1A','#C5DE33','#A9DE4D','#8DDF66','#70DF80','#54E099','#38E0B3','#1CE1CC','#00E1E6'];
     var pieChartColorPallete = ['#0fbe4d','#94ce36','#00F9FF','#00d69b','#00F9FF'];
-
-    const updateAssessmentsChart = (granularity) => {
-      $.get( "/api?f=getAssessmentReportsStats&granularity="+granularity).done(function( data, status ) {
-        // Extract all unique dates
-        const categoriesSet = new Set();
-        for (const key in data) {
-            if (data.hasOwnProperty(key)) {
-                Object.keys(data[key]).forEach(date => categoriesSet.add(date));
-            }
-        }
-        const categories = Array.from(categoriesSet).sort();
-        // Prepare the series data
-        const series = [];
-        for (const key in data) {
-            if (data.hasOwnProperty(key)) {
-                const seriesData = categories.map(date => data[key][date] || 0);
-                series.push({
-                    name: key,
-                    data: seriesData
-                });
-            }
-        }
-
-        const options = {
-          tooltip: {
-            theme: theme
-          },
-          chart: {
-            height: 350,
-            type: 'area',
-            toolbar: {
-              show: false
-            },
-          },
-          markers: {
-            size: 4
-          },
-          colors: ['#4154f1', '#2eca6a', '#ff771d'],
-          fill: {
-            type: "gradient",
-            gradient: {
-              shadeIntensity: 1,
-              opacityFrom: 0.3,
-              opacityTo: 0.4,
-              stops: [0, 90, 100]
-            }
-          },
-          dataLabels: {
-            enabled: false
-          },
-          stroke: {
-            curve: 'smooth',
-            width: 2
-          },
-          series: series,
-          xaxis: {
-              categories: categories
-          }
-        };
-
-        const chart = new ApexCharts(document.querySelector("#reportsChart"), options);
-        chart.render();
-      });
-    };
 
     const updateSummaryValues = () => {
       $.get( "/api?f=getAssessmentReportsSummary").done(function( data, status ) {
@@ -325,45 +271,190 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
         updateTopApiUsers(data,granularity);
         updateTopCustomers(data,granularity);
         updateAssessmentTypes(data);
+        updateAssessmentRealms(data);
       });
     }
 
+    // Define Area Chart Options
+    const areaChartOptions = {
+      tooltip: {
+        theme: theme
+      },
+      chart: {
+        height: 350,
+        type: 'area',
+        toolbar: {
+          show: false
+        },
+      },
+      markers: {
+        size: 4
+      },
+      colors: ['#4154f1', '#2eca6a', '#ff771d'],
+      fill: {
+        type: "gradient",
+        gradient: {
+          shadeIntensity: 1,
+          opacityFrom: 0.3,
+          opacityTo: 0.4,
+          stops: [0, 90, 100]
+        }
+      },
+      noData: {
+        text: 'Loading...'
+      },
+      dataLabels: {
+        enabled: false
+      },
+      stroke: {
+        curve: 'smooth',
+        width: 2
+      },
+      series: [],
+      xaxis: {
+          categories: []
+      }
+    };
+
+    // Define Donut Chart Options
+    const donutChartOptions = {
+        tooltip: {
+          theme: theme
+        },
+        chart: {
+          type: 'donut',
+          height: '350px',
+        },
+        plotOptions: {
+          pie: {
+            expandOnClick: true,
+          }
+        },
+        noData: {
+          text: 'Loading...'
+        },
+        legend: {
+          position: 'bottom',
+          offsetY: 20,
+          itemMargin: {
+            horizontal: 5
+          },
+        },
+        dataLabels: {
+          enabled: false
+        },
+        series: [],
+        labels: [],
+        colors: pieChartColorPallete
+    };
+
+    // Define Horizontal Bar Chart Options
+    const horizontalBarChartOptions = {
+      tooltip: {
+        theme: theme
+      },
+      chart: {
+        type: 'bar',
+        height: 350
+      },
+      plotOptions: {
+        bar: {
+          horizontal: true,
+          distributed: true // This enables different colors for each bar
+        }
+      },
+      noData: {
+        text: 'Loading...'
+      },
+      dataLabels: {
+        enabled: false
+      },
+      series: [],
+      colors: barChartColorPallete
+    };
+
+    // Render Assessments Area Chart
+    const assessmentsChart = new ApexCharts(document.querySelector("#assessmentsChart"), areaChartOptions);
+    assessmentsChart.render();
+
+    // Define Assessments Area Chart Update Function
+    const updateAssessmentsChart = (granularity) => {
+      $.get( "/api?f=getAssessmentReportsStats&granularity="+granularity).done(function( data, status ) {
+        // Extract all unique dates
+        const categoriesSet = new Set();
+        for (const key in data) {
+            if (data.hasOwnProperty(key)) {
+                Object.keys(data[key]).forEach(date => categoriesSet.add(date));
+            }
+        }
+        const categories = Array.from(categoriesSet).sort();
+        // Prepare the series data
+        const series = [];
+        for (const key in data) {
+          if (data.hasOwnProperty(key)) {
+            const seriesData = categories.map(date => data[key][date] || 0);
+            series.push({
+                name: key,
+                data: seriesData
+            });
+          }
+        }
+        assessmentsChart.updateOptions({
+          series: series,
+          xaxis: {
+            categories: categories
+          }
+        });
+      });
+    };
+    // Render Assessments Area Chart End //
+
+    // Render Types Chart
+    const typesChart = new ApexCharts(document.querySelector("#assessmentTypesChart"), donutChartOptions);
+    typesChart.render();
+
+    // Define Types Chart Update Function
     const updateAssessmentTypes = (data) => {
       const countByType = data.reduce((acc, obj) => {
         acc[obj.type] = (acc[obj.type] || 0) + 1;
         return acc;
       }, {});
-
-      const types = Object.keys(countByType).map(type => ({ type: type, count: countByType[type] }));
-      const options = {
-        tooltip: {
-          theme: theme
-        },
-        chart: {
-          type: 'donut'
-        },
-        plotOptions: {
-          pie: {
-            expandOnClick: true
-          }
-        },
-        legend: {
-          position: 'top'
-        },
-        dataLabels: {
-          enabled: false
-        },
+      var types = Object.keys(countByType).map(type => ({ type: type, count: countByType[type] }));
+      typesChart.updateOptions({
         series: types.map(type => type.count),
         labels: types.map(type => type.type),
-        colors: pieChartColorPallete
-      };
-      const chart = new ApexCharts(document.querySelector("#assessmentTypesChart"), options);
-      chart.render();
+      });
     }
+    // Render Types Chart End //
 
+
+    // Render Realms Chart
+    const realmsChart = new ApexCharts(document.querySelector("#assessmentRealmsChart"), donutChartOptions);
+    realmsChart.render();
+
+    // Define Realms Chart Update Function
+    const updateAssessmentRealms = (data) => {
+      const countByRealm = data.reduce((acc, obj) => {
+        acc[obj.realm] = (acc[obj.realm] || 0) + 1;
+        return acc;
+      }, {});
+
+      const realms = Object.keys(countByRealm).map(realm => ({ realm: realm, count: countByRealm[realm] }));
+      realmsChart.updateOptions({
+        series: realms.map(realm => realm.count),
+        labels: realms.map(realm => realm.realm)
+      });
+    }
+    // Render Realms Chart End //
+
+
+    // Render Top API Users Chart
+    const topApiUsersChart = new ApexCharts(document.querySelector("#topUsersChart"), horizontalBarChartOptions);
+    topApiUsersChart.render();
+
+    // Define Top API Users Chart Update Function
     const updateTopApiUsers = (data,granularity) => {
       const apiUserCount = {};
-
       data.forEach(entry => {
         const apiUser = entry.apiuser;
         if (apiUser) {
@@ -376,23 +467,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
 
       const sortedApiUsers = Object.entries(apiUserCount).sort((a, b) => b[1] - a[1]);
       const apiUsers = sortedApiUsers.slice(0,10).map(user => ({ apiuser: user[0], count: user[1] }));
-      const options = {
-        tooltip: {
-          theme: theme
-        },
-        chart: {
-          type: 'bar',
-          height: 350
-        },
-        plotOptions: {
-          bar: {
-            horizontal: true,
-            distributed: true // This enables different colors for each bar
-          }
-        },
-        dataLabels: {
-          enabled: false
-        },
+      topApiUsersChart.updateOptions({
         series: [{
           data: apiUsers.map(user => user.count),
           name: 'Assessment Count'
@@ -400,15 +475,18 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
         xaxis: {
           categories: apiUsers.map(user => user.apiuser)
         },
-        colors: barChartColorPallete
-      };
-      const chart = new ApexCharts(document.querySelector("#topUsersChart"), options);
-      chart.render();
+      });
     }
+    // Render Top API Users Chart End //
 
+
+    // Render Top Customers Chart
+    const topCustomersChart = new ApexCharts(document.querySelector("#topCustomersChart"), horizontalBarChartOptions);
+    topCustomersChart.render();
+
+    // Define Top Customers Chart Update Function
     const updateTopCustomers = (data,granularity) => {
       const customerCount = {};
-
       data.forEach(entry => {
         const customer = entry.customer;
         if (customer) {
@@ -418,41 +496,21 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
           customerCount[customer]++;
         }
       });
-
       const sortedCustomers = Object.entries(customerCount).sort((a, b) => b[1] - a[1]);
-      const customers = sortedCustomers.slice(0,10).map(user => ({ customer: user[0], count: user[1] }));
-      const options = {
-        tooltip: {
-          theme: theme
-        },
-        chart: {
-          type: 'bar',
-          height: 350
-        },
-        plotOptions: {
-          bar: {
-            horizontal: true,
-            distributed: true // This enables different colors for each bar
-          }
-        },
-        dataLabels: {
-          enabled: false
-        },
+      const customers = sortedCustomers.slice(0,10).map(customer => ({ customer: customer[0], count: customer[1] }));
+      topCustomersChart.updateOptions({
         series: [{
-          data: customers.map(user => user.count),
+          data: customers.map(customer => customer.count),
           name: 'Assessment Count'
         }],
         xaxis: {
-          categories: customers.map(user => user.customer)
+          categories: customers.map(customer => customer.customer)
         },
-        colors: barChartColorPallete
-      };
-      const chart = new ApexCharts(document.querySelector("#topCustomersChart"), options);
-      chart.render();
+      });
     }
+    // Render Top Customers Chart End //
 
     $('.granularity-select').on('click', function(event) {
-      $("#reportsChart,#topUsersChart,#topCustomersChart,#assessmentTypesChart").html('');
       updateAssessmentsChart($(event.currentTarget).data('granularity'));
       updateRecentAssessments($(event.currentTarget).data('granularity'));
       $('.granularity-title').text($(event.currentTarget).text());
