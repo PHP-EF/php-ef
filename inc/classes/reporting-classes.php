@@ -16,13 +16,87 @@ class Reporting {
         userid INTEGER,
         apiuser TEXT,
         customer TEXT,
-        created DATETIME
+        realm TEXT,
+        created DATETIME,
+        uuid TEXT,
+        status TEXT
       )");
     }
 
-    public function newReportEntry($type,$apiuser,$customer,$userid = '') {
-        $stmt = $this->db->prepare("INSERT INTO reporting_assessments (type, apiuser, customer, created) VALUES (:type, :apiuser, :customer, :created)");
-        $stmt->execute([':type' => $type,':apiuser' => $apiuser,':customer' => $customer,':created' => date('Y-m-d H:i:s')]);
+    public function getReportById($id) {
+      $stmt = $this->db->prepare("SELECT * FROM reporting_assessments WHERE id = :id");
+      $stmt->execute([':id' => $id]);
+      $report = $stmt->fetch(PDO::FETCH_ASSOC);
+      if ($report) {
+        return $report;
+      } else {
+        return false;
+      }
+    }
+
+    public function getReportByUuid($uuid) {
+      $stmt = $this->db->prepare("SELECT * FROM reporting_assessments WHERE uuid = :uuid");
+      $stmt->execute([':uuid' => $uuid]);
+      $report = $stmt->fetch(PDO::FETCH_ASSOC);
+      if ($report) {
+        return $report;
+      } else {
+        return false;
+      }
+    }
+
+    public function newReportEntry($type,$apiuser,$customer,$realm,$uuid,$status) {
+        $stmt = $this->db->prepare("INSERT INTO reporting_assessments (type, apiuser, customer, realm, created, uuid, status) VALUES (:type, :apiuser, :customer, :realm, :created, :uuid, :status)");
+        $stmt->execute([':type' => $type,':apiuser' => $apiuser,':customer' => $customer,':realm' => $realm,':created' => date('Y-m-d H:i:s'),':uuid' => $uuid,':status' => $status]);
+        return $this->db->lastInsertId();
+    }
+
+    public function updateReportEntry($id,$type,$apiuser,$customer,$realm,$uuid,$status) {
+      if ($this->getReportById($id)) {
+        $prepare = [];
+        $execute = [];
+        $execute[':id'] = $id;
+        if ($type !== null) {
+          $prepare[] = 'type = :type';
+          $execute[':type'] = $type;
+        }
+        if ($apiuser !== null) {
+          $prepare[] = 'apiuser = :apiuser';
+          $execute[':apiuser'] = $apiuser;
+        }
+        if ($customer !== null) {
+          $prepare[] = 'customer = :customer';
+          $execute[':customer'] = $customer;
+        }
+        if ($realm !== null) {
+          $prepare[] = 'realm = :realm';
+          $execute[':realm'] = $realm;
+        }
+        if ($uuid !== null) {
+          $prepare[] = 'uuid = :uuid';
+          $execute[':uuid'] = $uuid;
+        }
+        if ($status !== null) {
+          $prepare[] = 'status = :status';
+          $execute[':status'] = $status;
+        }
+        $stmt = $this->db->prepare('UPDATE reporting_assessments SET '.implode(", ",$prepare).' WHERE id = :id');
+        $stmt->execute($execute);
+        return array(
+          'Status' => 'Success',
+          'Message' => 'Report Record updated successfully'
+        );
+      } else {
+        return array(
+          'Status' => 'Error',
+          'Message' => 'Report Record does not exist'
+        );
+      }
+    }
+
+    public function updateReportEntryStatus($uuid,$status) {
+      $stmt = $this->db->prepare('UPDATE reporting_assessments SET status = :status WHERE uuid = :uuid');
+      $stmt->execute([':uuid' => $uuid,':status' => $status]);
     }
 
     public function getAssessmentReports($granularity) {

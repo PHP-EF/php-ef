@@ -1,3 +1,6 @@
+## v0.5.7
+- Implement temporary workaround to enable Threat Actor generation in EU whilst it is not aligned to US
+
 ## v0.5.6
 - Various bugfixes
 

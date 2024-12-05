@@ -465,6 +465,7 @@ if (!($_REQUEST['f'])) {
                         $id = $_REQUEST['id'];
                         $File = __DIR__.'/../files/reports/report-'.$id.'.pptx';
                         if (file_exists($File)) {
+                            $ib->reporting->updateReportEntryStatus($id,'Downloaded');
                             header('Content-type: application/pptx');
                             header('Content-Disposition: inline; filename="report-'.$id.'.pptx"');
                             header('Content-Transfer-Encoding: binary');
