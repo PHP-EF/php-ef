@@ -489,8 +489,21 @@ body .popover {
 }
 
 /* Granularity */
+.granularity-card .btn-group {
+  display: inline-flex;
+  vertical-align: middle;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.granularity-card .btn-group>.btn {
+  flex: none;
+}
 .granularity-card button {
   width: 150px;
+  margin-right: 10px!important;
+}
+.granularity-card .clearFilters {
+  display: none;
 }
 
 /* ApexCharts */

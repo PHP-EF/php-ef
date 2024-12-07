@@ -99,7 +99,7 @@ class Reporting {
       $stmt->execute([':uuid' => $uuid,':status' => $status]);
     }
 
-    public function getAssessmentReports($granularity) {
+    public function getAssessmentReports($granularity,$type = 'all',$realm = 'all',$user = 'all',$customer = 'all') {
       switch ($granularity) {
         case 'today':
           $Select = 'SELECT * FROM reporting_assessments WHERE date(created) = date("now")';
@@ -126,10 +126,28 @@ class Reporting {
           $Select = 'SELECT * FROM reporting_assessments';
           break;
       }
+
+      $execute = [];
+      if ($type != 'all') {
+        $Select = $Select.' AND type = :type';
+        $execute[':type'] = $type;
+      }
+      if ($realm != 'all') {
+        $Select = $Select.' AND realm = :realm';
+        $execute[':realm'] = $realm;
+      }
+      if ($user != 'all') {
+        $Select = $Select.' AND apiuser = :apiuser';
+        $execute[':apiuser'] = $user;
+      }
+      if ($customer != 'all') {
+        $Select = $Select.' AND customer = :customer';
+        $execute[':customer'] = $customer;
+      }
       if (isset($Select)) {
         try {
           $stmt = $this->db->prepare($Select);
-          $stmt->execute();
+          $stmt->execute($execute);
           return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             return array(
@@ -153,8 +171,8 @@ class Reporting {
       return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getAssessmentReportsStats($granularity) {
-        $data = $this->getAssessmentReports($granularity);
+    public function getAssessmentReportsStats($granularity,$type,$realm,$user,$customer) {
+        $data = $this->getAssessmentReports($granularity,$type,$realm,$user,$customer);
         $filteredData = $this->filterDataByGranularity($data, $granularity);
         $summary = $this->summarizeByTypeAndDate($filteredData, $granularity);
         return $summary;
