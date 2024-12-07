@@ -81,7 +81,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
                 <h5 class="card-title">Granularity</span></h5>
                 <div class="d-flex align-items-center">
                   <div class="btn-group">
-                    <button id="granularityBtn" class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button id="granularityBtn" class="btn btn-secondary btn-sm dropdown-toggle" data-granularity="last30Days" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                       Last 30 Days
                     </button>
                     <div class="dropdown-menu">
@@ -93,6 +93,9 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
                       <a class="dropdown-item granularity-select preventDefault" data-granularity="lastMonth" href="#">Last Month</a>
                       <a class="dropdown-item granularity-select preventDefault" data-granularity="lastYear" href="#">Last Year</a>
                     </div>
+                    <button id="clearFilters" class="btn btn-info btn-sm clearFilters" type="button">
+                      Clear Filters
+                    </button>
                   </div>
                 </div>
               </div>
@@ -183,8 +186,21 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
       var theme = 'light';
     }
 
-    var barChartColorPallete = ['#FDDD00','#E1DD1A','#C5DE33','#A9DE4D','#8DDF66','#70DF80','#54E099','#38E0B3','#1CE1CC','#00E1E6'];
-    var pieChartColorPallete = ['#0fbe4d','#94ce36','#00F9FF','#00d69b','#00F9FF'];
+    // Colour Palettes
+    var barChartColorPalette = ['#FDDD00','#E1DD1A','#C5DE33','#A9DE4D','#8DDF66','#70DF80','#54E099','#38E0B3','#1CE1CC','#00E1E6'];
+    var pieChartColorPalette = ['#0fbe4d','#94ce36','#00F9FF','#00d69b','#00F9FF'];
+
+    // Declare a global variable to store active filters
+    var appliedFilters = {};
+    function resetAppliedFilters() {
+      appliedFilters = {
+        type: 'all',
+        realm: 'all',
+        user: 'all',
+        customer: 'all'
+      };
+      $('#clearFilters').css('display','none');
+    }
 
     const updateSummaryValues = () => {
       $.get( "/api?f=getAssessmentReportsSummary").done(function( data, status ) {
@@ -201,8 +217,8 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
       });
     };
 
-    const updateRecentAssessments = (granularity) => {
-      $.get( "/api?f=getAssessmentReports&granularity="+granularity).done(function( data, status ) {
+    const updateRecentAssessments = (granularity, appliedFilters) => {
+      $.get( "/api?f=getAssessmentReports&granularity="+granularity+"&type="+appliedFilters['type']+"&realm="+appliedFilters['realm']+"&user="+appliedFilters['user']+"&customer="+appliedFilters['customer']).done(function( data, status ) {
         $('#assessmentTable').bootstrapTable('destroy');
         $('#assessmentTable').bootstrapTable({
           data: data,
@@ -324,11 +340,14 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
         chart: {
           type: 'donut',
           height: '350px',
+          events: {
+            dataPointSelection: (event, chartContext, config) => {
+              chartFilter(event,chartContext.el,config.w.config.labels[config.dataPointIndex]);
+            }
+          },
         },
         plotOptions: {
-          pie: {
-            expandOnClick: true,
-          }
+          pie: {}
         },
         noData: {
           text: 'Loading...'
@@ -345,7 +364,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
         },
         series: [],
         labels: [],
-        colors: pieChartColorPallete
+        colors: pieChartColorPalette
     };
 
     // Define Horizontal Bar Chart Options
@@ -355,7 +374,12 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
       },
       chart: {
         type: 'bar',
-        height: 350
+        height: 350,
+        events: {
+          dataPointSelection: (event, chartContext, config) => {
+            chartFilter(event,chartContext.el,chartContext.w.config.xaxis.categories[config.dataPointIndex]);
+          }
+        },
       },
       plotOptions: {
         bar: {
@@ -370,7 +394,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
         enabled: false
       },
       series: [],
-      colors: barChartColorPallete
+      colors: barChartColorPalette
     };
 
     // Render Assessments Area Chart
@@ -378,8 +402,8 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
     assessmentsChart.render();
 
     // Define Assessments Area Chart Update Function
-    const updateAssessmentsChart = (granularity) => {
-      $.get( "/api?f=getAssessmentReportsStats&granularity="+granularity).done(function( data, status ) {
+    const updateAssessmentsChart = (granularity,appliedFilters) => {
+      $.get( "/api?f=getAssessmentReportsStats&granularity="+granularity+"&type="+appliedFilters['type']+"&realm="+appliedFilters['realm']+"&user="+appliedFilters['user']+"&customer="+appliedFilters['customer']).done(function( data, status ) {
         // Extract all unique dates
         const categoriesSet = new Set();
         for (const key in data) {
@@ -410,7 +434,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
     // Render Assessments Area Chart End //
 
     // Render Types Chart
-    const typesChart = new ApexCharts(document.querySelector("#assessmentTypesChart"), donutChartOptions);
+    var typesChart = new ApexCharts(document.querySelector("#assessmentTypesChart"), donutChartOptions);
     typesChart.render();
 
     // Define Types Chart Update Function
@@ -429,7 +453,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
 
 
     // Render Realms Chart
-    const realmsChart = new ApexCharts(document.querySelector("#assessmentRealmsChart"), donutChartOptions);
+    var realmsChart = new ApexCharts(document.querySelector("#assessmentRealmsChart"), donutChartOptions);
     realmsChart.render();
 
     // Define Realms Chart Update Function
@@ -449,7 +473,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
 
 
     // Render Top API Users Chart
-    const topApiUsersChart = new ApexCharts(document.querySelector("#topUsersChart"), horizontalBarChartOptions);
+    var topApiUsersChart = new ApexCharts(document.querySelector("#topUsersChart"), horizontalBarChartOptions);
     topApiUsersChart.render();
 
     // Define Top API Users Chart Update Function
@@ -481,7 +505,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
 
 
     // Render Top Customers Chart
-    const topCustomersChart = new ApexCharts(document.querySelector("#topCustomersChart"), horizontalBarChartOptions);
+    var topCustomersChart = new ApexCharts(document.querySelector("#topCustomersChart"), horizontalBarChartOptions);
     topCustomersChart.render();
 
     // Define Top Customers Chart Update Function
@@ -510,16 +534,61 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
     }
     // Render Top Customers Chart End //
 
+    // Granularity Button
     $('.granularity-select').on('click', function(event) {
-      updateAssessmentsChart($(event.currentTarget).data('granularity'));
-      updateRecentAssessments($(event.currentTarget).data('granularity'));
+      updateAssessmentsChart($(event.currentTarget).data('granularity'),appliedFilters);
+      updateRecentAssessments($(event.currentTarget).data('granularity'),appliedFilters);
       $('.granularity-title').text($(event.currentTarget).text());
-      $('#granularityBtn').text($(event.currentTarget).text())
+      $('#granularityBtn').text($(event.currentTarget).text()).attr('data-granularity',$(event.currentTarget).data('granularity'));
     });
 
+    // Filter Button
+    $('#clearFilters').on('click', function(event) {
+      // Reset Applied Filters
+      resetAppliedFilters();
+      // Reset Charts
+      realmsChart = resetPieChart(realmsChart,donutChartOptions);
+      typesChart = resetPieChart(typesChart,donutChartOptions);
+      topApiUsersChart = resetPieChart(topApiUsersChart,horizontalBarChartOptions);
+      topCustomersChart = resetPieChart(topCustomersChart,horizontalBarChartOptions);
+      updateAssessmentsChart($('#granularityBtn').attr('data-granularity'),appliedFilters);
+      updateRecentAssessments($('#granularityBtn').attr('data-granularity'),appliedFilters);
+    })
+
+    // Filter the chart
+    function chartFilter(event = null,el = null, value = null) {
+      var parentElementId = $(el).attr('id');
+      switch(parentElementId) {
+        case 'assessmentTypesChart':
+          appliedFilters['type'] = value;
+          break;
+        case 'assessmentRealmsChart':
+          appliedFilters['realm'] = value;
+          break;
+        case 'topUsersChart':
+          appliedFilters['user'] = value;
+          break;
+        case 'topCustomersChart':
+          appliedFilters['customer'] = value;
+          break;
+      }
+      updateAssessmentsChart($('#granularityBtn').attr('data-granularity'),appliedFilters);
+      updateRecentAssessments($('#granularityBtn').attr('data-granularity'),appliedFilters);
+      $('#clearFilters').css('display','block');
+    }
+
+    function resetPieChart(chart,options) {
+      var querySelector = chart.ctx.el.id;
+      chart.destroy();
+      chart = new ApexCharts(document.querySelector("#"+querySelector), options);
+      chart.render();
+      return chart;
+    }
+
     // Initial render
-    updateAssessmentsChart('last30Days');
+    resetAppliedFilters();
+    updateAssessmentsChart('last30Days',appliedFilters);
     updateSummaryValues();
-    updateRecentAssessments('last30Days');
+    updateRecentAssessments('last30Days',appliedFilters);
   });
 </script>
