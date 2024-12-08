@@ -839,14 +839,34 @@ if (!($_REQUEST['f'])) {
         case 'getAssessmentReports':
             if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS")) {
                 if (checkRequestMethod('GET')) {
-                    echo json_encode($ib->reporting->getAssessmentReports($_REQUEST['granularity'],$_REQUEST['type'],$_REQUEST['realm'],$_REQUEST['user'],$_REQUEST['customer']),JSON_PRETTY_PRINT);
+                    if (isset($_REQUEST['start'])) {
+                        $Start = $_REQUEST['start'];
+                    } else {
+                        $Start = null;
+                    }
+                    if (isset($_REQUEST['end'])) {
+                        $End = $_REQUEST['end'];
+                    } else {
+                        $End = null;
+                    }
+                    echo json_encode($ib->reporting->getAssessmentReports($_REQUEST['granularity'],$_REQUEST['type'],$_REQUEST['realm'],$_REQUEST['user'],$_REQUEST['customer'],$Start,$End),JSON_PRETTY_PRINT);
                 }
             }
             break;
         case 'getAssessmentReportsStats':
             if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS")) {
                 if (checkRequestMethod('GET')) {
-                    echo json_encode($ib->reporting->getAssessmentReportsStats($_REQUEST['granularity'],$_REQUEST['type'],$_REQUEST['realm'],$_REQUEST['user'],$_REQUEST['customer']),JSON_PRETTY_PRINT);
+                    if (isset($_REQUEST['start'])) {
+                        $Start = $_REQUEST['start'];
+                    } else {
+                        $Start = null;
+                    }
+                    if (isset($_REQUEST['end'])) {
+                        $End = $_REQUEST['end'];
+                    } else {
+                        $End = null;
+                    }
+                    echo json_encode($ib->reporting->getAssessmentReportsStats($_REQUEST['granularity'],$_REQUEST['type'],$_REQUEST['realm'],$_REQUEST['user'],$_REQUEST['customer'],$Start,$End),JSON_PRETTY_PRINT);
                 }
             }
             break;

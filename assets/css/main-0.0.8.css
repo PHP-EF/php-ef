@@ -507,7 +507,7 @@ body .popover {
 }
 
 /* ApexCharts */
-.apexcharts-legend {
+.pie .apexcharts-legend {
   margin-bottom: 20px;
 }
 
@@ -1116,9 +1116,6 @@ body pre code {
 /* FlatPickr Calendar */
 .flatpickr-month div {
   padding: 0!important;
-}
-.flatpickr-time > div > input {
-  padding: 0 0 20!important;
 }
 .flatpickr-current-month > .numInputWrapper span.arrowDown, .flatpickr-current-month > .numInputWrapper span.arrowUp {
   display: none;

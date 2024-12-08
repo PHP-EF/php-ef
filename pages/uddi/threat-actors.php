@@ -27,27 +27,24 @@
             <div class="row justify-content-center">
               <div class="col-12 col-lg-12 col-xl-12 mx-auto">
                 <div class="row justify-content-md-center toolsMenu">
-                    <div class="col-md-4 ml-md-auto apiKey">
-                        <input onkeyup="checkInput(this.value)" id="APIKey" type="password" placeholder="Enter API Key" required>
-                        <i class="fas fa-save saveBtn" id="saveBtn"></i>
-                    </div>
-                    <div class="col-md-2 ml-md-auto realm">
-                        <select id="Realm" class="form-select" aria-label="Realm Selection">
-                            <option value="US" selected>US Realm</option>
-                            <option value="EU">EU Realm</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 ml-md-auto startDate">
-                        <input type="text" id="startDate" placeholder="Start Date/Time">
-                    </div>
-                    <div class="col-md-2 ml-md-auto endDate">
-                        <input type="text" id="endDate" placeholder="End Date/Time">
-                    </div>
-                    <div class="col-md-2 ml-md-auto actions">
-                      <button class="btn btn-success" id="Actors">Get Actors</button>
-                    </div>
+                  <div class="col-md-4 apiKey">
+                    <input onkeyup="checkInput(this.value)" id="APIKey" type="password" placeholder="Enter API Key" required>
+                    <i class="fas fa-save saveBtn" id="saveBtn"></i>
+                  </div>
+                  <div class="col-md-2 realm">
+                    <select id="Realm" class="form-select" aria-label="Realm Selection">
+                      <option value="US" selected>US Realm</option>
+                      <option value="EU">EU Realm</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                      <input type="text" id="assessmentStartAndEndDate" placeholder="Start & End Date/Time">
+                  </div>
+                  <div class="col-md-2 actions">
+                    <button class="btn btn-success" id="Generate">Generate</button>
+                  </div>
                 </div>
-                <div class="row">
+                <div class="row mt-3">
                   <div class="col-md-6 options">
                     <div class="form-group">
                       <div class="form-check form-switch">
@@ -257,35 +254,6 @@
       }]
     });
   }
-  // function populateObservedIOCs(row) {
-  //   $('#threatActorObservedIOCTable').bootstrapTable('destroy');
-  //   $('#threatActorObservedIOCTable').bootstrapTable({
-  //     data: row['related_indicators_with_dates'],
-  //     sortable: true,
-  //     pagination: true,
-  //     search: true,
-  //     showExport: true,
-  //     exportTypes: ['json', 'xml', 'csv', 'txt', 'excel', 'sql'],
-  //     showColumns: true,
-  //     columns: [{
-  //       field: 'indicator',
-  //       title: 'Indicator',
-  //       sortable: true
-  //     },{
-  //       field: 'te_ik_submitted',
-  //       title: 'Submitted',
-  //       sortable: true
-  //     },{
-  //       field: 'te_customer_last_dns_query',
-  //       title: 'Last Queried',
-  //       sortable: true
-  //     },{
-  //       field: 'vt_first_submission_date',
-  //       title: 'Virus Total Submitted',
-  //       sortable: true
-  //     }]
-  //   });
-  // }
 
   window.actionEvents = {
     'click .observed': function (e, value, row, index) {
@@ -305,19 +273,16 @@
             return null;
         }
     }
-    if(!$('#startDate')[0].value){
+    if(!$('#assessmentStartAndEndDate')[0].value){
         toast("Error","Missing Required Fields","The Start Date is a required field.","danger","30000");
-        return null;
-    }
-    if(!$('#endDate')[0].value){
-        toast("Error","Missing Required Fields","The End Date is a required field.","danger","30000");
         return null;
     }
 
     let timer = startTimer();
     showLoading(timer);
-    const startDateTime = new Date($('#startDate')[0].value)
-    const endDateTime = new Date($('#endDate')[0].value)
+    const assessmentStartAndEndDate = $('#assessmentStartAndEndDate')[0].value.split(" to ");
+    const startDateTime = new Date(assessmentStartAndEndDate[0]);
+    const endDateTime = new Date(assessmentStartAndEndDate[1]);
     var postArr = {}
     postArr.StartDateTime = startDateTime.toISOString()
     postArr.EndDateTime = endDateTime.toISOString()
@@ -353,11 +318,6 @@
             title: 'Description',
             sortable: true
           },
-          //{
-          //  field: 'related_indicators_with_dates',
-          //  title: 'Observed IOCs',
-          //  formatter: 'iocCountFormatter',
-          //  sortable: true
           {
             field: 'observed_iocs',
             title: 'Observed IOCs',
