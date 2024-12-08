@@ -1,3 +1,8 @@
+## v0.5.9
+- Add support for clickable chart filtering within reporting
+- Add support for custom time range filtering within reporting
+- Swap out Start/End date to a single range date/time picker for assessments
+
 ## v0.5.8
 - Add realms chart to assessment reporting
 - Minor visual bugfixes
