@@ -185,8 +185,8 @@ class Reporting {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
-  public function getAssessmentReportsStats($granularity,$type,$realm,$user,$customer) {
-    $data = $this->getAssessmentReports($granularity,$type,$realm,$user,$customer);
+  public function getAssessmentReportsStats($granularity,$type,$realm,$user,$customer,$start,$end) {
+    $data = $this->getAssessmentReports($granularity,$type,$realm,$user,$customer,$start,$end);
     $filteredData = $this->filterDataByGranularity($data, $granularity);
     $summary = $this->summarizeByTypeAndDate($filteredData, $granularity);
     return $summary;
@@ -241,6 +241,9 @@ class Reporting {
         case 'all':
           $filteredData[] = $item;
           break;
+        default:
+          $filteredData[] = $item;
+          break;
       }
     }
     return $filteredData;
@@ -274,6 +277,9 @@ class Reporting {
           break;
         case 'lastYear':
           $dateKey = $createdDate->format('Y-m');
+          break;
+        default:
+          $dateKey = $createdDate->format('Y-m-d');
           break;
       }
 

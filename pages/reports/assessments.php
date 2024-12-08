@@ -92,43 +92,12 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
                       <a class="dropdown-item granularity-select preventDefault" data-granularity="thisYear" href="#">This Year</a>
                       <a class="dropdown-item granularity-select preventDefault" data-granularity="lastMonth" href="#">Last Month</a>
                       <a class="dropdown-item granularity-select preventDefault" data-granularity="lastYear" href="#">Last Year</a>
+                      <a class="dropdown-item granularity-select preventDefault" data-granularity="custom" href="#">Custom</a>
                     </div>
                     <button id="clearFilters" class="btn btn-info btn-sm clearFilters" type="button">
                       Clear Filters
                     </button>
                   </div>
-<!-- Custom date range modal -->
-<div class="modal fade" id="customDateRangeModal" tabindex="-1" role="dialog" aria-labelledby="customDateRangeModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="customDateRangeModalLabel">Select Custom Date Range</h5>
-        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <label for="customDateTimeRange">Select Date and Time Range:</label>
-        <input type="text" id="customDateTimeRange">
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" id="applyCustomRange" class="btn btn-primary">Apply</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-  flatpickr("#customDateTimeRange", {
-    mode: "range",
-    enableTime: true,
-    dateFormat: "Y-m-d H:i",
-    onClose: function(selectedDates, dateStr, instance) {
-      console.log(selectedDates);
-    }
-  });
-</script>
                 </div>
               </div>
             </div>
@@ -205,6 +174,32 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
 
 </main><!-- End #main -->
 
+<!-- Custom date range modal -->
+<div class="modal fade" id="customDateRangeModal" tabindex="-1" role="dialog" aria-labelledby="customDateRangeModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="customDateRangeModalLabel">Select Custom Date Range</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="toolsMenu">
+          <label for="reportingStartAndEndDate">Select Date and Time Range:</label>
+          <div class="col-md-12">
+            <input type="text" id="reportingStartAndEndDate" placeholder="Start & End Date/Time">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" id="applyCustomRange" class="btn btn-primary">Apply</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   function dateFormatter(value, row, index) {
     var d = new Date(value) // The 0 there is the key, which sets the date to the epoch
@@ -249,8 +244,8 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
       });
     };
 
-    const updateRecentAssessments = (granularity, appliedFilters) => {
-      $.get( "/api?f=getAssessmentReports&granularity="+granularity+"&type="+appliedFilters['type']+"&realm="+appliedFilters['realm']+"&user="+appliedFilters['user']+"&customer="+appliedFilters['customer']).done(function( data, status ) {
+    const updateRecentAssessments = (granularity, appliedFilters, start = null, end = null) => {
+      $.get( "/api?f=getAssessmentReports&granularity="+granularity+"&type="+appliedFilters['type']+"&realm="+appliedFilters['realm']+"&user="+appliedFilters['user']+"&customer="+appliedFilters['customer']+"&start="+start+"&end="+end).done(function( data, status ) {
         $('#assessmentTable').bootstrapTable('destroy');
         $('#assessmentTable').bootstrapTable({
           data: data,
@@ -434,8 +429,8 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
     assessmentsChart.render();
 
     // Define Assessments Area Chart Update Function
-    const updateAssessmentsChart = (granularity,appliedFilters) => {
-      $.get( "/api?f=getAssessmentReportsStats&granularity="+granularity+"&type="+appliedFilters['type']+"&realm="+appliedFilters['realm']+"&user="+appliedFilters['user']+"&customer="+appliedFilters['customer']).done(function( data, status ) {
+    const updateAssessmentsChart = (granularity, appliedFilters, start = null, end = null) => {
+      $.get( "/api?f=getAssessmentReportsStats&granularity="+granularity+"&type="+appliedFilters['type']+"&realm="+appliedFilters['realm']+"&user="+appliedFilters['user']+"&customer="+appliedFilters['customer']+"&start="+start+"&end="+end).done(function( data, status ) {
         // Extract all unique dates
         const categoriesSet = new Set();
         for (const key in data) {
@@ -566,10 +561,26 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
     }
     // Render Top Customers Chart End //
 
+    $('#applyCustomRange').on('click', function(event) {
+      if(!$('#reportingStartAndEndDate')[0].value){
+        toast("Error","Missing Required Fields","The Start & End Date is a required field.","danger","30000");
+        return null;
+      }
+      const reportingStartAndEndDate = $('#reportingStartAndEndDate')[0].value.split(" to ");
+      const startDateTime = (new Date(reportingStartAndEndDate[0])).toISOString();
+      const endDateTime = (new Date(reportingStartAndEndDate[1])).toISOString();
+      updateAssessmentsChart($('#granularityBtn').attr('data-granularity'),appliedFilters,startDateTime,endDateTime);
+      updateRecentAssessments($('#granularityBtn').attr('data-granularity'),appliedFilters,startDateTime,endDateTime);
+    });
+
     // Granularity Button
     $('.granularity-select').on('click', function(event) {
-      updateAssessmentsChart($(event.currentTarget).data('granularity'),appliedFilters);
-      updateRecentAssessments($(event.currentTarget).data('granularity'),appliedFilters);
+      if ($(event.currentTarget).data('granularity') == 'custom') {
+        $('#customDateRangeModal').modal('show');
+      } else {
+        updateAssessmentsChart($(event.currentTarget).data('granularity'),appliedFilters);
+        updateRecentAssessments($(event.currentTarget).data('granularity'),appliedFilters);
+      }
       $('.granularity-title').text($(event.currentTarget).text());
       $('#granularityBtn').text($(event.currentTarget).text()).attr('data-granularity',$(event.currentTarget).data('granularity'));
     });

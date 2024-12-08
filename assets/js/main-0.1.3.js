@@ -428,43 +428,12 @@ document.addEventListener('DOMContentLoaded', function() {
   const maxPastDate = new Date(today);
   maxPastDate.setDate(today.getDate() - 31);
 
-  flatpickr("#startDate", {
-    enableTime: true,
-    dateFormat: "Y-m-d H:i",
-    minDate: maxPastDate,
-    maxDate: today,
-    onChange: function(selectedDates, dateStr, instance) {
-      const endDatePicker = document.getElementById('endDate')._flatpickr;
-      const maxEndDate = new Date(selectedDates[0]);
-      maxEndDate.setDate(maxEndDate.getDate() + maxDaysApart);
-      endDatePicker.set('minDate', dateStr);
-      endDatePicker.set('maxDate', maxEndDate > today ? today : maxEndDate);
-    }
-  });
-
-  flatpickr("#endDate", {
-    enableTime: true,
-    dateFormat: "Y-m-d H:i",
-    minDate: maxPastDate,
-    maxDate: today,
-    onChange: function(selectedDates, dateStr, instance) {
-      const startDatePicker = document.getElementById('startDate')._flatpickr;
-      const minStartDate = new Date(selectedDates[0]);
-      minStartDate.setDate(minStartDate.getDate() - maxDaysApart);
-      startDatePicker.set('maxDate', dateStr);
-      startDatePicker.set('minDate', minStartDate < maxPastDate ? maxPastDate : minStartDate);
-    }
-  });
-
-  flatpickr("#startAndEndDate", {
+  flatpickr("#assessmentStartAndEndDate", {
     mode: "range",
     minDate: maxPastDate,
     maxDate: today,
     enableTime: true,
     dateFormat: "Y-m-d H:i",
-    onClose: function(selectedDates, dateStr, instance) {
-      console.log(selectedDates);
-    },
     onChange: function(selectedDates, dateStr, instance) {
       if (selectedDates.length === 1) {
         const startDate = selectedDates[0];
@@ -482,6 +451,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
     }
+  });
+
+  flatpickr("#reportingStartAndEndDate", {
+    mode: "range",
+    maxDate: today,
+    enableTime: true,
+    dateFormat: "Y-m-d H:i"
   });
 });
 

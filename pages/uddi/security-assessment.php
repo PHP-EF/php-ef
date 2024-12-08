@@ -36,7 +36,7 @@
                   </select>
               </div>
               <div class="col-md-3">
-                  <input type="text" id="startAndEndDate" placeholder="Start & End Date/Time">
+                  <input type="text" id="assessmentStartAndEndDate" placeholder="Start & End Date/Time">
               </div>
               <div class="col-md-2 actions">
                 <button class="btn btn-success" id="Generate">Generate</button>
@@ -155,15 +155,7 @@ $("#Generate").click(function(){
     return null;
     }
   }
-  // if(!$('#startDate')[0].value){
-  //   toast("Error","Missing Required Fields","The Start Date is a required field.","danger","30000");
-  //   return null;
-  // }
-  // if(!$('#endDate')[0].value){
-  //   toast("Error","Missing Required Fields","The End Date is a required field.","danger","30000");
-  //   return null;
-  // }
-  if(!$('#startAndEndDate')[0].value){
+  if(!$('#assessmentStartAndEndDate')[0].value){
     toast("Error","Missing Required Fields","The Start & End Date is a required field.","danger","30000");
     return null;
   }
@@ -172,9 +164,9 @@ $("#Generate").click(function(){
   $.get( "/api?f=getUUID", function( id ) {
     let timer = startTimer();
     showLoading(id,timer);
-    const startAndEndDate = $('#startAndEndDate')[0].value.split(" to ");
-    const startDateTime = new Date(startAndEndDate[0]);
-    const endDateTime = new Date(startAndEndDate[1]);
+    const assessmentStartAndEndDate = $('#assessmentStartAndEndDate')[0].value.split(" to ");
+    const startDateTime = new Date(assessmentStartAndEndDate[0]);
+    const endDateTime = new Date(assessmentStartAndEndDate[1]);
     var postArr = {};
     postArr.StartDateTime = startDateTime.toISOString();
     postArr.EndDateTime = endDateTime.toISOString();
