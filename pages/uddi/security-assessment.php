@@ -24,48 +24,41 @@
       <div class="card">
         <div class="card-body">
           <div class="container">
-            <div class="row justify-content-center">
-              <div class="col-12 col-lg-12 col-xl-12 mx-auto">
-                <div class="row justify-content-md-center toolsMenu">
-                    <div class="col-md-4 ml-md-auto apiKey">
-                        <input onkeyup="checkInput(this.value)" id="APIKey" type="password" placeholder="Enter API Key" required>
-                        <i class="fas fa-save saveBtn" id="saveBtn"></i>
-                    </div>
-                    <div class="col-md-2 ml-md-auto realm">
-                        <select id="Realm" class="form-select" aria-label="Realm Selection">
-                            <option value="US" selected>US Realm</option>
-                            <option value="EU">EU Realm</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 ml-md-auto startDate">
-                        <input type="text" id="startDate" placeholder="Start Date/Time">
-                    </div>
-                    <div class="col-md-2 ml-md-auto endDate">
-                        <input type="text" id="endDate" placeholder="End Date/Time">
-                    </div>
-                    <div class="col-md-2 ml-md-auto actions">
-                      <button class="btn btn-success" id="Generate">Generate</button>
-                    </div>
-                </div>
-                <div class="row">
-                  <div class="col-md-6 options">
-                    <div class="form-group">
-                      <div class="form-check form-switch">
-                        <input class="form-check-input info-field" type="checkbox" id="unnamed" name="unnamed">
-                        <label class="form-check-label" for="unnamed">Enable Unnamed Actors</label>
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <div class="form-check form-switch">
-                        <input class="form-check-input info-field" type="checkbox" id="substring" name="substring">
-                        <label class="form-check-label" for="substring">Enable Substring_* Actors</label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <br>
+            <div class="row justify-content-md-center toolsMenu">
+              <div class="col-md-4 apiKey">
+                  <input onkeyup="checkInput(this.value)" id="APIKey" type="password" placeholder="Enter API Key" required>
+                  <i class="fas fa-save saveBtn" id="saveBtn"></i>
+              </div>
+              <div class="col-md-2 realm">
+                  <select id="Realm" class="form-select" aria-label="Realm Selection">
+                      <option value="US" selected>US Realm</option>
+                      <option value="EU">EU Realm</option>
+                  </select>
+              </div>
+              <div class="col-md-3">
+                  <input type="text" id="startAndEndDate" placeholder="Start & End Date/Time">
+              </div>
+              <div class="col-md-2 actions">
+                <button class="btn btn-success" id="Generate">Generate</button>
               </div>
             </div>
+            <div class="row mt-3">
+              <div class="col-md-6 options">
+                <div class="form-group">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input info-field" type="checkbox" id="unnamed" name="unnamed">
+                    <label class="form-check-label" for="unnamed">Enable Unnamed Actors</label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input info-field" type="checkbox" id="substring" name="substring">
+                    <label class="form-check-label" for="substring">Enable Substring_* Actors</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <br>
           </div>
         </div>
       </div>
@@ -162,12 +155,16 @@ $("#Generate").click(function(){
     return null;
     }
   }
-  if(!$('#startDate')[0].value){
-    toast("Error","Missing Required Fields","The Start Date is a required field.","danger","30000");
-    return null;
-  }
-  if(!$('#endDate')[0].value){
-    toast("Error","Missing Required Fields","The End Date is a required field.","danger","30000");
+  // if(!$('#startDate')[0].value){
+  //   toast("Error","Missing Required Fields","The Start Date is a required field.","danger","30000");
+  //   return null;
+  // }
+  // if(!$('#endDate')[0].value){
+  //   toast("Error","Missing Required Fields","The End Date is a required field.","danger","30000");
+  //   return null;
+  // }
+  if(!$('#startAndEndDate')[0].value){
+    toast("Error","Missing Required Fields","The Start & End Date is a required field.","danger","30000");
     return null;
   }
 
@@ -175,17 +172,18 @@ $("#Generate").click(function(){
   $.get( "/api?f=getUUID", function( id ) {
     let timer = startTimer();
     showLoading(id,timer);
-    const startDateTime = new Date($('#startDate')[0].value)
-    const endDateTime = new Date($('#endDate')[0].value)
-    var postArr = {}
-    postArr.StartDateTime = startDateTime.toISOString()
-    postArr.EndDateTime = endDateTime.toISOString()
-    postArr.Realm = $('#Realm').find(":selected").val()
-    postArr.id = id
+    const startAndEndDate = $('#startAndEndDate')[0].value.split(" to ");
+    const startDateTime = new Date(startAndEndDate[0]);
+    const endDateTime = new Date(startAndEndDate[1]);
+    var postArr = {};
+    postArr.StartDateTime = startDateTime.toISOString();
+    postArr.EndDateTime = endDateTime.toISOString();
+    postArr.Realm = $('#Realm').find(":selected").val();
+    postArr.id = id;
     postArr.unnamed = $('#unnamed')[0].checked;
     postArr.substring = $('#substring')[0].checked;
     if ($('#APIKey')[0].value) {
-      postArr.APIKey = $('#APIKey')[0].value
+      postArr.APIKey = $('#APIKey')[0].value;
     }
     $.post( "/api?f=createSecurityReport", postArr).done(function( data, status ) {
       if (data['Status'] == 'Success') {

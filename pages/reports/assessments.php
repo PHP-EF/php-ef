@@ -97,6 +97,38 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
                       Clear Filters
                     </button>
                   </div>
+<!-- Custom date range modal -->
+<div class="modal fade" id="customDateRangeModal" tabindex="-1" role="dialog" aria-labelledby="customDateRangeModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="customDateRangeModalLabel">Select Custom Date Range</h5>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <label for="customDateTimeRange">Select Date and Time Range:</label>
+        <input type="text" id="customDateTimeRange">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" id="applyCustomRange" class="btn btn-primary">Apply</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  flatpickr("#customDateTimeRange", {
+    mode: "range",
+    enableTime: true,
+    dateFormat: "Y-m-d H:i",
+    onClose: function(selectedDates, dateStr, instance) {
+      console.log(selectedDates);
+    }
+  });
+</script>
                 </div>
               </div>
             </div>
@@ -118,18 +150,18 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
 
           <div class="col-xxl-2 col-lg-3 col-md-6 col-sm-6 col-6"> <!-- Assessment Types Pie -->
             <div class="card chart-card">
-              <div class="card-body pb-0">
+              <div class="card-body">
                 <h5 class="card-title">Assessment Types | <span class="granularity-title">Last 30 Days</span></h5>
-                <div id="assessmentTypesChart"></div>
+                <div id="assessmentTypesChart" class="pie"></div>
               </div>
             </div>
           </div><!-- End Assessment Pie -->
 
           <div class="col-xxl-2 col-lg-3 col-md-6 col-sm-6 col-6"> <!-- Assessment Realm Pie -->
             <div class="card chart-card">
-              <div class="card-body pb-0">
+              <div class="card-body">
                 <h5 class="card-title">Infoblox Realms | <span class="granularity-title">Last 30 Days</span></h5>
-                <div id="assessmentRealmsChart"></div>
+                <div id="assessmentRealmsChart" class="pie"></div>
               </div>
             </div>
           </div><!-- Assessment Realm Pie -->
@@ -142,7 +174,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
             <div class="card top-users bar-chart-card overflow-auto">
               <div class="card-body pb-0">
                 <h5 class="card-title">Top 10 Users | <span class="granularity-title">Last 30 Days</span></h5>
-                <div id="topUsersChart"></div>
+                <div id="topUsersChart" class="bar"></div>
               </div>
             </div>
           </div><!-- End Top Users -->
@@ -151,7 +183,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
             <div class="card top-customers bar-chart-card overflow-auto">
               <div class="card-body pb-0">
                 <h5 class="card-title">Top 10 Customers | <span class="granularity-title">Last 30 Days</span></h5>
-                <div id="topCustomersChart"></div>
+                <div id="topCustomersChart" class="bar"></div>
               </div>
             </div>
           </div><!-- End Top Customers -->
