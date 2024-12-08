@@ -562,15 +562,8 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
     // Render Top Customers Chart End //
 
     $('#applyCustomRange').on('click', function(event) {
-      if(!$('#reportingStartAndEndDate')[0].value){
-        toast("Error","Missing Required Fields","The Start & End Date is a required field.","danger","30000");
-        return null;
-      }
-      const reportingStartAndEndDate = $('#reportingStartAndEndDate')[0].value.split(" to ");
-      const startDateTime = (new Date(reportingStartAndEndDate[0])).toISOString();
-      const endDateTime = (new Date(reportingStartAndEndDate[1])).toISOString();
-      updateAssessmentsChart($('#granularityBtn').attr('data-granularity'),appliedFilters,startDateTime,endDateTime);
-      updateRecentAssessments($('#granularityBtn').attr('data-granularity'),appliedFilters,startDateTime,endDateTime);
+      chartTimeFilter();
+      $('#customDateRangeModal').modal('hide');
     });
 
     // Granularity Button
@@ -594,8 +587,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
       typesChart = resetPieChart(typesChart,donutChartOptions);
       topApiUsersChart = resetPieChart(topApiUsersChart,horizontalBarChartOptions);
       topCustomersChart = resetPieChart(topCustomersChart,horizontalBarChartOptions);
-      updateAssessmentsChart($('#granularityBtn').attr('data-granularity'),appliedFilters);
-      updateRecentAssessments($('#granularityBtn').attr('data-granularity'),appliedFilters);
+      chartTimeFilter();
     })
 
     // Filter the chart
@@ -615,9 +607,26 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
           appliedFilters['customer'] = value;
           break;
       }
-      updateAssessmentsChart($('#granularityBtn').attr('data-granularity'),appliedFilters);
-      updateRecentAssessments($('#granularityBtn').attr('data-granularity'),appliedFilters);
+      chartTimeFilter();
       $('#clearFilters').css('display','block');
+    }
+
+    // Filter the chart with custom date/time range
+    function chartTimeFilter() {
+      if($('#granularityBtn').attr('data-granularity') == 'custom') {
+        if(!$('#reportingStartAndEndDate')[0].value){
+          toast("Error","Missing Required Fields","The Start & End Date is a required field.","danger","30000");
+          return null;
+        }
+        const reportingStartAndEndDate = $('#reportingStartAndEndDate')[0].value.split(" to ");
+        const startDateTime = (new Date(reportingStartAndEndDate[0])).toISOString();
+        const endDateTime = (new Date(reportingStartAndEndDate[1])).toISOString();
+        updateAssessmentsChart($('#granularityBtn').attr('data-granularity'),appliedFilters,startDateTime,endDateTime);
+        updateRecentAssessments($('#granularityBtn').attr('data-granularity'),appliedFilters,startDateTime,endDateTime);
+      } else {
+        updateAssessmentsChart($('#granularityBtn').attr('data-granularity'),appliedFilters);
+        updateRecentAssessments($('#granularityBtn').attr('data-granularity'),appliedFilters);
+      }
     }
 
     function resetPieChart(chart,options) {
