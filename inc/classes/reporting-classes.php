@@ -2,6 +2,7 @@
 
 class Reporting {
   private $db;
+  private $core;
 
   public function __construct($core,$db) {
     $this->db = $db;
