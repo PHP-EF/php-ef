@@ -44,7 +44,6 @@ class Reporting {
   }
 
   public function track($data,$auth) {
-    print_r($auth);
     $execute = [];
     $prepare = [
       'tId',
