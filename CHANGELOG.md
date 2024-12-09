@@ -1,3 +1,7 @@
+## v0.6.0
+- Add additional logging
+- Add additional reporting
+
 ## v0.5.9
 - Add support for clickable chart filtering within reporting
 - Add support for custom time range filtering within reporting

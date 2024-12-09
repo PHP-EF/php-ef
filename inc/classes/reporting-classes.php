@@ -3,13 +3,32 @@
 class Reporting {
   private $db;
 
-  public function __construct($db) {
+  public function __construct($core,$db) {
     $this->db = $db;
-    $this->createAssessmentReportingTable();
+    $this->core = $core;
+    $this->createReportingTables();
   }
 
-  private function createAssessmentReportingTable() {
-    // Create users table if it doesn't exist
+  private function createReportingTables() {
+    // Create tracking table if it doesn't exist
+    $this->db->exec("CREATE TABLE IF NOT EXISTS reporting_tracking (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT,
+      ipAddress TEXT,
+      tId TEXT,
+      browser TEXT,
+      os TEXT,
+      scheme TEXT,
+      domain TEXT,
+      path TEXT,
+      pageCategory TEXT,
+      pageName TEXT,
+      timeSpent INT,
+      clicks INT,
+      mouseMovements INT
+    )");
+
+    // Create assessments table if it doesn't exist
     $this->db->exec("CREATE TABLE IF NOT EXISTS reporting_assessments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       type TEXT,
@@ -21,6 +40,52 @@ class Reporting {
       uuid TEXT,
       status TEXT
     )");
+  }
+
+  public function track($data,$auth) {
+    print_r($auth);
+    $execute = [];
+    $prepare = [
+      'tId',
+      'username',
+      'ipAddress',
+      'browser',
+      'os',
+      'scheme',
+      'domain',
+      'path',
+      'timeSpent',
+      'clicks',
+      'mouseMovements'
+    ];
+    $execute = [
+      ':tId' => $data['tId'],
+      ':ipAddress' => $auth['IPAddress'],
+      ':browser' => $data['browserInfo']['browserName'],
+      ':os' => $data['browserInfo']['osName'],
+      ':scheme' => $data['urlComponents']['protocol'],
+      ':domain' => $data['urlComponents']['host'],
+      ':path' => $data['urlComponents']['pathname'],
+      ':timeSpent' => $data['timeSpent'],
+      ':clicks' => count($data['clicks']),
+      ':mouseMovements' => count($data['mouseMovements'])
+    ];
+    if ($data['pageDetails'] != null) {
+      $prepare[] = 'pageCategory';
+      $execute[':pageCategory'] = $data['pageDetails']['pageCategory'];
+      $prepare[] = 'pageName';
+      $execute[':pageName'] = $data['pageDetails']['pageName'];
+    }
+    if ($auth['Authenticated']) {
+      $execute[':username'] = $auth['Username'];
+    } else {
+      $execute[':username'] = 'unauthenticated';
+    }
+    $valueArray = array_map(function($value) {
+      return ':' . $value;
+    }, $prepare);
+    $stmt = $this->db->prepare("INSERT INTO reporting_tracking (".implode(", ",$prepare).") VALUES (".implode(', ', $valueArray).")");
+    $stmt->execute($execute);
   }
 
   public function getReportById($id) {

@@ -472,3 +472,163 @@ $( document ).ready(function() {
   });
   enableDateTime();
 });
+
+
+
+// ** Tracking ** //
+// Configuration object
+const trackingConfig = {
+  mouseMovement: true,
+  clicks: true,
+  timeOnPage: true,
+  currentPage: true,
+  browserInfo: true,
+  processData: async function(data) {
+      console.log(data);
+      const response = await fetch('/api?f=t', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+      });
+  }
+};
+
+// Function to get browser and OS information
+function getBrowserInfo() {
+  const userAgent = navigator.userAgent;
+  let browserName = "Unknown Browser";
+  let osName = "Unknown OS";
+
+  if (userAgent.indexOf("Firefox") > -1) {
+      browserName = "Mozilla Firefox";
+  } else if (userAgent.indexOf("SamsungBrowser") > -1) {
+      browserName = "Samsung Internet";
+  } else if (userAgent.indexOf("Opera") > -1 || userAgent.indexOf("OPR") > -1) {
+      browserName = "Opera";
+  } else if (userAgent.indexOf("Trident") > -1) {
+      browserName = "Microsoft Internet Explorer";
+  } else if (userAgent.indexOf("Edge") > -1) {
+      browserName = "Microsoft Edge";
+  } else if (userAgent.indexOf("Chrome") > -1) {
+      browserName = "Google Chrome";
+  } else if (userAgent.indexOf("Safari") > -1) {
+      browserName = "Apple Safari";
+  }
+
+  if (userAgent.indexOf("Win") > -1) {
+      osName = "Windows";
+  } else if (userAgent.indexOf("Mac") > -1) {
+      osName = "MacOS";
+  } else if (userAgent.indexOf("X11") > -1) {
+      osName = "UNIX";
+  } else if (userAgent.indexOf("Linux") > -1) {
+      osName = "Linux";
+  }
+
+  return { browserName, osName };
+}
+
+// Function to split URL into components
+function splitUrl(url) {
+  const urlObj = new URL(url);
+  return {
+      protocol: urlObj.protocol.replace(':',''),
+      host: urlObj.host,
+      pathname: urlObj.pathname,
+      hash: urlObj.hash
+  };
+}
+
+// Function to split pathname into Page Category and Page Name
+function splitPathname(pathname) {
+  const match = pathname.match(/^\/pages\/([^\/]+)\/([^\/]+)/);
+  if (match) {
+      return {
+          pageCategory: match[1],
+          pageName: match[2]
+      };
+  }
+  return null;
+}
+
+// Function to get a cookie by name
+function getCookie(name) {
+  const nameEQ = name + "=";
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
+}
+
+// Function to generate a unique ID
+function generateUniqueId() {
+  return 'xxxx-xxxx-xxxx-yxxx-xxxx-xxxx-xxxx-xxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+  });
+}
+
+// Check if user ID cookie exists, if not, create one
+let tId = getCookie('tId');
+if (!tId) {
+  tId = generateUniqueId();
+  setCookie('tId', tId, 365); // Cookie expires in 1 year
+}
+
+// Tracking object
+const userTracking = {
+  data: {
+      mouseMovements: [],
+      clicks: [],
+      startTime: Date.now(),
+      endTime: null,
+      currentPage: window.location.href,
+      browserInfo: getBrowserInfo(),
+      urlComponents: splitUrl(window.location.href),
+      pageDetails: splitPathname(window.location.pathname),
+      tId: tId
+  },
+  init: function(config) {
+      if (config.mouseMovement) {
+          document.addEventListener('mousemove', this.trackMouseMovement.bind(this));
+      }
+      if (config.clicks) {
+          document.addEventListener('click', this.trackClick.bind(this));
+      }
+      if (config.timeOnPage) {
+          window.addEventListener('beforeunload', this.trackTimeOnPage.bind(this));
+      }
+  },
+  trackMouseMovement: function(event) {
+      this.data.mouseMovements.push({ x: event.clientX, y: event.clientY, time: Date.now() });
+  },
+  trackClick: function(event) {
+      this.data.clicks.push({ x: event.clientX, y: event.clientY, time: Date.now(), element: event.target.tagName });
+  },
+  trackTimeOnPage: function() {
+      this.data.endTime = Date.now();
+      this.processData();
+  },
+  processData: function() {
+      const timeSpent = this.data.endTime - this.data.startTime;
+      const result = {
+          mouseMovements: this.data.mouseMovements,
+          clicks: this.data.clicks,
+          timeSpent: timeSpent,
+          currentPage: this.data.currentPage,
+          browserInfo: this.data.browserInfo,
+          urlComponents: this.data.urlComponents,
+          pageDetails: this.data.pageDetails,
+          tId: this.data.tId
+      };
+      trackingConfig.processData(result);
+  }
+};
+
+// Initialize tracking
+userTracking.init(trackingConfig);

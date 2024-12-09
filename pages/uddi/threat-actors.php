@@ -41,7 +41,7 @@
                       <input type="text" id="assessmentStartAndEndDate" placeholder="Start & End Date/Time">
                   </div>
                   <div class="col-md-2 actions">
-                    <button class="btn btn-success" id="Generate">Generate</button>
+                    <button class="btn btn-success" id="Actors">Get Actors</button>
                   </div>
                 </div>
                 <div class="row mt-3">
