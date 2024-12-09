@@ -3,7 +3,6 @@
 $SkipCSS = true;
 require_once(__DIR__.'/../inc/inc.php');
 header('Content-Type: application/json; charset=utf-8');
-
 if (!($_REQUEST['f'])) {
     echo json_encode(array(
         'Error' => 'Function not specified.',
@@ -12,6 +11,10 @@ if (!($_REQUEST['f'])) {
     die();
 } else {
     switch ($_REQUEST['f']) {
+        case 't':
+            $ib->reporting->track(json_decode(file_get_contents('php://input'), true),$ib->auth->getAuth());
+            http_response_code(201);
+            break;
         case 'login':
             echo json_encode($ib->auth->login($_POST['un'],$_POST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
             break;
@@ -460,7 +463,7 @@ if (!($_REQUEST['f'])) {
         case 'downloadSecurityReport':
             if ($ib->auth->checkAccess(null,"B1-SECURITY-ASSESSMENT")) {
                 if (checkRequestMethod('GET')) {
-                    $ib->logging->writeLog("SecurityAssessment","Downloaded security report","info");
+                    $ib->logging->writeLog("Assessment","Downloaded security assessment report","info");
                     if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
                         $id = $_REQUEST['id'];
                         $File = __DIR__.'/../files/reports/report-'.$id.'.pptx';
@@ -652,8 +655,14 @@ if (!($_REQUEST['f'])) {
                 if (checkRequestMethod('POST')) {
                     if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
                         $UserInfo = GetCSPCurrentUser();
+                    print_r($UserInfo);
                         if (isset($UserInfo)) {
                             $ib->logging->writeLog("ThreatActors",$UserInfo->result->name." queried list of Threat Actors","info");
+                        } else {
+                            return array(
+                                'Status' => 'Error',
+                                'Message' => 'Invalid API Key'
+                            );
                         }
                         $Actors = GetB1ThreatActors($_POST['StartDateTime'],$_POST['EndDateTime']);
                         if (!isset($Actors->Error)) {
@@ -849,6 +858,7 @@ if (!($_REQUEST['f'])) {
                     } else {
                         $End = null;
                     }
+                    $ib->logging->writeLog("Reporting","Queried Assessment Reports","info");
                     echo json_encode($ib->reporting->getAssessmentReports($_REQUEST['granularity'],$_REQUEST['type'],$_REQUEST['realm'],$_REQUEST['user'],$_REQUEST['customer'],$Start,$End),JSON_PRETTY_PRINT);
                 }
             }
@@ -866,6 +876,7 @@ if (!($_REQUEST['f'])) {
                     } else {
                         $End = null;
                     }
+                    $ib->logging->writeLog("Reporting","Queried Assessment Report Stats","debug");
                     echo json_encode($ib->reporting->getAssessmentReportsStats($_REQUEST['granularity'],$_REQUEST['type'],$_REQUEST['realm'],$_REQUEST['user'],$_REQUEST['customer'],$Start,$End),JSON_PRETTY_PRINT);
                 }
             }
@@ -873,6 +884,7 @@ if (!($_REQUEST['f'])) {
         case 'getAssessmentReportsSummary':
             if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS")) {
                 if (checkRequestMethod('GET')) {
+                    $ib->logging->writeLog("Reporting","Queried Assessment Report Summary","debug");
                     echo json_encode($ib->reporting->getAssessmentReportsSummary(),JSON_PRETTY_PRINT);
                 }
             }

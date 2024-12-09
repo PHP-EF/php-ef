@@ -1,10 +1,12 @@
 <?php
 class TemplateConfig {
     private $db;
+    private $core;
 
-    public function __construct($db) {
+    public function __construct($core,$db) {
         // Create or open the SQLite database
         $this->db = $db;
+        $this->core = $core;
         $this->createSecurityAssessmentTemplateTable();
     }
 
@@ -83,6 +85,7 @@ class TemplateConfig {
                     $setStatusStmt->execute([':Status' => 'Inactive',':id' => $AT['id'],':thisid' => $id]);
                 }
             }
+            $this->core->logging->writeLog("Templates","Created New Security Assessment Template","info");
             return array(
                 'Status' => 'Success',
                 'Message' => 'Template added successfully'
@@ -164,6 +167,7 @@ class TemplateConfig {
                     }
                 }
             }
+            $this->core->logging->writeLog("Templates","Updated Security Assessment Template: ".$TemplateName,"info");
             return array(
                 'Status' => 'Success',
                 'Message' => 'Template updated successfully'
@@ -198,6 +202,7 @@ class TemplateConfig {
               'Message' => 'Failed to delete template'
             );
           } else {
+            $this->core->logging->writeLog("Templates","Removed Security Assessment Template: ".$id,"warning");
             return array(
               'Status' => 'Success',
               'Message' => 'Template deleted successfully'
@@ -209,10 +214,12 @@ class TemplateConfig {
 
 class ThreatActorConfig {
     private $db;
+    private $core;
 
-    public function __construct($db) {
+    public function __construct($core,$db) {
         // Create or open the SQLite database
         $this->db = $db;
+        $this->core = $core;
         $this->createThreatActorTable();
     }
 
@@ -278,6 +285,7 @@ class ThreatActorConfig {
             $stmt = $this->db->prepare("INSERT INTO threat_actors (Name, SVG, PNG, URLStub) VALUES (:Name, :SVG, :PNG, :URLStub)");
             try {
                 $stmt->execute([':Name' => urldecode($Name), ':SVG' => urldecode($SVG), ':PNG' => urldecode($PNG), ':URLStub' => urldecode($URLStub)]);
+                $this->core->logging->writeLog("ThreatActors","Created new Threat Actor: ".$Name,"info");
                 return array(
                     'Status' => 'Success',
                     'Message' => 'Threat Actor added successfully'
@@ -337,6 +345,7 @@ class ThreatActorConfig {
                 }
                 $stmt = $this->db->prepare('UPDATE threat_actors SET '.implode(", ",$prepare).' WHERE id = :id');
                 $stmt->execute($execute);
+                $this->core->logging->writeLog("ThreatActors","Updated Threat Actor: ".$Name,"info");
                 return array(
                     'Status' => 'Success',
                     'Message' => 'Threat Actor updated successfully'
@@ -387,6 +396,7 @@ class ThreatActorConfig {
               'Message' => 'Failed to delete Threat Actor'
             );
           } else {
+            $this->core->logging->writeLog("ThreatActors","Removed Threat Actor: ".$id,"warning");
             return array(
               'Status' => 'Success',
               'Message' => 'Template deleted Threat Actor'

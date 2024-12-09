@@ -21,7 +21,7 @@ function generateSecurityReport($StartDateTime,$EndDateTime,$Realm,$UUID,$unname
         // Logging / Reporting
         $AccountInfo = QueryCSP("get","v2/current_user/accounts");
         $CurrentAccount = $AccountInfo->results[array_search($UserInfo->result->account_id, array_column($AccountInfo->results, 'id'))];
-        $ib->logging->writeLog("SecurityAssessment",$UserInfo->result->name." requested a security assessment report for: ".$CurrentAccount->name,"info");
+        $ib->logging->writeLog("Assessment",$UserInfo->result->name." requested a security assessment report for: ".$CurrentAccount->name,"info");
         $ReportRecordId = $ib->reporting->newReportEntry('Security Assessment',$UserInfo->result->name,$CurrentAccount->name,$Realm,$UUID,"Started");
 
         // Set Progress
