@@ -27,7 +27,7 @@ class ib {
   }
 
   public function getVersion() {
-    return ['v0.6.0'];
+    return ['v0.6.1'];
   }
 }
 

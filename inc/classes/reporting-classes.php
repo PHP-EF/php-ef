@@ -84,7 +84,7 @@ class Reporting {
     if ($auth['Authenticated']) {
       $execute[':username'] = $auth['Username'];
     } else {
-      $execute[':username'] = 'unauthenticated';
+      $execute[':username'] = 'None';
     }
     $valueArray = array_map(function($value) {
       return ':' . $value;
@@ -93,9 +93,32 @@ class Reporting {
     $stmt->execute($execute);
   }
 
-  public function getTrackingRecords($granularity) {
+  public function getTrackingRecords($granularity,$filters,$start,$end) {
     $execute = [];
-    $Select = $this->sqlSelectByGranularity($granularity,'dateTime','reporting_tracking');
+    $Select = $this->sqlSelectByGranularity($granularity,'dateTime','reporting_tracking',$start,$end);
+
+    if ($granularity == 'custom') {
+      if ($start != null && $end != null) {
+        $StartDateTime = (new DateTime($start))->format('Y-m-d H:i:s');
+        $EndDateTime = (new DateTime($end))->format('Y-m-d H:i:s');
+        $execute[':start'] = $StartDateTime;
+        $execute[':end'] = $EndDateTime;
+      }
+    }
+
+    if ($filters['page'] != 'all') {
+      $Select = $Select.' AND pageName = :pageName';
+      $execute[':pageName'] = $filters['page'];
+    }
+    if ($filters['browser'] != 'all') {
+      $Select = $Select.' AND browser = :browser';
+      $execute[':browser'] = $filters['browser'];
+    }
+    if ($filters['os'] != 'all') {
+      $Select = $Select.' AND os = :os';
+      $execute[':os'] = $filters['os'];
+    }
+    
     if (isset($Select)) {
       if (isset($Select['Status'])) {
         return $Select;
@@ -210,25 +233,32 @@ class Reporting {
     $stmt->execute([':uuid' => $uuid,':status' => $status]);
   }
 
-  public function getAssessmentReports($granularity,$type = 'all',$realm = 'all',$user = 'all',$customer = 'all',$start = null,$end = null) {
+  public function getAssessmentReports($granularity,$filters,$start = null,$end = null) {
     $execute = [];
-    $Select = $this->sqlSelectByGranularity($granularity,'created','reporting_assessments');
-
-    if ($type != 'all') {
+    $Select = $this->sqlSelectByGranularity($granularity,'created','reporting_assessments',$start,$end);
+    if ($granularity == 'custom') {
+      if ($start != null && $end != null) {
+        $StartDateTime = (new DateTime($start))->format('Y-m-d H:i:s');
+        $EndDateTime = (new DateTime($end))->format('Y-m-d H:i:s');
+        $execute[':start'] = $StartDateTime;
+        $execute[':end'] = $EndDateTime;
+      }
+    }
+    if ($filters['type'] != 'all') {
       $Select = $Select.' AND type = :type';
-      $execute[':type'] = $type;
+      $execute[':type'] = $filters['type'];
     }
-    if ($realm != 'all') {
+    if ($filters['realm'] != 'all') {
       $Select = $Select.' AND realm = :realm';
-      $execute[':realm'] = $realm;
+      $execute[':realm'] = $filters['realm'];
     }
-    if ($user != 'all') {
+    if ($filters['user'] != 'all') {
       $Select = $Select.' AND apiuser = :apiuser';
-      $execute[':apiuser'] = $user;
+      $execute[':apiuser'] = $filters['user'];
     }
-    if ($customer != 'all') {
+    if ($filters['customer'] != 'all') {
       $Select = $Select.' AND customer = :customer';
-      $execute[':customer'] = $customer;
+      $execute[':customer'] = $filters['customer'];
     }
     if (isset($Select)) {
       try {
@@ -257,8 +287,8 @@ class Reporting {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
-  public function getAssessmentReportsStats($granularity,$type,$realm,$user,$customer,$start,$end) {
-    $data = $this->getAssessmentReports($granularity,$type,$realm,$user,$customer,$start,$end);
+  public function getAssessmentReportsStats($granularity,$filters,$start,$end) {
+    $data = $this->getAssessmentReports($granularity,$filters,$start,$end);
     $summary = $this->summarizeByTypeAndDate($data, $granularity);
     return $summary;
   }
@@ -328,8 +358,7 @@ class Reporting {
     return $dateKey;
   }
 
-  private function sqlSelectByGranularity($granularity,$dateField,$table) {
-    $execute = [];
+  private function sqlSelectByGranularity($granularity,$dateField,$table,$start,$end) {
     switch ($granularity) {
       case 'today':
         $Select = 'SELECT * FROM '.$table.' WHERE date('.$dateField.') = date("now")';
@@ -354,10 +383,6 @@ class Reporting {
         break;
       case 'custom':
         if ($start != null && $end != null) {
-          $StartDateTime = (new DateTime($start))->format('Y-m-d H:i:s');
-          $EndDateTime = (new DateTime($end))->format('Y-m-d H:i:s');
-          $execute[':start'] = $StartDateTime;
-          $execute[':end'] = $EndDateTime;
           $Select = 'SELECT * FROM '.$table.' WHERE '.$dateField.' > :start AND '.$dateField.' < :end';
         } else {
           return array(
