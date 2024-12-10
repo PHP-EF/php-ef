@@ -483,15 +483,17 @@ const trackingConfig = {
   timeOnPage: true,
   currentPage: true,
   browserInfo: true,
-  processData: async function(data) {
-      console.log(data);
-      const response = await fetch('/api?f=t', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data)
-      });
+  processData: function(data) {
+    $.ajax({
+      url: '/api?f=t',
+      type: 'POST',
+      data: JSON.stringify(data),
+      contentType: "application/json; charset=utf-8",
+      dataType: "json",
+      error: function(xhr, status, error) {
+        toast("API Error","","Unable to submit tracking data.","danger","3000");
+      }
+    })
   }
 };
 

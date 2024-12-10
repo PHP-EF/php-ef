@@ -58,6 +58,12 @@
 			"PermittedMenus": [
 				"REPORT-Menu"
 			]
+		},
+		"REPORT-TRACKING": {
+			"description": "Grants the ability to view the Web Tracking Reports",
+			"PermittedMenus": [
+				"REPORT-Menu"
+			]
 		}
 	}
 }

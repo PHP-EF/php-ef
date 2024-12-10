@@ -173,6 +173,13 @@
                 <span>Assessments</span>
               </a>
             </li>';}
+          if ($ib->auth->checkAccess(null,'REPORT-TRACKING')) { echo '
+            <li>
+              <a href="#page=reports/tracking" class="toggleFrame" data-page-name="Web Tracking">
+                <i class="fa-solid fa-bullseye" ></i>
+                <span>Web Tracking</span>
+              </a>
+            </li>';}
             echo '
         </ul>
       </li>';}?>
