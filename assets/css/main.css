@@ -134,8 +134,11 @@ body.dark-theme .apexcharts-legend-text {
   color: #FFF!important;
 }
 body.dark-theme .apexcharts-xaxis tspan,
-body.dark-theme .apexcharts-yaxis tspan {
+body.dark-theme .apexcharts-yaxis tspan,
+body.dark-theme .apexcharts-yaxis text,
+body.dark-theme .apexcharts-title-text {
   fill: #FFF;
+  color: #FFF;
 }
 
 /* Light Mode */

@@ -215,16 +215,6 @@ if ($ib->auth->checkAccess(null,"REPORT-TRACKING") == false) {
 
 
   document.addEventListener("DOMContentLoaded", () => {
-    if ($('.dark-theme').length > 0) {
-      var theme = 'dark';
-    } else {
-      var theme = 'light';
-    }
-
-    // Colour Palettes
-    var barChartColorPalette = ['#FDDD00','#E1DD1A','#C5DE33','#A9DE4D','#8DDF66','#70DF80','#54E099','#38E0B3','#1CE1CC','#00E1E6'];
-    var pieChartColorPalette = ['#0fbe4d','#94ce36','#00F9FF','#00d69b','#00F9FF'];
-
     // Declare a global variable to store active filters
     var appliedFilters = {};
     function resetAppliedFilters() {
@@ -345,136 +335,6 @@ if ($ib->auth->checkAccess(null,"REPORT-TRACKING") == false) {
       });
     }
 
-    // Define Area Chart Options
-    const areaChartOptions = {
-      tooltip: {
-        theme: theme
-      },
-      chart: {
-        height: 350,
-        type: 'area',
-        toolbar: {
-          show: false
-        },
-      },
-      markers: {
-        size: 4
-      },
-      colors: ['#4154f1', '#2eca6a', '#ff771d'],
-      fill: {
-        type: "gradient",
-        gradient: {
-          shadeIntensity: 1,
-          opacityFrom: 0.3,
-          opacityTo: 0.4,
-          stops: [0, 90, 100]
-        }
-      },
-      noData: {
-        text: 'Loading...'
-      },
-      dataLabels: {
-        enabled: false
-      },
-      stroke: {
-        curve: 'smooth',
-        width: 2
-      },
-      series: [],
-      xaxis: {
-          categories: []
-      }
-    };
-
-    // Define Donut Chart Options
-    const donutChartOptions = {
-        tooltip: {
-          theme: theme
-        },
-        chart: {
-          type: 'donut',
-          height: '350px',
-          events: {
-            dataPointSelection: (event, chartContext, config) => {
-              chartFilter(event,chartContext.el,config.w.config.labels[config.dataPointIndex]);
-            }
-          },
-        },
-        plotOptions: {
-          pie: {}
-        },
-        noData: {
-          text: 'Loading...'
-        },
-        legend: {
-          position: 'bottom',
-          offsetY: 20,
-          itemMargin: {
-            horizontal: 5
-          },
-        },
-        dataLabels: {
-          enabled: false
-        },
-        series: [],
-        labels: [],
-        colors: pieChartColorPalette
-    };
-
-    // Define Horizontal Bar Chart Options
-    const horizontalBarChartOptions = {
-      tooltip: {
-        theme: theme
-      },
-      chart: {
-        type: 'bar',
-        height: 350,
-        events: {
-          dataPointSelection: (event, chartContext, config) => {
-            chartFilter(event,chartContext.el,chartContext.w.config.xaxis.categories[config.dataPointIndex]);
-          }
-        },
-      },
-      plotOptions: {
-        bar: {
-          horizontal: true,
-          distributed: true // This enables different colors for each bar
-        }
-      },
-      noData: {
-        text: 'Loading...'
-      },
-      dataLabels: {
-        enabled: false
-      },
-      series: [],
-      colors: barChartColorPalette
-    };
-
-    // Define Line Column Chart Options
-    const lineColumnChartOptions = {
-      chart: {
-          type: 'line',
-          height: 350
-      },
-      series: [],
-      noData: {
-        text: 'Loading...'
-      },
-      stroke: {
-          width: [0, 4]
-      },
-      dataLabels: {
-          enabled: true,
-          enabledOnSeries: [1]
-      },
-      labels: [],
-      xaxis: {
-          type: 'category'
-      },
-      colors: barChartColorPalette
-    };
-
     // Render Visitors Area Chart
     const visitorsChart = new ApexCharts(document.querySelector("#visitorsChart"), areaChartOptions);
     visitorsChart.render();
@@ -525,6 +385,13 @@ if ($ib->auth->checkAccess(null,"REPORT-TRACKING") == false) {
       browserTypesChart.updateOptions({
         series: types.map(browser => browser.count),
         labels: types.map(browser => browser.browser),
+        chart: {
+          events: {
+            dataPointSelection: (event, chartContext, config) => {
+              chartFilter(event,chartContext.el,config.w.config.labels[config.dataPointIndex]);
+            }
+          }
+        },
       });
     }
     // Render Browser Types Chart End //
@@ -544,17 +411,24 @@ if ($ib->auth->checkAccess(null,"REPORT-TRACKING") == false) {
       const osTypes = Object.keys(countByOS).map(os => ({ os: os, count: countByOS[os] }));
       osTypesChart.updateOptions({
         series: osTypes.map(os => os.count),
-        labels: osTypes.map(os => os.os)
+        labels: osTypes.map(os => os.os),
+        chart: {
+          events: {
+            dataPointSelection: (event, chartContext, config) => {
+              chartFilter(event,chartContext.el,config.w.config.labels[config.dataPointIndex]);
+            }
+          }
+        }
       });
     }
     // Render Realms Chart End //
 
 
-    // Render Top Pages Users Chart
+    // Render Top Pages Chart
     var topPagesChart = new ApexCharts(document.querySelector("#topPagesChart"), horizontalBarChartOptions);
     topPagesChart.render();
 
-    // Define Top Pages Users Chart Update Function
+    // Define Top Pages Chart Update Function
     const updateTopPages = (data,granularity) => {
       const pageCount = {};
       data.forEach(entry => {
@@ -577,6 +451,13 @@ if ($ib->auth->checkAccess(null,"REPORT-TRACKING") == false) {
         xaxis: {
           categories: pages.map(page => page.page)
         },
+        chart: {
+          events: {
+            dataPointSelection: (event, chartContext, config) => {
+              chartFilter(event,chartContext.el,chartContext.w.config.xaxis.categories[config.dataPointIndex]);
+            }
+          }
+        }
       });
     }
     // Render Top Pages Chart End //
@@ -598,9 +479,9 @@ if ($ib->auth->checkAccess(null,"REPORT-TRACKING") == false) {
         return acc;
       }, {});
 
-      // Extracting the data for the chart
+      // Extracting the data for the page activity chart
       const categories = Object.keys(aggregatedData);
-      const timeSpent = categories.map(page => aggregatedData[page].timeSpent / 1000);
+      const timeSpent = categories.map(page => Math.round((aggregatedData[page].timeSpent / 1000) / 60));
       const visits = categories.map(page => aggregatedData[page].visits);
       pageActivityChart.updateOptions({
         series: [{
@@ -618,14 +499,26 @@ if ($ib->auth->checkAccess(null,"REPORT-TRACKING") == false) {
         labels: categories,
         yaxis: [{
           title: {
-            text: 'Time Spent (s)'
+            text: 'Time Spent (mins)'
           }
         }, {
           opposite: true,
           title: {
             text: 'Total Visits'
           }
-        }]
+        }],
+        chart: {
+          events: {
+            dataPointSelection: (event, chartContext, config) => {
+              console.log(config.dataPointIndex);
+              var category = categories[config.dataPointIndex];
+              if (category == 'Home') {
+                category = "";
+              };
+              chartFilter(event,chartContext.el,category);
+            }
+          }
+        }
       });
     }
     // Render Page Activity Chart End //
@@ -652,10 +545,10 @@ if ($ib->auth->checkAccess(null,"REPORT-TRACKING") == false) {
       // Reset Applied Filters
       resetAppliedFilters();
       // Reset Charts
-      osTypesChart = resetPieChart(osTypesChart,donutChartOptions);
-      browserTypesChart = resetPieChart(browserTypesChart,donutChartOptions);
-      topPagesChart = resetPieChart(topPagesChart,horizontalBarChartOptions);
-      pageActivityChart = resetPieChart(pageActivityChart,lineColumnChartOptions);
+      osTypesChart = resetChart(osTypesChart,donutChartOptions);
+      browserTypesChart = resetChart(browserTypesChart,donutChartOptions);
+      topPagesChart = resetChart(topPagesChart,horizontalBarChartOptions);
+      pageActivityChart = resetChart(pageActivityChart,lineColumnChartOptions);
       chartTimeFilter();
     })
 
@@ -673,7 +566,7 @@ if ($ib->auth->checkAccess(null,"REPORT-TRACKING") == false) {
           appliedFilters['page'] = value;
           break;
         case 'pageActivityChart':
-          // appliedFilters['customer'] = value;
+          appliedFilters['page'] = value;
           break;
       }
       chartTimeFilter();
@@ -696,14 +589,6 @@ if ($ib->auth->checkAccess(null,"REPORT-TRACKING") == false) {
         updateVisitorsChart($('#granularityBtn').attr('data-granularity'),appliedFilters);
         updateRecentAssessments($('#granularityBtn').attr('data-granularity'),appliedFilters);
       }
-    }
-
-    function resetPieChart(chart,options) {
-      var querySelector = chart.ctx.el.id;
-      chart.destroy();
-      chart = new ApexCharts(document.querySelector("#"+querySelector), options);
-      chart.render();
-      return chart;
     }
 
     // Initial render
