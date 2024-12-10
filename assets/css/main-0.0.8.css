@@ -308,13 +308,13 @@ body .popover {
 # Reports
 --------------------------------------------------------------*/
 /* Filter dropdown */
-.assessment-reporting .filter {
+.reporting-section .filter {
   position: absolute;
   right: 0px;
   top: 15px;
 }
 
-.assessment-reporting .filter .icon {
+.reporting-section .filter .icon {
   color: #aab7cf;
   padding-right: 20px;
   padding-bottom: 5px;
@@ -322,16 +322,16 @@ body .popover {
   font-size: 16px;
 }
 
-.assessment-reporting .filter .icon:hover,
-.assessment-reporting .filter .icon:focus {
+.reporting-section .filter .icon:hover,
+.reporting-section .filter .icon:focus {
   color: #4154f1;
 }
 
-.assessment-reporting .filter .dropdown-header {
+.reporting-section .filter .dropdown-header {
   padding: 8px 15px;
 }
 
-.assessment-reporting .filter .dropdown-header h6 {
+.reporting-section .filter .dropdown-header h6 {
   text-transform: uppercase;
   font-size: 14px;
   font-weight: 600;
@@ -341,35 +341,35 @@ body .popover {
   padding: 0;
 }
 
-.assessment-reporting .filter .dropdown-item {
+.reporting-section .filter .dropdown-item {
   padding: 8px 15px;
 }
 
 /* Info Cards */
-.assessment-reporting .info-card {
+.reporting-section .info-card {
   padding-bottom: 10px;
   height: calc(100% - 5px);
 }
 
 /* Chart Cards */
-.assessment-reporting .chart-card {
+.reporting-section .chart-card {
   padding-bottom: 10px;
   height: calc(100% - 15px);
 }
 
 /* Chart Cards */
-.assessment-reporting .bar-chart-card {
+.reporting-section .bar-chart-card {
   margin-bottom: 10px;
 }
 
-.assessment-reporting .info-card h6 {
+.reporting-section .info-card h6 {
   font-size: 28px;
   /* color: #012970; */
   font-weight: 700;
   margin: 0;
 }
 
-.assessment-reporting .card-icon {
+.reporting-section .card-icon {
   font-size: 32px;
   line-height: 0;
   width: 64px;
@@ -378,33 +378,33 @@ body .popover {
   flex-grow: 0;
 }
 
-.assessment-reporting .metric-circle {
+.reporting-section .metric-circle {
   border: solid 2px #00bd4d;
   border-radius: 100px;
   padding: 10px 20px;
 }
 
-.assessment-reporting .reports-today-card .card-icon {
+.reporting-section .reports-today-card .card-icon {
   color: #4154f1;
   background: #f6f6fe;
 }
 
-.assessment-reporting .reports-month-card .card-icon {
+.reporting-section .reports-month-card .card-icon {
   color: #2eca6a;
   background: #e0f8e9;
 }
 
-.assessment-reporting .reports-year-card .card-icon {
+.reporting-section .reports-year-card .card-icon {
   color: #ff771d;
   background: #ffecdf;
 }
 
 /* Activity */
-.assessment-reporting .activity {
+.reporting-section .activity {
   font-size: 14px;
 }
 
-.assessment-reporting .activity .activity-item .activite-label {
+.reporting-section .activity .activity-item .activite-label {
   color: #888;
   position: relative;
   flex-shrink: 0;
@@ -412,7 +412,7 @@ body .popover {
   min-width: 64px;
 }
 
-.assessment-reporting .activity .activity-item .activite-label::before {
+.reporting-section .activity .activity-item .activite-label::before {
   content: "";
   position: absolute;
   right: -11px;
@@ -422,7 +422,7 @@ body .popover {
   background-color: #eceefe;
 }
 
-.assessment-reporting .activity .activity-item .activity-badge {
+.reporting-section .activity .activity-item .activity-badge {
   margin-top: 3px;
   z-index: 1;
   font-size: 11px;
@@ -433,58 +433,58 @@ body .popover {
   flex-grow: 0;
 }
 
-.assessment-reporting .activity .activity-item .activity-content {
+.reporting-section .activity .activity-item .activity-content {
   padding-left: 10px;
   padding-bottom: 20px;
 }
 
-.assessment-reporting .activity .activity-item:first-child .activite-label::before {
+.reporting-section .activity .activity-item:first-child .activite-label::before {
   top: 5px;
 }
 
-.assessment-reporting .activity .activity-item:last-child .activity-content {
+.reporting-section .activity .activity-item:last-child .activity-content {
   padding-bottom: 0;
 }
 
 /* News & Updates */
-.assessment-reporting .news .post-item+.post-item {
+.reporting-section .news .post-item+.post-item {
   margin-top: 15px;
 }
 
-.assessment-reporting .news img {
+.reporting-section .news img {
   width: 80px;
   float: left;
   border-radius: 5px;
 }
 
-.assessment-reporting .news h4 {
+.reporting-section .news h4 {
   font-size: 15px;
   margin-left: 95px;
   font-weight: bold;
   margin-bottom: 5px;
 }
 
-.assessment-reporting .news h4 a {
+.reporting-section .news h4 a {
   color: #012970;
   transition: 0.3s;
 }
 
-.assessment-reporting .news h4 a:hover {
+.reporting-section .news h4 a:hover {
   color: #4154f1;
 }
 
-.assessment-reporting .news p {
+.reporting-section .news p {
   font-size: 14px;
   color: #777777;
   margin-left: 95px;
 }
 
-.assessment-reporting .row {
+.reporting-section .row {
   margin-bottom: 10px;
 }
 
 /* Recent Assessments */
-.assessment-reporting .recent-assessments {
+.reporting-section .recent-assessments {
   font-size: 14px;
 }
 

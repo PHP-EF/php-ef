@@ -28,7 +28,8 @@
             "DNS-TOOLBOX",
             "B1-SECURITY-ASSESSMENT",
             "B1-THREAT-ACTORS",
-            "REPORT-ASSESSMENTS"
+            "REPORT-ASSESSMENTS",
+            "REPORT-TRACKING"
         ],
         "PermittedMenus": [
             "ADMIN-Menu",

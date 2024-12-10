@@ -26,7 +26,8 @@ class Reporting {
       pageName TEXT,
       timeSpent INT,
       clicks INT,
-      mouseMovements INT
+      mouseMovements INT,
+      dateTime DATETIME
     )");
 
     // Create assessments table if it doesn't exist
@@ -43,7 +44,9 @@ class Reporting {
     )");
   }
 
+  // Web Tracking
   public function track($data,$auth) {
+    $DateTime = (new DateTime())->format('Y-m-d H:i:s');
     $execute = [];
     $prepare = [
       'tId',
@@ -56,7 +59,8 @@ class Reporting {
       'path',
       'timeSpent',
       'clicks',
-      'mouseMovements'
+      'mouseMovements',
+      'dateTime'
     ];
     $execute = [
       ':tId' => $data['tId'],
@@ -68,7 +72,8 @@ class Reporting {
       ':path' => $data['urlComponents']['pathname'],
       ':timeSpent' => $data['timeSpent'],
       ':clicks' => count($data['clicks']),
-      ':mouseMovements' => count($data['mouseMovements'])
+      ':mouseMovements' => count($data['mouseMovements']),
+      ':dateTime' => $DateTime
     ];
     if ($data['pageDetails'] != null) {
       $prepare[] = 'pageCategory';
@@ -88,6 +93,47 @@ class Reporting {
     $stmt->execute($execute);
   }
 
+  public function getTrackingRecords($granularity) {
+    $execute = [];
+    $Select = $this->sqlSelectByGranularity($granularity,'dateTime','reporting_tracking');
+    if (isset($Select)) {
+      if (isset($Select['Status'])) {
+        return $Select;
+      } else {
+        try {
+          $stmt = $this->db->prepare($Select);
+          $stmt->execute($execute);
+          return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return array(
+                'Status' => 'Error',
+                'Message' => $e
+            );
+        }        
+      }
+    } else {
+      return array(
+        'Status' => 'Error',
+        'Message' => 'Invalid Granularity'
+      );
+    }
+  }
+
+  public function getTrackingSummary() {
+    $stmt = $this->db->prepare('SELECT "Total" AS type, SUM(CASE WHEN DATE(dateTime) = DATE("now") THEN 1 ELSE 0 END) AS count_today, SUM(CASE WHEN strftime("%Y-%m", dateTime) = strftime("%Y-%m", "now") THEN 1 ELSE 0 END) AS count_this_month, SUM(CASE WHEN strftime("%Y", dateTime) = strftime("%Y", "now") THEN 1 ELSE 0 END) AS count_this_year, COUNT(DISTINCT CASE WHEN DATE(dateTime) = DATE("now") THEN tId ELSE NULL END) AS unique_visitors_today, COUNT(DISTINCT CASE WHEN strftime("%Y-%m", dateTime) = strftime("%Y-%m", "now") THEN tId ELSE NULL END) AS unique_visitors_this_month, COUNT(DISTINCT CASE WHEN strftime("%Y", dateTime) = strftime("%Y", "now") THEN tId ELSE NULL END) AS unique_visitors_this_year FROM reporting_tracking;');
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
+  public function getTrackingStats($granularity,$filters,$start,$end) {
+    $data = $this->getTrackingRecords($granularity,$filters,$start,$end);
+    $summary = $this->summarizeByDate($data, $granularity, 'dateTime');
+    return $summary;
+  }
+
+  // Web Tracking End
+
+  // Assessment Reports
   public function getReportById($id) {
     $stmt = $this->db->prepare("SELECT * FROM reporting_assessments WHERE id = :id");
     $stmt->execute([':id' => $id]);
@@ -166,46 +212,7 @@ class Reporting {
 
   public function getAssessmentReports($granularity,$type = 'all',$realm = 'all',$user = 'all',$customer = 'all',$start = null,$end = null) {
     $execute = [];
-    switch ($granularity) {
-      case 'today':
-        $Select = 'SELECT * FROM reporting_assessments WHERE date(created) = date("now")';
-        break;
-      case 'thisWeek':
-        $Select = 'SELECT * FROM reporting_assessments WHERE strftime("%Y-%W", created) = strftime("%Y-%W","now")';
-        break;
-      case 'thisMonth':
-        $Select = 'SELECT * FROM reporting_assessments WHERE strftime("%Y-%m", created) = strftime("%Y-%m","now")';
-        break;
-      case 'thisYear':
-        $Select = 'SELECT * FROM reporting_assessments WHERE strftime("%Y", created) = strftime("%Y","now")';
-        break;
-      case 'last30Days':
-        $Select = 'SELECT * FROM reporting_assessments WHERE created >= date("now", "-30 days")';
-        break;
-      case 'lastMonth':
-        $Select = 'SELECT * FROM reporting_assessments WHERE strftime("%Y-%m", created) = strftime("%Y-%m", date("now", "-1 month"))';
-        break;
-      case 'lastYear':
-        $Select = 'SELECT * FROM reporting_assessments WHERE strftime("%Y", created) = strftime("%Y", date("now", "-1 year"))';
-        break;
-      case 'custom':
-        if ($start != null && $end != null) {
-          $StartDateTime = (new DateTime($start))->format('Y-m-d H:i:s');
-          $EndDateTime = (new DateTime($end))->format('Y-m-d H:i:s');
-          $execute[':start'] = $StartDateTime;
-          $execute[':end'] = $EndDateTime;
-          $Select = 'SELECT * FROM reporting_assessments WHERE created > :start AND created < :end';
-        } else {
-          return array(
-            'Status' => 'Error',
-            'Message' => 'Start and/or End date missing'
-          );
-        }
-        break;
-      case 'all':
-        $Select = 'SELECT * FROM reporting_assessments';
-        break;
-    }
+    $Select = $this->sqlSelectByGranularity($granularity,'created','reporting_assessments');
 
     if ($type != 'all') {
       $Select = $Select.' AND type = :type';
@@ -252,66 +259,8 @@ class Reporting {
 
   public function getAssessmentReportsStats($granularity,$type,$realm,$user,$customer,$start,$end) {
     $data = $this->getAssessmentReports($granularity,$type,$realm,$user,$customer,$start,$end);
-    $filteredData = $this->filterDataByGranularity($data, $granularity);
-    $summary = $this->summarizeByTypeAndDate($filteredData, $granularity);
+    $summary = $this->summarizeByTypeAndDate($data, $granularity);
     return $summary;
-  }
-
-  // Function to filter data based on granularity
-  private function filterDataByGranularity($data, $granularity) {
-    $filteredData = [];
-    $currentDate = new DateTime();
-
-    foreach ($data as $item) {
-      $createdDate = new DateTime($item['created']);
-      switch ($granularity) {
-        case 'today':
-          if ($createdDate->format('Y-m-d') == $currentDate->format('Y-m-d')) {
-              $filteredData[] = $item;
-          }
-          break;
-        case 'thisWeek':
-          if ($createdDate->format('W') == $currentDate->format('W') && $createdDate->format('Y') == $currentDate->format('Y')) {
-              $filteredData[] = $item;
-          }
-          break;
-        case 'thisMonth':
-          if ($createdDate->format('Y-m') == $currentDate->format('Y-m')) {
-              $filteredData[] = $item;
-          }
-          break;
-        case 'thisYear':
-          if ($createdDate->format('Y') == $currentDate->format('Y')) {
-              $filteredData[] = $item;
-          }
-          break;
-        case 'last30Days':
-          $thirtyDaysAgo = (new DateTime())->modify('-30 days');
-          if ($createdDate >= $thirtyDaysAgo) {
-            $filteredData[] = $item;
-          }
-          break;
-        case 'lastMonth':
-          $lastMonth = (clone $currentDate)->modify('-1 month');
-          if ($createdDate->format('Y-m') == $lastMonth->format('Y-m')) {
-              $filteredData[] = $item;
-          }
-          break;
-        case 'lastYear':
-          $lastYear = (clone $currentDate)->modify('-1 year');
-          if ($createdDate->format('Y') == $lastYear->format('Y')) {
-              $filteredData[] = $item;
-          }
-          break;
-        case 'all':
-          $filteredData[] = $item;
-          break;
-        default:
-          $filteredData[] = $item;
-          break;
-      }
-    }
-    return $filteredData;
   }
 
   // Function to summarize data by type and date
@@ -319,45 +268,108 @@ class Reporting {
     $summary = [];
     foreach ($data as $item) {
       $type = $item['type'];
-      $createdDate = new DateTime($item['created']);
-
-      switch ($granularity) {
-        case 'today':
-          $dateKey = $createdDate->format('Y-m-d H:00');
-          break;
-        case 'thisWeek':
-          $dateKey = $createdDate->format('Y-m-d');
-          break;
-        case 'thisMonth':
-          $dateKey = $createdDate->format('Y-m-d');
-          break;
-        case 'last30Days':
-          $dateKey = $createdDate->format('Y-m-d');
-          break;
-        case 'lastMonth':
-          $dateKey = $createdDate->format('Y-m-d');
-          break;
-        case 'thisYear':
-          $dateKey = $createdDate->format('Y-m');
-          break;
-        case 'lastYear':
-          $dateKey = $createdDate->format('Y-m');
-          break;
-        default:
-          $dateKey = $createdDate->format('Y-m-d');
-          break;
-      }
-
+      $dateKey = $this->summerizeDateByGranularity($item,$granularity,'created');
       if (!isset($summary[$type])) {
           $summary[$type] = [];
       }
-
       if (!isset($summary[$type][$dateKey])) {
           $summary[$type][$dateKey] = 0;
       }
-
       $summary[$type][$dateKey]++;
     }
     return $summary;
+  }
+  // Assessment Reports End
+
+
+  // ** Shared Functions ** //
+  // Function to summarize data date
+  private function summarizeByDate($data, $granularity, $dateField) {
+    $summary = [];
+    foreach ($data as $item) {
+      $dateKey = $this->summerizeDateByGranularity($item,$granularity,$dateField);
+      if (!isset($summary[$dateKey])) {
+          $summary[$dateKey] = 0;
+      }
+      $summary[$dateKey]++;
+    }
+    return $summary;
+  }
+
+  // Function to summarize date by granularity
+  private function summerizeDateByGranularity($item, $granularity, $dateField) {
+    $createdDate = new DateTime($item[$dateField]);
+    switch ($granularity) {
+      case 'today':
+        $dateKey = $createdDate->format('Y-m-d H:00');
+        break;
+      case 'thisWeek':
+        $dateKey = $createdDate->format('Y-m-d');
+        break;
+      case 'thisMonth':
+        $dateKey = $createdDate->format('Y-m-d');
+        break;
+      case 'last30Days':
+        $dateKey = $createdDate->format('Y-m-d');
+        break;
+      case 'lastMonth':
+        $dateKey = $createdDate->format('Y-m-d');
+        break;
+      case 'thisYear':
+        $dateKey = $createdDate->format('Y-m');
+        break;
+      case 'lastYear':
+        $dateKey = $createdDate->format('Y-m');
+        break;
+      default:
+        $dateKey = $createdDate->format('Y-m-d');
+        break;
+    }
+    return $dateKey;
+  }
+
+  private function sqlSelectByGranularity($granularity,$dateField,$table) {
+    $execute = [];
+    switch ($granularity) {
+      case 'today':
+        $Select = 'SELECT * FROM '.$table.' WHERE date('.$dateField.') = date("now")';
+        break;
+      case 'thisWeek':
+        $Select = 'SELECT * FROM '.$table.' WHERE strftime("%Y-%W", '.$dateField.') = strftime("%Y-%W","now")';
+        break;
+      case 'thisMonth':
+        $Select = 'SELECT * FROM '.$table.' WHERE strftime("%Y-%m", '.$dateField.') = strftime("%Y-%m","now")';
+        break;
+      case 'thisYear':
+        $Select = 'SELECT * FROM '.$table.' WHERE strftime("%Y", '.$dateField.') = strftime("%Y","now")';
+        break;
+      case 'last30Days':
+        $Select = 'SELECT * FROM '.$table.' WHERE '.$dateField.' >= date("now", "-30 days")';
+        break;
+      case 'lastMonth':
+        $Select = 'SELECT * FROM '.$table.' WHERE strftime("%Y-%m", '.$dateField.') = strftime("%Y-%m", date("now", "-1 month"))';
+        break;
+      case 'lastYear':
+        $Select = 'SELECT * FROM '.$table.' WHERE strftime("%Y", '.$dateField.') = strftime("%Y", date("now", "-1 year"))';
+        break;
+      case 'custom':
+        if ($start != null && $end != null) {
+          $StartDateTime = (new DateTime($start))->format('Y-m-d H:i:s');
+          $EndDateTime = (new DateTime($end))->format('Y-m-d H:i:s');
+          $execute[':start'] = $StartDateTime;
+          $execute[':end'] = $EndDateTime;
+          $Select = 'SELECT * FROM '.$table.' WHERE '.$dateField.' > :start AND '.$dateField.' < :end';
+        } else {
+          return array(
+            'Status' => 'Error',
+            'Message' => 'Start and/or End date missing'
+          );
+        }
+        break;
+      case 'all':
+        $Select = 'SELECT * FROM '.$table.'';
+        break;
+    }
+    return $Select;
   }
 }

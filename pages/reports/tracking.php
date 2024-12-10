@@ -1,6 +1,6 @@
 <?php
 require_once(__DIR__.'/../../inc/inc.php');
-if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
+if ($ib->auth->checkAccess(null,"REPORT-TRACKING") == false) {
   die();
 }
 ?>
@@ -11,68 +11,68 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
       <!-- Columns -->
       <div class="col-lg-12">
         <div class="row">
-          <!-- Reports Today Card -->
+          <!-- Visits Today Card -->
           <div class="col-lg-3 col-md-4 col-sm-6 col-12">
-            <div class="card info-card reports-today-card">
+            <div class="card info-card visits-today-card">
               <div class="card-body">
-                <h5 class="card-title">Assessments <span>| Today</span></h5>
+                <h5 class="card-title">Visits <span>| Today</span></h5>
                 <div class="d-flex align-items-center">
                   <!-- <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                     <i class="bi bi-cart"></i>
                   </div> -->
                   <div class="pt-1 ps-3">
-                    <h6 id="reportsThisDayVal" class="metric-circle border-5"></h6>
+                    <h6 id="visitsThisDayVal" class="metric-circle border-5"></h6>
                   </div>
                   <div class="p-2 pt-2 ps-4">
-                    <span id="customersThisDayVal" class="ib-green small pt-1 mt-1 fw-bold"></span>
-                    <span id="usersThisDayVal" class="ib-black small pt-1 mt-1 fw-bold" style="display:flex;"></span>
+                    <!-- <span id="customersThisDayVal" class="ib-green small pt-1 mt-1 fw-bold"></span> -->
+                    <span id="uniqueVisitorsThisDayVal" class="ib-black small pt-1 mt-1 fw-bold" style="display:flex;"></span>
                   </div>
                 </div>
               </div>
             </div>
-          </div><!-- Reports Today Card -->
+          </div><!-- Visits Today Card -->
 
-          <!-- Reports This Month Card -->
+          <!-- Visits This Month Card -->
           <div class="col-lg-3 col-md-4 col-sm-6 col-12">
-            <div class="card info-card reports-month-card">
+            <div class="card info-card visits-month-card">
               <div class="card-body">
-                <h5 class="card-title">Assessments <span>| This Month</span></h5>
+                <h5 class="card-title">Visits <span>| This Month</span></h5>
                 <div class="d-flex align-items-center">
                   <!-- <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                     <i class="bi bi-currency-dollar"></i>
                   </div> -->
                   <div class="pt-1 ps-3">
-                    <h6 id="reportsThisMonthVal" class="metric-circle border-5"></h6>
+                    <h6 id="visitsThisMonthVal" class="metric-circle border-5"></h6>
                   </div>
                   <div class="p-2 pt-2 ps-4">
-                    <span id="customersThisMonthVal" class="ib-green small pt-1 mt-1 fw-bold"></span>
-                    <span id="usersThisMonthVal" class="ib-black small pt-1 mt-1 fw-bold" style="display:flex;"></span>
+                    <!-- <span id="customersThisMonthVal" class="ib-green small pt-1 mt-1 fw-bold"></span> -->
+                    <span id="uniqueVisitorsThisMonthVal" class="ib-black small pt-1 mt-1 fw-bold" style="display:flex;"></span>
                   </div>
                 </div>
               </div>
             </div>
-          </div><!-- Reports This Month Card -->
+          </div><!-- Visits This Month Card -->
 
-          <!-- Reports This Year Card -->
+          <!-- Visits This Year Card -->
           <div class="col-lg-3 col-md-4 col-sm-6 col-12">
-            <div class="card info-card reports-year-card">
+            <div class="card info-card visits-year-card">
               <div class="card-body">
-                <h5 class="card-title">Assessments <span>| This Year</span></h5>
+                <h5 class="card-title">Visits <span>| This Year</span></h5>
                 <div class="d-flex align-items-center">
                   <!-- <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                     <i class="bi bi-people"></i>
                   </div> -->
                   <div class="pt-1 ps-3">
-                    <h6 id="reportsThisYearVal" class="metric-circle border-5"></h6>
+                    <h6 id="visitsThisYearVal" class="metric-circle border-5"></h6>
                   </div>
                   <div class="p-2 pt-2 ps-4">
-                    <span id="customersThisYearVal" class="ib-green small pt-1 mt-1 fw-bold"></span>
-                    <span id="usersThisYearVal" class="ib-black small pt-1 mt-1 fw-bold" style="display:flex;"></span>
+                    <!-- <span id="customersThisYearVal" class="ib-green small pt-1 mt-1 fw-bold"></span> -->
+                    <span id="uniqueVisitorsThisYearVal" class="ib-black small pt-1 mt-1 fw-bold" style="display:flex;"></span>
                   </div>
                 </div>
               </div>
             </div>
-          </div><!-- Reports This Year Card -->
+          </div><!-- Visits This Year Card -->
 
           <!-- Granularity Card -->
           <div class="col-lg-3 col-md-4 col-sm-6 col-12">
@@ -105,68 +105,68 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
         </div>
 
         <div class="row">
-          <!-- Assessments Chart -->
+          <!-- Visitors Chart -->
           <div class="col-xxl-8 col-lg-6 col-md-12 col-sm-12 col-12">
             <div class="card chart-card">
               <div class="card-body">
-                <h5 class="card-title">Assessments | <span class="granularity-title">Last 30 Days</span></h5>
+                <h5 class="card-title">Visitors | <span class="granularity-title">Last 30 Days</span></h5>
                 <!-- Line Chart -->
-                <div id="assessmentsChart"></div>
+                <div id="visitorsChart"></div>
                 <!-- End Line Chart -->
               </div>
             </div>
-          </div><!-- End Assessments -->
+          </div><!-- End Visitors -->
 
-          <div class="col-xxl-2 col-lg-3 col-md-6 col-sm-6 col-6"> <!-- Assessment Types Pie -->
+          <div class="col-xxl-2 col-lg-3 col-md-6 col-sm-6 col-6"> <!-- Browser Types Pie -->
             <div class="card chart-card">
               <div class="card-body">
-                <h5 class="card-title">Assessment Types | <span class="granularity-title">Last 30 Days</span></h5>
-                <div id="assessmentTypesChart" class="pie"></div>
+                <h5 class="card-title">Browser Types | <span class="granularity-title">Last 30 Days</span></h5>
+                <div id="browserTypesChart" class="pie"></div>
               </div>
             </div>
-          </div><!-- End Assessment Pie -->
+          </div><!-- End Browser Pie -->
 
-          <div class="col-xxl-2 col-lg-3 col-md-6 col-sm-6 col-6"> <!-- Assessment Realm Pie -->
+          <div class="col-xxl-2 col-lg-3 col-md-6 col-sm-6 col-6"> <!-- OS Types Pie -->
             <div class="card chart-card">
               <div class="card-body">
-                <h5 class="card-title">Infoblox Realms | <span class="granularity-title">Last 30 Days</span></h5>
-                <div id="assessmentRealmsChart" class="pie"></div>
+                <h5 class="card-title">OS Types | <span class="granularity-title">Last 30 Days</span></h5>
+                <div id="osTypesChart" class="pie"></div>
               </div>
             </div>
-          </div><!-- Assessment Realm Pie -->
+          </div><!-- End OS Types Pie -->
 
         </div>
 
         <div class="row">
-          <!-- Top Users -->
+          <!-- Top Pages -->
           <div class="col-lg-6 col-12">
-            <div class="card top-users bar-chart-card overflow-auto">
+            <div class="card top-pages bar-chart-card overflow-auto">
               <div class="card-body pb-0">
-                <h5 class="card-title">Top 10 Users | <span class="granularity-title">Last 30 Days</span></h5>
-                <div id="topUsersChart" class="bar"></div>
+                <h5 class="card-title">Top 10 Pages | <span class="granularity-title">Last 30 Days</span></h5>
+                <div id="topPagesChart" class="bar"></div>
               </div>
             </div>
-          </div><!-- End Top Users -->
-          <!-- Top Customers -->
+          </div><!-- End Top Pages -->
+          <!-- Page Activity -->
           <div class="col-lg-6 col-12">
             <div class="card top-customers bar-chart-card overflow-auto">
               <div class="card-body pb-0">
-                <h5 class="card-title">Top 10 Customers | <span class="granularity-title">Last 30 Days</span></h5>
-                <div id="topCustomersChart" class="bar"></div>
+                <h5 class="card-title">Page Activity | <span class="granularity-title">Last 30 Days</span></h5>
+                <div id="pageActivityChart" class="bar"></div>
               </div>
             </div>
-          </div><!-- End Top Customers -->
+          </div><!-- End Page Activity -->
         </div>
         <div class="row">
-          <!-- Assessments List -->
+          <!-- Visitors List -->
           <div class="col-12">
             <div class="card recent-assessments overflow-auto">
               <div class="card-body">
-                <h5 class="card-title">Assessments List | <span class="granularity-title">Last 30 Days</span></h5>
+                <h5 class="card-title">Visitors List | <span class="granularity-title">Last 30 Days</span></h5>
                 <table id="assessmentTable" class="table-striped"></table>
               </div>
             </div>
-          </div><!-- End Assessments List -->
+          </div><!-- End Visitors List -->
         </div>
       </div><!-- End columns -->
     </div>
@@ -206,6 +206,14 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
     return d.toGMTString();
   }
 
+  function msFormatter(value, row, index) {
+    var minutes = Math.floor(value / 60000);
+    var seconds = ((value % 60000) / 1000).toFixed(0);
+    return minutes + "m " + (seconds < 10 ? '0' : '') + seconds + 's';
+  }
+
+
+
   document.addEventListener("DOMContentLoaded", () => {
     if ($('.dark-theme').length > 0) {
       var theme = 'dark';
@@ -221,38 +229,37 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
     var appliedFilters = {};
     function resetAppliedFilters() {
       appliedFilters = {
-        type: 'all',
-        realm: 'all',
-        user: 'all',
-        customer: 'all'
+        page: 'all',
+        browser: 'all',
+        os: 'all'
       };
       $('#clearFilters').css('display','none');
     }
 
     const updateSummaryValues = () => {
-      $.get( "/api?f=getAssessmentReportsSummary").done(function( data, status ) {
+      $.get( "/api?f=getTrackingSummary").done(function( data, status ) {
         const total = data.find(item => item.type === "Total")
-        $('#reportsThisDayVal').text(total['count_today']);
-        $('#customersThisDayVal').text(total['unique_customers_today']+' Customers');
-        $('#usersThisDayVal').text(total['unique_apiusers_today']+' Users');
-        $('#reportsThisMonthVal').text(total['count_this_month']);
-        $('#customersThisMonthVal').text(total['unique_customers_this_month']+' Customers');
-        $('#usersThisMonthVal').text(total['unique_apiusers_this_month']+' Users');
-        $('#reportsThisYearVal').text(total['count_this_year']);
-        $('#customersThisYearVal').text(total['unique_customers_this_year']+' Customers');
-        $('#usersThisYearVal').text(total['unique_apiusers_this_year']+' Users');
+        $('#visitsThisDayVal').text(total['count_today']);
+        // $('#customersThisDayVal').text(total['unique_customers_today']+' Customers');
+        $('#uniqueVisitorsThisDayVal').text(total['unique_visitors_today']+' Unique Visitors');
+        $('#visitsThisMonthVal').text(total['count_today']);
+        // $('#customersThisMonthVal').text(total['unique_customers_this_month']+' Customers');
+        $('#uniqueVisitorsThisMonthVal').text(total['unique_visitors_this_month']+' Unique Visitors');
+        $('#visitsThisYearVal').text(total['count_today']);
+        // $('#customersThisYearVal').text(total['unique_customers_this_year']+' Customers');
+        $('#uniqueVisitorsThisYearVal').text(total['unique_visitors_this_year']+' Unique Visitors');
       });
     };
 
     const updateRecentAssessments = (granularity, appliedFilters, start = null, end = null) => {
-      $.get( "/api?f=getAssessmentReports&granularity="+granularity+"&type="+appliedFilters['type']+"&realm="+appliedFilters['realm']+"&user="+appliedFilters['user']+"&customer="+appliedFilters['customer']+"&start="+start+"&end="+end).done(function( data, status ) {
+      $.get( "/api?f=getTrackingRecords&granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( data, status ) {
         $('#assessmentTable').bootstrapTable('destroy');
         $('#assessmentTable').bootstrapTable({
           data: data,
           sortable: true,
           pagination: true,
           search: true,
-          sortName: 'created',
+          sortName: 'dateTime',
           sortOrder: 'desc',
           showExport: true,
           exportTypes: ['json', 'xml', 'csv', 'txt', 'excel', 'sql'],
@@ -265,56 +272,76 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
             title: 'ID',
             sortable: true,
             visible: false
-          },
-          {
-            field: 'customer',
-            title: 'Customer',
+          },{
+            field: 'scheme',
+            title: 'Scheme',
             sortable: true,
             filterControl: 'select'
           },{
-            field: 'realm',
-            title: 'Realm',
+            field: 'path',
+            title: 'Path',
             sortable: true,
             filterControl: 'select'
           },{
-            field: 'type',
-            title: 'Type',
+            field: 'pageCategory',
+            title: 'Page Category',
             sortable: true,
             filterControl: 'select'
           },{
-            field: 'userid',
-            title: 'User ID',
+            field: 'pageName',
+            title: 'Page Name',
+            sortable: true,
+            filterControl: 'select'
+          },{
+            field: 'ipAddress',
+            title: 'IP Address',
+            sortable: true,
+            filterControl: 'input'
+          },{
+            field: 'browser',
+            title: 'Browser',
+            sortable: true,
+            filterControl: 'select'
+          },{
+            field: 'os',
+            title: 'OS',
+            sortable: true,
+            filterControl: 'select'
+          },{
+            field: 'timeSpent',
+            title: 'Duration',
+            sortable: true,
+            formatter: 'msFormatter',
+            filterControl: 'input'
+          },{
+            field: 'clicks',
+            title: 'Clicks',
+            sortable: true,
+            filterControl: 'input'
+          },{
+            field: 'mouseMovements',
+            title: 'Mouse Movements',
             sortable: true,
             visible: false,
             filterControl: 'select'
           },{
-            field: 'apiuser',
-            title: 'API User',
-            sortable: true,
-            filterControl: 'select'
-          },{
-            field: 'status',
-            title: 'Status',
-            sortable: true,
-            filterControl: 'select'
-          },{
-            field: 'uuid',
-            title: 'UUID',
+            field: 'tId',
+            title: 'Tracking ID',
             sortable: true,
             visible: false,
             filterControl: 'input'
           },{
-            field: 'created',
-            title: 'Generated At',
+            field: 'dateTime',
+            title: 'Date/Time',
             sortable: true,
             formatter: 'dateFormatter',
             filterControl: 'input'
           }]
         });
-        updateTopApiUsers(data,granularity);
-        updateTopCustomers(data,granularity);
-        updateAssessmentTypes(data);
-        updateAssessmentRealms(data);
+        updateTopPages(data,granularity);
+        updatePageActivityChart(data,granularity);
+        updateBrowserTypes(data);
+        updateOSTypes(data);
       });
     }
 
@@ -424,142 +451,184 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
       colors: barChartColorPalette
     };
 
-    // Render Assessments Area Chart
-    const assessmentsChart = new ApexCharts(document.querySelector("#assessmentsChart"), areaChartOptions);
-    assessmentsChart.render();
+    // Define Line Column Chart Options
+    const lineColumnChartOptions = {
+      chart: {
+          type: 'line',
+          height: 350
+      },
+      series: [],
+      noData: {
+        text: 'Loading...'
+      },
+      stroke: {
+          width: [0, 4]
+      },
+      dataLabels: {
+          enabled: true,
+          enabledOnSeries: [1]
+      },
+      labels: [],
+      xaxis: {
+          type: 'category'
+      },
+      colors: barChartColorPalette
+    };
 
-    // Define Assessments Area Chart Update Function
-    const updateAssessmentsChart = (granularity, appliedFilters, start = null, end = null) => {
-      $.get( "/api?f=getAssessmentReportsStats&granularity="+granularity+"&type="+appliedFilters['type']+"&realm="+appliedFilters['realm']+"&user="+appliedFilters['user']+"&customer="+appliedFilters['customer']+"&start="+start+"&end="+end).done(function( data, status ) {
+    // Render Visitors Area Chart
+    const visitorsChart = new ApexCharts(document.querySelector("#visitorsChart"), areaChartOptions);
+    visitorsChart.render();
+
+    // Define Visitors Area Chart Update Function
+    const updateVisitorsChart = (granularity, appliedFilters, start = null, end = null) => {
+      $.get( "/api?f=getTrackingStats&granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( data, status ) {
         // Extract all unique dates
         const categoriesSet = new Set();
         for (const key in data) {
-            if (data.hasOwnProperty(key)) {
-                Object.keys(data[key]).forEach(date => categoriesSet.add(date));
-            }
+          if (data.hasOwnProperty(key)) {
+            categoriesSet.add(key);
+          }
         }
         const categories = Array.from(categoriesSet).sort();
         // Prepare the series data
         const series = [];
         for (const key in data) {
           if (data.hasOwnProperty(key)) {
-            const seriesData = categories.map(date => data[key][date] || 0);
-            series.push({
-                name: key,
-                data: seriesData
-            });
+            const seriesData = categories.map(date => data[key] || 0);
+            series.push(data[key]);
           }
         }
-        assessmentsChart.updateOptions({
-          series: series,
+        visitorsChart.updateOptions({
+          series: [{
+            name: 'Visitors',
+            data: series
+          }],
           xaxis: {
             categories: categories
           }
         });
       });
     };
-    // Render Assessments Area Chart End //
+    // Render Visitors Area Chart End //
 
-    // Render Types Chart
-    var typesChart = new ApexCharts(document.querySelector("#assessmentTypesChart"), donutChartOptions);
-    typesChart.render();
+    // Render Browser Types Chart
+    var browserTypesChart = new ApexCharts(document.querySelector("#browserTypesChart"), donutChartOptions);
+    browserTypesChart.render();
 
     // Define Types Chart Update Function
-    const updateAssessmentTypes = (data) => {
-      const countByType = data.reduce((acc, obj) => {
-        acc[obj.type] = (acc[obj.type] || 0) + 1;
+    const updateBrowserTypes = (data) => {
+      const countByBrowser = data.reduce((acc, obj) => {
+        acc[obj.browser] = (acc[obj.browser] || 0) + 1;
         return acc;
       }, {});
-      var types = Object.keys(countByType).map(type => ({ type: type, count: countByType[type] }));
-      typesChart.updateOptions({
-        series: types.map(type => type.count),
-        labels: types.map(type => type.type),
+      var types = Object.keys(countByBrowser).map(browser => ({ browser: browser, count: countByBrowser[browser] }));
+      browserTypesChart.updateOptions({
+        series: types.map(browser => browser.count),
+        labels: types.map(browser => browser.browser),
       });
     }
-    // Render Types Chart End //
+    // Render Browser Types Chart End //
 
 
-    // Render Realms Chart
-    var realmsChart = new ApexCharts(document.querySelector("#assessmentRealmsChart"), donutChartOptions);
-    realmsChart.render();
+    // Render OS Types Chart
+    var osTypesChart = new ApexCharts(document.querySelector("#osTypesChart"), donutChartOptions);
+    osTypesChart.render();
 
-    // Define Realms Chart Update Function
-    const updateAssessmentRealms = (data) => {
-      const countByRealm = data.reduce((acc, obj) => {
-        acc[obj.realm] = (acc[obj.realm] || 0) + 1;
+    // Define OS Types Chart Update Function
+    const updateOSTypes = (data) => {
+      const countByOS = data.reduce((acc, obj) => {
+        acc[obj.os] = (acc[obj.os] || 0) + 1;
         return acc;
       }, {});
 
-      const realms = Object.keys(countByRealm).map(realm => ({ realm: realm, count: countByRealm[realm] }));
-      realmsChart.updateOptions({
-        series: realms.map(realm => realm.count),
-        labels: realms.map(realm => realm.realm)
+      const osTypes = Object.keys(countByOS).map(os => ({ os: os, count: countByOS[os] }));
+      osTypesChart.updateOptions({
+        series: osTypes.map(os => os.count),
+        labels: osTypes.map(os => os.os)
       });
     }
     // Render Realms Chart End //
 
 
-    // Render Top API Users Chart
-    var topApiUsersChart = new ApexCharts(document.querySelector("#topUsersChart"), horizontalBarChartOptions);
-    topApiUsersChart.render();
+    // Render Top Pages Users Chart
+    var topPagesChart = new ApexCharts(document.querySelector("#topPagesChart"), horizontalBarChartOptions);
+    topPagesChart.render();
 
-    // Define Top API Users Chart Update Function
-    const updateTopApiUsers = (data,granularity) => {
-      const apiUserCount = {};
+    // Define Top Pages Users Chart Update Function
+    const updateTopPages = (data,granularity) => {
+      const pageCount = {};
       data.forEach(entry => {
-        const apiUser = entry.apiuser;
-        if (apiUser) {
-          if (!apiUserCount[apiUser]) {
-              apiUserCount[apiUser] = 0;
+        const page = entry.pageName;
+        if (page) {
+          if (!pageCount[page]) {
+            pageCount[page] = 0;
           }
-          apiUserCount[apiUser]++;
+          pageCount[page]++;
         }
       });
 
-      const sortedApiUsers = Object.entries(apiUserCount).sort((a, b) => b[1] - a[1]);
-      const apiUsers = sortedApiUsers.slice(0,10).map(user => ({ apiuser: user[0], count: user[1] }));
-      topApiUsersChart.updateOptions({
+      const sortedPages = Object.entries(pageCount).sort((a, b) => b[1] - a[1]);
+      const pages = sortedPages.slice(0,10).map(page => ({ page: page[0], count: page[1] }));
+      topPagesChart.updateOptions({
         series: [{
-          data: apiUsers.map(user => user.count),
-          name: 'Assessment Count'
+          data: pages.map(page => page.count),
+          name: 'Page Visits'
         }],
         xaxis: {
-          categories: apiUsers.map(user => user.apiuser)
+          categories: pages.map(page => page.page)
         },
       });
     }
-    // Render Top API Users Chart End //
+    // Render Top Pages Chart End //
 
 
-    // Render Top Customers Chart
-    var topCustomersChart = new ApexCharts(document.querySelector("#topCustomersChart"), horizontalBarChartOptions);
-    topCustomersChart.render();
+    // Render Page Activity Chart
+    var pageActivityChart = new ApexCharts(document.querySelector("#pageActivityChart"), lineColumnChartOptions);
+    pageActivityChart.render();
 
-    // Define Top Customers Chart Update Function
-    const updateTopCustomers = (data,granularity) => {
-      const customerCount = {};
-      data.forEach(entry => {
-        const customer = entry.customer;
-        if (customer) {
-          if (!customerCount[customer]) {
-              customerCount[customer] = 0;
-          }
-          customerCount[customer]++;
+    const updatePageActivityChart = (data,granularity) => {
+      // Aggregating data by pageName
+      const aggregatedData = data.reduce((acc, item) => {
+        const pageName = item.pageName || 'Home';
+        if (!acc[pageName]) {
+            acc[pageName] = { timeSpent: 0, visits: 0 };
         }
-      });
-      const sortedCustomers = Object.entries(customerCount).sort((a, b) => b[1] - a[1]);
-      const customers = sortedCustomers.slice(0,10).map(customer => ({ customer: customer[0], count: customer[1] }));
-      topCustomersChart.updateOptions({
+        acc[pageName].timeSpent += item.timeSpent;
+        acc[pageName].visits += 1;
+        return acc;
+      }, {});
+
+      // Extracting the data for the chart
+      const categories = Object.keys(aggregatedData);
+      const timeSpent = categories.map(page => aggregatedData[page].timeSpent / 1000);
+      const visits = categories.map(page => aggregatedData[page].visits);
+      pageActivityChart.updateOptions({
         series: [{
-          data: customers.map(customer => customer.count),
-          name: 'Assessment Count'
+          name: 'Time Spent',
+          type: 'column',
+          data: timeSpent
+        }, {
+          name: 'Total Visits',
+          type: 'line',
+          data: visits
         }],
-        xaxis: {
-          categories: customers.map(customer => customer.customer)
+        title: {
+          text: 'Page Activity'
         },
+        labels: categories,
+        yaxis: [{
+          title: {
+            text: 'Time Spent (s)'
+          }
+        }, {
+          opposite: true,
+          title: {
+            text: 'Total Visits'
+          }
+        }]
       });
     }
-    // Render Top Customers Chart End //
+    // Render Page Activity Chart End //
 
     $('#applyCustomRange').on('click', function(event) {
       chartTimeFilter();
@@ -571,7 +640,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
       if ($(event.currentTarget).data('granularity') == 'custom') {
         $('#customDateRangeModal').modal('show');
       } else {
-        updateAssessmentsChart($(event.currentTarget).data('granularity'),appliedFilters);
+        updateVisitorsChart($(event.currentTarget).data('granularity'),appliedFilters);
         updateRecentAssessments($(event.currentTarget).data('granularity'),appliedFilters);
       }
       $('.granularity-title').text($(event.currentTarget).text());
@@ -583,10 +652,10 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
       // Reset Applied Filters
       resetAppliedFilters();
       // Reset Charts
-      realmsChart = resetPieChart(realmsChart,donutChartOptions);
-      typesChart = resetPieChart(typesChart,donutChartOptions);
-      topApiUsersChart = resetPieChart(topApiUsersChart,horizontalBarChartOptions);
-      topCustomersChart = resetPieChart(topCustomersChart,horizontalBarChartOptions);
+      osTypesChart = resetPieChart(osTypesChart,donutChartOptions);
+      browserTypesChart = resetPieChart(browserTypesChart,donutChartOptions);
+      topPagesChart = resetPieChart(topPagesChart,horizontalBarChartOptions);
+      pageActivityChart = resetPieChart(pageActivityChart,lineColumnChartOptions);
       chartTimeFilter();
     })
 
@@ -594,17 +663,17 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
     function chartFilter(event = null,el = null, value = null) {
       var parentElementId = $(el).attr('id');
       switch(parentElementId) {
-        case 'assessmentTypesChart':
-          appliedFilters['type'] = value;
+        case 'browserTypesChart':
+          appliedFilters['browser'] = value;
           break;
-        case 'assessmentRealmsChart':
-          appliedFilters['realm'] = value;
+        case 'osTypesChart':
+          appliedFilters['os'] = value;
           break;
-        case 'topUsersChart':
-          appliedFilters['user'] = value;
+        case 'topPagesChart':
+          appliedFilters['page'] = value;
           break;
-        case 'topCustomersChart':
-          appliedFilters['customer'] = value;
+        case 'pageActivityChart':
+          // appliedFilters['customer'] = value;
           break;
       }
       chartTimeFilter();
@@ -621,10 +690,10 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
         const reportingStartAndEndDate = $('#reportingStartAndEndDate')[0].value.split(" to ");
         const startDateTime = (new Date(reportingStartAndEndDate[0])).toISOString();
         const endDateTime = (new Date(reportingStartAndEndDate[1])).toISOString();
-        updateAssessmentsChart($('#granularityBtn').attr('data-granularity'),appliedFilters,startDateTime,endDateTime);
+        updateVisitorsChart($('#granularityBtn').attr('data-granularity'),appliedFilters,startDateTime,endDateTime);
         updateRecentAssessments($('#granularityBtn').attr('data-granularity'),appliedFilters,startDateTime,endDateTime);
       } else {
-        updateAssessmentsChart($('#granularityBtn').attr('data-granularity'),appliedFilters);
+        updateVisitorsChart($('#granularityBtn').attr('data-granularity'),appliedFilters);
         updateRecentAssessments($('#granularityBtn').attr('data-granularity'),appliedFilters);
       }
     }
@@ -639,7 +708,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
 
     // Initial render
     resetAppliedFilters();
-    updateAssessmentsChart('last30Days',appliedFilters);
+    updateVisitorsChart('last30Days',appliedFilters);
     updateSummaryValues();
     updateRecentAssessments('last30Days',appliedFilters);
   });
