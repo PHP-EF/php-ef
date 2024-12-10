@@ -13,7 +13,7 @@ if (!($_REQUEST['f'])) {
     switch ($_REQUEST['f']) {
         case 't':
             $ib->reporting->track(json_decode(file_get_contents('php://input'), true),$ib->auth->getAuth());
-            // http_response_code(201);
+            http_response_code(201);
             break;
         case 'login':
             echo json_encode($ib->auth->login($_POST['un'],$_POST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);

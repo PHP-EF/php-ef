@@ -166,7 +166,6 @@ async function heartBeat() {
       while (true) {
 	      let response2 = await fetch('/api?f=heartbeat', {cache: "no-cache"});
         if (response2.status == "301") {
-      	  console.log("Session timed out.");
           window.location.href = "/login.php?redirect_uri="+window.location.href.replace("#","?");
 	      }
 	      await delay(10000);
@@ -491,6 +490,9 @@ const trackingConfig = {
       contentType: "application/json; charset=utf-8",
       dataType: "json",
       error: function(xhr, status, error) {
+        console.error("Error Status: " + status);
+        console.error("Error Thrown: " + error);
+        console.error("Response Text: " + xhr.responseText);
         toast("API Error","","Unable to submit tracking data.","danger","3000");
       }
     })
@@ -582,53 +584,61 @@ if (!tId) {
   setCookie('tId', tId, 365); // Cookie expires in 1 year
 }
 
+// Function to send data using sendBeacon
+function sendTrackingData(data) {
+  const url = '/api?f=t';
+  const payload = JSON.stringify(data);
+  const blob = new Blob([payload], { type: 'application/json; charset=utf-8' });
+  navigator.sendBeacon(url, blob);
+}
+
 // Tracking object
 const userTracking = {
   data: {
-      mouseMovements: [],
-      clicks: [],
-      startTime: Date.now(),
-      endTime: null,
-      currentPage: window.location.href,
-      browserInfo: getBrowserInfo(),
-      urlComponents: splitUrl(window.location.href),
-      pageDetails: splitPathname(window.location.pathname),
-      tId: tId
+    mouseMovements: [],
+    clicks: [],
+    startTime: Date.now(),
+    endTime: null,
+    currentPage: window.location.href,
+    browserInfo: getBrowserInfo(),
+    urlComponents: splitUrl(window.location.href),
+    pageDetails: splitPathname(window.location.pathname),
+    tId: tId
   },
   init: function(config) {
-      if (config.mouseMovement) {
-          document.addEventListener('mousemove', this.trackMouseMovement.bind(this));
-      }
-      if (config.clicks) {
-          document.addEventListener('click', this.trackClick.bind(this));
-      }
-      if (config.timeOnPage) {
-          window.addEventListener('beforeunload', this.trackTimeOnPage.bind(this));
-      }
+    if (config.mouseMovement) {
+      document.addEventListener('mousemove', this.trackMouseMovement.bind(this));
+    }
+    if (config.clicks) {
+      document.addEventListener('click', this.trackClick.bind(this));
+    }
+    if (config.timeOnPage) {
+      window.addEventListener('beforeunload', this.trackTimeOnPage.bind(this));
+    }
   },
   trackMouseMovement: function(event) {
-      this.data.mouseMovements.push({ x: event.clientX, y: event.clientY, time: Date.now() });
+    this.data.mouseMovements.push({ x: event.clientX, y: event.clientY, time: Date.now() });
   },
   trackClick: function(event) {
-      this.data.clicks.push({ x: event.clientX, y: event.clientY, time: Date.now(), element: event.target.tagName });
+    this.data.clicks.push({ x: event.clientX, y: event.clientY, time: Date.now(), element: event.target.tagName });
   },
   trackTimeOnPage: function() {
-      this.data.endTime = Date.now();
-      this.processData();
+    this.data.endTime = Date.now();
+    this.processData();
   },
   processData: function() {
-      const timeSpent = this.data.endTime - this.data.startTime;
-      const result = {
-          mouseMovements: this.data.mouseMovements,
-          clicks: this.data.clicks,
-          timeSpent: timeSpent,
-          currentPage: this.data.currentPage,
-          browserInfo: this.data.browserInfo,
-          urlComponents: this.data.urlComponents,
-          pageDetails: this.data.pageDetails,
-          tId: this.data.tId
-      };
-      trackingConfig.processData(result);
+    const timeSpent = this.data.endTime - this.data.startTime;
+    const result = {
+      mouseMovements: this.data.mouseMovements,
+      clicks: this.data.clicks,
+      timeSpent: timeSpent,
+      currentPage: this.data.currentPage,
+      browserInfo: this.data.browserInfo,
+      urlComponents: this.data.urlComponents,
+      pageDetails: this.data.pageDetails,
+      tId: this.data.tId
+    };
+    sendTrackingData(result);
   }
 };
 
