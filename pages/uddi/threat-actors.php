@@ -41,7 +41,7 @@
                       <input type="text" id="assessmentStartAndEndDate" placeholder="Start & End Date/Time">
                   </div>
                   <div class="col-md-2 actions">
-                    <button class="btn btn-success" id="Generate">Generate</button>
+                    <button class="btn btn-success" id="Actors">Get Actors</button>
                   </div>
                 </div>
                 <div class="row mt-3">
@@ -294,7 +294,7 @@
     }
     $.post( "/api?f=getThreatActors", postArr).done(function( data, status ) {
       if (data['Status'] == 'Error') {
-        toast(data['Status'],"",data['Error'],"danger","30000");
+        toast(data['Status'],"",data['Message'],"danger","30000");
         hideLoading(timer);
       } else if (data['error']) {
         toast('Error',"",data['error'][0]['message'],"danger","30000");

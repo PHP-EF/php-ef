@@ -3,7 +3,6 @@
 $SkipCSS = true;
 require_once(__DIR__.'/../inc/inc.php');
 header('Content-Type: application/json; charset=utf-8');
-
 if (!($_REQUEST['f'])) {
     echo json_encode(array(
         'Error' => 'Function not specified.',
@@ -12,6 +11,10 @@ if (!($_REQUEST['f'])) {
     die();
 } else {
     switch ($_REQUEST['f']) {
+        case 't':
+            $ib->reporting->track(json_decode(file_get_contents('php://input'), true),$ib->auth->getAuth());
+            // http_response_code(201);
+            break;
         case 'login':
             echo json_encode($ib->auth->login($_POST['un'],$_POST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
             break;
@@ -460,7 +463,7 @@ if (!($_REQUEST['f'])) {
         case 'downloadSecurityReport':
             if ($ib->auth->checkAccess(null,"B1-SECURITY-ASSESSMENT")) {
                 if (checkRequestMethod('GET')) {
-                    $ib->logging->writeLog("SecurityAssessment","Downloaded security report","info");
+                    $ib->logging->writeLog("Assessment","Downloaded security assessment report","info");
                     if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
                         $id = $_REQUEST['id'];
                         $File = __DIR__.'/../files/reports/report-'.$id.'.pptx';
@@ -652,15 +655,20 @@ if (!($_REQUEST['f'])) {
                 if (checkRequestMethod('POST')) {
                     if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
                         $UserInfo = GetCSPCurrentUser();
-                        if (isset($UserInfo)) {
+                        if (isset($UserInfo->result->name)) {
                             $ib->logging->writeLog("ThreatActors",$UserInfo->result->name." queried list of Threat Actors","info");
-                        }
-                        $Actors = GetB1ThreatActors($_POST['StartDateTime'],$_POST['EndDateTime']);
-                        if (!isset($Actors->Error)) {
-                            echo json_encode(GetB1ThreatActorsById3($Actors,$_POST['unnamed'],$_POST['substring']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                            $Actors = GetB1ThreatActors($_POST['StartDateTime'],$_POST['EndDateTime']);
+                            if (!isset($Actors->Error)) {
+                                echo json_encode(GetB1ThreatActorsById3($Actors,$_POST['unnamed'],$_POST['substring']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+                            } else {
+                                echo json_encode($Actors);
+                            };
                         } else {
-                            echo json_encode($Actors);
-                        };
+                            echo json_encode(array(
+                                'Status' => 'Error',
+                                'Message' => 'Invalid API Key'
+                            ));
+                        }
                     }
                 }
             }
@@ -849,6 +857,7 @@ if (!($_REQUEST['f'])) {
                     } else {
                         $End = null;
                     }
+                    $ib->logging->writeLog("Reporting","Queried Assessment Reports","info");
                     echo json_encode($ib->reporting->getAssessmentReports($_REQUEST['granularity'],$_REQUEST['type'],$_REQUEST['realm'],$_REQUEST['user'],$_REQUEST['customer'],$Start,$End),JSON_PRETTY_PRINT);
                 }
             }
@@ -866,6 +875,7 @@ if (!($_REQUEST['f'])) {
                     } else {
                         $End = null;
                     }
+                    $ib->logging->writeLog("Reporting","Queried Assessment Report Stats","debug");
                     echo json_encode($ib->reporting->getAssessmentReportsStats($_REQUEST['granularity'],$_REQUEST['type'],$_REQUEST['realm'],$_REQUEST['user'],$_REQUEST['customer'],$Start,$End),JSON_PRETTY_PRINT);
                 }
             }
@@ -873,7 +883,39 @@ if (!($_REQUEST['f'])) {
         case 'getAssessmentReportsSummary':
             if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS")) {
                 if (checkRequestMethod('GET')) {
+                    $ib->logging->writeLog("Reporting","Queried Assessment Report Summary","debug");
                     echo json_encode($ib->reporting->getAssessmentReportsSummary(),JSON_PRETTY_PRINT);
+                }
+            }
+            break;
+        case 'getTrackingRecords':
+            if ($ib->auth->checkAccess(null,"REPORT-TRACKING")) {
+                if (checkRequestMethod('GET')) {
+                    if (isset($_REQUEST['granularity'])) {
+                        if (isset($_REQUEST['filters'])) { $Filters = $_REQUEST['filters']; } else { $Filters = null; }
+                        if (isset($_REQUEST['start'])) { $Start = $_REQUEST['start']; } else { $Start = null; }
+                        if (isset($_REQUEST['end'])) { $End = $_REQUEST['end']; } else { $End = null; }
+                        $ib->logging->writeLog("Reporting","Queried Web Tracking","info");
+                        echo json_encode($ib->reporting->getTrackingRecords($_REQUEST['granularity'],$Filters,$Start,$End),JSON_PRETTY_PRINT);
+                    }
+                }
+            }
+            break;
+        case 'getTrackingStats':
+            if ($ib->auth->checkAccess(null,"REPORT-TRACKING")) {
+                if (checkRequestMethod('GET')) {
+                    if (isset($_REQUEST['granularity']) AND isset($_REQUEST['filters']) AND isset($_REQUEST['start']) AND isset($_REQUEST['end'])) {
+                        $ib->logging->writeLog("Reporting","Queried Web Tracking Summary","debug");
+                        echo json_encode($ib->reporting->getTrackingStats($_REQUEST['granularity'],$_REQUEST['filters'],$_REQUEST['start'],$_REQUEST['end']),JSON_PRETTY_PRINT);
+                    }
+                }
+            }
+            break;
+        case 'getTrackingSummary':
+            if ($ib->auth->checkAccess(null,"REPORT-TRACKING")) {
+                if (checkRequestMethod('GET')) {
+                    $ib->logging->writeLog("Reporting","Queried Web Tracking Summary","debug");
+                    echo json_encode($ib->reporting->getTrackingSummary(),JSON_PRETTY_PRINT);
                 }
             }
             break;
