@@ -140,7 +140,7 @@ if ($ib->auth->checkAccess(null,"REPORT-TRACKING") == false) {
         <div class="row">
           <!-- Top Pages -->
           <div class="col-lg-6 col-12">
-            <div class="card top-pages bar-chart-card overflow-auto">
+            <div class="card top-pages bar-chart-card">
               <div class="card-body pb-0">
                 <h5 class="card-title">Top 10 Pages | <span class="granularity-title">Last 30 Days</span></h5>
                 <div id="topPagesChart" class="bar"></div>
@@ -149,7 +149,7 @@ if ($ib->auth->checkAccess(null,"REPORT-TRACKING") == false) {
           </div><!-- End Top Pages -->
           <!-- Page Activity -->
           <div class="col-lg-6 col-12">
-            <div class="card top-customers bar-chart-card overflow-auto">
+            <div class="card top-customers bar-chart-card">
               <div class="card-body pb-0">
                 <h5 class="card-title">Page Activity | <span class="granularity-title">Last 30 Days</span></h5>
                 <div id="pageActivityChart" class="bar"></div>
@@ -160,7 +160,7 @@ if ($ib->auth->checkAccess(null,"REPORT-TRACKING") == false) {
         <div class="row">
           <!-- Visitors List -->
           <div class="col-12">
-            <div class="card recent-assessments overflow-auto">
+            <div class="card recent-assessments">
               <div class="card-body">
                 <h5 class="card-title">Visitors List | <span class="granularity-title">Last 30 Days</span></h5>
                 <table id="assessmentTable" class="table-striped"></table>
