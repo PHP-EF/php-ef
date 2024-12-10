@@ -1,3 +1,7 @@
+## v0.6.1
+- Enable filter support for web tracking dashboard
+- Minor cleanup and data conversion
+
 ## v0.6.0
 - Add additional logging
 - Add additional reporting

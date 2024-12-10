@@ -207,16 +207,6 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    if ($('.dark-theme').length > 0) {
-      var theme = 'dark';
-    } else {
-      var theme = 'light';
-    }
-
-    // Colour Palettes
-    var barChartColorPalette = ['#FDDD00','#E1DD1A','#C5DE33','#A9DE4D','#8DDF66','#70DF80','#54E099','#38E0B3','#1CE1CC','#00E1E6'];
-    var pieChartColorPalette = ['#0fbe4d','#94ce36','#00F9FF','#00d69b','#00F9FF'];
-
     // Declare a global variable to store active filters
     var appliedFilters = {};
     function resetAppliedFilters() {
@@ -245,7 +235,7 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
     };
 
     const updateRecentAssessments = (granularity, appliedFilters, start = null, end = null) => {
-      $.get( "/api?f=getAssessmentReports&granularity="+granularity+"&type="+appliedFilters['type']+"&realm="+appliedFilters['realm']+"&user="+appliedFilters['user']+"&customer="+appliedFilters['customer']+"&start="+start+"&end="+end).done(function( data, status ) {
+      $.get( "/api?f=getAssessmentReports&granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( data, status ) {
         $('#assessmentTable').bootstrapTable('destroy');
         $('#assessmentTable').bootstrapTable({
           data: data,
@@ -317,120 +307,13 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
         updateAssessmentRealms(data);
       });
     }
-
-    // Define Area Chart Options
-    const areaChartOptions = {
-      tooltip: {
-        theme: theme
-      },
-      chart: {
-        height: 350,
-        type: 'area',
-        toolbar: {
-          show: false
-        },
-      },
-      markers: {
-        size: 4
-      },
-      colors: ['#4154f1', '#2eca6a', '#ff771d'],
-      fill: {
-        type: "gradient",
-        gradient: {
-          shadeIntensity: 1,
-          opacityFrom: 0.3,
-          opacityTo: 0.4,
-          stops: [0, 90, 100]
-        }
-      },
-      noData: {
-        text: 'Loading...'
-      },
-      dataLabels: {
-        enabled: false
-      },
-      stroke: {
-        curve: 'smooth',
-        width: 2
-      },
-      series: [],
-      xaxis: {
-          categories: []
-      }
-    };
-
-    // Define Donut Chart Options
-    const donutChartOptions = {
-        tooltip: {
-          theme: theme
-        },
-        chart: {
-          type: 'donut',
-          height: '350px',
-          events: {
-            dataPointSelection: (event, chartContext, config) => {
-              chartFilter(event,chartContext.el,config.w.config.labels[config.dataPointIndex]);
-            }
-          },
-        },
-        plotOptions: {
-          pie: {}
-        },
-        noData: {
-          text: 'Loading...'
-        },
-        legend: {
-          position: 'bottom',
-          offsetY: 20,
-          itemMargin: {
-            horizontal: 5
-          },
-        },
-        dataLabels: {
-          enabled: false
-        },
-        series: [],
-        labels: [],
-        colors: pieChartColorPalette
-    };
-
-    // Define Horizontal Bar Chart Options
-    const horizontalBarChartOptions = {
-      tooltip: {
-        theme: theme
-      },
-      chart: {
-        type: 'bar',
-        height: 350,
-        events: {
-          dataPointSelection: (event, chartContext, config) => {
-            chartFilter(event,chartContext.el,chartContext.w.config.xaxis.categories[config.dataPointIndex]);
-          }
-        },
-      },
-      plotOptions: {
-        bar: {
-          horizontal: true,
-          distributed: true // This enables different colors for each bar
-        }
-      },
-      noData: {
-        text: 'Loading...'
-      },
-      dataLabels: {
-        enabled: false
-      },
-      series: [],
-      colors: barChartColorPalette
-    };
-
     // Render Assessments Area Chart
     const assessmentsChart = new ApexCharts(document.querySelector("#assessmentsChart"), areaChartOptions);
     assessmentsChart.render();
 
     // Define Assessments Area Chart Update Function
     const updateAssessmentsChart = (granularity, appliedFilters, start = null, end = null) => {
-      $.get( "/api?f=getAssessmentReportsStats&granularity="+granularity+"&type="+appliedFilters['type']+"&realm="+appliedFilters['realm']+"&user="+appliedFilters['user']+"&customer="+appliedFilters['customer']+"&start="+start+"&end="+end).done(function( data, status ) {
+      $.get( "/api?f=getAssessmentReportsStats&granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( data, status ) {
         // Extract all unique dates
         const categoriesSet = new Set();
         for (const key in data) {
@@ -474,10 +357,16 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
       typesChart.updateOptions({
         series: types.map(type => type.count),
         labels: types.map(type => type.type),
+        chart: {
+          events: {
+            dataPointSelection: (event, chartContext, config) => {
+              chartFilter(event,chartContext.el,config.w.config.labels[config.dataPointIndex]);
+            }
+          }
+        }
       });
     }
     // Render Types Chart End //
-
 
     // Render Realms Chart
     var realmsChart = new ApexCharts(document.querySelector("#assessmentRealmsChart"), donutChartOptions);
@@ -493,7 +382,14 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
       const realms = Object.keys(countByRealm).map(realm => ({ realm: realm, count: countByRealm[realm] }));
       realmsChart.updateOptions({
         series: realms.map(realm => realm.count),
-        labels: realms.map(realm => realm.realm)
+        labels: realms.map(realm => realm.realm),
+        chart: {
+          events: {
+            dataPointSelection: (event, chartContext, config) => {
+              chartFilter(event,chartContext.el,config.w.config.labels[config.dataPointIndex]);
+            }
+          }
+        }
       });
     }
     // Render Realms Chart End //
@@ -526,6 +422,13 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
         xaxis: {
           categories: apiUsers.map(user => user.apiuser)
         },
+        chart: {
+          events: {
+            dataPointSelection: (event, chartContext, config) => {
+              chartFilter(event,chartContext.el,chartContext.w.config.xaxis.categories[config.dataPointIndex]);
+            }
+          }
+        }
       });
     }
     // Render Top API Users Chart End //
@@ -557,6 +460,13 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
         xaxis: {
           categories: customers.map(customer => customer.customer)
         },
+        chart: {
+          events: {
+            dataPointSelection: (event, chartContext, config) => {
+              chartFilter(event,chartContext.el,chartContext.w.config.xaxis.categories[config.dataPointIndex]);
+            }
+          }
+        }
       });
     }
     // Render Top Customers Chart End //
@@ -583,10 +493,10 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
       // Reset Applied Filters
       resetAppliedFilters();
       // Reset Charts
-      realmsChart = resetPieChart(realmsChart,donutChartOptions);
-      typesChart = resetPieChart(typesChart,donutChartOptions);
-      topApiUsersChart = resetPieChart(topApiUsersChart,horizontalBarChartOptions);
-      topCustomersChart = resetPieChart(topCustomersChart,horizontalBarChartOptions);
+      realmsChart = resetChart(realmsChart,donutChartOptions);
+      typesChart = resetChart(typesChart,donutChartOptions);
+      topApiUsersChart = resetChart(topApiUsersChart,horizontalBarChartOptions);
+      topCustomersChart = resetChart(topCustomersChart,horizontalBarChartOptions);
       chartTimeFilter();
     })
 
@@ -627,14 +537,6 @@ if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
         updateAssessmentsChart($('#granularityBtn').attr('data-granularity'),appliedFilters);
         updateRecentAssessments($('#granularityBtn').attr('data-granularity'),appliedFilters);
       }
-    }
-
-    function resetPieChart(chart,options) {
-      var querySelector = chart.ctx.el.id;
-      chart.destroy();
-      chart = new ApexCharts(document.querySelector("#"+querySelector), options);
-      chart.render();
-      return chart;
     }
 
     // Initial render

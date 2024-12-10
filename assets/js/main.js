@@ -473,6 +473,150 @@ $( document ).ready(function() {
 });
 
 
+// ** Define ApexCharts Options ** //
+// Chart Theme
+if (getCookie('theme')) {
+  var theme = getCookie('theme');
+} else {
+  var theme = 'light';
+}
+
+// Colour Palettes
+var barChartColorPalette = ['#FDDD00','#E1DD1A','#C5DE33','#A9DE4D','#8DDF66','#70DF80','#54E099','#38E0B3','#1CE1CC','#00E1E6'];
+var pieChartColorPalette = ['#0fbe4d','#94ce36','#00F9FF','#00d69b','#00F9FF'];
+
+// Define Area Chart Options
+const areaChartOptions = {
+  tooltip: {
+    theme: theme
+  },
+  chart: {
+    height: 350,
+    type: 'area',
+    toolbar: {
+      show: false
+    },
+  },
+  markers: {
+    size: 4
+  },
+  colors: ['#4154f1', '#2eca6a', '#ff771d'],
+  fill: {
+    type: "gradient",
+    gradient: {
+      shadeIntensity: 1,
+      opacityFrom: 0.3,
+      opacityTo: 0.4,
+      stops: [0, 90, 100]
+    }
+  },
+  noData: {
+    text: 'Loading...'
+  },
+  dataLabels: {
+    enabled: false
+  },
+  stroke: {
+    curve: 'smooth',
+    width: 2
+  },
+  series: [],
+  xaxis: {
+      categories: []
+  }
+};
+
+// Define Donut Chart Options
+const donutChartOptions = {
+    tooltip: {
+      theme: theme
+    },
+    chart: {
+      type: 'donut',
+      height: '350px'
+    },
+    plotOptions: {
+      pie: {}
+    },
+    noData: {
+      text: 'Loading...'
+    },
+    legend: {
+      position: 'bottom',
+      offsetY: 20,
+      itemMargin: {
+        horizontal: 5
+      },
+    },
+    dataLabels: {
+      enabled: false
+    },
+    series: [],
+    labels: [],
+    colors: pieChartColorPalette
+};
+
+// Define Horizontal Bar Chart Options
+const horizontalBarChartOptions = {
+  tooltip: {
+    theme: theme
+  },
+  chart: {
+    type: 'bar',
+    height: 350,
+  },
+  plotOptions: {
+    bar: {
+      horizontal: true,
+      distributed: true // This enables different colors for each bar
+    }
+  },
+  noData: {
+    text: 'Loading...'
+  },
+  dataLabels: {
+    enabled: false
+  },
+  series: [],
+  colors: barChartColorPalette
+};
+
+// Define Line Column Chart Options
+const lineColumnChartOptions = {
+  tooltip: {
+    theme: theme
+  },
+  chart: {
+      type: 'line',
+      height: 350
+  },
+  series: [],
+  noData: {
+    text: 'Loading...'
+  },
+  stroke: {
+      width: [0, 4]
+  },
+  dataLabels: {
+      enabled: true,
+      enabledOnSeries: [1]
+  },
+  labels: [],
+  xaxis: {
+      type: 'category'
+  },
+  colors: barChartColorPalette
+};
+
+function resetChart(chart,options) {
+  var querySelector = chart.ctx.el.id;
+  chart.destroy();
+  chart = new ApexCharts(document.querySelector("#"+querySelector), options);
+  chart.render();
+  return chart;
+}
+
+// ** End Define ApexCharts Options ** //
 
 // ** Tracking ** //
 // Configuration object
@@ -547,13 +691,37 @@ function splitUrl(url) {
 
 // Function to split pathname into Page Category and Page Name
 function splitPathname(pathname) {
-  const match = pathname.match(/^\/pages\/([^\/]+)\/([^\/]+)/);
-  if (match) {
-      return {
-          pageCategory: match[1],
-          pageName: match[2]
-      };
+  if (pathname === '/') {
+    return {
+      pageCategory: 'home',
+      pageName: 'home'
+    };
   }
+
+  const loginMatch = pathname.match(/^\/([^\/]+)$/);
+  if (loginMatch) {
+    return {
+      pageCategory: 'home',
+      pageName: loginMatch[1]
+    };
+  }
+
+  const singlePageMatch = pathname.match(/^\/pages\/([^\/]+)$/);
+  if (singlePageMatch) {
+    return {
+      pageCategory: 'home',
+      pageName: singlePageMatch[1]
+    };
+  }
+
+  const doublePageMatch = pathname.match(/^\/pages\/([^\/]+)\/([^\/]+)$/);
+  if (doublePageMatch) {
+    return {
+      pageCategory: doublePageMatch[1],
+      pageName: doublePageMatch[2]
+    };
+  }
+
   return null;
 }
 

@@ -847,36 +847,26 @@ if (!($_REQUEST['f'])) {
         case 'getAssessmentReports':
             if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS")) {
                 if (checkRequestMethod('GET')) {
-                    if (isset($_REQUEST['start'])) {
-                        $Start = $_REQUEST['start'];
-                    } else {
-                        $Start = null;
+                    if (isset($_REQUEST['granularity']) && isset($_REQUEST['filters'])) {
+                        $Filters = $_REQUEST['filters'];
+                        if (isset($_REQUEST['start'])) { $Start = $_REQUEST['start']; } else { $Start = null; }
+                        if (isset($_REQUEST['end'])) { $End = $_REQUEST['end']; } else { $End = null; }
+                        $ib->logging->writeLog("Reporting","Queried Assessment Reports","info");
+                        echo json_encode($ib->reporting->getAssessmentReports($_REQUEST['granularity'],json_decode($Filters,true),$Start,$End),JSON_PRETTY_PRINT);
                     }
-                    if (isset($_REQUEST['end'])) {
-                        $End = $_REQUEST['end'];
-                    } else {
-                        $End = null;
-                    }
-                    $ib->logging->writeLog("Reporting","Queried Assessment Reports","info");
-                    echo json_encode($ib->reporting->getAssessmentReports($_REQUEST['granularity'],$_REQUEST['type'],$_REQUEST['realm'],$_REQUEST['user'],$_REQUEST['customer'],$Start,$End),JSON_PRETTY_PRINT);
                 }
             }
             break;
         case 'getAssessmentReportsStats':
             if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS")) {
                 if (checkRequestMethod('GET')) {
-                    if (isset($_REQUEST['start'])) {
-                        $Start = $_REQUEST['start'];
-                    } else {
-                        $Start = null;
+                    if (isset($_REQUEST['granularity']) && isset($_REQUEST['filters'])) {
+                        $Filters = $_REQUEST['filters'];
+                        if (isset($_REQUEST['start'])) { $Start = $_REQUEST['start']; } else { $Start = null; }
+                        if (isset($_REQUEST['end'])) { $End = $_REQUEST['end']; } else { $End = null; }
+                        $ib->logging->writeLog("Reporting","Queried Assessment Report Stats","debug");
+                        echo json_encode($ib->reporting->getAssessmentReportsStats($_REQUEST['granularity'],json_decode($Filters,true),$Start,$End),JSON_PRETTY_PRINT);
                     }
-                    if (isset($_REQUEST['end'])) {
-                        $End = $_REQUEST['end'];
-                    } else {
-                        $End = null;
-                    }
-                    $ib->logging->writeLog("Reporting","Queried Assessment Report Stats","debug");
-                    echo json_encode($ib->reporting->getAssessmentReportsStats($_REQUEST['granularity'],$_REQUEST['type'],$_REQUEST['realm'],$_REQUEST['user'],$_REQUEST['customer'],$Start,$End),JSON_PRETTY_PRINT);
                 }
             }
             break;
@@ -891,12 +881,12 @@ if (!($_REQUEST['f'])) {
         case 'getTrackingRecords':
             if ($ib->auth->checkAccess(null,"REPORT-TRACKING")) {
                 if (checkRequestMethod('GET')) {
-                    if (isset($_REQUEST['granularity'])) {
-                        if (isset($_REQUEST['filters'])) { $Filters = $_REQUEST['filters']; } else { $Filters = null; }
+                    if (isset($_REQUEST['granularity']) && isset($_REQUEST['filters'])) {
+                        $Filters = $_REQUEST['filters'];
                         if (isset($_REQUEST['start'])) { $Start = $_REQUEST['start']; } else { $Start = null; }
                         if (isset($_REQUEST['end'])) { $End = $_REQUEST['end']; } else { $End = null; }
                         $ib->logging->writeLog("Reporting","Queried Web Tracking","info");
-                        echo json_encode($ib->reporting->getTrackingRecords($_REQUEST['granularity'],$Filters,$Start,$End),JSON_PRETTY_PRINT);
+                        echo json_encode($ib->reporting->getTrackingRecords($_REQUEST['granularity'],json_decode($Filters,true),$Start,$End),JSON_PRETTY_PRINT);
                     }
                 }
             }
@@ -904,9 +894,12 @@ if (!($_REQUEST['f'])) {
         case 'getTrackingStats':
             if ($ib->auth->checkAccess(null,"REPORT-TRACKING")) {
                 if (checkRequestMethod('GET')) {
-                    if (isset($_REQUEST['granularity']) AND isset($_REQUEST['filters']) AND isset($_REQUEST['start']) AND isset($_REQUEST['end'])) {
+                    if (isset($_REQUEST['granularity']) && isset($_REQUEST['filters'])) {
+                        $Filters = $_REQUEST['filters'];
+                        if (isset($_REQUEST['start'])) { $Start = $_REQUEST['start']; } else { $Start = null; }
+                        if (isset($_REQUEST['end'])) { $End = $_REQUEST['end']; } else { $End = null; }
                         $ib->logging->writeLog("Reporting","Queried Web Tracking Summary","debug");
-                        echo json_encode($ib->reporting->getTrackingStats($_REQUEST['granularity'],$_REQUEST['filters'],$_REQUEST['start'],$_REQUEST['end']),JSON_PRETTY_PRINT);
+                        echo json_encode($ib->reporting->getTrackingStats($_REQUEST['granularity'],json_decode($Filters,true),$Start,$End),JSON_PRETTY_PRINT);
                     }
                 }
             }
