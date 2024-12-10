@@ -263,6 +263,10 @@ if ($ib->auth->checkAccess(null,"REPORT-TRACKING") == false) {
             sortable: true,
             visible: false
           },{
+            field: 'username',
+            title: 'Username',
+            sortable: true
+          },{
             field: 'scheme',
             title: 'Scheme',
             sortable: true,
