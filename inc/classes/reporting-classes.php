@@ -84,7 +84,7 @@ class Reporting {
     if ($auth['Authenticated']) {
       $execute[':username'] = $auth['Username'];
     } else {
-      $execute[':username'] = 'unauthenticated';
+      $execute[':username'] = 'None';
     }
     $valueArray = array_map(function($value) {
       return ':' . $value;
