@@ -178,6 +178,7 @@ async function heartBeat() {
 
 $('.preventDefault').click(function(event){
   event.preventDefault();
+  console.log(event);
 });
 
 window.addEventListener("load", function() {
