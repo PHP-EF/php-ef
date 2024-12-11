@@ -1,6 +1,6 @@
 <?php
 require_once(__DIR__.'/../../inc/inc.php');
-if ($ib->auth->checkAccess(null,"REPORT-TRACKING") == false) {
+if ($ib->rbac->checkAccess("REPORT-TRACKING") == false) {
   die();
 }
 ?>
@@ -230,13 +230,10 @@ if ($ib->auth->checkAccess(null,"REPORT-TRACKING") == false) {
       $.get( "/api?f=getTrackingSummary").done(function( data, status ) {
         const total = data.find(item => item.type === "Total")
         $('#visitsThisDayVal').text(total['count_today']);
-        // $('#customersThisDayVal').text(total['unique_customers_today']+' Customers');
         $('#uniqueVisitorsThisDayVal').text(total['unique_visitors_today']+' Unique Visitors');
-        $('#visitsThisMonthVal').text(total['count_today']);
-        // $('#customersThisMonthVal').text(total['unique_customers_this_month']+' Customers');
+        $('#visitsThisMonthVal').text(total['count_this_month']);
         $('#uniqueVisitorsThisMonthVal').text(total['unique_visitors_this_month']+' Unique Visitors');
-        $('#visitsThisYearVal').text(total['count_today']);
-        // $('#customersThisYearVal').text(total['unique_customers_this_year']+' Customers');
+        $('#visitsThisYearVal').text(total['count_this_year']);
         $('#uniqueVisitorsThisYearVal').text(total['unique_visitors_this_year']+' Unique Visitors');
       });
     };

@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
-  if ($ib->auth->checkAccess(null,"ADMIN-USERS") == false) {
+  if ($ib->rbac->checkAccess("ADMIN-USERS") == false) {
     die();
   }
 ?>
@@ -201,20 +201,10 @@
   }
 
   function groupsFormatter(value, row, index) {
-    var html = "";
-    if (groupinfo != null) {
-      $(row.groups).each(function (group) {
-        for (groupi in groupinfo ) {
-          if (row.groups[group] === groupinfo[groupi]['id']) {
-            html += '<span class="badge bg-info">'+groupinfo[groupi]['Group']+'</span>&nbsp;';
-          }
-        }
-      });
-    } else {
-      $(row.groups).each(function (group) {
-        html += '<span class="badge bg-info">'+row.groups[group]+'</span>&nbsp;';
-      });
-    }
+    var html = ''
+    $(row.groups).each(function (group) {
+      html += '<span class="badge bg-info">'+row.groups[group]+'</span>&nbsp;';
+    });
     return html;
   }
 
@@ -277,8 +267,8 @@
               </div>
               <div class="col-auto">
                 <div class="custom-control custom-switch">
-                  <input type="checkbox" class="custom-control-input toggle" id="${groupinfo[key]['id']}">
-                  <label class="custom-control-label" for="${groupinfo[key]['id']}"></label>
+                  <input type="checkbox" class="custom-control-input toggle" id="${groupinfo[key]['Group'].replaceAll(" ", "--")}">
+                  <label class="custom-control-label" for="${groupinfo[key]['Group'].replaceAll(" ", "--")}"></label>
                 </div>
 	            </div>
             </div>
@@ -287,7 +277,7 @@
       var groupsplit = row.groups;
       if (groupsplit[0] != "") {
         for (var group in groupsplit) {
-          $("#"+groupsplit[group]).prop("checked", "true");
+          $("#"+groupsplit[group].replaceAll(" ", "--")).prop("checked", "true");
         }
       }
     });
@@ -296,7 +286,7 @@
   $(document).on('click', '.toggle', function(event) {
     let toggle = $('#'+event.target.id).prop('checked');
     let groups = $('#editModal .toggle:checked').map(function() {
-    return this.id; // or $(this).attr('id');
+      return this.id.replaceAll("--"," ");
     }).get().join(',');
     var postArr = {}
     postArr.id = $('#editUserID').val();

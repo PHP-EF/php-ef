@@ -18,7 +18,7 @@ class TemplateConfig {
           FileName TEXT,
           TemplateName TEXT,
           Description TEXT,
-          ThreatActorSlide INT,
+          ThreatActorSlide INTEGER,
           Created DATE
         )");
     }

@@ -65,7 +65,7 @@ if (!($_REQUEST['f'])) {
             break;
         case 'getUsers':
             if (checkRequestMethod('GET')) {
-                if ($ib->auth->checkAccess(null,"ADMIN-USERS")) {
+                if ($ib->rbac->checkAccess("ADMIN-USERS")) {
                     $users = $ib->auth->getAllUsers();
                     echo json_encode($users,JSON_PRETTY_PRINT);
                 }
@@ -73,7 +73,7 @@ if (!($_REQUEST['f'])) {
             break;
         case 'newUser':
             if (checkRequestMethod('POST')) {
-                if ($ib->auth->checkAccess(null,"ADMIN-USERS")) {
+                if ($ib->rbac->checkAccess("ADMIN-USERS")) {
                     if (isset($_POST['un'])) {
                         $UN = $_POST['un'];
                     } else {
@@ -136,7 +136,7 @@ if (!($_REQUEST['f'])) {
             break;
         case 'setUser':
             if (checkRequestMethod('POST')) {
-                if ($ib->auth->checkAccess(null,"ADMIN-USERS")) {
+                if ($ib->rbac->checkAccess("ADMIN-USERS")) {
                     if (isset($_POST['id'])) {
                         $ID = $_POST['id'];
                     } else {
@@ -183,7 +183,7 @@ if (!($_REQUEST['f'])) {
             break;
         case 'removeUser':
             if (checkRequestMethod('POST')) {
-                if ($ib->auth->checkAccess(null,"ADMIN-USERS")) {
+                if ($ib->rbac->checkAccess("ADMIN-USERS")) {
                     if (isset($_POST['id'])) {
                         $remove = $ib->auth->removeUser($_POST['id']);
                         echo json_encode($remove,JSON_PRETTY_PRINT);
@@ -245,7 +245,7 @@ if (!($_REQUEST['f'])) {
                 $Result = array(
                     "node" => $_REQUEST['node']
                 );
-                if ($ib->auth->checkAccess(null,$_REQUEST['node'])) {
+                if ($ib->rbac->checkAccess($_REQUEST['node'])) {
                     $Result['permitted'] = true;
                 } else {
                     $Result['permitted'] = false;
@@ -254,76 +254,83 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'GetLog':
-            if ($ib->auth->checkAccess(null,"ADMIN-LOGS")) {
+            if ($ib->rbac->checkAccess("ADMIN-LOGS")) {
                 if (isset($_REQUEST['date'])) {
                     $Date = $_REQUEST['date'];
                 } else {
                     $Date = "";
                 }
                 echo json_encode($ib->logging->getLog($Date), JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-            } else {
-                return false;
             }
             break;
         case 'GetRBAC':
-            if ($ib->auth->checkAccess(null,"ADMIN-RBAC")) {
+            if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
                 if (isset($_REQUEST['group'])) {
-                    $Group = $_REQUEST['group'];
+                    $GroupID = $_REQUEST['group'];
                 } else {
-                    $Group = null;
+                    $GroupID = null;
                 }
                 if (isset($_REQUEST['action'])) {
                     $Action = $_REQUEST['action'];
                 } else {
                     $Action = null;
                 }
-                echo json_encode($ib->rbac->getRBAC($Group,$Action), JSON_PRETTY_PRINT);
-            } else {
-                return false;
+                echo json_encode($ib->rbac->getRBAC($GroupID,$Action), JSON_PRETTY_PRINT);
             }
             break;
         case 'SetRBAC':
-            if ($ib->auth->checkAccess(null,"ADMIN-RBAC")) {
+            if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
                 if (isset($_REQUEST['id'])) {
-                    $GroupID = $_REQUEST['id'];
-                } else {
-                    $GroupID = null;
+                    if (isset($_REQUEST['name'])) {
+                        $GroupName = $_REQUEST['name'];
+                    } else {
+                        $GroupName = null;
+                    }
+                    if (isset($_REQUEST['description'])) {
+                        $Description = $_REQUEST['description'];
+                    } else {
+                        $Description = null;
+                    }
+                    if (isset($_REQUEST['key'])) {
+                        $Key = $_REQUEST['key'];
+                    } else {
+                        $Key = null;
+                    }
+                    if (isset($_REQUEST['value'])) {
+                        $Value = $_REQUEST['value'];
+                    } else {
+                        $Value = null;
+                    }
+                    echo json_encode($ib->rbac->setRBAC($_REQUEST['id'],$GroupName,$Description,$Key,$Value), JSON_PRETTY_PRINT);
                 }
+            }
+            break;
+        case 'NewRBAC':
+            if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
                 if (isset($_REQUEST['name'])) {
-                    $GroupName = $_REQUEST['name'];
-                } else {
-                    $GroupName = null;
+                    if (isset($_REQUEST['description'])) {
+                        $Description = $_REQUEST['description'];
+                    } else {
+                        $Description = null;
+                    }
+                    echo json_encode($ib->rbac->newRBAC($_REQUEST['name'],$Description), JSON_PRETTY_PRINT);
                 }
-                if (isset($_REQUEST['description'])) {
-                    $Description = $_REQUEST['description'];
-                } else {
-                    $Description = null;
-                }
-                if (isset($_REQUEST['key'])) {
-                    $Key = $_REQUEST['key'];
-                } else {
-                    $Key = null;
-                }
-                if (isset($_REQUEST['value'])) {
-                    $Value = $_REQUEST['value'];
-                } else {
-                    $Value = null;
-                }
-                 echo json_encode($ib->rbac->setRBAC($GroupID,$GroupName,$Description,$Key,$Value), JSON_PRETTY_PRINT);
             }
             break;
         case 'DeleteRBAC':
-            if ($ib->auth->checkAccess(null,"ADMIN-RBAC")) {
-                if (isset($_REQUEST['group'])) {
-                    $Group = $_REQUEST['group'];
+            if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+                if (isset($_REQUEST['id'])) {
+                    echo json_encode($ib->rbac->deleteRBAC($_REQUEST['id']), JSON_PRETTY_PRINT);
                 } else {
-                    $Group = null;
+                    return array(
+                        'Status' => 'Error',
+                        'Message' => 'Group ID Missing'
+                    );
                 }
-                echo json_encode($ib->rbac->deleteRBAC($Group), JSON_PRETTY_PRINT);
             }
             break;
         case 'GetConfig':
-            if ($ib->auth->checkAccess(null,"ADMIN-CONFIG")) {
+            if ($ib->rbac->checkAccess("ADMIN-CONFIG")) {
                 $config = $ib->config->getConfig();
                 $config['Security']['salt'] = "********";
                 if ($config['SAML']['sp']['privateKey'] != "") {
@@ -336,7 +343,7 @@ if (!($_REQUEST['f'])) {
             break;
         case 'SetConfig':
             if (checkRequestMethod('POST')) {
-                if ($ib->auth->checkAccess(null,"ADMIN-CONFIG")) {
+                if ($ib->rbac->checkAccess("ADMIN-CONFIG")) {
                     $config = $ib->config->getConfig();
                     $config['Security']['salt'] = "********";
                     if ($config['SAML']['sp']['privateKey'] != "") {
@@ -349,8 +356,6 @@ if (!($_REQUEST['f'])) {
                     if (isset($_POST['systemLogRetention'])) { $ib->config->setConfig("System","logretention",$_POST['systemLogRetention']); }
                     if (isset($_POST['systemCURLTimeout'])) { $ib->config->setConfig("System","CURL-Timeout",$_POST['systemCURLTimeout']); }
                     if (isset($_POST['systemCURLTimeoutConnect'])) { $ib->config->setConfig("System","CURL-ConnectTimeout",$_POST['systemCURLTimeoutConnect']); }
-                    if (isset($_POST['systemRBACFile'])) { $ib->config->setConfig("System","rbacjson",$_POST['systemRBACFile']); }
-                    if (isset($_POST['systemRBACInfoFile'])) { $ib->config->setConfig("System","rbacinfo",$_POST['systemRBACInfoFile']); }
                     if (isset($_POST['securitySalt'])) { $ib->config->setConfig("Security","salt",$_POST['securitySalt']); }
 
                     // SAML Stuff //
@@ -449,7 +454,7 @@ if (!($_REQUEST['f'])) {
             echo \Ramsey\Uuid\Uuid::uuid4();
             break;
         case 'createSecurityReport':
-            if ($ib->auth->checkAccess(null,"B1-SECURITY-ASSESSMENT")) {
+            if ($ib->rbac->checkAccess("B1-SECURITY-ASSESSMENT")) {
                 if (checkRequestMethod('POST')) {
                     if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm']) AND isset($_POST['id']) AND isset($_POST['unnamed']) AND isset($_POST['substring'])) {
                         if (isValidUuid($_POST['id'])) {
@@ -461,7 +466,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'downloadSecurityReport':
-            if ($ib->auth->checkAccess(null,"B1-SECURITY-ASSESSMENT")) {
+            if ($ib->rbac->checkAccess("B1-SECURITY-ASSESSMENT")) {
                 if (checkRequestMethod('GET')) {
                     $ib->logging->writeLog("Assessment","Downloaded security assessment report","info");
                     if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
@@ -482,7 +487,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'getSecurityReportProgress':
-            if ($ib->auth->checkAccess(null,"B1-SECURITY-ASSESSMENT")) {
+            if ($ib->rbac->checkAccess("B1-SECURITY-ASSESSMENT")) {
                 if (checkRequestMethod('GET')) {
                     if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
                         $id = $_REQUEST['id'];
@@ -492,7 +497,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'createLicenseReport':
-            if ($ib->auth->checkAccess(null,"B1-LICENSE-USAGE")) {
+            if ($ib->rbac->checkAccess("B1-LICENSE-USAGE")) {
                 if (checkRequestMethod('POST')) {
                     if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
                         $response = getLicenseCount($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm']);
@@ -502,7 +507,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'createLicenseReport2':
-            // if ($ib->auth->checkAccess(null,"B1-LICENSE-USAGE")) {
+            // if ($ib->rbac->checkAccess("B1-LICENSE-USAGE")) {
                 if (checkRequestMethod('POST')) {
                     if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
                         $response = getLicenseCount2($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm']);
@@ -519,14 +524,14 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'getSecurityAssessmentTemplates':
-            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
+            if ($ib->rbac->checkAccess("ADMIN-SECASS")) {
                 if (checkRequestMethod('GET')) {
                     echo json_encode($ib->templates->getTemplateConfigs(),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                 }
             }
             break;
         case 'newSecurityAssessmentTemplate':
-            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
+            if ($ib->rbac->checkAccess("ADMIN-SECASS")) {
                 if (checkRequestMethod('POST')) {
                     if (isset($_POST['TemplateName'])) {
                         $TemplateName = $_POST['TemplateName'];
@@ -540,7 +545,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'setSecurityAssessmentTemplate':
-            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
+            if ($ib->rbac->checkAccess("ADMIN-SECASS")) {
                 if (checkRequestMethod('POST')) {
                     if (isset($_POST['id'])) {
                         $ID = $_POST['id'];
@@ -555,7 +560,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'removeSecurityAssessmentTemplate':
-            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
+            if ($ib->rbac->checkAccess("ADMIN-SECASS")) {
                 if (checkRequestMethod('POST')) {
                     if (isset($_POST['id'])) {
                         echo json_encode($ib->templates->removeTemplateConfig($_POST['id']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
@@ -564,7 +569,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'uploadSecurityAssessmentTemplate':
-            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
+            if ($ib->rbac->checkAccess("ADMIN-SECASS")) {
                 if (checkRequestMethod('POST')) {
                     $uploadDir = __DIR__.'/../files/templates/';
                     if (!is_dir($uploadDir)) {
@@ -610,14 +615,14 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'getThreatActorConfig':
-            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
+            if ($ib->rbac->checkAccess("ADMIN-SECASS")) {
                 if (checkRequestMethod('GET')) {
                     echo json_encode($ib->threatactors->getThreatActorConfigs(),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                 }
             }
             break;
         case 'newThreatActorConfig':
-            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
+            if ($ib->rbac->checkAccess("ADMIN-SECASS")) {
                 if (checkRequestMethod('POST')) {
                     if (isset($_POST['name'])) {
                         if (isset($_POST['SVG'])) { $SVG = $_POST['SVG'] . '.svg'; } else { $SVG = null; }
@@ -629,7 +634,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'setThreatActorConfig':
-            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
+            if ($ib->rbac->checkAccess("ADMIN-SECASS")) {
                 if (checkRequestMethod('POST')) {
                     if (isset($_POST['id'])) {
                         if (isset($_POST['name'])) { $Name = $_POST['name']; } else { $Name = null; }
@@ -642,7 +647,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'removeThreatActorConfig':
-            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
+            if ($ib->rbac->checkAccess("ADMIN-SECASS")) {
                 if (checkRequestMethod('POST')) {
                     if (isset($_POST['id'])) {
                         echo json_encode($ib->threatactors->removeThreatActorConfig($_POST['id']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
@@ -651,7 +656,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'getThreatActors':
-            if ($ib->auth->checkAccess(null,"B1-THREAT-ACTORS")) {
+            if ($ib->rbac->checkAccess("B1-THREAT-ACTORS")) {
                 if (checkRequestMethod('POST')) {
                     if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
                         $UserInfo = GetCSPCurrentUser();
@@ -674,7 +679,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'getThreatActor':
-            if ($ib->auth->checkAccess(null,"B1-THREAT-ACTORS")) {
+            if ($ib->rbac->checkAccess("B1-THREAT-ACTORS")) {
                 if (checkRequestMethod('POST')) {
                     if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['Realm']) AND isset($_POST['ActorID']) AND isset($_POST['Page'])) {
                         $UserInfo = GetCSPCurrentUser();
@@ -687,7 +692,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'uploadThreatActorImage':
-            if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) {
+            if ($ib->rbac->checkAccess("ADMIN-SECASS")) {
                 if (checkRequestMethod('POST')) {
                     $uploadDir = __DIR__.'/../assets/images/Threat Actors/Uploads/';
                     if (!is_dir($uploadDir)) {
@@ -758,7 +763,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'DNSToolbox':
-            if ($ib->auth->checkAccess(null,"DNS-TOOLBOX")) {
+            if ($ib->rbac->checkAccess("DNS-TOOLBOX")) {
                 if (checkRequestMethod('GET')) {
                     if (isset($_GET['request']) && isset($_GET['domain'])) {
 
@@ -845,7 +850,7 @@ if (!($_REQUEST['f'])) {
             break;
             }
         case 'getAssessmentReports':
-            if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS")) {
+            if ($ib->rbac->checkAccess("REPORT-ASSESSMENTS")) {
                 if (checkRequestMethod('GET')) {
                     if (isset($_REQUEST['granularity']) && isset($_REQUEST['filters'])) {
                         $Filters = $_REQUEST['filters'];
@@ -858,7 +863,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'getAssessmentReportsStats':
-            if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS")) {
+            if ($ib->rbac->checkAccess("REPORT-ASSESSMENTS")) {
                 if (checkRequestMethod('GET')) {
                     if (isset($_REQUEST['granularity']) && isset($_REQUEST['filters'])) {
                         $Filters = $_REQUEST['filters'];
@@ -871,7 +876,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'getAssessmentReportsSummary':
-            if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS")) {
+            if ($ib->rbac->checkAccess("REPORT-ASSESSMENTS")) {
                 if (checkRequestMethod('GET')) {
                     $ib->logging->writeLog("Reporting","Queried Assessment Report Summary","debug");
                     echo json_encode($ib->reporting->getAssessmentReportsSummary(),JSON_PRETTY_PRINT);
@@ -879,7 +884,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'getTrackingRecords':
-            if ($ib->auth->checkAccess(null,"REPORT-TRACKING")) {
+            if ($ib->rbac->checkAccess("REPORT-TRACKING")) {
                 if (checkRequestMethod('GET')) {
                     if (isset($_REQUEST['granularity']) && isset($_REQUEST['filters'])) {
                         $Filters = $_REQUEST['filters'];
@@ -892,7 +897,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'getTrackingStats':
-            if ($ib->auth->checkAccess(null,"REPORT-TRACKING")) {
+            if ($ib->rbac->checkAccess("REPORT-TRACKING")) {
                 if (checkRequestMethod('GET')) {
                     if (isset($_REQUEST['granularity']) && isset($_REQUEST['filters'])) {
                         $Filters = $_REQUEST['filters'];
@@ -905,7 +910,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'getTrackingSummary':
-            if ($ib->auth->checkAccess(null,"REPORT-TRACKING")) {
+            if ($ib->rbac->checkAccess("REPORT-TRACKING")) {
                 if (checkRequestMethod('GET')) {
                     $ib->logging->writeLog("Reporting","Queried Web Tracking Summary","debug");
                     echo json_encode($ib->reporting->getTrackingSummary(),JSON_PRETTY_PRINT);

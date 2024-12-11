@@ -1,6 +1,6 @@
 <?php
 require_once(__DIR__.'/../../inc/inc.php');
-if ($ib->auth->checkAccess(null,"REPORT-ASSESSMENTS") == false) {
+if ($ib->rbac->checkAccess("REPORT-ASSESSMENTS") == false) {
   die();
 }
 ?>

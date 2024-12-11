@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
-  if ($ib->auth->checkAccess(null,"B1-LICENSE-USAGE") == false) {
+  if ($ib->rbac->checkAccess("B1-LICENSE-USAGE") == false) {
     die();
   }
 ?>

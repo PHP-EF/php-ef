@@ -1,7 +1,5 @@
 {
     "System": {
-        "rbacjson": "config/rbac.json",
-        "rbacinfo": "config/rbac-info.json",
         "logfilename": "ib-sa-tools",
         "logdirectory": "logs/",
         "loglevel": "Debug",

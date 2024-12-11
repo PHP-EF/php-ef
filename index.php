@@ -14,6 +14,195 @@
   } else {
     $isAuth = false;
   }
+
+  $navLinks = [
+    array(
+      'Name' => 'Home',
+      'Title' => 'Home',
+      'ACL' => null,
+      'Type' => 'Link', // Link / MenuLink / SubMenuLink / Menu / Submenu
+      'Menu' => null,
+      'Submenu' => null,
+      'Url' => '#page=default',
+      'Icon' => 'fa fa-toolbox'
+    ),
+    array(
+      'Name' => 'DNS Toolbox',
+      'Title' => 'DNS Toolbox',
+      'ACL' => 'DNS-TOOLBOX',
+      'Type' => 'Link', // Link / MenuLink / SubMenuLink / Menu / Submenu
+      'Menu' => null,
+      'Submenu' => null,
+      'Url' => '#page=tools/dnstoolbox',
+      'Icon' => 'fa fa-toolbox'
+    ),
+    array(
+      'Name' => 'Security Assessment',
+      'Title' => 'Security Assessment Report Generator',
+      'ACL' => 'B1-SECURITY-ASSESSMENT',
+      'Type' => 'Link',
+      'Menu' => null,
+      'Submenu' => null,
+      'Url' => '#page=uddi/security-assessment',
+      'Icon' => 'fa fa-magnifying-glass-chart'
+    ),
+    array(
+      'Name' => 'Threat Actors',
+      'Title' => 'Threat Actors',
+      'ACL' => 'B1-THREAT-ACTORS',
+      'Type' => 'Link',
+      'Menu' => null,
+      'Submenu' => null,
+      'Url' => '#page=uddi/threat-actors',
+      'Icon' => 'fa fa-skull'
+    ),
+    array(
+      'Name' => 'Dev',
+      'Title' => 'Dev',
+      'ACL' => 'DEV-Menu',
+      'Type' => 'Menu',
+      'Menu' => null,
+      'Submenu' => null,
+      'Url' => null,
+      'Icon' => 'fa fa-toolbox'
+    ),
+    array(
+      'Name' => 'License Utilization',
+      'Title' => 'License Utilization',
+      'ACL' => 'B1-LICENSE-USAGE',
+      'Type' => 'MenuLink',
+      'Menu' => 'Dev',
+      'Submenu' => null,
+      'Url' => '#page=uddi/license-usage',
+      'Icon' => 'fas fa-certificate'
+    ),
+    array(
+      'Name' => 'Admin',
+      'Title' => 'Admin',
+      'ACL' => 'ADMIN-Menu',
+      'Type' => 'Menu',
+      'Menu' => null,
+      'Submenu' => null,
+      'Url' => null,
+      'Icon' => 'fas fa-user-shield'
+    ),
+    array(
+      'Name' => 'Settings',
+      'Title' => 'Settings',
+      'ACL' => null,
+      'Type' => 'SubMenu',
+      'Menu' => 'Admin',
+      'Submenu' => null,
+      'Url' => null,
+      'Icon' => 'fa fa-cog'
+    ),
+    array(
+      'Name' => 'Users',
+      'Title' => 'Users',
+      'ACL' => 'ADMIN-USERS',
+      'Type' => 'SubMenuLink',
+      'Menu' => 'Admin',
+      'Submenu' => 'Settings',
+      'Url' => '#page=core/users',
+      'Icon' => null
+    ),
+    array(
+      'Name' => 'Configuration',
+      'Title' => 'Configuration',
+      'ACL' => 'ADMIN-CONFIG',
+      'Type' => 'SubMenuLink',
+      'Menu' => 'Admin',
+      'Submenu' => 'Settings',
+      'Url' => '#page=core/configuration',
+      'Icon' => null
+    ),
+    array(
+      'Name' => 'Role Based Access',
+      'Title' => 'Role Based Access',
+      'ACL' => 'ADMIN-RBAC',
+      'Type' => 'SubMenuLink',
+      'Menu' => 'Admin',
+      'Submenu' => 'Settings',
+      'Url' => '#page=core/rbac',
+      'Icon' => null
+    ),
+    array(
+      'Name' => 'Security Assessment',
+      'Title' => 'Security Assessment',
+      'ACL' => 'ADMIN-SECASS',
+      'Type' => 'SubMenuLink',
+      'Menu' => 'Admin',
+      'Submenu' => 'Settings',
+      'Url' => '#page=core/security-assessment-configuration',
+      'Icon' => null
+    ),
+    array(
+      'Name' => 'Logs',
+      'Title' => 'Logs',
+      'ACL' => null,
+      'Type' => 'SubMenu',
+      'Menu' => 'Admin',
+      'Submenu' => null,
+      'Url' => null,
+      'Icon' => 'fa-regular fa-file'
+    ),
+    array(
+      'Name' => 'Portal Logs',
+      'Title' => 'Logs',
+      'ACL' => 'ADMIN-LOGS',
+      'Type' => 'SubMenuLink',
+      'Menu' => 'Admin',
+      'Submenu' => 'Logs',
+      'Url' => '#page=core/logs',
+      'Icon' => null
+    ),
+    array(
+      'Name' => 'Reports',
+      'Title' => 'Reports',
+      'ACL' => 'REPORT-Menu',
+      'Type' => 'Menu',
+      'Menu' => null,
+      'Submenu' => null,
+      'Url' => null,
+      'Icon' => 'fa-solid fa-chart-simple'
+    ),
+    array(
+      'Name' => 'Assessments',
+      'Title' => 'Assessment Reporting',
+      'ACL' => 'REPORT-ASSESSMENTS',
+      'Type' => 'MenuLink',
+      'Menu' => 'Reports',
+      'Submenu' => null,
+      'Url' => '#page=reports/assessments',
+      'Icon' => 'fa-solid fa-arrows-to-eye'
+    ),
+    array(
+      'Name' => 'Web Tracking',
+      'Title' => 'Web Tracking',
+      'ACL' => 'REPORT-TRACKING',
+      'Type' => 'MenuLink',
+      'Menu' => 'Reports',
+      'Submenu' => null,
+      'Url' => '#page=reports/tracking',
+      'Icon' => 'fa-solid fa-bullseye'
+    )
+  ];
+
+  function filterNavLinksByMenu($navLinks, $menuName) {
+    return array_filter($navLinks, function($link) use ($menuName) {
+        return $link['Menu'] === $menuName && $link['Type'] == 'MenuLink';
+    });
+  }
+  function filterSubmenuLinksByMenu($navLinks, $menuName) {
+    return array_filter($navLinks, function($link) use ($menuName) {
+        return $link['Menu'] === $menuName && $link['Type'] == 'SubMenu';
+    });
+  }
+  function filterNavLinksBySubMenu($navLinks, $linkName) {
+    return array_filter($navLinks, function($link) use ($linkName) {
+        return $link['Submenu'] === $linkName && $link['Type'] == 'SubMenuLink';
+    });
+  }
 ?>
 
 <!DOCTYPE html>
@@ -32,157 +221,128 @@
       <img class="logo-lg" src="/assets/images/Other/ib-logo-white.png"></img>
     </div>
     <ul class="nav-links">
-      <li class="menu-item">
-        <a href="#page=default" class="toggleFrame" data-page-name="Home">
-          <i class='fa fa-home' ></i>
-          <span class="link_name">Home</span>
-        </a>
-        <ul class="sub-menu blank">
-          <li><a class="link_name toggleFrame" href="#page=default" data-page-name="Home">Home</a></li>
-        </ul>
-      </li>
-      <?php if ($ib->auth->checkAccess(null,'DNS-TOOLBOX')) { echo '
-      <li class="menu-item">
-        <div class="icon-link">
-          <a href="#page=tools/dnstoolbox" class="toggleFrame" data-page-name="DNS Toolbox">
-            <i class="fa fa-toolbox" ></i>
-            <span class="link_name">DNS Toolbox</span>
-          </a>
-          <ul class="sub-menu blank">
-            <li><a class="link_name toggleFrame" href="#page=tools/dnstoolbox" data-page-name="DNS Toolbox">DNS Toolbox</a></li>
-          </ul>
-        </div>
-      </li>';}
-      if ($ib->auth->checkAccess(null,'B1-SECURITY-ASSESSMENT')) { echo '
-      <li class="menu-item">
-        <div class="icon-link">
-          <a href="#page=uddi/security-assessment" class="toggleFrame" data-page-name="Security Assessment Report Generator">
-            <i class="fa fa-magnifying-glass-chart" ></i>
-            <span class="link_name">Security Assessment</span>
-          </a>
-          <ul class="sub-menu blank">
-            <li><a class="link_name toggleFrame" href="#page=uddi/security-assessment" data-page-name="Security Assessment Report Generator">Security Assessment</a></li>
-          </ul>
-        </div>
-      </li>';}
-      if ($ib->auth->checkAccess(null,'B1-THREAT-ACTORS')) { echo '
-      <li class="menu-item">
-        <div class="icon-link">
-          <a href="#page=uddi/threat-actors" class="toggleFrame" data-page-name="Threat Actors">
-            <i class="fa fa-skull" ></i>
-            <span class="link_name">Threat Actors</span>
-          </a>
-          <ul class="sub-menu blank">
-            <li><a class="link_name toggleFrame" href="#page=uddi/threat-actors" data-page-name="Threat Actors">Threat Actors</a></li>
-          </ul>
-        </div>
-      </li>';}
-      if ($ib->auth->checkAccess(null,null,"DEV-Menu")) { echo '
-      <li class="menu-item">
-        <div class="icon-link menu-item-dropdown">
-          <a href="#" class="preventDefault">
-            <i class="fa fa-toolbox" ></i>
-            <span class="link_name">Dev</span>
-          </a>
-          <i class="bx bxs-chevron-down arrow" ></i>
-        </div>
-        <ul class="sub-menu">
-          <a class="link_name preventDefault" href="#">Dev</a>';
-          if ($ib->auth->checkAccess(null,'B1-LICENSE-USAGE')) { echo '
-            <li>
-              <a href="#page=uddi/license-usage" class="toggleFrame" data-page-name="License Usage">
-                <i class="fas fa-certificate" ></i>
-                <span>License Utilization</span>
-              </a>
-            </li>';}
-            echo '
-        </ul>
-      </li>';}
-      if ($ib->auth->checkAccess(null,null,"ADMIN-Menu")) { echo '
-      <li class="menu-item">
-        <div class="icon-link menu-item-dropdown">
-          <a href="#" class="preventDefault">
-            <i class="fas fa-user-shield" ></i>
-            <span class="link_name">Admin</span>
-          </a>
-          <i class="bx bxs-chevron-down arrow" ></i>
-        </div>
-        <ul class="sub-menu">
-          <a class="link_name preventDefault" href="#">Admin</a>
-          <li class="sub-menu-item">
-            <div class="icon-link menu-item-dropdown">
-              <a href="#" class="preventDefault">
-                <i class="fas fa-cog" ></i>
-                <span>Settings</span>
-              </a>
-              <i class="bx bxs-chevron-down arrow" ></i>
-            </div>
-            <ul class="sub-sub-menu">
-              <li>';
-                if ($ib->auth->checkAccess(null,"ADMIN-USERS")) { echo '
-                <a href="#page=core/users" class="toggleFrame" data-page-name="Users">Users</a>
-                ';}
-                if ($ib->auth->checkAccess(null,"ADMIN-CONFIG")) { echo '
-                <a href="#page=core/configuration" class="toggleFrame" data-page-name="Configuration">Configuration</a>
-                ';}
-                if ($ib->auth->checkAccess(null,"ADMIN-RBAC")) { echo '
-                <a href="#page=core/rbac" class="toggleFrame" data-page-name="Role Based Access">Role Based Access</a>
-                ';}
-                if ($ib->auth->checkAccess(null,"ADMIN-SECASS")) { echo '
-                <a href="#page=core/security-assessment-configuration" class="toggleFrame" data-page-name="Security Assessment Configuration">Security Assessment</a>
-                ';}
-                echo '
+      <?php
+foreach ($navLinks as $navLink) {
+  $MenuItem = '';
+  switch($navLink['Type']) {
+      case 'Link':
+          // Create Nav Link
+          if (!$navLink['ACL'] || $ib->rbac->checkAccess($navLink['ACL'])) {
+              $MenuItem .= <<<EOD
+              <li class="menu-item">
+                  <div class="icon-link">
+                      <a href="{$navLink['Url']}" class="toggleFrame" data-page-name="{$navLink['Title']}">
+                          <i class="{$navLink['Icon']}"></i>
+                          <span class="link_name">{$navLink['Name']}</span>
+                      </a>
+                      <ul class="sub-menu blank">
+                          <li><a class="link_name toggleFrame" href="{$navLink['Url']}" data-page-name="{$navLink['Title']}">{$navLink['Name']}</a></li>
+                      </ul>
+                  </div>
               </li>
-            </ul>
-          </li>';
-          if ($ib->auth->checkAccess(null,"ADMIN-LOGS")) { echo '
-          <li class="sub-menu-item">
-            <div class="icon-link menu-item-dropdown">
-              <a href="#" class="preventDefault">
-                <i class="fa-regular fa-file" ></i>
-                <span>Logs</span>
-              </a>
-              <i class="bx bxs-chevron-down arrow" ></i>
-            </div>
-            <ul class="sub-sub-menu">
-              <li>';
-                if ($ib->auth->checkAccess(null,"ADMIN-LOGS")) { echo '
-                <a href="#page=core/logs" class="toggleFrame" data-page-name="Logs">Portal Logs</a>
-                ';}
-                echo '
+              EOD;
+          }
+          break;
+      case 'Menu':
+          // Filter links and submenus
+          $filteredMenuLinks = filterNavLinksByMenu($navLinks, $navLink['Name']);
+          $filteredSubMenuLinks = filterSubmenuLinksByMenu($navLinks, $navLink['Name']);
+          
+          // Check if there are any valid links or submenus
+          $hasValidLinks = false;
+          foreach ($filteredMenuLinks as $filteredMenuLink) {
+              if ($ib->rbac->checkAccess( $filteredMenuLink['ACL'])) {
+                  $hasValidLinks = true;
+                  break;
+              }
+          }
+          if (!$hasValidLinks) {
+              foreach ($filteredSubMenuLinks as $filteredSubMenuLink) {
+                  $filteredSubMenuNavLinks = filterNavLinksBySubMenu($navLinks, $filteredSubMenuLink['Name']);
+                  foreach ($filteredSubMenuNavLinks as $filteredSubMenuNavLink) {
+                      if ($ib->rbac->checkAccess( $filteredSubMenuNavLink['ACL'])) {
+                          $hasValidLinks = true;
+                          break 2;
+                      }
+                  }
+              }
+          }
+
+          // Create Nav Menu Dropdown only if there are valid links
+          if ($hasValidLinks) {
+              $MenuItem .= <<<EOD
+              <li class="menu-item">
+                  <div class="icon-link menu-item-dropdown">
+                      <a href="#" class="preventDefault">
+                          <i class="{$navLink['Icon']}"></i>
+                          <span class="link_name">{$navLink['Name']}</span>
+                      </a>
+                      <i class="bx bxs-chevron-down arrow"></i>
+                  </div>
+                  <ul class="sub-menu">
+              EOD;
+
+              // Create Nav Menu Links
+              foreach ($filteredMenuLinks as $filteredMenuLink) {
+                  if ($ib->rbac->checkAccess( $filteredMenuLink['ACL'])) {
+                      $MenuItem .= <<<EOD
+                      <li>
+                          <a href="{$filteredMenuLink['Url']}" class="toggleFrame" data-page-name="{$filteredMenuLink['Title']}">
+                              <i class="{$filteredMenuLink['Icon']}"></i>
+                              <span>{$filteredMenuLink['Name']}</span>
+                          </a>
+                      </li>
+                      EOD;
+                  }
+              }
+
+              // Create Nav Menu Submenus
+              foreach ($filteredSubMenuLinks as $filteredSubMenuLink) {
+                  $Submenu = <<<EOD
+                  <a class="link_name preventDefault" href="#">{$navLink['Name']}</a>
+                  <li class="sub-menu-item">
+                      <div class="icon-link menu-item-dropdown">
+                          <a href="#" class="preventDefault">
+                              <i class="{$filteredSubMenuLink['Icon']}"></i>
+                              <span>{$filteredSubMenuLink['Name']}</span>
+                          </a>
+                          <i class="bx bxs-chevron-down arrow"></i>
+                      </div>
+                      <ul class="sub-sub-menu">
+                          <li>
+                  EOD;
+
+                  // Create Nav Submenu Links
+                  $SubmenuLinks = '';
+                  $filteredSubMenuNavLinks = filterNavLinksBySubMenu($navLinks, $filteredSubMenuLink['Name']);
+                  foreach ($filteredSubMenuNavLinks as $filteredSubMenuNavLink) {
+                      if ($ib->rbac->checkAccess( $filteredSubMenuNavLink['ACL'])) {
+                          $SubmenuLinks .= <<<EOD
+                          <a href="{$filteredSubMenuNavLink['Url']}" class="toggleFrame" data-page-name="{$filteredSubMenuNavLink['Title']}">{$filteredSubMenuNavLink['Name']}</a>
+                          EOD;
+                      }
+                  }
+
+                  // Only display Sub Menu if the user has access to links underneath it
+                  if ($SubmenuLinks != '') {
+                      $MenuItem .= $Submenu . $SubmenuLinks . <<<EOD
+                          </li>
+                      </ul>
+                  </li>
+                  EOD;
+                  }
+              }
+
+              $MenuItem .= <<<EOD
+                  </ul>
               </li>
-            </ul>
-          </li>';} echo '
-        </ul>
-      </li>';}
-      if ($ib->auth->checkAccess(null,null,"REPORT-Menu")) { echo '
-      <li class="menu-item">
-        <div class="icon-link menu-item-dropdown">
-          <a href="#" class="preventDefault">
-            <i class="fa-solid fa-chart-simple" ></i>
-            <span class="link_name">Reports</span>
-          </a>
-          <i class="bx bxs-chevron-down arrow" ></i>
-        </div>
-        <ul class="sub-menu">
-          <a class="link_name preventDefault" href="#">Reports</a>';
-          if ($ib->auth->checkAccess(null,'REPORT-ASSESSMENTS')) { echo '
-            <li>
-              <a href="#page=reports/assessments" class="toggleFrame" data-page-name="Assessment Reporting">
-                <i class="fa-solid fa-arrows-to-eye" ></i>
-                <span>Assessments</span>
-              </a>
-            </li>';}
-          if ($ib->auth->checkAccess(null,'REPORT-TRACKING')) { echo '
-            <li>
-              <a href="#page=reports/tracking" class="toggleFrame" data-page-name="Web Tracking">
-                <i class="fa-solid fa-bullseye" ></i>
-                <span>Web Tracking</span>
-              </a>
-            </li>';}
-            echo '
-        </ul>
-      </li>';}?>
+              EOD;
+          }
+          break;
+        }
+        echo $MenuItem;
+      }
+    ?>
     </ul>
     <div class="sidebar-footer">
       <a href="#" class="infoBtn preventDefault">
