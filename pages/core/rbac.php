@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
-  if ($ib->auth->checkAccess(null,"ADMIN-RBAC") == false) {
+  if ($ib->rbac->checkAccess("ADMIN-RBAC") == false) {
     die();
   }
 
@@ -152,27 +152,30 @@
     $('#editGroupDescription').val(row['Description']);
     $.getJSON('/api?f=GetRBAC&action=listroles', function(roleinfo) {
       div.innerHTML = "";
-      for (var key in roleinfo['Resources']) {
+      for (var role in roleinfo) {
         div.innerHTML += `
           <div class="list-group-item">
             <div class="row align-items-center">
               <div class="col">
-                <strong class="mb-2">${key}</strong>
-                <p class="text-muted mb-0">${roleinfo['Resources'][key]['description']}</p>
+                <strong class="mb-2">${roleinfo[role]['name']}</strong>
+                <p class="text-muted mb-0">${roleinfo[role]['description']}</p>
               </div>
               <div class="col-auto">
                 <div class="custom-control custom-switch">
-                  <input type="checkbox" class="custom-control-input toggle" id="${key}">
-                  <label class="custom-control-label" for="${key}"></label>
-              </div>
-	      </div>
+                  <input type="checkbox" class="custom-control-input toggle" id="${roleinfo[role]['name']}">
+                  <label class="custom-control-label" for="${roleinfo[role]['name']}"></label>
+                </div>
+	            </div>
             </div>
           </div>`
       };
       $.getJSON('/api?f=GetRBAC&group='+encodeURIComponent(row.id), function(grouproleinfo) {
         $('#editModalLabel').text(row.Group);
-        for (var key in grouproleinfo.PermittedResources) {
-          $("#"+grouproleinfo.PermittedResources[key]).prop("checked", "true");
+        if (grouproleinfo[0]['PermittedResources']) {
+          var PermittedResources = grouproleinfo[0]['PermittedResources'].split(',');
+          for (var resource in PermittedResources) {
+            $("#"+PermittedResources[resource]).prop("checked", "true");
+          }
         }
       });
       $('.toggle').on('click', function(event) {
@@ -181,18 +184,13 @@
       let group = $('#editModalLabel').text();
       let targetid = event.target.id
       $.getJSON('/api?f=SetRBAC&id='+encodeURIComponent(id)+'&key='+targetid+'&value='+toggle, function(setRBACResults) {
-        if (setRBACResults[id]['PermittedResources'].includes(targetid)) {
-          if (toggle) {
-            toast("Success","","Successfully added "+targetid+" to "+group,"success");
-          } else {
-            toast("Error","","Failed to add "+targetid+" to "+group,"danger");
-          }
+        if (setRBACResults['Status'] == 'Success') {
+          toast("Success","","Successfully added "+targetid+" to "+group,"success");
+          $('#rbacTable').bootstrapTable('refresh');
+        } else if (setRBACResults['Status'] == 'Error') {
+          toast(setRBACResults['Status'],"",setRBACResults['Message'],"danger","30000");
         } else {
-          if (toggle) {
-            toast("Error","","Failed to remove "+targetid+" from "+group,"danger");
-          } else {
-            toast("Success","","Successfully removed "+targetid+" from "+group,"success");
-          }
+          toast("Error","","Failed to add "+targetid+" to "+group,"danger");
         }
       });
     });
@@ -214,13 +212,15 @@
     },
     'click .delete': function (e, value, row, index) {
       if(confirm("Are you sure you want to delete "+row.Group+" from Role Based Access? This is irriversible.") == true) {
-        $.getJSON('/api?f=DeleteRBAC&group='+encodeURIComponent(row.id), function(removeRBACResults) {
-          if (removeRBACResults[row.id]) {
-            toast("Error","","Failed to delete "+row.Group+" from Role Based Access","danger");
-	        } else {
+        $.getJSON('/api?f=DeleteRBAC&id='+encodeURIComponent(row.id), function(removeRBACResults) {
+          if (removeRBACResults['Status'] == 'Success') {
             toast("Success","","Successfully deleted "+row.Group+" from Role Based Access","success");
             $('#rbacTable').bootstrapTable('refresh');
-	        }
+          } else if (removeRBACResults['Status'] == 'Error') {
+            toast(removeRBACResults['Status'],"",removeRBACResults['Message'],"danger","30000");
+          } else {
+            toast("Error","","Failed to delete "+row.Group+" from Role Based Access","danger");
+          }
         });
       }
     }
@@ -231,10 +231,12 @@
     let group = $('#editModalLabel').text();
     let description = $('#editGroupDescription').val();
     $.getJSON('/api?f=SetRBAC&id='+encodeURIComponent(id)+'&description='+encodeURIComponent(description),function(setRBACResults) {
-      if (setRBACResults[id]['Description'] == description) {
+      if (setRBACResults['Status'] == 'Success') {
         toast("Success","","Successfully edited "+group+" description to: "+description,"success");
         $('#rbacTable').bootstrapTable('refresh');
         $('#editModal').modal('hide');
+      } else if (setRBACResults['Status'] == 'Error') {
+        toast(setRBACResults['Status'],"",setRBACResults['Message'],"danger","30000");
       } else {
         toast("Error","","Failed to edit "+group+" description","danger");
       }
@@ -248,19 +250,20 @@
   $('#newGroupSubmit').on('click', function(event) {
     event.preventDefault();
     let groupName = $('#groupName').val();
-    let groupId = groupName.toLowerCase().replace(/ /g, '-');
     let groupDescription = $('#groupDescription').val();
-    $.getJSON('/api?f=SetRBAC&id='+encodeURIComponent(groupId)+'&name='+encodeURIComponent(groupName)+'&description='+encodeURIComponent(groupDescription)).done(function( data, status ) {
-      if (data[groupId] != null) {
-          toast("Success","","Successfully created group: "+groupName,"success");
-          $('#rbacTable').bootstrapTable('refresh');
-          $('#newGroupModal').modal('hide');
-        } else {
-          toast("Error","","Failed to add new group","danger","30000");
-        }
-      }).fail(function( data, status ) {
-          toast("API Error","","Failed to add new group","danger","30000");
-      });
+    $.getJSON('/api?f=NewRBAC&name='+encodeURIComponent(groupName)+'&description='+encodeURIComponent(groupDescription)).done(function( data, status ) {
+      if (data['Status'] == 'Success') {
+        toast("Success","","Successfully created group: "+groupName,"success");
+        $('#rbacTable').bootstrapTable('refresh');
+        $('#newGroupModal').modal('hide');
+      } else if (data['Status'] == 'Error') {
+        toast(data['Status'],"",data['Message'],"danger","30000");
+      } else {
+        toast("Error","","Failed to add new group","danger","30000");
+      }
+    }).fail(function( data, status ) {
+        toast("API Error","","Failed to add new group","danger","30000");
+    });
   });
 
 

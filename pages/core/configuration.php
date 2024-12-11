@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
-  if ($ib->auth->checkAccess(null,"ADMIN-CONFIG") == false) {
+  if ($ib->rbac->checkAccess("ADMIN-CONFIG") == false) {
     die();
   }
 
@@ -47,16 +47,6 @@
               <label for="systemLogRetention">Log Retention</label>
               <input type="text" class="form-control info-field" id="systemLogRetention" aria-describedby="systemLogRetentionHelp" name="systemLogRetention">
               <small id="systemLogRetentionHelp" class="form-text text-muted">How many days to keep system logs before they are purged.</small>
-            </div>
-            <div class="form-group">
-              <label for="systemRBACFile">Role Based Access Control File Location</label>
-              <input type="text" class="form-control info-field" id="systemRBACFile" aria-describedby="systemRBACFileHelp" name="systemRBACFile">
-              <small id="systemRBACFileHelp" class="form-text text-muted">The full path of the RBAC .json file to be used for storing permissions.</small>
-	          </div>
-            <div class="form-group">
-              <label for="systemRBACInfoFile">Role Based Access Control Information File Location</label>
-              <input type="text" class="form-control info-field" id="systemRBACInfoFile" aria-describedby="systemRBACInfoFileHelp" name="systemRBACInfoFile">
-              <small id="systemRBACInfoFileHelp" class="form-text text-muted">The full path of the RBAC .json file containing the list of available roles and matching descriptions.</small>
             </div>
             <div class="form-group">
               <label for="systemCURLTimeout">CURL Timeout</label>
@@ -203,8 +193,6 @@
       $("#systemLogRetention").val(config.System.logretention);
       $("#systemCURLTimeout").val(config.System["CURL-Timeout"]);
       $("#systemCURLTimeoutConnect").val(config.System["CURL-ConnectTimeout"]);
-      $("#systemRBACFile").val(config.System.rbacjson);
-      $("#systemRBACInfoFile").val(config.System.rbacinfo);
       $("#securitySalt").val(config.Security.salt);
       $("#spEntityId").val(config.SAML.sp.entityId);
       $("#spAcsUrl").val(config.SAML.sp.assertionConsumerService.url);

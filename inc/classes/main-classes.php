@@ -18,7 +18,7 @@ class ib {
       $this->db = (new db(__DIR__.'/../config/app.db'))->db;
       $this->core = new core(__DIR__.'/../config/config.json');
       $this->auth = new Auth($this->core,$this->db);
-      $this->rbac = new RBAC($this->core,$this->db);
+      $this->rbac = new RBAC($this->core,$this->db,$this->auth);
       $this->config = $this->core->config;
       $this->logging = $this->core->logging;
       $this->reporting = new Reporting($this->core,$this->db);
@@ -27,7 +27,7 @@ class ib {
   }
 
   public function getVersion() {
-    return ['v0.6.1'];
+    return ['v0.6.2'];
   }
 }
 

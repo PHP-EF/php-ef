@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__.'/../../inc/inc.php');
-  if ($ib->auth->checkAccess(null,"ADMIN-LOGS") == false) {
+  if ($ib->rbac->checkAccess("ADMIN-LOGS") == false) {
     die();
   }
 
