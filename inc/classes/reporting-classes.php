@@ -24,9 +24,9 @@ class Reporting {
       path TEXT,
       pageCategory TEXT,
       pageName TEXT,
-      timeSpent INT,
-      clicks INT,
-      mouseMovements INT,
+      timeSpent INTEGER,
+      clicks INTEGER,
+      mouseMovements INTEGER,
       dateTime DATETIME
     )");
 

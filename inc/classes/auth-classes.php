@@ -93,6 +93,13 @@ class Auth {
       passwordexpires DATE,
       type TEXT
     )");
+
+    // Check if the users table is empty and define default admin account if it is
+    $result = $this->db->query("SELECT COUNT(*) as count FROM users");
+    $row = $result->fetch(PDO::FETCH_ASSOC);
+    if ($row['count'] == 0) {
+        $this->newUser('admin', 'Admin123!', 'Admin', 'User', '', 'Administrators', 'Local', 'true');
+    }
   }
 
   private function hashAndSalt($password) {
@@ -532,7 +539,7 @@ class Auth {
     $Login = false;
 
     if ($this->sso->isAuthenticated()) {
-        // User is authenticated
+        // User is Authenticated
         $SAMLArr = array(
           'samlUserdata' => $this->sso->getAttributes(),
           'samlNameId' => $this->sso->getNameId(),
@@ -693,7 +700,7 @@ class Auth {
           'Authenticated' => false,
           'IPAddress' => $IPAddress,
           'Groups' => [
-            'everyone'
+            'Everyone'
           ]
         );
         return $AuthResult;
@@ -742,13 +749,13 @@ class Auth {
         }
 
         if (isset($decodedJWT->groups[0]) && $decodedJWT->groups[0] != "") {
-          $decodedJWT->groups[] = 'authenticated';
-          $decodedJWT->groups[] = 'everyone';
+          $decodedJWT->groups[] = 'Authenticated';
+          $decodedJWT->groups[] = 'Everyone';
           $Groups = $decodedJWT->groups;
         } else {
           $Groups = [
-            'authenticated',
-            'everyone'
+            'Authenticated',
+            'Everyone'
           ];
         }
 
@@ -773,56 +780,17 @@ class Auth {
         $AuthResult = array(
           'Authenticated' => false,
           'IPAddress' => $IPAddress,
-          'Groups' => ['everyone']
+          'Groups' => ['Everyone']
         );
       }
     } else {
       $AuthResult = array(
         'Authenticated' => false,
         'IPAddress' => $IPAddress,
-        'Groups' => ['everyone']
+        'Groups' => ['Everyone']
       );
     }
     return $AuthResult;
-  }
-
-  public function checkAccess($User,$Service = null,$Menu = null) {
-    if ($User == null) {
-      $User = $this->getAuth();
-    }
-    if (isset($User['Authenticated'])) {
-      $rbacJson = file_get_contents(__DIR__.'/../'.$this->config->getConfig("System","rbacjson"));
-      $rbac = json_decode($rbacJson, true);
-      if (isset($User['Groups'])) {
-        $usergroups = $User['Groups'];
-        if ($Service != null) {
-          $Services = explode(',',$Service);
-          foreach ($Services as $ServiceToCheck) {
-            foreach ($usergroups as $usergroup) {
-              if (isset($rbac[$usergroup])) {
-                if (in_array($ServiceToCheck,$rbac[$usergroup]['PermittedResources'])) {
-                  return true;
-                }
-              }
-            }
-          }
-        }
-        if ($Menu != null) {
-          foreach ($usergroups as $usergroup) {
-            if (isset($rbac[$usergroup])) {
-              if (in_array($Menu,$rbac[$usergroup]['PermittedMenus'])) {
-                return true;
-              }
-            }
-          }
-        }
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
-    return false;
   }
 
   public function signinRedirect() {
@@ -834,206 +802,287 @@ class Auth {
 }
 
 class RBAC {
-  private $rbacJson;
-  private $rbacInfo;
   private $config;
   private $logging;
   private $db;
+  private $auth;
 
-  public function __construct($core,$db) {
+  public function __construct($core,$db,$auth) {
     // Set Config
     $this->config = $core->config;
     $this->logging = $core->logging;
 
+    // Define Auth
+    $this->auth = $auth;
+
     // SQL
     $this->db = $db;
-    // Not migrated RBAC to DB
-    // $this->createRBACTable();
-    // $this->createRBACMenuDefinitionsTable();
-    // $this->createRBACResourcesDefinitionsTable();
-
-    // Create or open the RBAC Configuration
-    $this->rbacJson = __DIR__.'/../'.$this->config->getConfig("System","rbacjson");
-    $this->rbacInfo = __DIR__.'/../'.$this->config->getConfig("System","rbacinfo");
+    $this->createRBACTable();
+    $this->createRBACResourcesDefinitionsTable();
   }
 
   private function createRBACTable() {
     // Create users table if it doesn't exist
     $this->db->exec("CREATE TABLE IF NOT EXISTS rbac (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT UNIQUE,
-      description TEXT,
-      resources TEXT,
-      menus TEXT
+      Name TEXT,
+      Description TEXT,
+      PermittedResources TEXT
     )");
-  }
 
-  private function createRBACMenuDefinitionsTable() {
-    // Create users table if it doesn't exist
-    $this->db->exec("CREATE TABLE IF NOT EXISTS rbac_menu_definitions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT UNIQUE,
-      description TEXT
-    )");
+    // Function to check if a role exists
+    function roleExists($db, $roleName) {
+      $stmt = $db->prepare("SELECT COUNT(*) FROM rbac WHERE Name = :name");
+      $stmt->execute([':name' => $roleName]);
+      return $stmt->fetchColumn() > 0;
+    }
+
+    // Insert roles if they don't exist
+    $roles = [
+      ['Authenticated', 'This group applies to any authenticated user', ''],
+      ['Everyone', 'This group applies to any user, regardless of if they are logged in or not', ''],
+      ['Administrators', 'System Administrators', 'ADMIN-RBAC,ADMIN-USERS,ADMIN-CONFIG,ADMIN-LOGS']
+    ];
+
+    foreach ($roles as $role) {
+      if (!roleExists($this->db, $role[0])) {
+        $stmt = $this->db->prepare("INSERT INTO rbac (Name, Description, PermittedResources) VALUES (:Name, :Description, :PermittedResources)");
+        $stmt->execute([':Name' => $role[0],':Description' => $role[1], ':PermittedResources' => $role[2]]);
+      }
+    }
   }
 
   private function createRBACResourcesDefinitionsTable() {
     // Create users table if it doesn't exist
-    $this->db->exec("CREATE TABLE IF NOT EXISTS rbac_resources_definitions (
+    $this->db->exec("CREATE TABLE IF NOT EXISTS rbac_resources (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT UNIQUE,
-      description TEXT,
-      menus TEXT
+      description TEXT
     )");
+
+    // Function to check if a resource exists
+    function resourceExists($db, $resourceName) {
+      $stmt = $db->prepare("SELECT COUNT(*) FROM rbac_resources WHERE name = :name");
+      $stmt->execute([':name' => $resourceName]);
+      return $stmt->fetchColumn() > 0;
+    }
+
+    // Insert roles if they don't exist
+    // This needs to be re-done when modularisation comes in
+    $resources = [
+      // Default Admin Roles
+      ['ADMIN-RBAC', 'Grants the ability to view and manage Role Based Access'],
+      ['ADMIN-LOGS', 'Grants access to view Logs'],
+      ['ADMIN-CONFIG', 'Grants access to manage the Infoblox SA Tools Configuration'],
+      ['ADMIN-USERS', 'Grants access to view and manage users & groups'],
+      ['REPORT-TRACKING', 'Grants the ability to view the Web Tracking Reports'],
+      // Other Stuff
+      ['DNS-TOOLBOX', 'Grants the ability to use the DNS Toolbox'],
+      ['B1-SECURITY-ASSESSMENT', 'Grants the ability to use the Security Assessment Tool'],
+      ['B1-THREAT-ACTORS', 'Grants the ability to use the Threat Actors Tool'],
+      ['B1-LICENSE-USAGE', 'Grants the ability to use the License Usage Tool'],
+      ['ADMIN-SECASS', 'Grants the ability to view and manage the Security Assessment Generator Configuration'],
+      ['REPORT-ASSESSMENTS', 'Grants the ability to view the Assessment Reports']
+    ];
+
+    foreach ($resources as $resource) {
+      if (!resourceExists($this->db, $resource[0])) {
+        $stmt = $this->db->prepare("INSERT INTO rbac_resources (name, description) VALUES (:Name, :Description)");
+        $stmt->execute([':Name' => $resource[0],':Description' => $resource[1]]);
+      }
+    }
   }
 
-  public function getRBAC($Group = null,$Action = null) {
+  public function getRBACGroups() {
+    $stmt = $this->db->prepare('SELECT * FROM rbac');
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
+  public function getRBACByGroupID($GroupID) {
+    $stmt = $this->db->prepare('SELECT * FROM rbac WHERE id = :GroupID');
+    $stmt->execute([':GroupID' => $GroupID]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
+  public function getRBACByGroupName($GroupName) {
+    $stmt = $this->db->prepare('SELECT * FROM rbac WHERE LOWER(Name) = LOWER(:GroupName)');
+    $stmt->execute([':GroupName' => $GroupName]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
+  public function getRBAC($GroupID = null,$Action = null) {
     $this->logging->writeLog("RBAC","Queried RBAC List","debug",$_REQUEST);
-    $rbacJson = file_get_contents($this->rbacJson);
-    $rbac = json_decode($rbacJson, true);
+    if ($GroupID != null) {
+      $rbac = $this->getRBACByGroupID($GroupID);
+    } else {
+      $rbac = $this->getRBACGroups();
+    }
     switch ($Action) {
       case 'listgroups':
         $splat = array();
-        foreach ($rbac as $group => $groupval) {
+        foreach ($rbac as $group) {
           $newArr = array(
-            "id" => $group,
-            "Group" => $groupval['Name'],
-            "Description" => $groupval['Description']
+            "id" => $group['id'],
+            "Group" => $group['Name'],
+            "Description" => $group['Description']
           );
           array_push($splat,$newArr);
         }
         return $splat;
       case 'listconfigurablegroups':
         $splat = array();
-        foreach ($rbac as $group => $groupval) {
+        foreach ($rbac as $group) {
           // Exclude SYSTEM Groups
-          if ($group != 'authenticated' && $group != 'everyone') {
+          if ($group['Name'] != 'Authenticated' && $group['Name'] != 'Everyone') {
             $newArr = array(
-              "id" => $group,
-              "Group" => $groupval['Name'],
-              "Description" => $groupval['Description']
+              "id" => $group['id'],
+              "Group" => $group['Name'],
+              "Description" => $group['Description']
             );
             array_push($splat,$newArr);
           }
         }
         return $splat;
       case 'listroles':
-        $rbacJson = file_get_contents($this->rbacInfo);
-        $rbac = json_decode($rbacJson, true);
-        return $rbac;
+        $stmt = $this->db->prepare('SELECT * FROM rbac_resources');
+        $stmt->execute();
+        $rbac = $stmt->fetchAll(PDO::FETCH_ASSOC);
       default:
-        if ($Group != null) {
-          return $rbac[$Group];
-        } else {
-          return $rbac;
-        }
+        return $rbac;
     }
   }
 
-  public function setRBAC($GroupID,$GroupName,$Description = null,$Key = null,$Value = null) {
-    $rbac = $this->getRBAC();
+  public function setRBAC($GroupID,$GroupName,$Description = null,$Role = null,$Value = null) {
+    $rbac = $this->getRBAC($GroupID)[0];
     $roles = $this->getRBAC(null,"listroles");
-    if (array_key_exists($GroupID,$rbac)) {
+    $prepare = [];
+    $execute = [];
+    $execute[':id'] = $GroupID;
+    if ($rbac) {
       if ($Description != null) {
-        $rbac[$GroupID]['Description'] = $Description;
-        file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
-        $this->logging->writeLog("RBAC","Updated description for: ".$rbac[$GroupID]['Name'],"info",$rbac[$GroupID]);
+        $rbac['Description'] = $Description;
+        $prepare[] = 'Description = :Description';
+        $execute[':Description'] = $Description;
+        $this->logging->writeLog("RBAC","Updated description for: ".$rbac['Name'],"info",$rbac);
       }
-      if ($Key != null) {
-        if (array_key_exists($Key,$roles['Resources'])) {
+      if ($Role != null) {
+        // Check if role exists in definitions
+        if (in_array($Role, array_column($roles, 'name'))) {
+          if ($rbac['PermittedResources'] != "") {
+            $PermittedResources = explode(',',$rbac['PermittedResources']);
+          } else {
+            $PermittedResources = [];
+          }
           if ($Value == "true") {
             ## Add Key to Array
-            if (in_array($Key,$rbac[$GroupID]['PermittedResources'])) {
-              $this->logging->writeLog("RBAC","$Key is already assigned to ".$rbac[$GroupID]['Name'],"debug",$Key,$rbac[$GroupID]);
+            if (in_array($Role,$PermittedResources)) {
+              return array(
+                'Status' => 'Error',
+                'Message' => $Role.' is already assigned to: '.$rbac['Name']
+              );
+              $this->logging->writeLog("RBAC","$Role is already assigned to ".$rbac['Name'],"debug",$rbac);
             } else {
-              array_push($rbac[$GroupID]['PermittedResources'],$Key);
-              file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
-              $this->logging->writeLog("RBAC","Added $Key to ".$rbac[$GroupID]['Name'],"warning",$rbac[$GroupID]);
-            }
-
-            ## Add Menus to Array
-            foreach ($roles['Resources'][$Key]['PermittedMenus'] as $PermittedMenu) {
-              if (in_array($PermittedMenu,$rbac[$GroupID]['PermittedMenus'])) {
-                $this->logging->writeLog("RBAC","$PermittedMenu is already assigned to: ".$rbac[$GroupID]['Name'],"debug",$rbac[$GroupID]);
-              } else {
-                array_push($rbac[$GroupID]['PermittedMenus'],$PermittedMenu);
-                file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
-                $this->logging->writeLog("RBAC","Added Menu: $PermittedMenu to ".$rbac[$GroupID]['Name'],"info",$rbac[$GroupID]);
-              }
+              $PermittedResources[] = $Role;
+              $prepare[] = 'PermittedResources = :PermittedResources';
+              $execute[':PermittedResources'] = implode(',',$PermittedResources);
+              $this->logging->writeLog("RBAC","Added $Role to ".$rbac['Name'],"warning",$rbac);
             }
           } else if ($Value == "false") {
             ## Remove Key from Array
-            if (in_array($Key,$rbac[$GroupID]['PermittedResources'])) {
-              if (($keytoremove = array_search($Key, $rbac[$GroupID]['PermittedResources'])) !== false) {
-                unset($rbac[$GroupID]['PermittedResources'][$keytoremove]);
-                $rbac[$GroupID]['PermittedResources'] = array_values($rbac[$GroupID]['PermittedResources']);
-                file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
-                $this->logging->writeLog("RBAC","Removed $Key from ".$rbac[$GroupID]['Name'],"warning",$rbac[$GroupID]);
-              }
+            if (in_array($Role,$PermittedResources)) {
+              $ArrKey = array_search($Role, $PermittedResources);
+              unset($PermittedResources[$ArrKey]);
+              $prepare[] = 'PermittedResources = :PermittedResources';
+              $execute[':PermittedResources'] = implode(',',$PermittedResources);
+              $this->logging->writeLog("RBAC","Removed $Role from ".$rbac['Name'],"warning",$rbac);
             } else {
-              $this->logging->writeLog("RBAC","$Key is not assigned to ".$rbac[$GroupID]['Name'],"error",$Key,$rbac[$GroupID]);
-            }
-            ## Remove Menus from Array
-            $Needed = false;
-            foreach ($roles['Resources'][$Key]['PermittedMenus'] as $PermittedMenu) {
-              if (in_array($PermittedMenu,$rbac[$GroupID]['PermittedMenus'])) {
-                if (!empty($rbac[$GroupID]['PermittedResources'])) {
-                  foreach ($rbac[$GroupID]['PermittedResources'] as $PermittedResource) {
-                    if (in_array($PermittedMenu,$roles['Resources'][$PermittedResource]['PermittedMenus'])) {
-                      $Needed = true;
-                    }
-                  }
-                } else {
-                  foreach ($rbac[$GroupID]['PermittedMenus'] as $PermittedMenu) {
-                    if (($menutoremove = array_search($PermittedMenu, $rbac[$GroupID]['PermittedMenus'])) !== false) {;
-                      unset($rbac[$GroupID]['PermittedMenus'][$menutoremove]);
-                    }
-                  }
-                  $rbac[$GroupID]['PermittedMenus'] = array_values($rbac[$GroupID]['PermittedMenus']);
-                  file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
-                  $this->logging->writeLog("RBAC","No permitted resources left, removing permitted menus from ".$rbac[$GroupID]['Name'],"debug",$rbac[$GroupID]);
-                }
-              } else {
-                $this->logging->writeLog("RBAC","$PermittedMenu is not assigned to ".$rbac[$GroupID]['Name'],"error",$Key,$rbac[$GroupID]);
-              }
-              if (!$Needed) {
-                if (($menutoremove = array_search($PermittedMenu, $rbac[$GroupID]['PermittedMenus'])) !== false) {
-                  unset($rbac[$GroupID]['PermittedMenus'][$menutoremove]);
-                  $rbac[$GroupID]['PermittedMenus'] = array_values($rbac[$GroupID]['PermittedMenus']);
-                  file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
-                  $this->logging->writeLog("RBAC","Removed Menu: $PermittedMenu from ".$rbac[$GroupID]['Name'],"info",$rbac[$GroupID]);
-                }
-              }
+              $this->logging->writeLog("RBAC","$Role is not assigned to ".$rbac['Name'],"error",$rbac);
+              return array(
+                'Status' => 'Error',
+                'Message' => $Role.' is not assigned to: '.$rbac['Name']
+              );
             }
           }
         } else {
-          return "Error. Invalid RBAC Option specified: ".$Key.".";
+          return array(
+            'Status' => 'Error',
+            'Message' => 'Invalid RBAC Option specified: "'.$Role.'"'
+          );
         }
       }
-    } else {
-      $NewNode = array(
-          "Name" => $GroupName,
-          "Description" => $Description,
-          "PermittedResources" => array(),
-          "PermittedMenus" => array()
+      $stmt = $this->db->prepare('UPDATE rbac SET '.implode(", ",$prepare).' WHERE id = :id');
+      $stmt->execute($execute);
+      return array(
+        'Status' => 'Success',
+        'Message' => 'RBAC Group updated successfully'
       );
-      $rbac[$GroupID] = $NewNode;
-      file_put_contents($this->rbacJson, json_encode($rbac, JSON_PRETTY_PRINT));
+    } else {
+      return array(
+        'Status' => 'Error',
+        'Message' => 'RBAC Group does not exist'
+      );
     }
     return $rbac;
   }
 
-  public function deleteRBAC($Group) {
-    $this->logging->writeLog("RBAC","Deleted RBAC Group: $Group","debug",$_REQUEST);
-    $rbacJson = file_get_contents($this->rbacJson);
-    $rbacArr = json_decode($rbacJson, true);
-    if (array_key_exists($Group,$rbacArr)) {
-      $this->logging->writeLog("RBAC","Deleted RBAC Group: $Group","debug",$_REQUEST);
-      unset($rbacArr[$Group]);
-      file_put_contents($this->rbacJson, json_encode($rbacArr, JSON_PRETTY_PRINT));
+  public function newRBAC($Name,$Description) {
+    if (!empty($this->getRBACByGroupName($Name))) {
+      return array(
+        'Status' => 'Error',
+        'Message' => 'RBAC Group already exists with the name: '.$Name
+      );
     } else {
-      $this->logging->writeLog("RBAC","Error deleting RBAC Group: $Group. The group does not exist.","error",$_REQUEST);
+      $stmt = $this->db->prepare("INSERT INTO rbac (Name, Description) VALUES (:Name, :Description)");
+      $stmt->execute([':Name' => $Name, ':Description' => $Description]);      
+      return array(
+        'Status' => 'Success',
+        'Message' => 'RBAC Group successfully created: '.$Name
+      );
     }
-    return $rbacArr;
+  }
+
+  public function deleteRBAC($GroupID) {
+    if ($this->getRBACByGroupID($GroupID)) {
+      $this->logging->writeLog("RBAC","Deleted RBAC Group: $GroupID","debug",$_REQUEST);
+      $stmt = $this->db->prepare("DELETE FROM rbac WHERE id = :id");
+      $stmt->execute([':id' => $GroupID]);
+    } else {
+      $this->logging->writeLog("RBAC","Error deleting RBAC Group. The group does not exist.","error",$_REQUEST);
+    }
+    return array(
+      'Status' => 'Success',
+      'Message' => 'RBAC Group deleted successfully'
+    );
+  }
+
+  private function isResourcePermitted($rbac, $resource) {
+    foreach ($rbac as $group) {
+      $resources = explode(',', $group['PermittedResources']);
+      if (in_array($resource,$resources)) {
+          return true;
+      } else {
+      }
+    }
+    return false;
+  }
+
+  public function checkAccess($Service = null) {
+    $User = $this->auth->getAuth();
+    if (isset($User['Authenticated'])) {
+      $groupsArr = array_map(function($value) {
+        return "'" . $value . "'";
+      }, $User['Groups']);
+      $stmt = $this->db->prepare('SELECT * FROM rbac WHERE Name IN ('.implode(',',$groupsArr).')');
+      $stmt->execute();
+      $rbac = $stmt->fetchAll(PDO::FETCH_ASSOC);
+      if ($Service != null) {
+        return $this->isResourcePermitted($rbac,$Service);
+      } else {
+      }
+    } else {
+      return false;
+    }
+    return false;
   }
 }

@@ -1,3 +1,8 @@
+## v0.6.2
+- Overhaul Role Based Access & migrate from JSON to DB
+- Remove RBAC requirement for separate Menu permissions
+- Move NavBar links to dynamic generation
+
 ## v0.6.1
 - Enable filter support for web tracking dashboard
 - Minor cleanup and data conversion
