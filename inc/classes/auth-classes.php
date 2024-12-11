@@ -870,19 +870,12 @@ class RBAC {
     // Insert roles if they don't exist
     // This needs to be re-done when modularisation comes in
     $resources = [
-      // Default Admin Roles
+      // Built-In Roles
       ['ADMIN-RBAC', 'Grants the ability to view and manage Role Based Access'],
       ['ADMIN-LOGS', 'Grants access to view Logs'],
       ['ADMIN-CONFIG', 'Grants access to manage the Infoblox SA Tools Configuration'],
       ['ADMIN-USERS', 'Grants access to view and manage users & groups'],
-      ['REPORT-TRACKING', 'Grants the ability to view the Web Tracking Reports'],
-      // Other Stuff
-      ['DNS-TOOLBOX', 'Grants the ability to use the DNS Toolbox'],
-      ['B1-SECURITY-ASSESSMENT', 'Grants the ability to use the Security Assessment Tool'],
-      ['B1-THREAT-ACTORS', 'Grants the ability to use the Threat Actors Tool'],
-      ['B1-LICENSE-USAGE', 'Grants the ability to use the License Usage Tool'],
-      ['ADMIN-SECASS', 'Grants the ability to view and manage the Security Assessment Generator Configuration'],
-      ['REPORT-ASSESSMENTS', 'Grants the ability to view the Assessment Reports']
+      ['REPORT-TRACKING', 'Grants the ability to view the Web Tracking Reports']
     ];
 
     foreach ($resources as $resource) {
@@ -893,69 +886,41 @@ class RBAC {
     }
   }
 
-  public function getRBACGroups() {
+  public function getRBACGroups($type = null) {
     $stmt = $this->db->prepare('SELECT * FROM rbac');
     $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $groups = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    if ($type != null) {
+      switch($type) {
+        case 'configurable':
+          foreach ($groups as $groupKey => $groupVal) {
+            if ($groupVal['Name'] == 'Authenticated' || $groupVal['Name'] == 'Everyone') {
+              unset($groups[$groupKey]);
+            }
+          }
+          return $groups;
+        default:
+          break;
+      }
+    }
+    return $groups;
   }
 
-  public function getRBACByGroupID($GroupID) {
+  public function getRBACGroupByID($GroupID) {
     $stmt = $this->db->prepare('SELECT * FROM rbac WHERE id = :GroupID');
     $stmt->execute([':GroupID' => $GroupID]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
-  public function getRBACByGroupName($GroupName) {
+  public function getRBACGroupByName($GroupName) {
     $stmt = $this->db->prepare('SELECT * FROM rbac WHERE LOWER(Name) = LOWER(:GroupName)');
     $stmt->execute([':GroupName' => $GroupName]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
-  public function getRBAC($GroupID = null,$Action = null) {
-    $this->logging->writeLog("RBAC","Queried RBAC List","debug",$_REQUEST);
-    if ($GroupID != null) {
-      $rbac = $this->getRBACByGroupID($GroupID);
-    } else {
-      $rbac = $this->getRBACGroups();
-    }
-    switch ($Action) {
-      case 'listgroups':
-        $splat = array();
-        foreach ($rbac as $group) {
-          $newArr = array(
-            "id" => $group['id'],
-            "Group" => $group['Name'],
-            "Description" => $group['Description']
-          );
-          array_push($splat,$newArr);
-        }
-        return $splat;
-      case 'listconfigurablegroups':
-        $splat = array();
-        foreach ($rbac as $group) {
-          // Exclude SYSTEM Groups
-          if ($group['Name'] != 'Authenticated' && $group['Name'] != 'Everyone') {
-            $newArr = array(
-              "id" => $group['id'],
-              "Group" => $group['Name'],
-              "Description" => $group['Description']
-            );
-            array_push($splat,$newArr);
-          }
-        }
-        return $splat;
-      case 'listroles':
-        $stmt = $this->db->prepare('SELECT * FROM rbac_resources');
-        $stmt->execute();
-        $rbac = $stmt->fetchAll(PDO::FETCH_ASSOC);
-      default:
-        return $rbac;
-    }
-  }
-
-  public function setRBAC($GroupID,$GroupName,$Description = null,$Role = null,$Value = null) {
-    $rbac = $this->getRBAC($GroupID)[0];
-    $roles = $this->getRBAC(null,"listroles");
+  public function updateRBACGroup($GroupID,$GroupName,$Description = null,$Role = null,$Value = null) {
+    $rbac = $this->getRBACGroupByID($GroupID)[0];
+    $roles = $this->getRBACRoles();
     $prepare = [];
     $execute = [];
     $execute[':id'] = $GroupID;
@@ -1026,8 +991,8 @@ class RBAC {
     return $rbac;
   }
 
-  public function newRBAC($Name,$Description) {
-    if (!empty($this->getRBACByGroupName($Name))) {
+  public function newRBACGroup($Name,$Description) {
+    if (!empty($this->getRBACGroupByName($Name))) {
       return array(
         'Status' => 'Error',
         'Message' => 'RBAC Group already exists with the name: '.$Name
@@ -1042,8 +1007,8 @@ class RBAC {
     }
   }
 
-  public function deleteRBAC($GroupID) {
-    if ($this->getRBACByGroupID($GroupID)) {
+  public function deleteRBACGroup($GroupID) {
+    if ($this->getRBACGroupByID($GroupID)) {
       $this->logging->writeLog("RBAC","Deleted RBAC Group: $GroupID","debug",$_REQUEST);
       $stmt = $this->db->prepare("DELETE FROM rbac WHERE id = :id");
       $stmt->execute([':id' => $GroupID]);
@@ -1053,6 +1018,81 @@ class RBAC {
     return array(
       'Status' => 'Success',
       'Message' => 'RBAC Group deleted successfully'
+    );
+  }
+
+  public function getRBACRoles() {
+    $stmt = $this->db->prepare('SELECT * FROM rbac_resources');
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
+  public function getRBACRoleByID($RoleID) {
+    $stmt = $this->db->prepare('SELECT * FROM rbac_resources WHERE id = :RoleID');
+    $stmt->execute([':RoleID' => $RoleID]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
+  public function getRBACRoleByName($RoleName) {
+    $stmt = $this->db->prepare('SELECT * FROM rbac_resources WHERE LOWER(name) = LOWER(:RoleName)');
+    $stmt->execute([':RoleName' => $RoleName]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
+  public function newRBACRole($Name,$Description) {
+    if (!empty($this->getRBACRoleByName($Name))) {
+      return array(
+        'Status' => 'Error',
+        'Message' => 'RBAC Role already exists with the name: '.$Name
+      );
+    } else {
+      $stmt = $this->db->prepare("INSERT INTO rbac_resources (name, description) VALUES (:Name, :Description)");
+      $stmt->execute([':Name' => $Name, ':Description' => $Description]);      
+      return array(
+        'Status' => 'Success',
+        'Message' => 'RBAC Role successfully created: '.$Name
+      );
+    }
+  }
+
+  public function updateRBACRole($id,$roleName,$roleDescription) {
+    if ($this->getRBACRoleByID($id)) {
+      $prepare = [];
+      $execute = [];
+      $execute[':id'] = $id;
+      if ($roleName !== null) {
+        $prepare[] = 'name = :name';
+        $execute[':name'] = $roleName;
+      }
+      if ($roleDescription !== null) {
+        $prepare[] = 'description = :description';
+        $execute[':description'] = $roleDescription;
+      }
+      $stmt = $this->db->prepare('UPDATE rbac_resources SET '.implode(", ",$prepare).' WHERE id = :id');
+      $stmt->execute($execute);
+      return array(
+        'Status' => 'Success',
+        'Message' => 'RBAC Role updated successfully'
+      );
+    } else {
+      return array(
+        'Status' => 'Error',
+        'Message' => 'RBAC Role does not exist'
+      );
+    }
+  }
+
+  public function deleteRBACRole($RoleID) {
+    if ($this->getRBACRoleByID($RoleID)) {
+      $this->logging->writeLog("RBAC","Deleted RBAC Role: $RoleID","debug",$_REQUEST);
+      $stmt = $this->db->prepare("DELETE FROM rbac_resources WHERE id = :id");
+      $stmt->execute([':id' => $RoleID]);
+    } else {
+      $this->logging->writeLog("RBAC","Error deleting RBAC Role. The role does not exist.","error",$_REQUEST);
+    }
+    return array(
+      'Status' => 'Success',
+      'Message' => 'RBAC Role deleted successfully'
     );
   }
 
