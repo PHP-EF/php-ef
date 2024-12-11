@@ -241,7 +241,7 @@ if (!($_REQUEST['f'])) {
             }
             break;
         case 'CheckAccess':
-            if (isset($_REQUEST['node']) && $ib->auth->getAuth()['Authenticated'] == true) {
+            if (isset($_REQUEST['node'])) {
                 $Result = array(
                     "node" => $_REQUEST['node']
                 );
@@ -263,22 +263,24 @@ if (!($_REQUEST['f'])) {
                 echo json_encode($ib->logging->getLog($Date), JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
             }
             break;
-        case 'GetRBAC':
+        case 'GetRBACGroups':
             if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
-                if (isset($_REQUEST['group'])) {
-                    $GroupID = $_REQUEST['group'];
+                if (isset($_REQUEST['type'])) {
+                    $Type = $_REQUEST['type'];
                 } else {
-                    $GroupID = null;
+                    $Type = null;
                 }
-                if (isset($_REQUEST['action'])) {
-                    $Action = $_REQUEST['action'];
-                } else {
-                    $Action = null;
-                }
-                echo json_encode($ib->rbac->getRBAC($GroupID,$Action), JSON_PRETTY_PRINT);
+                echo json_encode($ib->rbac->getRBACGroups($Type), JSON_PRETTY_PRINT);
             }
             break;
-        case 'SetRBAC':
+        case 'GetRBACGroup':
+            if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+                if (isset($_REQUEST['id'])) {
+                    echo json_encode($ib->rbac->getRBACGroupByID($_REQUEST['id']), JSON_PRETTY_PRINT);
+                }
+            }
+            break;
+        case 'SetRBACGroup':
             if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
                 if (isset($_REQUEST['id'])) {
                     if (isset($_REQUEST['name'])) {
@@ -301,11 +303,11 @@ if (!($_REQUEST['f'])) {
                     } else {
                         $Value = null;
                     }
-                    echo json_encode($ib->rbac->setRBAC($_REQUEST['id'],$GroupName,$Description,$Key,$Value), JSON_PRETTY_PRINT);
+                    echo json_encode($ib->rbac->updateRBACGroup($_REQUEST['id'],$GroupName,$Description,$Key,$Value), JSON_PRETTY_PRINT);
                 }
             }
             break;
-        case 'NewRBAC':
+        case 'NewRBACGroup':
             if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
                 if (isset($_REQUEST['name'])) {
                     if (isset($_REQUEST['description'])) {
@@ -313,18 +315,64 @@ if (!($_REQUEST['f'])) {
                     } else {
                         $Description = null;
                     }
-                    echo json_encode($ib->rbac->newRBAC($_REQUEST['name'],$Description), JSON_PRETTY_PRINT);
+                    echo json_encode($ib->rbac->newRBACGroup($_REQUEST['name'],$Description), JSON_PRETTY_PRINT);
                 }
             }
             break;
-        case 'DeleteRBAC':
+        case 'DeleteRBACGroup':
             if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
                 if (isset($_REQUEST['id'])) {
-                    echo json_encode($ib->rbac->deleteRBAC($_REQUEST['id']), JSON_PRETTY_PRINT);
+                    echo json_encode($ib->rbac->deleteRBACGroup($_REQUEST['id']), JSON_PRETTY_PRINT);
                 } else {
                     return array(
                         'Status' => 'Error',
                         'Message' => 'Group ID Missing'
+                    );
+                }
+            }
+            break;
+        case 'GetRBACRoles':
+            if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+                echo json_encode($ib->rbac->getRBACRoles(), JSON_PRETTY_PRINT);
+            }
+            break;
+        case 'NewRBACRole':
+            if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+                if (isset($_REQUEST['name'])) {
+                    if (isset($_REQUEST['description'])) {
+                        $Description = $_REQUEST['description'];
+                    } else {
+                        $Description = null;
+                    }
+                    echo json_encode($ib->rbac->newRBACRole($_REQUEST['name'],$Description), JSON_PRETTY_PRINT);
+                }
+            }
+            break;
+        case 'SetRBACRole':
+            if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+                if (isset($_REQUEST['id'])) {
+                    if (isset($_REQUEST['name'])) {
+                        $RoleName = $_REQUEST['name'];
+                    } else {
+                        $RoleName = null;
+                    }
+                    if (isset($_REQUEST['description'])) {
+                        $RoleDescription = $_REQUEST['description'];
+                    } else {
+                        $RoleDescription = null;
+                    }
+                    echo json_encode($ib->rbac->updateRBACRole($_REQUEST['id'],$RoleName,$RoleDescription), JSON_PRETTY_PRINT);
+                }
+            }
+            break;
+        case 'DeleteRBACRole':
+            if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+                if (isset($_REQUEST['id'])) {
+                    echo json_encode($ib->rbac->deleteRBACRole($_REQUEST['id']), JSON_PRETTY_PRINT);
+                } else {
+                    return array(
+                        'Status' => 'Error',
+                        'Message' => 'Role ID Missing'
                     );
                 }
             }

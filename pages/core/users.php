@@ -255,20 +255,20 @@
 
   function listGroups(row) {
     var div = document.getElementById('modalListGroup');
-    $.getJSON('/api?f=GetRBAC&action=listconfigurablegroups', function(groupinfo) {
+    $.getJSON('/api?f=GetRBACGroups&type=configurable', function(groupinfo) {
       div.innerHTML = "";
       for (var key in groupinfo) {
         div.innerHTML += `
           <div class="list-group-item">
             <div class="row align-items-center">
               <div class="col">
-                <strong class="mb-2">${groupinfo[key]['Group']}</strong>
+                <strong class="mb-2">${groupinfo[key]['Name']}</strong>
                 <p class="text-muted mb-0">${groupinfo[key]['Description']}</p>
               </div>
               <div class="col-auto">
                 <div class="custom-control custom-switch">
-                  <input type="checkbox" class="custom-control-input toggle" id="${groupinfo[key]['Group'].replaceAll(" ", "--")}">
-                  <label class="custom-control-label" for="${groupinfo[key]['Group'].replaceAll(" ", "--")}"></label>
+                  <input type="checkbox" class="custom-control-input toggle" id="${groupinfo[key]['Name'].replaceAll(" ", "--")}">
+                  <label class="custom-control-label" for="${groupinfo[key]['Name'].replaceAll(" ", "--")}"></label>
                 </div>
 	            </div>
             </div>
@@ -510,7 +510,7 @@
             $('.popover').hide();
         }
     );
-    $.getJSON('/api?f=GetRBAC&action=listconfigurablegroups', function(groupres) {
+    $.getJSON('/api?f=GetRBACGroups&type=configurable', function(groupres) {
       groupinfo = groupres;
       populateUsers();
     });
