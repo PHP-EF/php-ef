@@ -8,10 +8,9 @@ require_once(__DIR__.'/../../inc/inc.php');
 if ($ib->rbac->checkAccess("DNS-TOOLBOX") == false) {
   die();
 }
-?>
+$return = '
 
 <link href="/assets/css/dnstoolbox-0.3.css" rel="stylesheet">
-
 
 <section class="section">
   <div class="row">
@@ -122,7 +121,7 @@ if ($ib->rbac->checkAccess("DNS-TOOLBOX") == false) {
                   </tr>
                   <tr>
                     <td>SPF/TXT Record</td>
-                    <td>An TXT record is used to store text based information within DNS for various services. SPF specifically is for authentication of public email servers and identifies which mail servers are permitted to send mail on the queried domain's behalf. This query will return associated TXT records.</td>
+                    <td>An TXT record is used to store text based information within DNS for various services. SPF specifically is for authentication of public email servers and identifies which mail servers are permitted to send mail on the queried domain\'s behalf. This query will return associated TXT records.</td>
                   </tr>
                   <tr>
                     <td>DMARC Record</td>
@@ -175,17 +174,17 @@ if ($ib->rbac->checkAccess("DNS-TOOLBOX") == false) {
 </section>
 
 <script src ="/assets/js/dnstoolbox-0.4.js"></script>
-<script>
-
-<?php
+<script>';
 if (isset($_REQUEST['domain'])) {
-  echo '$("#domain").val("'.$_REQUEST['domain'].'");';
+  $return .= '$("#domain").val("'.$_REQUEST['domain'].'");';
 }
 if (isset($_REQUEST['type'])) {
-  echo '$("#file").val("'.$_REQUEST['type'].'");';
+  $return .= '$("#file").val("'.$_REQUEST['type'].'");';
 }
 if (isset($_REQUEST['location'])) {
-  echo '$("#source").val("'.$_REQUEST['location'].'");';
+  $return .= '$("#source").val("'.$_REQUEST['location'].'");';
 }
+return $return;
 ?>
 </script>
+

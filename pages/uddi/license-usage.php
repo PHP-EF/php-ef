@@ -1,9 +1,9 @@
 <?php
-  require_once(__DIR__.'/../../inc/inc.php');
+  require_once(__DIR__."/../../inc/inc.php");
   if ($ib->rbac->checkAccess("B1-LICENSE-USAGE") == false) {
     die();
   }
-?>
+return '
 
 <!doctype html>
 <html lang="en">
@@ -13,7 +13,7 @@
 
 	<title>License Usage</title>
 
-	<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
   <meta name="viewport" content="width=device-width" />
 </head>
 <body>
@@ -91,53 +91,54 @@
 
 <script>
 function showLoading() {
-  document.querySelector('.loading-icon').style.display = 'block';
+  document.querySelector(".loading-icon").style.display = "block";
 }
 function hideLoading() {
-  document.querySelector('.loading-icon').style.display = 'none';
+  document.querySelector(".loading-icon").style.display = "none";
 }
 
 $("#Generate").click(function(){
-    if (!$('#APIKey').is(':disabled')) {
-      if(!$('#APIKey')[0].value) {
+    if (!$("#APIKey").is(":disabled")) {
+      if(!$("#APIKey")[0].value) {
       toast("Error","Missing Required Fields","The API Key is a required field.","danger","30000");
       return null;
       }
     }
-    if(!$('#startDate')[0].value){
+    if(!$("#startDate")[0].value){
     toast("Error","Missing Required Fields","The Start Date is a required field.","danger","30000");
     return null;
     }
-    if(!$('#endDate')[0].value){
+    if(!$("#endDate")[0].value){
     toast("Error","Missing Required Fields","The End Date is a required field.","danger","30000");
     return null;
     }
 
-    $("#Generate").prop('disabled', true)
-    const startDateTime = new Date($('#startDate')[0].value)
-    const endDateTime = new Date($('#endDate')[0].value)
+    $("#Generate").prop("disabled", true)
+    const startDateTime = new Date($("#startDate")[0].value)
+    const endDateTime = new Date($("#endDate")[0].value)
     showLoading();
       var postArr = {}
       postArr.StartDateTime = startDateTime.toISOString()
       postArr.EndDateTime = endDateTime.toISOString()
-      postArr.Realm = $('#Realm').find(":selected").val()
-      if ($('#APIKey')[0].value) {
-        postArr.APIKey = $('#APIKey')[0].value
+      postArr.Realm = $("#Realm").find(":selected").val()
+      if ($("#APIKey")[0].value) {
+        postArr.APIKey = $("#APIKey")[0].value
       }
-      $.post( "/api?f=createLicenseReport", postArr).done(function( data, status ) {
-        if (data['Status'] == 'Error') {
-          toast(data['Status'],"",data['Error'],"danger","30000");
+      queryAPI("POST", "/api?f=createLicenseReport", postArr).done(function( data, status ) {
+        if (data["Status"] == "Error") {
+          toast(data["Status"],"",data["Error"],"danger","30000");
         } else {
-          $('#ip_unique_dns').text(data['Unique']['DNS'])
-          $('#ip_unique_dhcp').text(data['Unique']['DHCP'])
-          $('#ip_unique_dfp').text(data['Unique']['DFP'])
+          $("#ip_unique_dns").text(data["Unique"]["DNS"])
+          $("#ip_unique_dhcp").text(data["Unique"]["DHCP"])
+          $("#ip_unique_dfp").text(data["Unique"]["DFP"])
           toast("Success","","License Usage has been successfully generated.","success","30000");
         }
     }).fail(function( data, status ) {
         toast("API Error","","Unknown API Error","danger","30000");
     }).always(function() {
         hideLoading()
-        $("#Generate").prop('disabled', false)
+        $("#Generate").prop("disabled", false)
     });
 });
 </script>
+';

@@ -1,7 +1,5 @@
-<html>
 <?php
-  require_once(__DIR__.'/../inc/inc.php');
-?>
+  return '
   <main class="page-content">
     <div class="container-fluid">
       <h2>Infoblox SA Tools</h2>
@@ -26,7 +24,7 @@
       </div>
       <div class="mb-2">
         <small>
-          Running Version: <?php echo $ib->getVersion()[0]; ?>
+          Running Version: '.$ib->getVersion()[0].'
           </a>
         </small>
       </div>
@@ -36,3 +34,4 @@
   </main>
 </body>
 </html>
+';

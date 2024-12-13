@@ -1,12 +1,24 @@
 <?php
-  require_once(__DIR__.'/../../inc/inc.php');
+  require_once(__DIR__."/../../inc/inc.php");
   if ($ib->rbac->checkAccess("ADMIN-LOGS") == false) {
     die();
   }
 
-?>
-
-
+  $LogFiles = array_reverse($ib->logging->getLogFiles());
+  $LogFileArr = array();
+    foreach ($LogFiles as $LogFile) {
+      $LogFileShort = explode(".log",explode($ib->config->getConfig("System","logfilename")."-",$LogFile)[1]);
+      if ($LogFileShort[0] != null) {
+        array_push($LogFileArr,$LogFileShort[0]);
+      }
+    }
+    usort($LogFileArr, "compareByTimestamp");
+    $logOptions = [];
+    foreach ($LogFileArr as $LogFileItem) {
+      $logOptions[] = '<option value="'.$LogFileItem.'">'.date("d/m/Y",strtotime($LogFileItem)).'</option>';
+    }
+ 
+  return '
 <div class="container">
   <div class="row justify-content-center">
     <div class="col-14 col-lg-14 col-xl-14 mx-auto">
@@ -22,7 +34,7 @@
             data-filter-control-visible="false"
             data-filter-control-multiple-search="true"
             data-show-export="true"
-            data-export-data-type='json, xml, csv, txt, excel, sql'
+            data-export-data-type="json, xml, csv, txt, excel, sql"
             data-show-refresh="true"
             data-show-columns="true"
             data-pagination="true"
@@ -33,20 +45,7 @@
 
             <div id="toolbar" class="select">
               <select class="form-select" id="logDate">
-                <?php
-                  $LogFiles = array_reverse($ib->logging->getLogFiles());
-                  $LogFileArr = array();
-                    foreach ($LogFiles as $LogFile) {
-                      $LogFileShort = explode(".log",explode($ib->config->getConfig("System","logfilename")."-",$LogFile)[1]);
-                      if ($LogFileShort[0] != null) {
-                        array_push($LogFileArr,$LogFileShort[0]);
-                      }
-                    }
-                    usort($LogFileArr, "compareByTimestamp");
-                    foreach ($LogFileArr as $LogFileItem) {
-                      echo '<option value="'.$LogFileItem.'">'.date('d/m/Y',strtotime($LogFileItem)).'</option>';
-                    }
-                ?>
+              '.implode('',$logOptions).'
               </select>
             </div>
             <thead>
@@ -93,18 +92,18 @@
 <script>
   function actionFormatter(value, row, index) {
     return [
-      '<a class="edit" title="Edit">',
-      '<i class="fa fa-search"></i>',
-      '</a>'
-    ].join('')
+      `<a class="edit" title="Edit">`,
+      `<i class="fa fa-search"></i>`,
+      "</a>"
+    ].join("")
   }
 
-  $('#logDate').on('change', function(event) {
-    $('#logTable').bootstrapTable('refresh');
+  $("#logDate").on("change", function(event) {
+    $("#logTable").bootstrapTable("refresh");
   });
 
   function queryParams(params) {
-    var logDate = $('#logDate').find(":selected").val();
+    var logDate = $("#logDate").find(":selected").val();
     params.date = logDate;
     return params;
   }
@@ -116,14 +115,17 @@
   }
 
   function logData(row) {
-    document.getElementById('logData').innerHTML = row;
+    document.getElementById("logData").innerHTML = row;
   }
 
   window.actionEvents = {
-    'click .edit': function (e, value, row, index) {
+    "click .edit": function (e, value, row, index) {
       var jsonPretty = JSON.stringify(JSON.parse(row.context),null,2);
       logData(jsonPretty);
-      $('#logModal').modal('show');
+      $("#logModal").modal("show");
     }
   }
+
+  $("#logTable").bootstrapTable();
 </script>
+';

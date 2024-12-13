@@ -1,9 +1,9 @@
 <?php
-  require_once(__DIR__.'/../../inc/inc.php');
+  require_once(__DIR__."/../../inc/inc.php");
   if ($ib->rbac->checkAccess("ADMIN-USERS") == false) {
     die();
   }
-?>
+return '
 
 <div class="container">
   <div class="row justify-content-center">
@@ -191,89 +191,84 @@
 <script>
   function actionFormatter(value, row, index) {
     return [
-      '<a class="edit" title="Edit">',
-      '<i class="fa fa-pencil"></i>',
-      '</a>&nbsp;',
-      '<a class="delete" title="Delete">',
-      '<i class="fa fa-trash"></i>',
-      '</a>'
-    ].join('')
+      `<a class="edit" title="Edit">`,
+      `<i class="fa fa-pencil"></i>`,
+      `</a>&nbsp;`,
+      `<a class="delete" title="Delete">`,
+      `<i class="fa fa-trash"></i>`,
+      "</a>"
+    ].join("")
   }
 
   function groupsFormatter(value, row, index) {
-    var html = ''
+    var html = ""
     $(row.groups).each(function (group) {
-      html += '<span class="badge bg-info">'+row.groups[group]+'</span>&nbsp;';
+      html += `<span class="badge bg-info">`+row.groups[group]+`</span>&nbsp;`;
     });
     return html;
   }
 
   function listUserConfig(row) {
-    $('#editUserID').val(row['id']);
-    $('#editUserName').val(row['username']);
-    $('#editUserFirstname').val(row['firstname']);
-    $('#editUserSurname').val(row['surname']);
-    $('#editUserEmail').val(row['email']);
-    if (row['type'] == 'SSO') {
-      $('#editUserPassword').attr('disabled',true);
-      $('#editUserPassword2').attr('disabled',true);
+    $("#editUserID").val(row["id"]);
+    $("#editUserName").val(row["username"]);
+    $("#editUserFirstname").val(row["firstname"]);
+    $("#editUserSurname").val(row["surname"]);
+    $("#editUserEmail").val(row["email"]);
+    if (row["type"] == "SSO") {
+      $("#editUserPassword").attr("disabled",true);
+      $("#editUserPassword2").attr("disabled",true);
     } else {
-      $('#editUserPassword').attr('disabled',false);
-      $('#editUserPassword2').attr('disabled',false);
+      $("#editUserPassword").attr("disabled",false);
+      $("#editUserPassword2").attr("disabled",false);
     }
-    $('#editUserType').val(row['type']);
-    $('#editLastLogin').val(row['lastlogin']);
-    $('#editPasswordExpires').val(row['passwordexpires']);
-    $('#editCreated').val(row['created']);
+    $("#editUserType").val(row["type"]);
+    $("#editLastLogin").val(row["lastlogin"]);
+    $("#editPasswordExpires").val(row["passwordexpires"]);
+    $("#editCreated").val(row["created"]);
   }
 
   window.actionEvents = {
-    'click .edit': function (e, value, row, index) {
+    "click .edit": function (e, value, row, index) {
       listUserConfig(row);
       listGroups(row);
-      $('#editModal').modal('show');
+      $("#editModal").modal("show");
     },
-    'click .delete': function (e, value, row, index) {
+    "click .delete": function (e, value, row, index) {
       if(confirm("Are you sure you want to delete "+row.username+" from the list of Users? This is irriversible.") == true) {
-        $.ajax({
-          url: '/api/v2/user/'+row.id,
-          type: 'DELETE',
-          success: function(data) {
-            if (data['result'] == 'Success') {
-              toast(data['result'],"",data['message'],"success");
-              populateUsers();
-              $('#editModal').modal('hide');
-            } else if (data['result'] == 'Error') {
-              toast(data['result'],"",data['message'],"danger","30000");
-            } else {
-              toast("Error","","Failed to remove user: "+row.username,"danger","30000");
-            }
-          },
-          fail: function(data) {
-            toast("API Error","","Failed to remove user: "+row.username,"danger","30000");
+        queryAPI("DELETE","/api/v2/user/"+row.id).done(function(data) {
+          if (data["result"] == "Success") {
+            toast(data["result"],"",data["message"],"success");
+            populateUsers();
+            $("#editModal").modal("hide");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger","30000");
+          } else {
+            toast("Error","","Failed to remove user: "+row.username,"danger","30000");
           }
+        }).fail(function() {
+          toast("API Error","","Failed to remove user: "+row.username,"danger","30000");
         });
       }
     }
   }
 
   function listGroups(row) {
-    var div = document.getElementById('modalListGroup');
-    $.getJSON('/api/v2/rbac/groups/configurable', function(groupinfo) {
+    var div = document.getElementById("modalListGroup");
+    queryAPI("GET","/api/v2/rbac/groups/configurable").done(function(data) {
       div.innerHTML = "";
-      var groups = groupinfo['data']
+      var groups = data["data"]
       for (var key in groups) {
         div.innerHTML += `
           <div class="list-group-item">
             <div class="row align-items-center">
               <div class="col">
-                <strong class="mb-2">${groups[key]['Name']}</strong>
-                <p class="text-muted mb-0">${groups[key]['Description']}</p>
+                <strong class="mb-2">${groups[key]["Name"]}</strong>
+                <p class="text-muted mb-0">${groups[key]["Description"]}</p>
               </div>
               <div class="col-auto">
                 <div class="custom-control custom-switch">
-                  <input type="checkbox" class="custom-control-input toggle" id="${groups[key]['Name'].replaceAll(" ", "--")}">
-                  <label class="custom-control-label" for="${groups[key]['Name'].replaceAll(" ", "--")}"></label>
+                  <input type="checkbox" class="custom-control-input toggle" id="${groups[key]["Name"].replaceAll(" ", "--")}">
+                  <label class="custom-control-label" for="${groups[key]["Name"].replaceAll(" ", "--")}"></label>
                 </div>
 	            </div>
             </div>
@@ -285,52 +280,53 @@
           $("#"+groupsplit[group].replaceAll(" ", "--")).prop("checked", "true");
         }
       }
-    });
+    }).fail(function() {
+      toast("API Error","","Failed to retrieve list of configurable groups","danger","30000");
+    });;
   }
 
-  $(document).on('click', '.toggle', function(event) {
-    let toggle = $('#'+event.target.id).prop('checked');
-    let groups = $('#editModal .toggle:checked').map(function() {
-      return this.id.replaceAll("--"," ");
-    }).get().join(',');
-    var id = $('#editUserID').val().trim();
-
-    $.ajax({
-      url: '/api/v2/user/'+id,
-      type: 'PUT',
-      data: JSON.stringify({
-        groups: groups
-      }),
-      contentType: 'application/json',
-      success: function(data) {
-        if (data['result'] == 'Success') {
-          toast(data['result'],"",data['message'],"success");
-          populateUsers();
-        } else if (data['result'] == 'Error') {
-          toast(data['result'],"",data['message'],"danger","30000");
-        } else {
-          toast("Error","","Failed to update user groups","danger","30000");
-        }
-      },
-      fail: function(data) {
-        toast("API Error","","Failed to update user groups","danger","30000");
+  $(document).on("click", ".toggle", function(event) {
+    let toggle = $("#"+event.target.id).prop("checked");
+    let data = {
+      groups: $("#editModal .toggle:checked").map(function() {
+        return this.id.replaceAll("--"," ");
+      }).get().join(",")
+    }
+    var id = $("#editUserID").val().trim();
+    queryAPI("PUT","/api/v2/user/"+id,data).done(function(data) {
+      if (data["result"] == "Success") {
+        toast(data["result"],"",data["message"],"success");
+        populateUsers();
+      } else if (data["result"] == "Error") {
+        toast(data["result"],"",data["message"],"danger","30000");
+      } else {
+        toast("Error","","Failed to update user groups","danger","30000");
       }
+    }).fail(function(data) {
+      toast("API Error","","Failed to update user groups","danger","30000");
     });
   });
 
-  $(document).on('click', '#newUserSubmit', function(event) {
+  $(document).on("click", "#newUserSubmit", function(event) {
     // Prevent the default form submission
     event.preventDefault();
 
     // Get values from the input fields
-    var username = $('#newUserName').val().trim();
-    var password = $('#newUserPassword').val().trim();
-    var confirmPassword = $('#newUserPassword2').val().trim();
-    var firstname = $('#newUserFirstname').val().trim();
-    var surname = $('#newUserSurname').val().trim();
-    var email = $('#newUserEmail').val().trim();
-    var expire = $('#expire')[0].checked;
-
+    var username = $("#newUserName").val().trim();
+    var password = $("#newUserPassword").val().trim();
+    var confirmPassword = $("#newUserPassword2").val().trim();
+    var firstname = $("#newUserFirstname").val().trim();
+    var surname = $("#newUserSurname").val().trim();
+    var email = $("#newUserEmail").val().trim();
+    var expire = $("#expire")[0].checked;
+    let data = {
+      un: username ? username : null,
+      pw: password ? password : null,
+      fn: firstname ? firstname : null,
+      sn: surname ? surname : null,
+      em: email ? email : null,
+      expire: expire ? expire : null,
+    }
     // Initialize a flag for validation
     var isValid = true;
 
@@ -348,65 +344,44 @@
 
     // Display error messages or proceed with form submission
     if (isValid) {
-      $.ajax({
-        url: '/api/v2/users',
-        type: 'POST',
-        data: JSON.stringify({
-          un: username,
-          pw: password,
-          fn: firstname,
-          sn: surname,
-          em: email,
-          expire: expire
-        }),
-        contentType: 'application/json',
-        success: function(data) {
-          if (data['result'] == 'Success') {
-            toast(data['result'],"",data['message'],"success");
-            populateUsers();
-            $('#newUserModal').modal('hide');
-          } else if (data['result'] == 'Error') {
-            toast(data['result'],"",data['message'],"danger","30000");
-          } else {
-            toast("Error","","Failed to add new user","danger","30000");
-          }
-        },
-        fail: function(data) {
-          toast("API Error","","Failed to add new user","danger","30000");
+      queryAPI("POST","/api/v2/users",data).done(function(data) {
+        if (data["result"] == "Success") {
+          toast(data["result"],"",data["message"],"success");
+          populateUsers();
+          $("#newUserModal").modal("hide");
+        } else if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger","30000");
+        } else {
+          toast("Error","","Failed to add new user","danger","30000");
         }
+      }).fail(function(data) {
+        toast("API Error","","Failed to add new user","danger","30000");
       });
     }
   });
 
-  $(document).on('click', '#editUserSubmit', function(event) {
-    var id = $('#editUserID').val().trim();
-    var un = $('#editUserName').val().trim();
-    $.ajax({
-      url: '/api/v2/user/'+id,
-      type: 'PUT',
-      data: JSON.stringify({
-        un: un,
-        pw: $('#editUserPassword').val().trim(),
-        fn: $('#editUserFirstname').val().trim(),
-        sn: $('#editUserSurname').val().trim(),
-        em: $('#editUserEmail').val().trim()
-      }),
-      contentType: 'application/json',
-      success: function(data) {
-        if (data['result'] == 'Success') {
-          toast(data['result'],"",data['message'],"success");
-          populateUsers();
-          $('#editModal').modal('hide');
-        } else if (data['result'] == 'Error') {
-          toast(data['result'],"",data['message'],"danger","30000");
-        } else {
-          toast("Error","","Failed to update user: "+un,"danger","30000");
-        }
-      },
-      fail: function(data) {
-        toast("API Error","","Failed to update user: "+un,"danger","30000");
+  $(document).on("click", "#editUserSubmit", function(event) {
+    var id = $("#editUserID").val().trim();
+    let data = {
+      un: $("#editUserName").val().trim() ? $("#editUserName").val().trim() : null,
+      pw: $("#editUserPassword").val().trim() ? $("#editUserPassword").val().trim() : null,
+      fn: $("#editUserFirstname").val().trim() ? $("#editUserFirstname").val().trim() : null,
+      sn: $("#editUserSurname").val().trim() ? $("#editUserSurname").val().trim() : null,
+      em: $("#editUserEmail").val().trim() ? $("#editUserEmail").val().trim() : null
+    };
+    queryAPI("PUT","/api/v2/user/"+id,data).done(function(data) {
+      if (data["result"] == "Success") {
+        toast(data["result"],"",data["message"],"success");
+        populateUsers();
+        $("#editModal").modal("hide");
+      } else if (data["result"] == "Error") {
+        toast(data["result"],"",data["message"],"danger","30000");
+      } else {
+        toast("Error","","Failed to update user: "+un,"danger","30000");
       }
-    });
+    }).fail(function(data) {
+      toast("API Error","","Failed to update user: "+un,"danger","30000");
+    })
   });
 
   function userButtons() {
@@ -415,8 +390,8 @@
         text: "Add User",
         icon: "bi-person-fill-add",
         event: function() {
-          $('#newUserModal').modal('show');
-          $('#newUserModal input').val('');
+          $("#newUserModal").modal("show");
+          $("#newUserModal input").val("");
         },
         attributes: {
           title: "Add a new user",
@@ -427,96 +402,96 @@
   }
 
   function populateUsers() {
-    $.getJSON('/api/v2/users', function(data) {
-      if (data['Status'] == 'Error') {
-        toast(data['Status'],"",data['Error'],"danger","30000");
-      } else if (data['error']) {
-        toast('Error',"",data['error'][0]['message'],"danger","30000");
+    $.getJSON("/api/v2/users", function(data) {
+      if (data["Status"] == "Error") {
+        toast(data["Status"],"",data["Error"],"danger","30000");
+      } else if (data["error"]) {
+        toast("Error","",data["error"][0]["message"],"danger","30000");
       } else {
-        $('#userTable').bootstrapTable('destroy');
-        $('#userTable').bootstrapTable({
+        $("#userTable").bootstrapTable("destroy");
+        $("#userTable").bootstrapTable({
           data: data,
-          dataField: 'data',
+          dataField: "data",
           sortable: true,
           pagination: true,
           search: true,
           showExport: true,
-          exportTypes: ['json', 'xml', 'csv', 'txt', 'excel', 'sql'],
+          exportTypes: ["json", "xml", "csv", "txt", "excel", "sql"],
           showColumns: true,
           showRefresh: true,
           filterControl: true,
           filterControlVisible: false,
           showFilterControlSwitch: true,
-          buttons: 'userButtons',
-          buttonsOrder: 'btnAddUser,btnBulkDelete,refresh,columns,export,filterControlSwitch',
+          buttons: "userButtons",
+          buttonsOrder: "btnAddUser,btnBulkDelete,refresh,columns,export,filterControlSwitch",
           columns: [{
-            field: 'state',
-            title: 'state',
+            field: "state",
+            title: "state",
             checkbox: true
           },{
-            field: 'id',
-            title: 'ID',
-            filterControl: 'input',
+            field: "id",
+            title: "ID",
+            filterControl: "input",
             sortable: true
           },{
-            field: 'username',
-            title: 'Username',
-            filterControl: 'input',
+            field: "username",
+            title: "Username",
+            filterControl: "input",
             sortable: true
           },{
-            field: 'firstname',
-            title: 'First Name',
-            filterControl: 'input',
+            field: "firstname",
+            title: "First Name",
+            filterControl: "input",
             sortable: true
           },{
-            field: 'surname',
-            title: 'Surname',
-            filterControl: 'input',
+            field: "surname",
+            title: "Surname",
+            filterControl: "input",
             sortable: true
           },{
-            field: 'email',
-            title: 'Email',
-            filterControl: 'input',
+            field: "email",
+            title: "Email",
+            filterControl: "input",
             sortable: true
           },{
-            field: 'groups',
-            title: 'Group(s)',
-            filterControl: 'input',
+            field: "groups",
+            title: "Group(s)",
+            filterControl: "input",
             sortable: true,
-            formatter: 'groupsFormatter'
+            formatter: "groupsFormatter"
           },{
-            field: 'type',
-            title: 'Type',
-            filterControl: 'input',
+            field: "type",
+            title: "Type",
+            filterControl: "input",
             sortable: true
           },{
-            field: 'lastlogin',
-            title: 'Last Login Date',
-            filterControl: 'input',
+            field: "lastlogin",
+            title: "Last Login Date",
+            filterControl: "input",
             sortable: false,
-            formatter: 'datetimeFormatter'
+            formatter: "datetimeFormatter"
           },{
-            field: 'created',
-            title: 'Creation Date',
-            filterControl: 'input',
-            sortable: false,
-            visible: false,
-            formatter: 'datetimeFormatter'
-          },{
-            field: 'passwordexpires',
-            title: 'Password Expiry Date',
-            filterControl: 'input',
+            field: "created",
+            title: "Creation Date",
+            filterControl: "input",
             sortable: false,
             visible: false,
-            formatter: 'datetimeFormatter'
+            formatter: "datetimeFormatter"
           },{
-            title: 'Actions',
-            formatter: 'actionFormatter',
-            events: 'actionEvents',
+            field: "passwordexpires",
+            title: "Password Expiry Date",
+            filterControl: "input",
+            sortable: false,
+            visible: false,
+            formatter: "datetimeFormatter"
+          },{
+            title: "Actions",
+            formatter: "actionFormatter",
+            events: "actionEvents",
           }]
         });
         // Enable refresh button
-        $('button[name="refresh"]').click(function() {
+        $(`button[name="refresh"]`).click(function() {
           populateUsers();
         });
       }
@@ -525,57 +500,53 @@
     })
   }
 
-  var groupinfo = '';
-
   $(document).ready(function() {
-    $('.hover-target').hover(
+    $(".hover-target").hover(
         function() {
-            $('.popover').css({
-                display: 'block',
+            $(".popover").css({
+                display: "block",
             });
         },
         function() {
-            $('.popover').hide();
+            $(".popover").hide();
         }
     );
-    $.getJSON('/api/v2/rbac/groups/configurable', function(groupres) {
-      groupinfo = groupres['data'];
-      populateUsers();
-    });
-    $('#newUserPassword, #newUserPassword2').on('change', function() {
-      var password = $('#newUserPassword').val();
-      var confirmPassword = $('#newUserPassword2').val();
+    populateUsers();
+    $("#newUserPassword, #newUserPassword2").on("change", function() {
+      var password = $("#newUserPassword").val();
+      var confirmPassword = $("#newUserPassword2").val();
 
       if (password !== confirmPassword) {
         if (password !== "" && confirmPassword !== "") {
           toast("Warning","","The entered passwords do not match","danger","3000");
-          $('#newUserSubmit').attr('disabled',true);
-          $('#newUserPassword').css('color','red').css('border-color','red');
-          $('#newUserPassword2').css('color','red').css('border-color','red');
+          $("#newUserSubmit").attr("disabled",true);
+          $("#newUserPassword").css("color","red").css("border-color","red");
+          $("#newUserPassword2").css("color","red").css("border-color","red");
         }
       } else {
-        $('#newUserSubmit').attr('disabled',false);
-        $('#newUserPassword').css('color','green').css('border-color','green');
-        $('#newUserPassword2').css('color','green').css('border-color','green');
+        $("#newUserSubmit").attr("disabled",false);
+        $("#newUserPassword").css("color","green").css("border-color","green");
+        $("#newUserPassword2").css("color","green").css("border-color","green");
       }
     });
-    $('#editUserPassword, #editUserPassword2').on('change', function() {
-      var password = $('#editUserPassword').val();
-      var confirmPassword = $('#editUserPassword2').val();
+    $("#editUserPassword, #editUserPassword2").on("change", function() {
+      var password = $("#editUserPassword").val();
+      var confirmPassword = $("#editUserPassword2").val();
 
       if (password !== confirmPassword) {
         if (password !== "" && confirmPassword !== "") {
           toast("Warning","","The entered passwords do not match","danger","3000");
-          $('#editUserSubmit').attr('disabled',true);
-          $('#editUserPassword').css('color','red').css('border-color','red');
-          $('#editUserPassword2').css('color','red').css('border-color','red');
+          $("#editUserSubmit").attr("disabled",true);
+          $("#editUserPassword").css("color","red").css("border-color","red");
+          $("#editUserPassword2").css("color","red").css("border-color","red");
         }
       } else {
-        $('#newUserSubmit').attr('disabled',false);
-        $('#editUserPassword').css('color','green').css('border-color','green');
-        $('#editUserPassword2').css('color','green').css('border-color','green');
+        $("#newUserSubmit").attr("disabled",false);
+        $("#editUserPassword").css("color","green").css("border-color","green");
+        $("#editUserPassword2").css("color","green").css("border-color","green");
       }
     });
   });
 
 </script>
+';

@@ -1,10 +1,10 @@
 <?php
-  require_once(__DIR__.'/../../inc/inc.php');
+  require_once(__DIR__."/../../inc/inc.php");
   if ($ib->rbac->checkAccess("ADMIN-CONFIG") == false) {
     die();
   }
 
-?>
+return '
 
 <style>
 .card {
@@ -56,7 +56,7 @@
             <div class="form-group">
               <label for="systemCURLTimeoutConnect">CURL Timeout on Connect</label>
 	            <input type="text" class="form-control info-field" id="systemCURLTimeoutConnect" aria-describedby="systemCURLTimeoutConnectHelp" name="systemCURLTimeoutConnect">
-              <small id="systemCURLTimeoutConnectHelp" class="form-text text-muted">Specify the timeout used for CURL requests on connect. (Shouldn't need to be increased)</small>
+              <small id="systemCURLTimeoutConnectHelp" class="form-text text-muted">Specify the timeout used for CURL requests on connect. (Shouldn"t need to be increased)</small>
 	          </div>
 	        </div>
           <br>
@@ -186,7 +186,7 @@
 <script>
 
   function getConfig() {
-    $.getJSON('/api/v2/config', function(data) {
+    $.getJSON("/api/v2/config", function(data) {
       let config = data.data;
       $("#systemLogFileName").val(config.System.logfilename);
       $("#systemLogDirectory").val(config.System.logdirectory);
@@ -204,10 +204,10 @@
       $("#idpSsoUrl").val(config.SAML.idp.singleSignOnService.url);
       $("#idpSloUrl").val(config.SAML.idp.singleLogoutService.url);
       $("#idpX509Cert").text(config.SAML.idp.x509cert);
-      $("#samlEnabled").prop('checked',config.SAML.enabled);
-      $("#samlAutoCreateUsers").prop('checked',config.SAML.AutoCreateUsers);
-      $("#samlStrict").prop('checked',config.SAML.strict);
-      $("#samlDebug").prop('checked',config.SAML.debug);
+      $("#samlEnabled").prop("checked",config.SAML.enabled);
+      $("#samlAutoCreateUsers").prop("checked",config.SAML.AutoCreateUsers);
+      $("#samlStrict").prop("checked",config.SAML.strict);
+      $("#samlDebug").prop("checked",config.SAML.debug);
       $("#attributeUsername").val(config.SAML.attributes.Username);
       $("#attributeFirstName").val(config.SAML.attributes.FirstName);
       $("#attributeLastName").val(config.SAML.attributes.LastName);
@@ -219,36 +219,31 @@
   getConfig();
 
   $(".info-field").change(function(elem) {
-    toast("Configuration","",$(elem.target.previousElementSibling).text()+' has changed.<br><small>Save configuration to apply changes.</small>',"warning");
+    toast("Configuration","",$(elem.target.previousElementSibling).text()+" has changed.<br><small>Save configuration to apply changes.</small>","warning");
     $(this).addClass("changed");
   });
 
   $("#submitConfig").click(function(event) {
     event.preventDefault();
     var kvpairs = {};
-    var inspectForm = document.querySelector('#configurationForm').getElementsByClassName("changed");
+    var inspectForm = document.querySelector("#configurationForm").getElementsByClassName("changed");
     for ( var i = 0; i < inspectForm.length; i++ ) {
       var e = inspectForm[i];
-      if (inspectForm[i]['type'] == 'checkbox') {
+      if (inspectForm[i]["type"] == "checkbox") {
         kvpairs[e.name] = encodeURIComponent(e.checked);
       } else {
         kvpairs[e.name] = encodeURIComponent(e.value);
       }
     }
-    $.ajax({
-      url: '/api/v2/config',
-      type: 'PUT',
-      data: JSON.stringify(kvpairs),
-      contentType: 'application/json',
-      success: function(setConfig) {
-        if (setConfig['result'] == 'Success') {
-          toast("Success","","Successfully saved configuration","success");
-        } else if (setConfig['result'] == 'Error') {
-          toast("Error","","Failed to save configuration","danger");
-        } else {
-          toast("API Error","","Failed to save configuration","danger","30000");
-        }
+    queryAPI("PUT","/api/v2/config",kvpairs).done(function(data) {
+      if (data["result"] == "Success") {
+        toast("Success","","Successfully saved configuration","success");
+      } else if (data["result"] == "Error") {
+        toast("Error","","Failed to save configuration","danger");
+      } else {
+        toast("API Error","","Failed to save configuration","danger","30000");
       }
     });
   });
 </script>
+';

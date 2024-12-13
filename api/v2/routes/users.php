@@ -16,9 +16,9 @@ $app->post('/users', function ($request, $response, $args) {
     if ($ib->rbac->checkAccess("ADMIN-USERS")) {
         $UN = $data['un'] ?? exit($ib->api->setAPIResponse('Error','Username missing from request'));
         $PW = $data['pw'] ?? exit($ib->api->setAPIResponse('Error','Password missing from request'));
-        $FN = $data['fn'] ?? exit($ib->api->setAPIResponse('Error','Firstname missing from request'));
-        $SN = $data['sn'] ?? exit($ib->api->setAPIResponse('Error','Surname missing from request'));
-        $EM = $data['em'] ?? exit($ib->api->setAPIResponse('Error','Email missing from request'));
+        $FN = $data['fn'] ?? null;
+        $SN = $data['sn'] ?? null;
+        $EM = $data['em'] ?? null;
         $Groups = $data['groups'] ?? null;
         $Expire = $data['expire'] ?? 'false';
         $ib->auth->newUser($UN,$PW,$FN,$SN,$EM,$Groups,'Local',$Expire);

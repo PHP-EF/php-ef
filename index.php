@@ -23,7 +23,7 @@
       'Type' => 'Link', // Link / MenuLink / SubMenuLink / Menu / Submenu
       'Menu' => null,
       'Submenu' => null,
-      'Url' => '#page=default',
+      'Url' => '#page=core/default',
       'Icon' => 'fa fa-house'
     ),
     array(
@@ -43,7 +43,7 @@
       'Type' => 'Link',
       'Menu' => null,
       'Submenu' => null,
-      'Url' => '#page=uddi/security-assessment',
+      'Url' => '#page=plugin/IB/security-assessment-generator',
       'Icon' => 'fa fa-magnifying-glass-chart'
     ),
     array(
@@ -53,7 +53,7 @@
       'Type' => 'Link',
       'Menu' => null,
       'Submenu' => null,
-      'Url' => '#page=uddi/threat-actors',
+      'Url' => '#page=plugin/IB/threat-actors',
       'Icon' => 'fa fa-skull'
     ),
     array(
@@ -133,7 +133,7 @@
       'Type' => 'SubMenuLink',
       'Menu' => 'Admin',
       'Submenu' => 'Settings',
-      'Url' => '#page=core/security-assessment-configuration',
+      'Url' => '#page=plugin/IB/security-assessment-configuration',
       'Icon' => null
     ),
     array(
@@ -173,7 +173,7 @@
       'Type' => 'MenuLink',
       'Menu' => 'Reports',
       'Submenu' => null,
-      'Url' => '#page=reports/assessments',
+      'Url' => '#page=plugin/IB/assessment-reporting',
       'Icon' => 'fa-solid fa-arrows-to-eye'
     ),
     array(
@@ -414,13 +414,7 @@ foreach ($navLinks as $navLink) {
     </div>
     <main class="page-content" id="page-content">
       <div class="container-fluid">
-        <?php
-        if (isset($iframe)) {
-        echo '<iframe id="mainFrame" name="mainFrame" height="100%" width="100%" frameborder="0" src="'.$iframe.'"></iframe>';
-        } else {
-        echo '<iframe id="mainFrame" name="mainFrame" height="100%" width="100%" frameborder="0" src="pages/default.php"></iframe>';
-        }
-        ?>
+        <div id="mainWindow" name="mainWindow"></div>
       </div>
     </main>
   </section>
@@ -620,7 +614,8 @@ foreach ($navLinks as $navLink) {
 </div>
 
 <script>
-  loadiFrame();
+  // loadiFrame();
+  loadMainWindow();
   heartBeat();
 
   function login() {
@@ -628,8 +623,7 @@ foreach ($navLinks as $navLink) {
   }
 
   function logout() {
-    $.get('/api/v2/auth/logout', function(data) {
-    }).done(function (data, status) {
+    queryAPI('GET', '/api/v2/auth/logout').done(function(data) {
       if (data['result'] == "Success" && !data['data']['Authenticated']) {
           toast("Logged Out","","Successfully Logged Out.","success");
         } else {
@@ -762,7 +756,7 @@ foreach ($navLinks as $navLink) {
       if (isValid) {
         var postArr = {}
         postArr.pw = password;
-        $.post("/api/v2/auth/password/reset", postArr).done(function( data, status ) {
+        queryAPI("POST", "/api/v2/auth/password/reset", postArr).done(function( data, status ) {
           if (data['result'] == 'Success') {
             toast(data['result'],"",data['message'],"success");
             $('#profileModal').modal('hide');
@@ -778,7 +772,8 @@ foreach ($navLinks as $navLink) {
     });
 
     $('.toggleFrame').click(function(element) {
-      loadiFrame(element.currentTarget.href);
+      // loadiFrame(element.currentTarget.href);
+      loadMainWindow(element.currentTarget.href);
       $('.title-text').text($(element.currentTarget).data('pageName'));
     });
   });

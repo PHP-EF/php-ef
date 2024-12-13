@@ -149,7 +149,7 @@ html {
 
 <script>
 function login() {
-  $.post( "/api/v2/auth/login", {
+  queryAPI("POST", "/api/v2/auth/login", {
       un: $('#un').val(),
       pw: $('#pw').val()
   }).done(function( data, status ) {
@@ -188,7 +188,7 @@ function login() {
 }
 
 function reset() {
-  $.post( "/api/v2/auth/password/expired", {
+  queryAPI("POST", "/api/v2/auth/password/expired", {
       un: $('#un').val(),
       cpw: $('#cpw').val(),
       pw: $('#pw').val()
