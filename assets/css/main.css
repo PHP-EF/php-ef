@@ -486,11 +486,6 @@ body .popover {
   margin-bottom: 10px;
 }
 
-/* Recent Assessments */
-.reporting-section .recent-assessments {
-  font-size: 14px;
-}
-
 /* Granularity */
 .granularity-card .btn-group {
   display: inline-flex;

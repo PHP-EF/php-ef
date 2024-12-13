@@ -18,7 +18,7 @@
       $logOptions[] = '<option value="'.$LogFileItem.'">'.date("d/m/Y",strtotime($LogFileItem)).'</option>';
     }
  
-  return <<<EOF
+  return '
 <div class="container">
   <div class="row justify-content-center">
     <div class="col-14 col-lg-14 col-xl-14 mx-auto">
@@ -128,4 +128,4 @@
 
   $("#logTable").bootstrapTable();
 </script>
-EOF;
+';
