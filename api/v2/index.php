@@ -10,11 +10,9 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 
 $GLOBALS['api'] = array(
-	'response' => array(
-		'result' => 'Success',
-		'message' => null,
-		'data' => null
-	)
+	'result' => 'Success',
+	'message' => null,
+	'data' => null
 );
 $GLOBALS['responseCode'] = 200;
 
@@ -58,12 +56,12 @@ if (file_exists(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SE
  *
  */
 $app->any('{route:.*}', function ($request, $response) {
-	$GLOBALS['api']['response']['data'] = array(
+	$GLOBALS['api']['data'] = array(
 		'endpoint' => $request->getUri()->getPath(),
 		'method' => $request->getMethod(),
 	);
-	$GLOBALS['api']['response']['result'] = 'error';
-	$GLOBALS['api']['response']['message'] = 'Endpoint Not Found or Defined';
+	$GLOBALS['api']['result'] = 'error';
+	$GLOBALS['api']['message'] = 'Endpoint Not Found or Defined';
 	$GLOBALS['responseCode'] = 404;
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response

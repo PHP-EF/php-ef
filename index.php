@@ -628,9 +628,9 @@ foreach ($navLinks as $navLink) {
   }
 
   function logout() {
-    $.get('/api/v2/logout', function(data) {
+    $.get('/api/v2/auth/logout', function(data) {
     }).done(function (data, status) {
-      if (data['response']['result'] == "success" && !data['response']['data']['Authenticated']) {
+      if (data['result'] == "Success" && !data['data']['Authenticated']) {
           toast("Logged Out","","Successfully Logged Out.","success");
         } else {
           toast("Error","","Failed to Log Out. Your session may still be active.","danger");
@@ -682,19 +682,19 @@ foreach ($navLinks as $navLink) {
 
     $('.infoBtn').on('click', function() {
       $('#infoModal').modal('show');
-      $.getJSON('/api/v2/whoami', function(whoami) {
-        if (whoami.response.data.headers.Cookie != null) {whoami.response.data.headers.Cookie = whoami.response.data.headers.Cookie.split('; ')};
-        $('#whoami').text(JSON.stringify(whoami.response.data, null, 2));
+      $.getJSON('/api/v2/auth/whoami', function(whoami) {
+        if (whoami.data.headers.Cookie != null) {whoami.data.headers.Cookie = whoami.data.headers.Cookie.split('; ')};
+        $('#whoami').text(JSON.stringify(whoami.data, null, 2));
       });
     });
 
     $('.profile').on('click', function() {
       $('#profileModal').modal('show');
-      $.getJSON('/api/v2/whoami', function(whoami) {
-        $('#userUsername').val(whoami.response.data.Username);
-        $('#userFirstname').val(whoami.response.data.Firstname);
-        $('#userSurname').val(whoami.response.data.Surname);
-        $('#userEmail').val(whoami.response.data.Email);
+      $.getJSON('/api/v2/auth/whoami', function(whoami) {
+        $('#userUsername').val(whoami.data.Username);
+        $('#userFirstname').val(whoami.data.Firstname);
+        $('#userSurname').val(whoami.data.Surname);
+        $('#userEmail').val(whoami.data.Email);
       });
     });
 

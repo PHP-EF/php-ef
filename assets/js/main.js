@@ -161,10 +161,10 @@ function getCookie(name) {
 async function heartBeat() {
   const delay = ms => new Promise(res => setTimeout(res, ms));
   try {
-    const response = await fetch('/api?f=heartbeat', {cache: "no-cache"});
+    const response = await fetch('/api/v2/auth/heartbeat', {cache: "no-cache"});
     if (response.status == "200") {
       while (true) {
-	      let response2 = await fetch('/api?f=heartbeat', {cache: "no-cache"});
+	      let response2 = await fetch('/api/v2/auth/heartbeat', {cache: "no-cache"});
         if (response2.status == "301") {
           window.location.href = "/login.php?redirect_uri="+window.location.href.replace("#","?");
 	      }
@@ -629,7 +629,7 @@ const trackingConfig = {
   browserInfo: true,
   processData: function(data) {
     $.ajax({
-      url: '/api?f=t',
+      url: '/api/v2/t',
       type: 'POST',
       data: JSON.stringify(data),
       contentType: "application/json; charset=utf-8",
@@ -755,7 +755,7 @@ if (!tId) {
 
 // Function to send data using sendBeacon
 function sendTrackingData(data) {
-  const url = '/api?f=t';
+  const url = '/api/v2/t';
   const payload = JSON.stringify(data);
   const blob = new Blob([payload], { type: 'application/json; charset=utf-8' });
   navigator.sendBeacon(url, blob);

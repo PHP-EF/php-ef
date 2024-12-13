@@ -261,26 +261,20 @@ class Auth {
       if ($username || $password) {
         try {
           // Check if username or email already exists
-          $checkStmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE (username = :username OR email = :email) AND id = :id");
+          $checkStmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE (username = :username OR email = :email) AND id != :id");
           $checkStmt->execute([':username' => $username, ':email' => $email, ':id' => $id]);
           if ($checkStmt->fetchColumn() > 0) {
-              return array(
-                  'Status' => 'Error',
-                  'Message' => 'Username or Email already exists'
-              );
+            $this->api->setAPIResponse('Error','Username or Email already exists');
           }
         } catch (PDOException $e) {
-            return array(
-                'Status' => 'Error',
-                'Message' => $e
-            );
+            $this->api->setAPIResponse('Error',$e);
         }
       }
 
       $prepare = [];
       $execute = [];
       $execute[':id'] = $id;
-      if ($password !== null) {
+      if (!empty($password)) {
         // Hash & salt the password for security
         $pepper = $this->hashAndSalt($password);
         $prepare[] = 'password = :password';
@@ -288,37 +282,31 @@ class Auth {
         $execute[':password'] = $pepper['hash'];
         $execute[':salt'] = $pepper['salt'];
       }
-      if ($username !== null) {
+      if (!empty($username)) {
         $prepare[] = 'username = :username';
         $execute[':username'] = $username;
       }
-      if ($firstname !== null) {
+      if (!empty($firstname)) {
         $prepare[] = 'firstname = :firstname';
         $execute[':firstname'] = $firstname;
       }
-      if ($surname !== null) {
+      if (!empty($surname)) {
         $prepare[] = 'surname = :surname';
         $execute[':surname'] = $surname;
       }
-      if ($email !== null) {
+      if (!empty($email)) {
         $prepare[] = 'email = :email';
         $execute[':email'] = $email;
       }
-      if ($groups !== null) {
+      if (!empty($groups)) {
         $prepare[] = 'groups = :groups';
         $execute[':groups'] = $groups;
       }
       $stmt = $this->db->prepare('UPDATE users SET '.implode(", ",$prepare).' WHERE id = :id');
       $stmt->execute($execute);
-      return array(
-        'Status' => 'Success',
-        'Message' => 'User updated successfully'
-      );
+      $this->api->setAPIMessage('User updated successfully');
     } else {
-      return array(
-        'Status' => 'Error',
-        'Message' => 'User does not exist'
-      );
+      $this->api->setAPIResponse('Error','User does not exist');
     }
   }
 
@@ -327,15 +315,9 @@ class Auth {
       $stmt = $this->db->prepare("DELETE FROM users WHERE id = :id");
       $stmt->execute([':id' => $id]);
       if ($this->getUserById($id)) {
-        return array(
-          'Status' => 'Error',
-          'Message' => 'Failed to delete user'
-        );
+        $this->api->setAPIResponse('Error','Failed to delete user');
       } else {
-        return array(
-          'Status' => 'Success',
-          'Message' => 'User deleted successfully'
-        );
+        $this->api->setAPIMessage('User deleted successfully');
       }
     }
   }

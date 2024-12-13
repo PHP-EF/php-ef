@@ -149,13 +149,13 @@ html {
 
 <script>
 function login() {
-  $.post( "/api/v2/login", {
+  $.post( "/api/v2/auth/login", {
       un: $('#un').val(),
       pw: $('#pw').val()
   }).done(function( data, status ) {
-    if (data['response']['result'] == 'Error') {
-      toast("Authentication Error","",data['response']['message'],"danger","30000");
-    } else if (data['response']['result'] == 'Expired') {
+    if (data['result'] == 'Error') {
+      toast("Authentication Error","",data['message'],"danger","30000");
+    } else if (data['result'] == 'Expired') {
       toast("Password expired","","You must reset your password before logging in.","danger","30000");
       var un = $('#un').val()
       $('.login-wrap').html('');
@@ -178,7 +178,7 @@ function login() {
       $('#pw, #pw2').on('change', function() {
         validatePW();
       });
-    } else if (data['response']['result'] == 'Success') {
+    } else if (data['result'] == 'Success') {
         toast("Success!","","Successfully logged in.","success","30000");
         location = "<?php echo $RedirectUri; ?>"
     }
@@ -193,7 +193,7 @@ function reset() {
       cpw: $('#cpw').val(),
       pw: $('#pw').val()
   }).done(function( data, status ) {
-    if (data['response']['result'] == 'Success') {
+    if (data['result'] == 'Success') {
       toast("Success!","","Successfully reset password.","success","30000");
       $('.login-wrap').html('');
       $('.login-wrap').html(`<h2>Login</h2>
@@ -209,15 +209,15 @@ function reset() {
         login();
       })
       $('#sso').click(function() {
-        location = "/api?f=sso";
+        location = "/api/v2/auth/sso";
       })
       $('#un,#pw').keypress(function(event) {
         if (event.which == 13) {
             login();
         }
       });
-    } else if (data['response']['result'] == 'Error') {
-      toast("Error","",data['response']['message'],"danger","30000");
+    } else if (data['result'] == 'Error') {
+      toast("Error","",data['message'],"danger","30000");
     }
   }).fail(function( data, status ) {
     toast("Authentication Error","","Unknown Authentication Error","danger","30000");
@@ -244,7 +244,7 @@ $('#login').click(function() {
     login();
 })
 $('#sso').click(function() {
-    location = "/api?f=sso";
+    location = "/api/v2/auth/sso";
 })
 $('#un,#pw').keypress(function(event) {
   if (event.which == 13) {

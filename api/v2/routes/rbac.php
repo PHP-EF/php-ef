@@ -8,7 +8,6 @@ $app->get('/rbac/group/{id}', function ($request, $response, $args) {
             $ib->api->setAPIResponse('Error','id missing from request',400);
         }
     }
-
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
 		->withHeader('Content-Type', 'application/json;charset=UTF-8')
@@ -20,8 +19,7 @@ $app->get('/rbac/groups', function ($request, $response, $args) {
     if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
         $ib->api->setAPIData($ib->rbac->getRBACGroups());
     }
-
-	$response->getBody()->write(jsonE($GLOBALS['api']['response']));
+	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
 		->withHeader('Content-Type', 'application/json;charset=UTF-8')
 		->withStatus($GLOBALS['responseCode']);
@@ -32,7 +30,6 @@ $app->get('/rbac/groups/protected', function ($request, $response, $args) {
     if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
         $ib->api->setAPIData($ib->rbac->getRBACGroups(true));
     }
-
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
 		->withHeader('Content-Type', 'application/json;charset=UTF-8')
@@ -44,7 +41,6 @@ $app->get('/rbac/groups/configurable', function ($request, $response, $args) {
     if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
         $ib->api->setAPIData($ib->rbac->getRBACGroups(null,true));
     }
-
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
 		->withHeader('Content-Type', 'application/json;charset=UTF-8')
@@ -69,7 +65,6 @@ $app->put('/rbac/group/{id}', function ($request, $response, $args) {
             $ib->api->setAPIResponse('Error','id missing from request',400);
         }
     }
-
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
 		->withHeader('Content-Type', 'application/json;charset=UTF-8')

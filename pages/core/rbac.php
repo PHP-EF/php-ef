@@ -316,15 +316,15 @@
           }),
           contentType: 'application/json',
           success: function(setRBACResults) {
-            if (setRBACResults['response']['result'] == 'Success') {
+            if (setRBACResults['result'] == 'Success') {
               if (toggle == 'enabled') {
                 toast("Success", "", "Successfully added " + targetid + " to " + group, "success");
               } else if (toggle == 'disabled') {
                 toast("Success", "", "Successfully removed " + targetid + " to " + group, "success");
               }
               $('#rbacGroupsTable').bootstrapTable('refresh');
-            } else if (setRBACResults['response']['result'] == 'Error') {
-              toast(setRBACResults['response']['result'], "", setRBACResults['response']['message'], "danger", "30000");
+            } else if (setRBACResults['result'] == 'Error') {
+              toast(setRBACResults['result'], "", setRBACResults['message'], "danger", "30000");
             } else {
               if (toggle == 'enabled') {
                 toast("Error", "", "Failed to add " + targetid + " to " + group, "danger");
@@ -412,12 +412,12 @@
       }),
       contentType: 'application/json',
       success: function(setRBACResults) {
-        if (setRBACResults['response']['result'] == 'Success') {
+        if (setRBACResults['result'] == 'Success') {
           toast("Success", "", "Successfully edited " + group + " description to: " + description, "success");
           $('#rbacGroupsTable').bootstrapTable('refresh');
           $('#groupEditModal').modal('hide');
-        } else if (setRBACResults['response']['result'] == 'Error') {
-          toast(setRBACResults['response']['result'], "", setRBACResults['response']['message'], "danger", "30000");
+        } else if (setRBACResults['result'] == 'Error') {
+          toast(setRBACResults['result'], "", setRBACResults['message'], "danger", "30000");
         } else {
           toast("Error", "", "Failed to edit " + group + " description", "danger");
         }

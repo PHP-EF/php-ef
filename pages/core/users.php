@@ -235,20 +235,24 @@
     },
     'click .delete': function (e, value, row, index) {
       if(confirm("Are you sure you want to delete "+row.username+" from the list of Users? This is irriversible.") == true) {
-        var postArr = {}
-        postArr.id = row.id;
-        $.post( "/api?f=removeUser", postArr).done(function( data, status ) {
-          if (data['Status'] == 'Success') {
-            toast(data['Status'],"",data['Message'],"success");
-            populateUsers();
-          } else if (data['Status'] == 'Error') {
-            toast(data['Status'],"",data['Message'],"danger","30000");
-          } else {
-            toast("Error","","Failed to remove user: "+row.username,"danger","30000");
-          }
-        }).fail(function( data, status ) {
+        $.ajax({
+          url: '/api/v2/user/'+row.id,
+          type: 'DELETE',
+          success: function(data) {
+            if (data['result'] == 'Success') {
+              toast(data['result'],"",data['message'],"success");
+              populateUsers();
+              $('#editModal').modal('hide');
+            } else if (data['result'] == 'Error') {
+              toast(data['result'],"",data['message'],"danger","30000");
+            } else {
+              toast("Error","","Failed to remove user: "+row.username,"danger","30000");
+            }
+          },
+          fail: function(data) {
             toast("API Error","","Failed to remove user: "+row.username,"danger","30000");
-        })
+          }
+        });
       }
     }
   }
@@ -257,7 +261,7 @@
     var div = document.getElementById('modalListGroup');
     $.getJSON('/api/v2/rbac/groups/configurable', function(groupinfo) {
       div.innerHTML = "";
-      var groups = groupinfo['response']['data']
+      var groups = groupinfo['data']
       for (var key in groups) {
         div.innerHTML += `
           <div class="list-group-item">
@@ -289,21 +293,29 @@
     let groups = $('#editModal .toggle:checked').map(function() {
       return this.id.replaceAll("--"," ");
     }).get().join(',');
-    var postArr = {}
-    postArr.id = $('#editUserID').val();
-    postArr.groups = groups;
-    $.post( "/api?f=setUser", postArr).done(function( data, status ) {
-      if (data['Status'] == 'Success') {
-        toast(data['Status'],"",data['Message'],"success");
-        populateUsers();
-      } else if (data['Status'] == 'Error') {
-        toast(data['Status'],"",data['Message'],"danger","30000");
-      } else {
-        toast("Error","","Failed to update user groups: "+postArr.un,"danger","30000");
+    var id = $('#editUserID').val().trim();
+
+    $.ajax({
+      url: '/api/v2/user/'+id,
+      type: 'PUT',
+      data: JSON.stringify({
+        groups: groups
+      }),
+      contentType: 'application/json',
+      success: function(data) {
+        if (data['result'] == 'Success') {
+          toast(data['result'],"",data['message'],"success");
+          populateUsers();
+        } else if (data['result'] == 'Error') {
+          toast(data['result'],"",data['message'],"danger","30000");
+        } else {
+          toast("Error","","Failed to update user groups","danger","30000");
+        }
+      },
+      fail: function(data) {
+        toast("API Error","","Failed to update user groups","danger","30000");
       }
-    }).fail(function( data, status ) {
-        toast("API Error","","Failed to update groups: "+postArr.un,"danger","30000");
-    })
+    });
   });
 
   $(document).on('click', '#newUserSubmit', function(event) {
@@ -360,27 +372,34 @@
   });
 
   $(document).on('click', '#editUserSubmit', function(event) {
-    var postArr = {}
-    postArr.id = $('#editUserID').val().trim();
-    postArr.un = $('#editUserName').val().trim();
-    postArr.pw = $('#editUserPassword').val().trim();
-    postArr.fn = $('#editUserFirstname').val().trim();
-    postArr.sn = $('#editUserSurname').val().trim();
-    postArr.em = $('#editUserEmail').val().trim();
-    $.post( "/api?f=setUser", postArr).done(function( data, status ) {
-      if (data['Status'] == 'Success') {
-        toast(data['Status'],"",data['Message'],"success");
-        populateUsers();
-      } else if (data['Status'] == 'Error') {
-        toast(data['Status'],"",data['Message'],"danger","30000");
-      } else {
-        toast("Error","","Failed to update user: "+postArr.un,"danger","30000");
+    var id = $('#editUserID').val().trim();
+    var un = $('#editUserName').val().trim();
+    $.ajax({
+      url: '/api/v2/user/'+id,
+      type: 'PUT',
+      data: JSON.stringify({
+        un: un,
+        pw: $('#editUserPassword').val().trim(),
+        fn: $('#editUserFirstname').val().trim(),
+        sn: $('#editUserSurname').val().trim(),
+        em: $('#editUserEmail').val().trim()
+      }),
+      contentType: 'application/json',
+      success: function(data) {
+        if (data['result'] == 'Success') {
+          toast(data['result'],"",data['message'],"success");
+          populateUsers();
+          $('#editModal').modal('hide');
+        } else if (data['result'] == 'Error') {
+          toast(data['result'],"",data['message'],"danger","30000");
+        } else {
+          toast("Error","","Failed to update user: "+un,"danger","30000");
+        }
+      },
+      fail: function(data) {
+        toast("API Error","","Failed to update user: "+un,"danger","30000");
       }
-    }).fail(function( data, status ) {
-        toast("API Error","","Failed to update user: "+postArr.un,"danger","30000");
-    }).always(function( data, status) {
-      $('#editModal').modal('hide');
-    })
+    });
   });
 
   function userButtons() {
@@ -393,7 +412,7 @@
           $('#newUserModal input').val('');
         },
         attributes: {
-          title: "Add a new user to the Infoblox SA Tools Portal",
+          title: "Add a new user",
           style: "background-color:#4bbe40;border-color:#4bbe40;"
         }
 	    }
@@ -401,7 +420,7 @@
   }
 
   function populateUsers() {
-    $.getJSON('/api?f=getUsers', function(data) {
+    $.getJSON('/api/v2/users', function(data) {
       if (data['Status'] == 'Error') {
         toast(data['Status'],"",data['Error'],"danger","30000");
       } else if (data['error']) {
@@ -410,6 +429,7 @@
         $('#userTable').bootstrapTable('destroy');
         $('#userTable').bootstrapTable({
           data: data,
+          dataField: 'data',
           sortable: true,
           pagination: true,
           search: true,
@@ -512,7 +532,7 @@
         }
     );
     $.getJSON('/api/v2/rbac/groups/configurable', function(groupres) {
-      groupinfo = groupres['response']['data'];
+      groupinfo = groupres['data'];
       populateUsers();
     });
     $('#newUserPassword, #newUserPassword2').on('change', function() {

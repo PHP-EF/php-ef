@@ -11,66 +11,66 @@ if (!($_REQUEST['f'])) {
     die();
 } else {
     switch ($_REQUEST['f']) {
-        case 't':
-            $ib->reporting->track(json_decode(file_get_contents('php://input'), true),$ib->auth->getAuth());
-            http_response_code(201);
-            break;
-        case 'login':
-            echo json_encode($ib->auth->login($_POST['un'],$_POST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-            break;
-        case 'logout':
-            echo json_encode($ib->auth->logout(),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-            break;
-        case 'sso':
-            if ($ib->config->getConfig('SAML','enabled')) {
-                $ib->auth->sso();
-            } else {
-                echo json_encode(array(
-                    'Status' => 'Error',
-                    'Message' => 'SSO is not enabled.'
-                ),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-            }
-            break;
-        case 'slo':
-            if ($ib->config->getConfig('SAML','enabled')) {
-                $ib->auth->slo();
-            } else {
-                echo json_encode(array(
-                    'Status' => 'Error',
-                    'Message' => 'SSO is not enabled.'
-                ),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-            }
-            break;
-        case 'acs':
-            if ($ib->config->getConfig('SAML','enabled')) {
-                if (checkRequestMethod('POST') && isset($_POST['SAMLResponse'])) {
-                    echo json_encode($ib->auth->acs(),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                }
-            } else {
-                echo json_encode(array(
-                    'Status' => 'Error',
-                    'Message' => 'SSO is not enabled.'
-                ),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-            }
-            break;
-        case 'samlMetadata':
-            if ($ib->config->getConfig('SAML','enabled')) {
-                echo $ib->auth->getSamlMetadata();
-            } else {
-                echo json_encode(array(
-                    'Status' => 'Error',
-                    'Message' => 'SSO is not enabled.'
-                ),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-            }
-            break;
-        case 'getUsers':
-            if (checkRequestMethod('GET')) {
-                if ($ib->rbac->checkAccess("ADMIN-USERS")) {
-                    $users = $ib->auth->getAllUsers();
-                    echo json_encode($users,JSON_PRETTY_PRINT);
-                }
-            }
-            break;
+        // case 't':
+        //     $ib->reporting->track(json_decode(file_get_contents('php://input'), true),$ib->auth->getAuth());
+        //     http_response_code(201);
+        //     break;
+        // case 'login':
+        //     echo json_encode($ib->auth->login($_POST['un'],$_POST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+        //     break;
+        // case 'logout':
+        //     echo json_encode($ib->auth->logout(),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+        //     break;
+        // case 'sso':
+        //     if ($ib->config->getConfig('SAML','enabled')) {
+        //         $ib->auth->sso();
+        //     } else {
+        //         echo json_encode(array(
+        //             'Status' => 'Error',
+        //             'Message' => 'SSO is not enabled.'
+        //         ),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+        //     }
+        //     break;
+        // case 'slo':
+        //     if ($ib->config->getConfig('SAML','enabled')) {
+        //         $ib->auth->slo();
+        //     } else {
+        //         echo json_encode(array(
+        //             'Status' => 'Error',
+        //             'Message' => 'SSO is not enabled.'
+        //         ),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+        //     }
+        //     break;
+        // case 'acs':
+        //     if ($ib->config->getConfig('SAML','enabled')) {
+        //         if (checkRequestMethod('POST') && isset($_POST['SAMLResponse'])) {
+        //             echo json_encode($ib->auth->acs(),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+        //         }
+        //     } else {
+        //         echo json_encode(array(
+        //             'Status' => 'Error',
+        //             'Message' => 'SSO is not enabled.'
+        //         ),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+        //     }
+        //     break;
+        // case 'samlMetadata':
+        //     if ($ib->config->getConfig('SAML','enabled')) {
+        //         echo $ib->auth->getSamlMetadata();
+        //     } else {
+        //         echo json_encode(array(
+        //             'Status' => 'Error',
+        //             'Message' => 'SSO is not enabled.'
+        //         ),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+        //     }
+        //     break;
+        // case 'getUsers':
+        //     if (checkRequestMethod('GET')) {
+        //         if ($ib->rbac->checkAccess("ADMIN-USERS")) {
+        //             $users = $ib->auth->getAllUsers();
+        //             echo json_encode($users,JSON_PRETTY_PRINT);
+        //         }
+        //     }
+        //     break;
         case 'newUser':
             if (checkRequestMethod('POST')) {
                 if ($ib->rbac->checkAccess("ADMIN-USERS")) {
@@ -134,72 +134,72 @@ if (!($_REQUEST['f'])) {
                 }
             }
             break;
-        case 'setUser':
-            if (checkRequestMethod('POST')) {
-                if ($ib->rbac->checkAccess("ADMIN-USERS")) {
-                    if (isset($_POST['id'])) {
-                        $ID = $_POST['id'];
-                    } else {
-                        echo json_encode(array(
-                            'Status' => 'Error',
-                            'Message' => 'Invalid User ID'
-                        ));
-                        break;
-                    }
-                    if (isset($_POST['fn'])) {
-                        $FN = $_POST['fn'];
-                    } else {
-                        $FN = null;
-                    }
-                    if (isset($_POST['sn'])) {
-                        $SN = $_POST['sn'];
-                    } else {
-                        $SN = null;
-                    }
-                    if (isset($_POST['em'])) {
-                        $EM = $_POST['em'];
-                    } else {
-                        $EM = null;
-                    }
-                    if (isset($_POST['un'])) {
-                        $UN = $_POST['un'];
-                    } else {
-                        $UN = null;
-                    }
-                    if (isset($_POST['pw'])) {
-                        $PW = $_POST['pw'];
-                    } else {
-                        $PW = null;
-                    }
-                    if (isset($_POST['groups'])) {
-                        $Groups = $_POST['groups'];
-                    } else {
-                        $Groups = null;
-                    }
-                    $update = $ib->auth->updateUser($ID,$UN,$PW,$FN,$SN,$EM,$Groups);
-                    echo json_encode($update,JSON_PRETTY_PRINT);
-                }
-            }
-            break;
-        case 'removeUser':
-            if (checkRequestMethod('POST')) {
-                if ($ib->rbac->checkAccess("ADMIN-USERS")) {
-                    if (isset($_POST['id'])) {
-                        $remove = $ib->auth->removeUser($_POST['id']);
-                        echo json_encode($remove,JSON_PRETTY_PRINT);
-                    }
-                }
-            }
-            break;
-        case 'heartbeat':
-            if ($ib->auth->getAuth()['Authenticated'] == true) {
-                http_response_code(200);
-            } else {
-                http_response_code(301);
-                echo "Session timed out.";
-                die();
-            }
-            break;
+        // case 'setUser':
+        //     if (checkRequestMethod('POST')) {
+        //         if ($ib->rbac->checkAccess("ADMIN-USERS")) {
+        //             if (isset($_POST['id'])) {
+        //                 $ID = $_POST['id'];
+        //             } else {
+        //                 echo json_encode(array(
+        //                     'Status' => 'Error',
+        //                     'Message' => 'Invalid User ID'
+        //                 ));
+        //                 break;
+        //             }
+        //             if (isset($_POST['fn'])) {
+        //                 $FN = $_POST['fn'];
+        //             } else {
+        //                 $FN = null;
+        //             }
+        //             if (isset($_POST['sn'])) {
+        //                 $SN = $_POST['sn'];
+        //             } else {
+        //                 $SN = null;
+        //             }
+        //             if (isset($_POST['em'])) {
+        //                 $EM = $_POST['em'];
+        //             } else {
+        //                 $EM = null;
+        //             }
+        //             if (isset($_POST['un'])) {
+        //                 $UN = $_POST['un'];
+        //             } else {
+        //                 $UN = null;
+        //             }
+        //             if (isset($_POST['pw'])) {
+        //                 $PW = $_POST['pw'];
+        //             } else {
+        //                 $PW = null;
+        //             }
+        //             if (isset($_POST['groups'])) {
+        //                 $Groups = $_POST['groups'];
+        //             } else {
+        //                 $Groups = null;
+        //             }
+        //             $update = $ib->auth->updateUser($ID,$UN,$PW,$FN,$SN,$EM,$Groups);
+        //             echo json_encode($update,JSON_PRETTY_PRINT);
+        //         }
+        //     }
+        //     break;
+        // case 'removeUser':
+        //     if (checkRequestMethod('POST')) {
+        //         if ($ib->rbac->checkAccess("ADMIN-USERS")) {
+        //             if (isset($_POST['id'])) {
+        //                 $remove = $ib->auth->removeUser($_POST['id']);
+        //                 echo json_encode($remove,JSON_PRETTY_PRINT);
+        //             }
+        //         }
+        //     }
+        //     break;
+        // case 'heartbeat':
+        //     if ($ib->auth->getAuth()['Authenticated'] == true) {
+        //         http_response_code(200);
+        //     } else {
+        //         http_response_code(301);
+        //         echo "Session timed out.";
+        //         die();
+        //     }
+        //     break;
         // case 'whoami':
         //     if (isset($ib->auth->getAuth()['Authenticated'])) {
         //         $AuthContent = $ib->auth->getAuth();
