@@ -1,49 +1,94 @@
-jQuery(function ($) {
+// Core Functions & Logging
+$.xhrPool = [];
+function queryAPI(type,path,data=null,contentType="application/json",asyncValue=true){
+	if (contentType == 'application/json' && data != null) {
+    data = JSON.stringify(data);
+  }
+  let timeout = 10000;
+	switch (type) {
+		case 'get':
+		case 'GET':
+		case 'g':
+			return $.ajax({
+				url:path,
+				method:"GET",
+				beforeSend: function(request) {
+					$.xhrPool.push(request);
+				},
+				complete: function(jqXHR) {
+					var i = $.xhrPool.indexOf(jqXHR); //  get index for current connection completed
+					if (i > -1) $.xhrPool.splice(i, 1); //  removes from list by index
+				},
+				timeout: timeout,
+			});
+		case 'delete':
+		case 'DELETE':
+		case 'd':
+			return $.ajax({
+				url:path,
+				method:"DELETE",
+				beforeSend: function(request) {
+					$.xhrPool.push(request);
+				},
+				complete: function(jqXHR) {
+					var i = $.xhrPool.indexOf(jqXHR); //  get index for current connection completed
+					if (i > -1) $.xhrPool.splice(i, 1); //  removes from list by index
+				},
+				timeout: timeout,
+			});
+		case 'post':
+		case 'POST':
+		case 'p':
+			return $.ajax({
+				url:path,
+				method:"POST",
+				async: asyncValue,
+				beforeSend: function(request) {
+					$.xhrPool.push(request);
+				},
+				complete: function(jqXHR) {
+					var i = $.xhrPool.indexOf(jqXHR); //  get index for current connection completed
+					if (i > -1) $.xhrPool.splice(i, 1); //  removes from list by index
+				},
+				data:data,
+				contentType: contentType
+			});
+		case 'put':
+		case 'PUT':
+			return $.ajax({
+				url:path,
+				method:"PUT",
+				async: asyncValue,
+				beforeSend: function(request) {
+					$.xhrPool.push(request);
+				},
+				complete: function(jqXHR) {
+					var i = $.xhrPool.indexOf(jqXHR); //  get index for current connection completed
+					if (i > -1) $.xhrPool.splice(i, 1); //  removes from list by index
+				},
+				data:data,
+				contentType: contentType
+			});
+		default:
+			console.warn('API: Method Not Supported');
+	}
+}
 
-  $(".sidebar-dropdown > a").click(function() {
-    $(".sidebar-submenu").slideUp(200);
-    if (
-      $(this)
-        .parent()
-        .hasClass("active")
-    ) {
-      $(".sidebar-dropdown").removeClass("active");
-      $(this)
-        .parent()
-        .removeClass("active");
-    } else {
-      $(".sidebar-dropdown").removeClass("active");
-      $(this)
-        .next(".sidebar-submenu")
-        .slideDown(200);
-      $(this)
-        .parent()
-        .addClass("active");
-    }
-  });
-
-  $(".sidebar-subdropdown > a").click(function() {
-    $(".sidebar-subsubmenu").slideUp(200);
-    if (
-      $(this)
-        .parent()
-        .hasClass("active")
-    ) {
-      $(".sidebar-subdropdown").removeClass("active");
-      $(this)
-        .parent()
-        .removeClass("active");
-    } else {
-      $(".sidebar-subdropdown").removeClass("active");
-      $(this)
-        .next(".sidebar-subsubmenu")
-        .slideDown(200);
-      $(this)
-        .parent()
-        .addClass("active");
-    }
-  });
-});
+function logConsole(subject,msg,type = 'info'){
+	let color;
+	switch (type){
+		case 'error':
+			color = '#ed2e72';
+			break;
+		case 'warning':
+			color = '#272361';
+			break;
+		default:
+			color = '#2cabe3';
+			break;
+	}
+	console.info("%c "+subject+" %c ".concat(msg, " "), "color: white; background: "+color+"; font-weight: 700;", "color: "+color+"; background: white; font-weight: 700;");
+}
 
 function searchTable(searchId,tableId) {
   // Declare variables
@@ -176,14 +221,6 @@ async function heartBeat() {
   }
 }
 
-$('.preventDefault').click(function(event){
-  event.preventDefault();
-});
-
-window.addEventListener("load", function() {
-  $('.dark-theme .table-striped').addClass('table-dark');
-});
-
 function getNoAsync(url) {
   return JSON.parse($.ajax({
     type: "GET",
@@ -219,13 +256,13 @@ const netmaskToCIDR = (netmask) => (netmask.split('.').map(Number)
                                  .join('')).split('1').length -1;
 
 const cidrToNetmask = (bitCount) => {
-    var mask=[];
-    for(var i=0;i<4;i++) {
-        var n = Math.min(bitCount, 8);
-        mask.push(256 - Math.pow(2, 8-n));
-        bitCount -= n;
-    }
-    return mask.join('.');
+  var mask=[];
+  for(var i=0;i<4;i++) {
+      var n = Math.min(bitCount, 8);
+      mask.push(256 - Math.pow(2, 8-n));
+      bitCount -= n;
+  }
+  return mask.join('.');
 }
 
 function stringValidate(element, min, max, type) {
@@ -301,6 +338,52 @@ function loadiFrame(element = null) {
   }
 }
 
+function loadMainWindow(element) {
+  clearAllApexCharts();
+  if (element != null) {
+    var hashsplit = element.split('#page=');
+    var linkElem = $('a[href="#page='+hashsplit[1]+'"]');
+    $('.toggleFrame').removeClass('active');
+    linkElem.addClass('active');
+    // Remove proxy support for now
+    // if (hashsplit[1].startsWith('prx')) {
+    //   var prxsplit = hashsplit[1].split('prx');
+    //   window.parent.document.getElementById('mainFrame').src = prxsplit[1];
+    // } else {
+    //   window.parent.document.getElementById('mainFrame').src = '/pages/'+hashsplit[1]+".php";
+    // }
+    queryAPI('GET','/api/v2/page/'+hashsplit[1]).done(function(data) {
+      $('#mainWindow').html('');
+      $('#mainWindow').html(data);
+      $('.dark-theme .table-striped').addClass('table-dark');
+    });
+  } else if (window.parent.location.hash) {
+    var hashsplit = window.parent.location.hash.split('#page=');
+    // Auto-expand and set navbar to active
+    var linkElem = $('a[href="'+window.parent.location.hash+'"]');
+    linkElem.addClass('active');
+    $('.title-text').text(linkElem.data('pageName'));
+    var doubleParent = $('.icon-link > .toggleFrame.active, .sub-sub-menu .toggleFrame.active, .icon-link > .toggleFrame.active, .sub-menu .toggleFrame.active').parent().parent();
+    if (doubleParent.hasClass('sub-sub-menu')) {
+      if (!doubleParent.parent().hasClass('showMenu')) {
+        doubleParent.parent().addClass('showMenu');
+      }
+      if (!doubleParent.parent().parent().parent().hasClass('showMenu')) {
+          doubleParent.parent().parent().parent().addClass('showMenu');
+      }
+    } else if (doubleParent.hasClass('sub-menu') && doubleParent.not('.blank')) {
+      if (!doubleParent.parent().hasClass('showMenu')) {
+        doubleParent.parent().addClass('showMenu');
+      }
+    }
+    queryAPI('GET','/api/v2/page/'+hashsplit[1]).done(function(data) {
+      $('#mainWindow').html('');
+      $('#mainWindow').html(data);
+      $('.dark-theme .table-striped').addClass('table-dark');
+    });
+  }
+}
+
 function toast(title,note,body,theme,delay = "8000") {
   $('#toastContainer').append(`
       <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="`+delay+`">
@@ -330,7 +413,7 @@ function applyFontSize() {
 applyFontSize();
 
 function saveAPIKey(key) {
-  $.post( "/api/v2/auth/crypt", {key: key}).done(function( data, status ) {
+  queryAPI("POST", "/api/v2/auth/crypt", {key: key}).done(function( data, status ) {
       if (data.result == 'Success') {
         setCookie('crypt',data.data,7);
         checkAPIKey();
@@ -366,19 +449,6 @@ function checkInput(text) {
   } else {
       $("#saveBtn").removeClass("saveBtnShow");
   }
-}
-
-function enableDateTime() {
-  $('.datetimepicker').datetimepicker({
-    onGenerate:function( ct ){
-      jQuery(this).find('.xdsoft_date')
-        .toggleClass('xdsoft_disabled');
-    },
-    formatDate:'d/m/Y H:i:s',
-    minDate:'-1970/01/02',//yesterday is minimum date(for today use 0 or -1970/01/01)
-    maxDate:'+1970/01/02',//tomorrow is maximum date calendar
-    timepicker:true
-  });
 }
 
 let seconds = 0;
@@ -421,60 +491,6 @@ function datetimeFormatter(value) {
     hour12: true // Format as MM/DD/YYYY
   });
 }
-
-// END
-
-document.addEventListener('DOMContentLoaded', function() {
-  const maxDaysApart = 31;
-  const today = new Date();
-  const maxPastDate = new Date(today);
-  maxPastDate.setDate(today.getDate() - 31);
-
-  flatpickr("#assessmentStartAndEndDate", {
-    mode: "range",
-    minDate: maxPastDate,
-    maxDate: today,
-    enableTime: true,
-    dateFormat: "Y-m-d H:i",
-    onChange: function(selectedDates, dateStr, instance) {
-      if (selectedDates.length === 1) {
-        const startDate = selectedDates[0];
-        const maxEndDate = new Date(startDate.getTime() + 31 * 24 * 60 * 60 * 1000); // 31 days later
-        const today = new Date();
-        instance.set('maxDate', maxEndDate > today ? today : maxEndDate);
-      }
-      if (selectedDates.length === 2) {
-        const startDate = selectedDates[0];
-        const endDate = selectedDates[1];
-        const diffInDays = (endDate - startDate) / (1000 * 60 * 60 * 24);
-        if (diffInDays > 31) {
-          toast("Error","","The start and end date cannot exceed 31 days.","warning");
-          instance.clear();
-        }
-      }
-    }
-  });
-
-  flatpickr("#reportingStartAndEndDate", {
-    mode: "range",
-    maxDate: today,
-    enableTime: true,
-    dateFormat: "Y-m-d H:i"
-  });
-});
-
-$( document ).ready(function() {
-  checkAPIKey();
-  $('#saveBtn').click(function(){
-    if ($('#saveBtn').hasClass('fa-save')) {
-      saveAPIKey($('#APIKey').val());
-    } else if ($('#saveBtn').hasClass('fa-trash')) {
-      removeAPIKey();
-    }
-  });
-  enableDateTime();
-});
-
 
 // ** Define ApexCharts Options ** //
 // Chart Theme
@@ -813,5 +829,117 @@ const userTracking = {
   }
 };
 
-// Initialize tracking
-userTracking.init(trackingConfig);
+// Destroy any existing charts
+function clearAllApexCharts() {
+  for (let chart in window.charts) {
+    if (window.charts[chart] && typeof window.charts[chart].destroy === "function") {
+        window.charts[chart].destroy();
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  window.charts = [];
+  checkAPIKey();
+  $('#saveBtn').click(function(){
+    if ($('#saveBtn').hasClass('fa-save')) {
+      saveAPIKey($('#APIKey').val());
+    } else if ($('#saveBtn').hasClass('fa-trash')) {
+      removeAPIKey();
+    }
+  });
+
+  const maxDaysApart = 31;
+  const today = new Date();
+  const maxPastDate = new Date(today);
+  maxPastDate.setDate(today.getDate() - 31);
+
+  flatpickr("#assessmentStartAndEndDate", {
+    mode: "range",
+    minDate: maxPastDate,
+    maxDate: today,
+    enableTime: true,
+    dateFormat: "Y-m-d H:i",
+    onChange: function(selectedDates, dateStr, instance) {
+      if (selectedDates.length === 1) {
+        const startDate = selectedDates[0];
+        const maxEndDate = new Date(startDate.getTime() + 31 * 24 * 60 * 60 * 1000); // 31 days later
+        const today = new Date();
+        instance.set('maxDate', maxEndDate > today ? today : maxEndDate);
+      }
+      if (selectedDates.length === 2) {
+        const startDate = selectedDates[0];
+        const endDate = selectedDates[1];
+        const diffInDays = (endDate - startDate) / (1000 * 60 * 60 * 24);
+        if (diffInDays > 31) {
+          toast("Error","","The start and end date cannot exceed 31 days.","warning");
+          instance.clear();
+        }
+      }
+    }
+  });
+
+  flatpickr("#reportingStartAndEndDate", {
+    mode: "range",
+    maxDate: today,
+    enableTime: true,
+    dateFormat: "Y-m-d H:i"
+  });
+
+  jQuery(function ($) {
+    $(".sidebar-dropdown > a").click(function() {
+      $(".sidebar-submenu").slideUp(200);
+      if (
+        $(this)
+          .parent()
+          .hasClass("active")
+      ) {
+        $(".sidebar-dropdown").removeClass("active");
+        $(this)
+          .parent()
+          .removeClass("active");
+      } else {
+        $(".sidebar-dropdown").removeClass("active");
+        $(this)
+          .next(".sidebar-submenu")
+          .slideDown(200);
+        $(this)
+          .parent()
+          .addClass("active");
+      }
+    });
+  
+    $(".sidebar-subdropdown > a").click(function() {
+      $(".sidebar-subsubmenu").slideUp(200);
+      if (
+        $(this)
+          .parent()
+          .hasClass("active")
+      ) {
+        $(".sidebar-subdropdown").removeClass("active");
+        $(this)
+          .parent()
+          .removeClass("active");
+      } else {
+        $(".sidebar-subdropdown").removeClass("active");
+        $(this)
+          .next(".sidebar-subsubmenu")
+          .slideDown(200);
+        $(this)
+          .parent()
+          .addClass("active");
+      }
+    });
+  });
+  
+  $('.preventDefault').click(function(event){
+    event.preventDefault();
+  });
+  
+  $('.dark-theme .table-striped').addClass('table-dark');
+
+  // Initialize tracking
+  userTracking.init(trackingConfig);
+
+  console.info("%c Web App %c ".concat("DOM Fully loaded", " "), "color: white; background: #AD80FD; font-weight: 700;", "color: #AD80FD; background: white; font-weight: 700;");
+});

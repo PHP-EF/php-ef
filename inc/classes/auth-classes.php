@@ -974,7 +974,7 @@ class RBAC {
 
   public function newRBACRole($Name,$Description) {
     if (!empty($this->getRBACRoleByName($Name))) {
-      $this->api->setAPIResponseData('Error','RBAC Role already exists with the name: '.$Name);
+      $this->api->setAPIResponse('Error','RBAC Role already exists with the name: '.$Name);
     } else {
       $stmt = $this->db->prepare("INSERT INTO rbac_resources (name, description) VALUES (:Name, :Description)");
       $stmt->execute([':Name' => $Name, ':Description' => $Description]);      

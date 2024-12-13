@@ -1,10 +1,9 @@
 <?php
-require_once(__DIR__.'/../../inc/inc.php');
+$ib = new ib();
 if ($ib->rbac->checkAccess("REPORT-TRACKING") == false) {
   die();
 }
-?>
-
+return '
 <main id="main" class="main">
   <section class="section reporting-section">
     <div class="row">
@@ -209,396 +208,394 @@ if ($ib->rbac->checkAccess("REPORT-TRACKING") == false) {
   function msFormatter(value, row, index) {
     var minutes = Math.floor(value / 60000);
     var seconds = ((value % 60000) / 1000).toFixed(0);
-    return minutes + "m " + (seconds < 10 ? '0' : '') + seconds + 's';
+    return minutes + "m " + (seconds < 10 ? "0" : "") + seconds + "s";
   }
 
 
-
-  document.addEventListener("DOMContentLoaded", () => {
-    // Declare a global variable to store active filters
-    var appliedFilters = {};
-    function resetAppliedFilters() {
-      appliedFilters = {
-        page: 'all',
-        browser: 'all',
-        os: 'all'
-      };
-      $('#clearFilters').css('display','none');
-    }
-
-    const updateSummaryValues = () => {
-      $.get( "/api/v2/reports/tracking/summary").done(function( response, status ) {
-        let data = response['data'];
-        const total = data.find(item => item.type === "Total")
-        $('#visitsThisDayVal').text(total['count_today']);
-        $('#uniqueVisitorsThisDayVal').text(total['unique_visitors_today']+' Unique Visitors');
-        $('#visitsThisMonthVal').text(total['count_this_month']);
-        $('#uniqueVisitorsThisMonthVal').text(total['unique_visitors_this_month']+' Unique Visitors');
-        $('#visitsThisYearVal').text(total['count_this_year']);
-        $('#uniqueVisitorsThisYearVal').text(total['unique_visitors_this_year']+' Unique Visitors');
-      });
+  // Declare a global variable to store active filters
+  var appliedFilters = {};
+  function resetAppliedFilters() {
+    appliedFilters = {
+      page: "all",
+      browser: "all",
+      os: "all"
     };
+    $("#clearFilters").css("display","none");
+  }
 
-    const updateRecentAssessments = (granularity, appliedFilters, start = null, end = null) => {
-      $.get( "/api/v2/reports/tracking/records?granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( response, status ) {
-        let data = response['data'];
-        $('#assessmentTable').bootstrapTable('destroy');
-        $('#assessmentTable').bootstrapTable({
-          data: data,
+  var updateTrackingSummaryValues = () => {
+    queryAPI("GET", "/api/v2/reports/tracking/summary").done(function( response, status ) {
+      let data = response["data"];
+      const total = data.find(item => item.type === "Total")
+      $("#visitsThisDayVal").text(total["count_today"]);
+      $("#uniqueVisitorsThisDayVal").text(total["unique_visitors_today"]+" Unique Visitors");
+      $("#visitsThisMonthVal").text(total["count_this_month"]);
+      $("#uniqueVisitorsThisMonthVal").text(total["unique_visitors_this_month"]+" Unique Visitors");
+      $("#visitsThisYearVal").text(total["count_this_year"]);
+      $("#uniqueVisitorsThisYearVal").text(total["unique_visitors_this_year"]+" Unique Visitors");
+    });
+  };
+
+  var updateRecentTracking = (granularity, appliedFilters, start = null, end = null) => {
+    queryAPI("GET", "/api/v2/reports/tracking/records?granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( response, status ) {
+      let data = response["data"];
+      $("#assessmentTable").bootstrapTable("destroy");
+      $("#assessmentTable").bootstrapTable({
+        data: data,
+        sortable: true,
+        pagination: true,
+        search: true,
+        sortName: "dateTime",
+        sortOrder: "desc",
+        showExport: true,
+        exportTypes: ["json", "xml", "csv", "txt", "excel", "sql"],
+        showColumns: true,
+        filterControl: true,
+        filterControlVisible: false,
+        showFilterControlSwitch: true,
+        columns: [{
+          field: "id",
+          title: "ID",
           sortable: true,
-          pagination: true,
-          search: true,
-          sortName: 'dateTime',
-          sortOrder: 'desc',
-          showExport: true,
-          exportTypes: ['json', 'xml', 'csv', 'txt', 'excel', 'sql'],
-          showColumns: true,
-          filterControl: true,
-          filterControlVisible: false,
-          showFilterControlSwitch: true,
-          columns: [{
-            field: 'id',
-            title: 'ID',
-            sortable: true,
-            visible: false
-          },{
-            field: 'username',
-            title: 'Username',
-            sortable: true,
-            filterControl: 'select'
-          },{
-            field: 'scheme',
-            title: 'Scheme',
-            sortable: true,
-            filterControl: 'select'
-          },{
-            field: 'path',
-            title: 'Path',
-            sortable: true,
-            filterControl: 'select'
-          },{
-            field: 'pageCategory',
-            title: 'Page Category',
-            sortable: true,
-            filterControl: 'select'
-          },{
-            field: 'pageName',
-            title: 'Page Name',
-            sortable: true,
-            filterControl: 'select'
-          },{
-            field: 'ipAddress',
-            title: 'IP Address',
-            sortable: true,
-            filterControl: 'input'
-          },{
-            field: 'browser',
-            title: 'Browser',
-            sortable: true,
-            filterControl: 'select'
-          },{
-            field: 'os',
-            title: 'OS',
-            sortable: true,
-            filterControl: 'select'
-          },{
-            field: 'timeSpent',
-            title: 'Duration',
-            sortable: true,
-            formatter: 'msFormatter',
-            filterControl: 'input'
-          },{
-            field: 'clicks',
-            title: 'Clicks',
-            sortable: true,
-            filterControl: 'input'
-          },{
-            field: 'mouseMovements',
-            title: 'Mouse Movements',
-            sortable: true,
-            visible: false,
-            filterControl: 'select'
-          },{
-            field: 'tId',
-            title: 'Tracking ID',
-            sortable: true,
-            visible: false,
-            filterControl: 'input'
-          },{
-            field: 'dateTime',
-            title: 'Date/Time',
-            sortable: true,
-            formatter: 'dateFormatter',
-            filterControl: 'input'
-          }]
-        });
-        updateTopPages(data,granularity);
-        updatePageActivityChart(data,granularity);
-        updateBrowserTypes(data);
-        updateOSTypes(data);
+          visible: false
+        },{
+          field: "username",
+          title: "Username",
+          sortable: true,
+          filterControl: "select"
+        },{
+          field: "scheme",
+          title: "Scheme",
+          sortable: true,
+          filterControl: "select"
+        },{
+          field: "path",
+          title: "Path",
+          sortable: true,
+          filterControl: "select"
+        },{
+          field: "pageCategory",
+          title: "Page Category",
+          sortable: true,
+          filterControl: "select"
+        },{
+          field: "pageName",
+          title: "Page Name",
+          sortable: true,
+          filterControl: "select"
+        },{
+          field: "ipAddress",
+          title: "IP Address",
+          sortable: true,
+          filterControl: "input"
+        },{
+          field: "browser",
+          title: "Browser",
+          sortable: true,
+          filterControl: "select"
+        },{
+          field: "os",
+          title: "OS",
+          sortable: true,
+          filterControl: "select"
+        },{
+          field: "timeSpent",
+          title: "Duration",
+          sortable: true,
+          formatter: "msFormatter",
+          filterControl: "input"
+        },{
+          field: "clicks",
+          title: "Clicks",
+          sortable: true,
+          filterControl: "input"
+        },{
+          field: "mouseMovements",
+          title: "Mouse Movements",
+          sortable: true,
+          visible: false,
+          filterControl: "select"
+        },{
+          field: "tId",
+          title: "Tracking ID",
+          sortable: true,
+          visible: false,
+          filterControl: "input"
+        },{
+          field: "dateTime",
+          title: "Date/Time",
+          sortable: true,
+          formatter: "dateFormatter",
+          filterControl: "input"
+        }]
       });
-    }
+      updateTopPages(data,granularity);
+      updatePageActivityChart(data,granularity);
+      updateBrowserTypes(data);
+      updateOSTypes(data);
+    });
+  }
 
-    // Render Visitors Area Chart
-    const visitorsChart = new ApexCharts(document.querySelector("#visitorsChart"), areaChartOptions);
-    visitorsChart.render();
+  // Render Visitors Area Chart
+  window.charts.visitorsChart = new ApexCharts(document.querySelector("#visitorsChart"), areaChartOptions);
+  window.charts.visitorsChart.render();
 
-    // Define Visitors Area Chart Update Function
-    const updateVisitorsChart = (granularity, appliedFilters, start = null, end = null) => {
-      $.get( "/api/v2/reports/tracking/stats?granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( response, status ) {
-        let data = response['data'];
-        // Extract all unique dates
-        const categoriesSet = new Set();
-        for (const key in data) {
-          if (data.hasOwnProperty(key)) {
-            categoriesSet.add(key);
-          }
+  // Define Visitors Area Chart Update Function
+  var updateVisitorsChart = (granularity, appliedFilters, start = null, end = null) => {
+    queryAPI("GET", "/api/v2/reports/tracking/stats?granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( response, status ) {
+      let data = response["data"];
+      // Extract all unique dates
+      const categoriesSet = new Set();
+      for (const key in data) {
+        if (data.hasOwnProperty(key)) {
+          categoriesSet.add(key);
         }
-        const categories = Array.from(categoriesSet).sort();
-        // Prepare the series data
-        const series = [];
-        for (const key in data) {
-          if (data.hasOwnProperty(key)) {
-            const seriesData = categories.map(date => data[key] || 0);
-            series.push(data[key]);
-          }
+      }
+      const categories = Array.from(categoriesSet).sort();
+      // Prepare the series data
+      const series = [];
+      for (const key in data) {
+        if (data.hasOwnProperty(key)) {
+          const seriesData = categories.map(date => data[key] || 0);
+          series.push(data[key]);
         }
-        visitorsChart.updateOptions({
-          series: [{
-            name: 'Visitors',
-            data: series
-          }],
-          xaxis: {
-            categories: categories
-          }
-        });
-      });
-    };
-    // Render Visitors Area Chart End //
-
-    // Render Browser Types Chart
-    var browserTypesChart = new ApexCharts(document.querySelector("#browserTypesChart"), donutChartOptions);
-    browserTypesChart.render();
-
-    // Define Types Chart Update Function
-    const updateBrowserTypes = (data) => {
-      const countByBrowser = data.reduce((acc, obj) => {
-        acc[obj.browser] = (acc[obj.browser] || 0) + 1;
-        return acc;
-      }, {});
-      var types = Object.keys(countByBrowser).map(browser => ({ browser: browser, count: countByBrowser[browser] }));
-      browserTypesChart.updateOptions({
-        series: types.map(browser => browser.count),
-        labels: types.map(browser => browser.browser),
-        chart: {
-          events: {
-            dataPointSelection: (event, chartContext, config) => {
-              chartFilter(event,chartContext.el,config.w.config.labels[config.dataPointIndex]);
-            }
-          }
-        },
-      });
-    }
-    // Render Browser Types Chart End //
-
-
-    // Render OS Types Chart
-    var osTypesChart = new ApexCharts(document.querySelector("#osTypesChart"), donutChartOptions);
-    osTypesChart.render();
-
-    // Define OS Types Chart Update Function
-    const updateOSTypes = (data) => {
-      const countByOS = data.reduce((acc, obj) => {
-        acc[obj.os] = (acc[obj.os] || 0) + 1;
-        return acc;
-      }, {});
-
-      const osTypes = Object.keys(countByOS).map(os => ({ os: os, count: countByOS[os] }));
-      osTypesChart.updateOptions({
-        series: osTypes.map(os => os.count),
-        labels: osTypes.map(os => os.os),
-        chart: {
-          events: {
-            dataPointSelection: (event, chartContext, config) => {
-              chartFilter(event,chartContext.el,config.w.config.labels[config.dataPointIndex]);
-            }
-          }
-        }
-      });
-    }
-    // Render Realms Chart End //
-
-
-    // Render Top Pages Chart
-    var topPagesChart = new ApexCharts(document.querySelector("#topPagesChart"), horizontalBarChartOptions);
-    topPagesChart.render();
-
-    // Define Top Pages Chart Update Function
-    const updateTopPages = (data,granularity) => {
-      const pageCount = {};
-      data.forEach(entry => {
-        const page = entry.pageName;
-        if (page) {
-          if (!pageCount[page]) {
-            pageCount[page] = 0;
-          }
-          pageCount[page]++;
-        }
-      });
-
-      const sortedPages = Object.entries(pageCount).sort((a, b) => b[1] - a[1]);
-      const pages = sortedPages.slice(0,10).map(page => ({ page: page[0], count: page[1] }));
-      topPagesChart.updateOptions({
+      }
+      window.charts.visitorsChart.updateOptions({
         series: [{
-          data: pages.map(page => page.count),
-          name: 'Page Visits'
+          name: "Visitors",
+          data: series
         }],
         xaxis: {
-          categories: pages.map(page => page.page)
-        },
-        chart: {
-          events: {
-            dataPointSelection: (event, chartContext, config) => {
-              chartFilter(event,chartContext.el,chartContext.w.config.xaxis.categories[config.dataPointIndex]);
-            }
-          }
+          categories: categories
         }
       });
-    }
-    // Render Top Pages Chart End //
+    });
+  };
+  // Render Visitors Area Chart End //
 
+  // Render Browser Types Chart
+  window.charts.browserTypesChart = new ApexCharts(document.querySelector("#browserTypesChart"), donutChartOptions);
+  window.charts.browserTypesChart.render();
 
-    // Render Page Activity Chart
-    var pageActivityChart = new ApexCharts(document.querySelector("#pageActivityChart"), lineColumnChartOptions);
-    pageActivityChart.render();
-
-    const updatePageActivityChart = (data,granularity) => {
-      // Aggregating data by pageName
-      const aggregatedData = data.reduce((acc, item) => {
-        const pageName = item.pageName || 'Home';
-        if (!acc[pageName]) {
-            acc[pageName] = { timeSpent: 0, visits: 0 };
+  // Define Types Chart Update Function
+  var updateBrowserTypes = (data) => {
+    const countByBrowser = data.reduce((acc, obj) => {
+      acc[obj.browser] = (acc[obj.browser] || 0) + 1;
+      return acc;
+    }, {});
+    var types = Object.keys(countByBrowser).map(browser => ({ browser: browser, count: countByBrowser[browser] }));
+    window.charts.browserTypesChart.updateOptions({
+      series: types.map(browser => browser.count),
+      labels: types.map(browser => browser.browser),
+      chart: {
+        events: {
+          dataPointSelection: (event, chartContext, config) => {
+            chartFilter(event,chartContext.el,config.w.config.labels[config.dataPointIndex]);
+          }
         }
-        acc[pageName].timeSpent += item.timeSpent;
-        acc[pageName].visits += 1;
-        return acc;
-      }, {});
+      },
+    });
+  }
+  // Render Browser Types Chart End //
 
-      // Extracting the data for the page activity chart
-      const categories = Object.keys(aggregatedData);
-      const timeSpent = categories.map(page => Math.round((aggregatedData[page].timeSpent / 1000) / 60));
-      const visits = categories.map(page => aggregatedData[page].visits);
-      pageActivityChart.updateOptions({
-        series: [{
-          name: 'Time Spent',
-          type: 'column',
-          data: timeSpent
-        }, {
-          name: 'Total Visits',
-          type: 'line',
-          data: visits
-        }],
+
+  // Render OS Types Chart
+  window.charts.osTypesChart = new ApexCharts(document.querySelector("#osTypesChart"), donutChartOptions);
+  window.charts.osTypesChart.render();
+
+  // Define OS Types Chart Update Function
+  var updateOSTypes = (data) => {
+    const countByOS = data.reduce((acc, obj) => {
+      acc[obj.os] = (acc[obj.os] || 0) + 1;
+      return acc;
+    }, {});
+
+    const osTypes = Object.keys(countByOS).map(os => ({ os: os, count: countByOS[os] }));
+    window.charts.osTypesChart.updateOptions({
+      series: osTypes.map(os => os.count),
+      labels: osTypes.map(os => os.os),
+      chart: {
+        events: {
+          dataPointSelection: (event, chartContext, config) => {
+            chartFilter(event,chartContext.el,config.w.config.labels[config.dataPointIndex]);
+          }
+        }
+      }
+    });
+  }
+  // Render Realms Chart End //
+
+
+  // Render Top Pages Chart
+  window.charts.topPagesChart = new ApexCharts(document.querySelector("#topPagesChart"), horizontalBarChartOptions);
+  window.charts.topPagesChart.render();
+
+  // Define Top Pages Chart Update Function
+  var updateTopPages = (data,granularity) => {
+    const pageCount = {};
+    data.forEach(entry => {
+      const page = entry.pageName;
+      if (page) {
+        if (!pageCount[page]) {
+          pageCount[page] = 0;
+        }
+        pageCount[page]++;
+      }
+    });
+
+    const sortedPages = Object.entries(pageCount).sort((a, b) => b[1] - a[1]);
+    const pages = sortedPages.slice(0,10).map(page => ({ page: page[0], count: page[1] }));
+    window.charts.topPagesChart.updateOptions({
+      series: [{
+        data: pages.map(page => page.count),
+        name: "Page Visits"
+      }],
+      xaxis: {
+        categories: pages.map(page => page.page)
+      },
+      chart: {
+        events: {
+          dataPointSelection: (event, chartContext, config) => {
+            chartFilter(event,chartContext.el,chartContext.w.config.xaxis.categories[config.dataPointIndex]);
+          }
+        }
+      }
+    });
+  }
+  // Render Top Pages Chart End //
+
+
+  // Render Page Activity Chart
+  window.charts.pageActivityChart = new ApexCharts(document.querySelector("#pageActivityChart"), lineColumnChartOptions);
+  window.charts.pageActivityChart.render();
+
+  var updatePageActivityChart = (data,granularity) => {
+    // Aggregating data by pageName
+    const aggregatedData = data.reduce((acc, item) => {
+      const pageName = item.pageName || "Home";
+      if (!acc[pageName]) {
+          acc[pageName] = { timeSpent: 0, visits: 0 };
+      }
+      acc[pageName].timeSpent += item.timeSpent;
+      acc[pageName].visits += 1;
+      return acc;
+    }, {});
+
+    // Extracting the data for the page activity chart
+    const categories = Object.keys(aggregatedData);
+    const timeSpent = categories.map(page => Math.round((aggregatedData[page].timeSpent / 1000) / 60));
+    const visits = categories.map(page => aggregatedData[page].visits);
+    window.charts.pageActivityChart.updateOptions({
+      series: [{
+        name: "Time Spent",
+        type: "column",
+        data: timeSpent
+      }, {
+        name: "Total Visits",
+        type: "line",
+        data: visits
+      }],
+      title: {
+        text: "Page Activity"
+      },
+      labels: categories,
+      yaxis: [{
         title: {
-          text: 'Page Activity'
-        },
-        labels: categories,
-        yaxis: [{
-          title: {
-            text: 'Time Spent (mins)'
-          }
-        }, {
-          opposite: true,
-          title: {
-            text: 'Total Visits'
-          }
-        }],
-        chart: {
-          events: {
-            dataPointSelection: (event, chartContext, config) => {
-              var category = categories[config.dataPointIndex];
-              if (category == 'Home') {
-                category = "";
-              };
-              chartFilter(event,chartContext.el,category);
-            }
+          text: "Time Spent (mins)"
+        }
+      }, {
+        opposite: true,
+        title: {
+          text: "Total Visits"
+        }
+      }],
+      chart: {
+        events: {
+          dataPointSelection: (event, chartContext, config) => {
+            var category = categories[config.dataPointIndex];
+            if (category == "Home") {
+              category = "";
+            };
+            chartFilter(event,chartContext.el,category);
           }
         }
-      });
-    }
-    // Render Page Activity Chart End //
-
-    $('#applyCustomRange').on('click', function(event) {
-      chartTimeFilter();
-      $('#customDateRangeModal').modal('hide');
+      }
     });
+  }
+  // Render Page Activity Chart End //
 
-    // Granularity Button
-    $('.granularity-select').on('click', function(event) {
-      if ($(event.currentTarget).data('granularity') == 'custom') {
-        $('#customDateRangeModal').modal('show');
-      } else {
-        updateVisitorsChart($(event.currentTarget).data('granularity'),appliedFilters);
-        updateRecentAssessments($(event.currentTarget).data('granularity'),appliedFilters);
-      }
-      $('.granularity-title').text($(event.currentTarget).text());
-      $('#granularityBtn').text($(event.currentTarget).text()).attr('data-granularity',$(event.currentTarget).data('granularity'));
-    });
-
-    // Filter Button
-    $('#clearFilters').on('click', function(event) {
-      // Reset Applied Filters
-      resetAppliedFilters();
-      // Reset Charts
-      osTypesChart = resetChart(osTypesChart,donutChartOptions);
-      browserTypesChart = resetChart(browserTypesChart,donutChartOptions);
-      topPagesChart = resetChart(topPagesChart,horizontalBarChartOptions);
-      pageActivityChart = resetChart(pageActivityChart,lineColumnChartOptions);
-      chartTimeFilter();
-    })
-
-    // Filter the chart
-    function chartFilter(event = null,el = null, value = null) {
-      var parentElementId = $(el).attr('id');
-      switch(parentElementId) {
-        case 'browserTypesChart':
-          appliedFilters['browser'] = value;
-          break;
-        case 'osTypesChart':
-          appliedFilters['os'] = value;
-          break;
-        case 'topPagesChart':
-          appliedFilters['page'] = value;
-          break;
-        case 'pageActivityChart':
-          appliedFilters['page'] = value;
-          break;
-      }
-      chartTimeFilter();
-      $('#clearFilters').css('display','block');
-    }
-
-    // Filter the chart with custom date/time range
-    function chartTimeFilter() {
-      if($('#granularityBtn').attr('data-granularity') == 'custom') {
-        if(!$('#reportingStartAndEndDate')[0].value){
-          toast("Error","Missing Required Fields","The Start & End Date is a required field.","danger","30000");
-          return null;
-        }
-        const reportingStartAndEndDate = $('#reportingStartAndEndDate')[0].value.split(" to ");
-        const startDateTime = (new Date(reportingStartAndEndDate[0])).toISOString();
-        const endDateTime = (new Date(reportingStartAndEndDate[1])).toISOString();
-        updateVisitorsChart($('#granularityBtn').attr('data-granularity'),appliedFilters,startDateTime,endDateTime);
-        updateRecentAssessments($('#granularityBtn').attr('data-granularity'),appliedFilters,startDateTime,endDateTime);
-      } else {
-        updateVisitorsChart($('#granularityBtn').attr('data-granularity'),appliedFilters);
-        updateRecentAssessments($('#granularityBtn').attr('data-granularity'),appliedFilters);
-      }
-    }
-
-    // Initial render
-    resetAppliedFilters();
-    updateVisitorsChart('last30Days',appliedFilters);
-    updateSummaryValues();
-    updateRecentAssessments('last30Days',appliedFilters);
+  $("#applyCustomRange").on("click", function(event) {
+    chartTimeFilter();
+    $("#customDateRangeModal").modal("hide");
   });
+
+  // Granularity Button
+  $(".granularity-select").on("click", function(event) {
+    if ($(event.currentTarget).data("granularity") == "custom") {
+      $("#customDateRangeModal").modal("show");
+    } else {
+      updateVisitorsChart($(event.currentTarget).data("granularity"),appliedFilters);
+      updateRecentTracking($(event.currentTarget).data("granularity"),appliedFilters);
+    }
+    $(".granularity-title").text($(event.currentTarget).text());
+    $("#granularityBtn").text($(event.currentTarget).text()).attr("data-granularity",$(event.currentTarget).data("granularity"));
+  });
+
+  // Filter Button
+  $("#clearFilters").on("click", function(event) {
+    // Reset Applied Filters
+    resetAppliedFilters();
+    // Reset Charts
+    window.charts.osTypesChart = resetChart(window.charts.osTypesChart,donutChartOptions);
+    window.charts.browserTypesChart = resetChart(window.charts.browserTypesChart,donutChartOptions);
+    window.charts.topPagesChart = resetChart(window.charts.topPagesChart,horizontalBarChartOptions);
+    window.charts.pageActivityChart = resetChart(window.charts.pageActivityChart,lineColumnChartOptions);
+    chartTimeFilter();
+  })
+
+  // Filter the chart
+  function chartFilter(event = null,el = null, value = null) {
+    var parentElementId = $(el).attr("id");
+    switch(parentElementId) {
+      case "browserTypesChart":
+        appliedFilters["browser"] = value;
+        break;
+      case "osTypesChart":
+        appliedFilters["os"] = value;
+        break;
+      case "topPagesChart":
+        appliedFilters["page"] = value;
+        break;
+      case "pageActivityChart":
+        appliedFilters["page"] = value;
+        break;
+    }
+    chartTimeFilter();
+    $("#clearFilters").css("display","block");
+  }
+
+  // Filter the chart with custom date/time range
+  function chartTimeFilter() {
+    if($("#granularityBtn").attr("data-granularity") == "custom") {
+      if(!$("#reportingStartAndEndDate")[0].value){
+        toast("Error","Missing Required Fields","The Start & End Date is a required field.","danger","30000");
+        return null;
+      }
+      const reportingStartAndEndDate = $("#reportingStartAndEndDate")[0].value.split(" to ");
+      const startDateTime = (new Date(reportingStartAndEndDate[0])).toISOString();
+      const endDateTime = (new Date(reportingStartAndEndDate[1])).toISOString();
+      updateVisitorsChart($("#granularityBtn").attr("data-granularity"),appliedFilters,startDateTime,endDateTime);
+      updateRecentTracking($("#granularityBtn").attr("data-granularity"),appliedFilters,startDateTime,endDateTime);
+    } else {
+      updateVisitorsChart($("#granularityBtn").attr("data-granularity"),appliedFilters);
+      updateRecentTracking($("#granularityBtn").attr("data-granularity"),appliedFilters);
+    }
+  }
+
+  // Initial render
+  resetAppliedFilters();
+  updateVisitorsChart("last30Days",appliedFilters);
+  updateTrackingSummaryValues();
+  updateRecentTracking("last30Days",appliedFilters);
 </script>
+';
