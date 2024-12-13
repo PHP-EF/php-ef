@@ -1,7 +1,7 @@
 <?php
 $app->post('/t', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-    $ib->reporting->track($ib->api->getAPIData($request),$ib->auth->getAuth());
+    $ib->reporting->track($ib->api->getAPIRequestData($request),$ib->auth->getAuth());
 	$ib->api->setAPIResponseCode(201);
 
 	// Return the response

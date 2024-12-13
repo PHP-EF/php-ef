@@ -15,7 +15,7 @@ class api {
 		}
 	}
 
-	public function setAPIMessage($message = null) {
+	public function setAPIResponseMessage($message = null) {
 		if ($message) {
 			$this->setAPIResponse(null,$message);
 		}
@@ -27,13 +27,13 @@ class api {
 		}
 	}
 
-	public function setAPIData($data = null) {
+	public function setAPIResponseData($data = null) {
 		if ($data) {
 			$this->setAPIResponse(null,null,null,$data);
 		}
 	}
 
-    public function getApiData($request, $decode = true) {
+    public function getAPIRequestData($request, $decode = true) {
 		switch ($request->getMethod()) {
 			case 'POST':
 				if (stripos($request->getHeaderLine('Content-Type'), 'application/json') !== false) {

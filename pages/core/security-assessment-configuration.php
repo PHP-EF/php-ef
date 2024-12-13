@@ -521,7 +521,6 @@
             processData: false,
             success: function(response) {
               toast('Success',"","Uploaded images","success");
-              console.log(response);
             },
             error: function(jqXHR, textStatus, errorThrown) {
               toast('Error',"","Error submitting images","danger");
@@ -577,7 +576,6 @@
             processData: false,
             success: function(response) {
               toast('Success',"","Uploaded images","success");
-              console.log(response);
             },
             error: function(jqXHR, textStatus, errorThrown) {
               toast('Error',"","Error submitting images","danger");

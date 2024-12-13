@@ -161,36 +161,40 @@ $("#Generate").click(function(){
   }
 
   $("#Generate").prop('disabled', true)
-  $.get( "/api?f=getUUID", function( id ) {
-    let timer = startTimer();
-    showLoading(id,timer);
-    const assessmentStartAndEndDate = $('#assessmentStartAndEndDate')[0].value.split(" to ");
-    const startDateTime = new Date(assessmentStartAndEndDate[0]);
-    const endDateTime = new Date(assessmentStartAndEndDate[1]);
-    var postArr = {};
-    postArr.StartDateTime = startDateTime.toISOString();
-    postArr.EndDateTime = endDateTime.toISOString();
-    postArr.Realm = $('#Realm').find(":selected").val();
-    postArr.id = id;
-    postArr.unnamed = $('#unnamed')[0].checked;
-    postArr.substring = $('#substring')[0].checked;
-    if ($('#APIKey')[0].value) {
-      postArr.APIKey = $('#APIKey')[0].value;
-    }
-    $.post( "/api?f=createSecurityReport", postArr).done(function( data, status ) {
-      if (data['Status'] == 'Success') {
-        toast("Success","Do not refresh the page","Security Assessment Report Job Started Successfully","success","30000");
-      } else {
-        toast(data['Status'],"",data['Error'],"danger","30000");
-        hideLoading(timer);
-        $("#Generate").prop('disabled', false);
+  $.get( "/api/v2/uuid/generate", function( data ) {
+    if (data.data) {
+      let id = data.data;
+      let timer = startTimer();
+      showLoading(id,timer);
+      const assessmentStartAndEndDate = $('#assessmentStartAndEndDate')[0].value.split(" to ");
+      const startDateTime = new Date(assessmentStartAndEndDate[0]);
+      const endDateTime = new Date(assessmentStartAndEndDate[1]);
+      var postArr = {};
+      postArr.StartDateTime = startDateTime.toISOString();
+      postArr.EndDateTime = endDateTime.toISOString();
+      postArr.Realm = $('#Realm').find(":selected").val();
+      postArr.id = id;
+      postArr.unnamed = $('#unnamed')[0].checked;
+      postArr.substring = $('#substring')[0].checked;
+      if ($('#APIKey')[0].value) {
+        postArr.APIKey = $('#APIKey')[0].value;
       }
-    }).fail(function( data, status ) {
-        toast("API Error","","Unknown API Error","danger","30000");
-        hideLoading(timer);
-        $("#Generate").prop('disabled', false);
-    }).always(function() {
-    });
+      $.post( "/api?f=createSecurityReport", postArr).done(function( data, status ) {
+        if (data['Status'] == 'Success') {
+          toast("Success","Do not refresh the page","Security Assessment Report Job Started Successfully","success","30000");
+        } else {
+          toast(data['Status'],"",data['Error'],"danger","30000");
+          hideLoading(timer);
+          $("#Generate").prop('disabled', false);
+        }
+      }).fail(function( data, status ) {
+          toast("API Error","","Unknown API Error","danger","30000");
+          hideLoading(timer);
+          $("#Generate").prop('disabled', false);
+      })
+    } else {
+      toast("API Error","","UUID not returned from the API","danger","30000");
+    }
   });
 });
 </script>

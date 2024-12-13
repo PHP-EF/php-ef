@@ -188,7 +188,7 @@ function login() {
 }
 
 function reset() {
-  $.post( "/api?f=resetExpiredPassword", {
+  $.post( "/api/v2/auth/password/expired", {
       un: $('#un').val(),
       cpw: $('#cpw').val(),
       pw: $('#pw').val()

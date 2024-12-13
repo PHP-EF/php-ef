@@ -13,7 +13,8 @@
       <h2 class="h3 mb-4 page-title">Logs</h2>
       <div class="my-4">
           <p>The following table displays logs from the Infoblox SA Tools Portal.</p>
-          <table  data-url="/api?f=GetLog"
+          <table  data-url="/api/v2/logs"
+            data-data-field="data"  
             data-toggle="table"
             data-search="true"
             data-filter-control="true"

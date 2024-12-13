@@ -504,7 +504,7 @@ foreach ($navLinks as $navLink) {
                 </div>
                 <div class="tab-pane fade" id="changelog">
                   <div>
-                    <iframe class="changeLogFrame" src="api?f=getChangelog"></iframe>
+                    <iframe class="changeLogFrame" src="/api/v2/changelog"></iframe>
                   </div>
                 </div>
                 <!--/tabs content-->
@@ -642,7 +642,6 @@ foreach ($navLinks as $navLink) {
   }
 
   function setFontSize(fontsize) {
-    console.log(fontsize);
     $('html').css('font-size',fontsize);
     setCookie('fontSize',fontsize,365);
     location.reload();
@@ -763,13 +762,12 @@ foreach ($navLinks as $navLink) {
       if (isValid) {
         var postArr = {}
         postArr.pw = password;
-        $.post( "/api?f=resetPassword", postArr).done(function( data, status ) {
-          if (data['Status'] == 'Success') {
-            toast(data['Status'],"",data['Message'],"success");
-            populateUsers();
+        $.post("/api/v2/auth/password/reset", postArr).done(function( data, status ) {
+          if (data['result'] == 'Success') {
+            toast(data['result'],"",data['message'],"success");
             $('#profileModal').modal('hide');
-          } else if (data['Status'] == 'Error') {
-            toast(data['Status'],"",data['Message'],"danger","30000");
+          } else if (data['result'] == 'Error') {
+            toast(data['result'],"",data['message'],"danger","30000");
           } else {
             toast("Error","","Failed to reset password","danger","30000");
           }
