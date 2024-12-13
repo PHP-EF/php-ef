@@ -2,16 +2,16 @@
 class api {
 	public function setAPIResponse($result = null, $message = null, $responseCode = null, $data = null) {
 		if ($result) {
-			$GLOBALS['api']['response']['result'] = $result;
+			$GLOBALS['api']['result'] = $result;
 		}
 		if ($message) {
-			$GLOBALS['api']['response']['message'] = $message;
+			$GLOBALS['api']['message'] = $message;
 		}
 		if ($responseCode) {
 			$GLOBALS['responseCode'] = $responseCode;
 		}
 		if ($data) {
-			$GLOBALS['api']['response']['data'] = $data;
+			$GLOBALS['api']['data'] = $data;
 		}
 	}
 
