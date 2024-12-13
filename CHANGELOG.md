@@ -1,3 +1,9 @@
+## v0.6.5
+- Complete native API conversion from V1 to V2
+- Move pages from static content to be generated via API endpoints instead
+- Enable initial plugin support
+- Move IB pages/functions to new plugin
+
 ## v0.6.4
 - Initial release of new V2 API
 

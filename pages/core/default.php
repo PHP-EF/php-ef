@@ -1,7 +1,7 @@
 <?php
   return '
-  <main class="page-content">
-    <div class="container-fluid">
+  <div class="container">
+    <div class="row">
       <h2>Infoblox SA Tools</h2>
       <hr>
       <div class="row">
@@ -31,7 +31,7 @@
       <div>
       </div>
     </footer>
-  </main>
+  </div>
 </body>
 </html>
 ';
