@@ -10,3 +10,4 @@ _archive
 .DS_Store
 test.*
 php.error.log
+inc/plugins/*

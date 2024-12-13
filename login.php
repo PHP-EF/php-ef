@@ -149,13 +149,13 @@ html {
 
 <script>
 function login() {
-  $.post( "/api?f=login", {
+  $.post( "/api/v2/login", {
       un: $('#un').val(),
       pw: $('#pw').val()
   }).done(function( data, status ) {
-    if (data['Status'] == 'Error') {
-      toast("Authentication Error","",data['Message'],"danger","30000");
-    } else if (data['Status'] == 'Expired') {
+    if (data['response']['result'] == 'Error') {
+      toast("Authentication Error","",data['response']['message'],"danger","30000");
+    } else if (data['response']['result'] == 'Expired') {
       toast("Password expired","","You must reset your password before logging in.","danger","30000");
       var un = $('#un').val()
       $('.login-wrap').html('');
@@ -178,7 +178,7 @@ function login() {
       $('#pw, #pw2').on('change', function() {
         validatePW();
       });
-    } else if (data['Status'] == 'Success') {
+    } else if (data['response']['result'] == 'Success') {
         toast("Success!","","Successfully logged in.","success","30000");
         location = "<?php echo $RedirectUri; ?>"
     }
@@ -193,7 +193,7 @@ function reset() {
       cpw: $('#cpw').val(),
       pw: $('#pw').val()
   }).done(function( data, status ) {
-    if (data['Status'] == 'Success') {
+    if (data['response']['result'] == 'Success') {
       toast("Success!","","Successfully reset password.","success","30000");
       $('.login-wrap').html('');
       $('.login-wrap').html(`<h2>Login</h2>
@@ -216,8 +216,8 @@ function reset() {
             login();
         }
       });
-    } else if (data['Status'] == 'Error') {
-      toast("Error","",data['Message'],"danger","30000");
+    } else if (data['response']['result'] == 'Error') {
+      toast("Error","",data['response']['message'],"danger","30000");
     }
   }).fail(function( data, status ) {
     toast("Authentication Error","","Unknown Authentication Error","danger","30000");

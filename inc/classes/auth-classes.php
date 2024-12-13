@@ -61,8 +61,9 @@ class Auth {
   private $logging;
   private $CoreJwt;
   private $sso;
+  private $api;
 
-  public function __construct($core,$db) {
+  public function __construct($core,$db,$api) {
     $this->db = $db;
     $this->createUsersTable();
 
@@ -75,6 +76,9 @@ class Auth {
 
     // SSO
     $this->sso = new OneLogin\Saml2\Auth($this->config->getConfig("SAML"));
+
+    // API
+    $this->api = $api;
   }
 
   private function createUsersTable() {
@@ -483,44 +487,41 @@ class Auth {
     return $usermap;
   }
 
-  public function login($username, $password) {
-    $user = $this->getUserByUsernameOrEmail($username,$username,true);
-    if ($user && password_verify($user['salt'].$password, $user['password'])) { // Login Successful
-      $now = new DateTime();
-      $expires = new DateTime($user['passwordexpires']);
-      if ($expires < $now)  {
-        return array(
-          'Status' => 'Expired',
-          'Message' => 'Password Expired'
-        );
+  public function login($request) {
+    if (isset($request['un']) && isset($request['pw'])) {
+      $username = $request['un'];
+      $password = $request['pw'];
+      $user = $this->getUserByUsernameOrEmail($username,$username,true);
+      if ($user && password_verify($user['salt'].$password, $user['password'])) { // Login Successful
+        $now = new DateTime();
+        $expires = new DateTime($user['passwordexpires']);
+        if ($expires < $now)  {
+          $this->api->setAPIResponse('Expired','Password Expired');
+          return false;
+        }
+        // Update last login
+        $this->updateLastLogin($user['id']);
+  
+        // Generate JWT token
+        $jwt = $this->CoreJwt->generateToken($user['username'],$user['firstname'],$user['surname'],$user['email'],explode(',',$user['groups']),$user['type']);
+        // Set JWT as a cookie
+        setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
+  
+        $this->logging->writeLog("Authentication",$username." successfully logged in","info");
+        return true;
+      } else { // Login failed
+        $this->api->setAPIResponse('Error','Invalid Credentials');
+        $this->logging->writeLog("Authentication",$username." failed to log in","warning");
+        return false;
       }
-      // Update last login
-      $this->updateLastLogin($user['id']);
-
-      // Generate JWT token
-      $jwt = $this->CoreJwt->generateToken($user['username'],$user['firstname'],$user['surname'],$user['email'],explode(',',$user['groups']),$user['type']);
-      // Set JWT as a cookie
-      setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
-
-      $Arr = array(
-        'Status' => 'Success',
-        'Location' => '/'
-      );
-      $this->logging->writeLog("Authentication",$username." successfully logged in","info",$Arr);
-      return $Arr;
-    } else { // Login failed
-      $Arr = array(
-        'Status' => 'Error',
-        'Message' => 'Invalid Credentials'
-      );
-      $this->logging->writeLog("Authentication",$username." failed to log in","warning",$Arr);
-      return $Arr;
+    } else {
+      $this->api->setAPIResponse('Error','Invalid Credentials');
     }
   }
 
   public function logout() {
     $this->CoreJwt->revokeToken($_COOKIE['jwt']);
-    return $this->getAuth();
+    $this->api->setAPIData($this->getAuth());
   }
 
   public function sso() {
@@ -806,8 +807,9 @@ class RBAC {
   private $logging;
   private $db;
   private $auth;
+  private $api;
 
-  public function __construct($core,$db,$auth) {
+  public function __construct($core,$db,$auth,$api) {
     // Set Config
     $this->config = $core->config;
     $this->logging = $core->logging;
@@ -819,6 +821,16 @@ class RBAC {
     $this->db = $db;
     $this->createRBACTable();
     $this->createRBACResourcesDefinitionsTable();
+
+    // API
+    $this->api = $api;
+  }
+  
+  // Function to check if a role exists
+  private function roleExists($db, $roleName) {
+    $stmt = $db->prepare("SELECT COUNT(*) FROM rbac WHERE Name = :name");
+    $stmt->execute([':name' => $roleName]);
+    return $stmt->fetchColumn() > 0;
   }
 
   private function createRBACTable() {
@@ -827,29 +839,30 @@ class RBAC {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       Name TEXT,
       Description TEXT,
-      PermittedResources TEXT
+      PermittedResources TEXT,
+      Protected BOOLEAN
     )");
-
-    // Function to check if a role exists
-    function roleExists($db, $roleName) {
-      $stmt = $db->prepare("SELECT COUNT(*) FROM rbac WHERE Name = :name");
-      $stmt->execute([':name' => $roleName]);
-      return $stmt->fetchColumn() > 0;
-    }
 
     // Insert roles if they don't exist
     $roles = [
-      ['Authenticated', 'This group applies to any authenticated user', ''],
-      ['Everyone', 'This group applies to any user, regardless of if they are logged in or not', ''],
-      ['Administrators', 'System Administrators', 'ADMIN-RBAC,ADMIN-USERS,ADMIN-CONFIG,ADMIN-LOGS']
+      ['Authenticated', 'This group applies to any authenticated user', true],
+      ['Everyone', 'This group applies to any user, regardless of if they are logged in or not', true],
+      ['Administrators', 'System Administrators', 'ADMIN-RBAC,ADMIN-USERS,ADMIN-CONFIG,ADMIN-LOGS', true]
     ];
 
     foreach ($roles as $role) {
-      if (!roleExists($this->db, $role[0])) {
-        $stmt = $this->db->prepare("INSERT INTO rbac (Name, Description, PermittedResources) VALUES (:Name, :Description, :PermittedResources)");
-        $stmt->execute([':Name' => $role[0],':Description' => $role[1], ':PermittedResources' => $role[2]]);
+      if (!$this->roleExists($this->db, $role[0])) {
+        $stmt = $this->db->prepare("INSERT INTO rbac (Name, Description, PermittedResources, Protected) VALUES (:Name, :Description, :PermittedResources, :Protected)");
+        $stmt->execute([':Name' => $role[0],':Description' => $role[1], ':PermittedResources' => $role[2], ':Protected' => $role[3]]);
       }
     }
+  }
+
+  // Function to check if a resource exists
+  private function resourceExists($db, $resourceName) {
+    $stmt = $db->prepare("SELECT COUNT(*) FROM rbac_resources WHERE name = :name");
+    $stmt->execute([':name' => $resourceName]);
+    return $stmt->fetchColumn() > 0;
   }
 
   private function createRBACResourcesDefinitionsTable() {
@@ -857,15 +870,11 @@ class RBAC {
     $this->db->exec("CREATE TABLE IF NOT EXISTS rbac_resources (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT UNIQUE,
-      description TEXT
+      description TEXT,
+      Protected BOOLEAN
     )");
 
-    // Function to check if a resource exists
-    function resourceExists($db, $resourceName) {
-      $stmt = $db->prepare("SELECT COUNT(*) FROM rbac_resources WHERE name = :name");
-      $stmt->execute([':name' => $resourceName]);
-      return $stmt->fetchColumn() > 0;
-    }
+
 
     // Insert roles if they don't exist
     // This needs to be re-done when modularisation comes in
@@ -879,30 +888,28 @@ class RBAC {
     ];
 
     foreach ($resources as $resource) {
-      if (!resourceExists($this->db, $resource[0])) {
+      if (!$this->resourceExists($this->db, $resource[0])) {
         $stmt = $this->db->prepare("INSERT INTO rbac_resources (name, description) VALUES (:Name, :Description)");
         $stmt->execute([':Name' => $resource[0],':Description' => $resource[1]]);
       }
     }
   }
 
-  public function getRBACGroups($type = null) {
-    $stmt = $this->db->prepare('SELECT * FROM rbac');
+  public function getRBACGroups($protected = false, $configurable = false) {
+    $prepare = 'SELECT * FROM rbac';
+    $where = [];
+    if ($protected) {
+      $where[] = '(Protected = 0 OR Protected IS NULL)';
+    }
+    if ($configurable) {
+      $where[] = 'Name NOT IN ("Everyone","Authenticated")';
+    }
+    if (!empty($where)) {
+      $prepare .= ' WHERE '.implode(' AND ',$where);
+    }
+    $stmt = $this->db->prepare($prepare);
     $stmt->execute();
     $groups = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    if ($type != null) {
-      switch($type) {
-        case 'configurable':
-          foreach ($groups as $groupKey => $groupVal) {
-            if ($groupVal['Name'] == 'Authenticated' || $groupVal['Name'] == 'Everyone') {
-              unset($groups[$groupKey]);
-            }
-          }
-          return $groups;
-        default:
-          break;
-      }
-    }
     return $groups;
   }
 
@@ -939,21 +946,19 @@ class RBAC {
           } else {
             $PermittedResources = [];
           }
-          if ($Value == "true") {
+          if ($Value == "enabled") {
             ## Add Key to Array
             if (in_array($Role,$PermittedResources)) {
-              return array(
-                'Status' => 'Error',
-                'Message' => $Role.' is already assigned to: '.$rbac['Name']
-              );
               $this->logging->writeLog("RBAC","$Role is already assigned to ".$rbac['Name'],"debug",$rbac);
+              $this->api->setAPIData('Error',$Role.' is already assigned to: '.$rbac['Name']);
+              return false;
             } else {
               $PermittedResources[] = $Role;
               $prepare[] = 'PermittedResources = :PermittedResources';
               $execute[':PermittedResources'] = implode(',',$PermittedResources);
               $this->logging->writeLog("RBAC","Added $Role to ".$rbac['Name'],"warning",$rbac);
             }
-          } else if ($Value == "false") {
+          } else if ($Value == "disabled") {
             ## Remove Key from Array
             if (in_array($Role,$PermittedResources)) {
               $ArrKey = array_search($Role, $PermittedResources);
@@ -963,32 +968,22 @@ class RBAC {
               $this->logging->writeLog("RBAC","Removed $Role from ".$rbac['Name'],"warning",$rbac);
             } else {
               $this->logging->writeLog("RBAC","$Role is not assigned to ".$rbac['Name'],"error",$rbac);
-              return array(
-                'Status' => 'Error',
-                'Message' => $Role.' is not assigned to: '.$rbac['Name']
-              );
+              $this->api->setAPIData('Error',$Role.' is not assigned to: '.$rbac['Name']);
+              return false;
             }
           }
         } else {
-          return array(
-            'Status' => 'Error',
-            'Message' => 'Invalid RBAC Option specified: "'.$Role.'"'
-          );
+          $this->api->setAPIData('Error','Invalid RBAC Option specified: "'.$Role.'"');
+          return false;
         }
       }
       $stmt = $this->db->prepare('UPDATE rbac SET '.implode(", ",$prepare).' WHERE id = :id');
       $stmt->execute($execute);
-      return array(
-        'Status' => 'Success',
-        'Message' => 'RBAC Group updated successfully'
-      );
+      $this->api->setAPIMessage('RBAC Group updated successfully');
     } else {
-      return array(
-        'Status' => 'Error',
-        'Message' => 'RBAC Group does not exist'
-      );
+      $this->api->setAPIData('Error','RBAC Group does not exist');
+      return false;
     }
-    return $rbac;
   }
 
   public function newRBACGroup($Name,$Description) {
@@ -1117,8 +1112,12 @@ class RBAC {
       $stmt->execute();
       $rbac = $stmt->fetchAll(PDO::FETCH_ASSOC);
       if ($Service != null) {
-        return $this->isResourcePermitted($rbac,$Service);
-      } else {
+        if ($this->isResourcePermitted($rbac,$Service)) {
+          return true;
+        } else {
+          $this->api->setAPIResponse('Error','Unauthorized','401');
+          return false;
+        }
       }
     } else {
       return false;

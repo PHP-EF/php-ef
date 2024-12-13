@@ -200,22 +200,22 @@ if (!($_REQUEST['f'])) {
                 die();
             }
             break;
-        case 'whoami':
-            if (isset($ib->auth->getAuth()['Authenticated'])) {
-                $AuthContent = $ib->auth->getAuth();
-                $AuthContent['headers'] = getallheaders();
-                $UnsetHeaders = array(
-                    "Remote-Email",
-                    "Remote-Groups",
-                    "Remote-Name",
-                    "Remote-User"
-                );
-                foreach ($UnsetHeaders as $UnsetHeader) {
-                    unset($AuthContent['headers'][$UnsetHeader]);
-                }
-                echo json_encode($AuthContent,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-            }
-            break;
+        // case 'whoami':
+        //     if (isset($ib->auth->getAuth()['Authenticated'])) {
+        //         $AuthContent = $ib->auth->getAuth();
+        //         $AuthContent['headers'] = getallheaders();
+        //         $UnsetHeaders = array(
+        //             "Remote-Email",
+        //             "Remote-Groups",
+        //             "Remote-Name",
+        //             "Remote-User"
+        //         );
+        //         foreach ($UnsetHeaders as $UnsetHeader) {
+        //             unset($AuthContent['headers'][$UnsetHeader]);
+        //         }
+        //         echo json_encode($AuthContent,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+        //     }
+        //     break;
         case 'resetPassword':
             if (checkRequestMethod('POST')) {
                 if (isset($_POST['pw'])) {
@@ -263,50 +263,50 @@ if (!($_REQUEST['f'])) {
                 echo json_encode($ib->logging->getLog($Date), JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
             }
             break;
-        case 'GetRBACGroups':
-            if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
-                if (isset($_REQUEST['type'])) {
-                    $Type = $_REQUEST['type'];
-                } else {
-                    $Type = null;
-                }
-                echo json_encode($ib->rbac->getRBACGroups($Type), JSON_PRETTY_PRINT);
-            }
-            break;
-        case 'GetRBACGroup':
-            if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
-                if (isset($_REQUEST['id'])) {
-                    echo json_encode($ib->rbac->getRBACGroupByID($_REQUEST['id']), JSON_PRETTY_PRINT);
-                }
-            }
-            break;
-        case 'SetRBACGroup':
-            if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
-                if (isset($_REQUEST['id'])) {
-                    if (isset($_REQUEST['name'])) {
-                        $GroupName = $_REQUEST['name'];
-                    } else {
-                        $GroupName = null;
-                    }
-                    if (isset($_REQUEST['description'])) {
-                        $Description = $_REQUEST['description'];
-                    } else {
-                        $Description = null;
-                    }
-                    if (isset($_REQUEST['key'])) {
-                        $Key = $_REQUEST['key'];
-                    } else {
-                        $Key = null;
-                    }
-                    if (isset($_REQUEST['value'])) {
-                        $Value = $_REQUEST['value'];
-                    } else {
-                        $Value = null;
-                    }
-                    echo json_encode($ib->rbac->updateRBACGroup($_REQUEST['id'],$GroupName,$Description,$Key,$Value), JSON_PRETTY_PRINT);
-                }
-            }
-            break;
+        // case 'GetRBACGroups':
+        //     if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+        //         if (isset($_REQUEST['type'])) {
+        //             $Type = $_REQUEST['type'];
+        //         } else {
+        //             $Type = null;
+        //         }
+        //         echo json_encode($ib->rbac->getRBACGroups($Type), JSON_PRETTY_PRINT);
+        //     }
+        //     break;
+        // case 'GetRBACGroup':
+        //     if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+        //         if (isset($_REQUEST['id'])) {
+        //             echo json_encode($ib->rbac->getRBACGroupByID($_REQUEST['id']), JSON_PRETTY_PRINT);
+        //         }
+        //     }
+        //     break;
+        // case 'SetRBACGroup':
+        //     if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+        //         if (isset($_REQUEST['id'])) {
+        //             if (isset($_REQUEST['name'])) {
+        //                 $GroupName = $_REQUEST['name'];
+        //             } else {
+        //                 $GroupName = null;
+        //             }
+        //             if (isset($_REQUEST['description'])) {
+        //                 $Description = $_REQUEST['description'];
+        //             } else {
+        //                 $Description = null;
+        //             }
+        //             if (isset($_REQUEST['key'])) {
+        //                 $Key = $_REQUEST['key'];
+        //             } else {
+        //                 $Key = null;
+        //             }
+        //             if (isset($_REQUEST['value'])) {
+        //                 $Value = $_REQUEST['value'];
+        //             } else {
+        //                 $Value = null;
+        //             }
+        //             echo json_encode($ib->rbac->updateRBACGroup($_REQUEST['id'],$GroupName,$Description,$Key,$Value), JSON_PRETTY_PRINT);
+        //         }
+        //     }
+        //     break;
         case 'NewRBACGroup':
             if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
                 if (isset($_REQUEST['name'])) {

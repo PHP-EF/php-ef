@@ -5,6 +5,7 @@ use Monolog\Handler\StreamHandler;
 
 class ib {
   private $core;
+  public $api;
   public $auth;
   public $rbac;
   public $config;
@@ -15,10 +16,11 @@ class ib {
   public $threatactors;
 
   public function __construct() {
+      $this->api = new api();
       $this->db = (new db(__DIR__.'/../config/app.db'))->db;
       $this->core = new core(__DIR__.'/../config/config.json');
-      $this->auth = new Auth($this->core,$this->db);
-      $this->rbac = new RBAC($this->core,$this->db,$this->auth);
+      $this->auth = new Auth($this->core,$this->db,$this->api);
+      $this->rbac = new RBAC($this->core,$this->db,$this->auth,$this->api);
       $this->config = $this->core->config;
       $this->logging = $this->core->logging;
       $this->reporting = new Reporting($this->core,$this->db);
@@ -27,7 +29,7 @@ class ib {
   }
 
   public function getVersion() {
-    return ['v0.6.3'];
+    return ['v0.6.4'];
   }
 }
 

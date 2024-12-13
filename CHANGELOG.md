@@ -1,3 +1,6 @@
+## v0.6.4
+- Initial release of new V2 API
+
 ## v0.6.3
 - Enable support for managing roles
 
