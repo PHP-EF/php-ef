@@ -73,7 +73,7 @@
       'Type' => 'MenuLink',
       'Menu' => 'Dev',
       'Submenu' => null,
-      'Url' => '#page=uddi/license-usage',
+      'Url' => '#page=plugin/IB/license-usage',
       'Icon' => 'fas fa-certificate'
     ),
     array(

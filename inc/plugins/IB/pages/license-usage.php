@@ -1,10 +1,9 @@
 <?php
-  require_once(__DIR__."/../../inc/inc.php");
-  if ($ib->rbac->checkAccess("B1-LICENSE-USAGE") == false) {
+  $ibPlugin = new ibPlugin();
+  if ($ibPlugin->rbac->checkAccess("B1-LICENSE-USAGE") == false) {
     die();
   }
-return '
-
+return <<<EOF
 <!doctype html>
 <html lang="en">
 <head>
@@ -141,4 +140,4 @@ $("#Generate").click(function(){
     });
 });
 </script>
-';
+EOF;
