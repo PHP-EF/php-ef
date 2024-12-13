@@ -348,26 +348,33 @@
 
     // Display error messages or proceed with form submission
     if (isValid) {
-      var postArr = {}
-      postArr.un = username;
-      postArr.pw = password;
-      postArr.fn = firstname;
-      postArr.sn = surname;
-      postArr.em = email;
-      postArr.expire = expire;
-      $.post( "/api?f=newUser", postArr).done(function( data, status ) {
-        if (data['Status'] == 'Success') {
-          toast(data['Status'],"",data['Message'],"success");
-          populateUsers();
-          $('#newUserModal').modal('hide');
-        } else if (data['Status'] == 'Error') {
-          toast(data['Status'],"",data['Message'],"danger","30000");
-        } else {
-          toast("Error","","Failed to add new user","danger","30000");
-        }
-      }).fail(function( data, status ) {
+      $.ajax({
+        url: '/api/v2/users',
+        type: 'POST',
+        data: JSON.stringify({
+          un: username,
+          pw: password,
+          fn: firstname,
+          sn: surname,
+          em: email,
+          expire: expire
+        }),
+        contentType: 'application/json',
+        success: function(data) {
+          if (data['result'] == 'Success') {
+            toast(data['result'],"",data['message'],"success");
+            populateUsers();
+            $('#newUserModal').modal('hide');
+          } else if (data['result'] == 'Error') {
+            toast(data['result'],"",data['message'],"danger","30000");
+          } else {
+            toast("Error","","Failed to add new user","danger","30000");
+          }
+        },
+        fail: function(data) {
           toast("API Error","","Failed to add new user","danger","30000");
-      })
+        }
+      });
     }
   });
 

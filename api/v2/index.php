@@ -21,7 +21,7 @@ $app->addRoutingMiddleware();
 $app->addErrorMiddleware(true, true, true);
 $app->setBasePath(getBasePath());
 $app->add(function ($request, $handler) {
-	// add the ib class to the request as read-only
+	// inject the ib class into the request
 	$ib = new ib();
 	$request = $request->withAttribute('ib', $ib);
 	// set custom error handler

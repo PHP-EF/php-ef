@@ -47,9 +47,9 @@ $("#submit").on('click', function(event) {
 function returnDnsDetails(domain, callType, port, source) {
     $('#txtHint, .info').html('');
   
-    $.get( "/api?f=DNSToolbox&domain=" + domain + "&request=" + callType + "&port=" + port + "&source=" + source).done(function( data ) {
-        if (data['Status'] == 'Error') {
-            toast(data['Status'],"",data['Message'],"danger","30000");
+    $.get( "/api/v2/dnstoolbox?domain=" + domain + "&request=" + callType + "&port=" + port + "&source=" + source).done(function( data ) {
+        if (data['result'] == 'Error') {
+            toast(data['result'],"",data['Message'],"danger","30000");
             hideLoading();
         } else {
             const columns = [];
@@ -123,6 +123,7 @@ function returnDnsDetails(domain, callType, port, source) {
             $('#dnsResponseTable').bootstrapTable('destroy');
             $('#dnsResponseTable').bootstrapTable({
                 data: data,
+                dataField: 'data',
                 sortable: true,
                 pagination: true,
                 search: true,

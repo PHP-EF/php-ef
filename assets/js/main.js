@@ -178,7 +178,6 @@ async function heartBeat() {
 
 $('.preventDefault').click(function(event){
   event.preventDefault();
-  console.log(event);
 });
 
 window.addEventListener("load", function() {
@@ -330,12 +329,15 @@ function applyFontSize() {
 
 applyFontSize();
 
-// New Stuff
 function saveAPIKey(key) {
-  $.post( "/api?f=crypt", {key: key}).done(function( data, status ) {
-      setCookie('crypt',data,7);
-      checkAPIKey();
-      toast("Success","","Saved API Key.","success","30000");
+  $.post( "/api/v2/auth/crypt", {key: key}).done(function( data, status ) {
+      if (data.result == 'Success') {
+        setCookie('crypt',data.data,7);
+        checkAPIKey();
+        toast("Success","","Saved API Key.","success","30000");
+      } else {
+        toast(data.result,"","Unable to save API Key.","danger","30000");
+      }
   }).fail(function( data, status ) {
       toast("API Error","","Unable to save API Key.","danger","30000");
   })

@@ -202,7 +202,6 @@
     });
   }
   function getThreatActor(params) {
-    console.log(params)
     var postArr = {}
     postArr.Realm = $('#Realm').find(":selected").val();
     postArr.ActorID = $('#threatActorID').val();

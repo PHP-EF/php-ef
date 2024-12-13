@@ -144,9 +144,9 @@ class Logging {
     return $files;
   }
 
-  public function getLog($date = "") {
+  public function getLog($date = null) {
     $this->writeLog("LOG","Queried logs","debug");
-    if ($date == "") {
+    if ($date == null) {
       $date = date("d-m-Y");
     }
     $LogFile = __DIR__.'/../'.$this->config->getConfig("System","logdirectory").$this->config->getConfig("System","logfilename")."-".$date.".log";

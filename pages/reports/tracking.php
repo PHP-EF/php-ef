@@ -227,7 +227,8 @@ if ($ib->rbac->checkAccess("REPORT-TRACKING") == false) {
     }
 
     const updateSummaryValues = () => {
-      $.get( "/api?f=getTrackingSummary").done(function( data, status ) {
+      $.get( "/api/v2/reports/tracking/summary").done(function( response, status ) {
+        let data = response['data'];
         const total = data.find(item => item.type === "Total")
         $('#visitsThisDayVal').text(total['count_today']);
         $('#uniqueVisitorsThisDayVal').text(total['unique_visitors_today']+' Unique Visitors');
@@ -239,7 +240,8 @@ if ($ib->rbac->checkAccess("REPORT-TRACKING") == false) {
     };
 
     const updateRecentAssessments = (granularity, appliedFilters, start = null, end = null) => {
-      $.get( "/api?f=getTrackingRecords&granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( data, status ) {
+      $.get( "/api/v2/reports/tracking/records?granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( response, status ) {
+        let data = response['data'];
         $('#assessmentTable').bootstrapTable('destroy');
         $('#assessmentTable').bootstrapTable({
           data: data,
@@ -262,7 +264,8 @@ if ($ib->rbac->checkAccess("REPORT-TRACKING") == false) {
           },{
             field: 'username',
             title: 'Username',
-            sortable: true
+            sortable: true,
+            filterControl: 'select'
           },{
             field: 'scheme',
             title: 'Scheme',
@@ -342,7 +345,8 @@ if ($ib->rbac->checkAccess("REPORT-TRACKING") == false) {
 
     // Define Visitors Area Chart Update Function
     const updateVisitorsChart = (granularity, appliedFilters, start = null, end = null) => {
-      $.get( "/api?f=getTrackingStats&granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( data, status ) {
+      $.get( "/api/v2/reports/tracking/stats?granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( response, status ) {
+        let data = response['data'];
         // Extract all unique dates
         const categoriesSet = new Set();
         for (const key in data) {
@@ -511,7 +515,6 @@ if ($ib->rbac->checkAccess("REPORT-TRACKING") == false) {
         chart: {
           events: {
             dataPointSelection: (event, chartContext, config) => {
-              console.log(config.dataPointIndex);
               var category = categories[config.dataPointIndex];
               if (category == 'Home') {
                 category = "";

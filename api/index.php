@@ -71,69 +71,69 @@ if (!($_REQUEST['f'])) {
         //         }
         //     }
         //     break;
-        case 'newUser':
-            if (checkRequestMethod('POST')) {
-                if ($ib->rbac->checkAccess("ADMIN-USERS")) {
-                    if (isset($_POST['un'])) {
-                        $UN = $_POST['un'];
-                    } else {
-                        echo json_encode(array(
-                            'Status' => 'Error',
-                            'Message' => 'Username missing from request'
-                        ));
-                        break;
-                    }
-                    if (isset($_POST['pw'])) {
-                        $PW = $_POST['pw'];
-                    } else {
-                        echo json_encode(array(
-                            'Status' => 'Error',
-                            'Message' => 'Password missing from request'
-                        ));
-                        break;
-                    }
-                    if (isset($_POST['fn'])) {
-                        $FN = $_POST['fn'];
-                    } else {
-                        echo json_encode(array(
-                            'Status' => 'Error',
-                            'Message' => 'First name missing from request'
-                        ));
-                        break;
-                    }
-                    if (isset($_POST['sn'])) {
-                        $SN = $_POST['sn'];
-                    } else {
-                        echo json_encode(array(
-                            'Status' => 'Error',
-                            'Message' => 'Surname missing from request'
-                        ));
-                        break;
-                    }
-                    if (isset($_POST['em'])) {
-                        $EM = $_POST['em'];
-                    } else {
-                        echo json_encode(array(
-                            'Status' => 'Error',
-                            'Message' => 'Email address missing from request'
-                        ));
-                        break;
-                    }
-                    if (isset($_POST['groups'])) {
-                        $Groups = $_POST['groups'];
-                    } else {
-                        $Groups = null;
-                    }
-                    if (isset($_POST['expire'])) {
-                        $Expire = $_POST['expire'];
-                    } else {
-                        $Expire = 'false';
-                    }
-                    $new = $ib->auth->newUser($UN,$PW,$FN,$SN,$EM,$Groups,'Local',$Expire);
-                    echo json_encode($new,JSON_PRETTY_PRINT);
-                }
-            }
-            break;
+        // case 'newUser':
+        //     if (checkRequestMethod('POST')) {
+        //         if ($ib->rbac->checkAccess("ADMIN-USERS")) {
+        //             if (isset($_POST['un'])) {
+        //                 $UN = $_POST['un'];
+        //             } else {
+        //                 echo json_encode(array(
+        //                     'Status' => 'Error',
+        //                     'Message' => 'Username missing from request'
+        //                 ));
+        //                 break;
+        //             }
+        //             if (isset($_POST['pw'])) {
+        //                 $PW = $_POST['pw'];
+        //             } else {
+        //                 echo json_encode(array(
+        //                     'Status' => 'Error',
+        //                     'Message' => 'Password missing from request'
+        //                 ));
+        //                 break;
+        //             }
+        //             if (isset($_POST['fn'])) {
+        //                 $FN = $_POST['fn'];
+        //             } else {
+        //                 echo json_encode(array(
+        //                     'Status' => 'Error',
+        //                     'Message' => 'First name missing from request'
+        //                 ));
+        //                 break;
+        //             }
+        //             if (isset($_POST['sn'])) {
+        //                 $SN = $_POST['sn'];
+        //             } else {
+        //                 echo json_encode(array(
+        //                     'Status' => 'Error',
+        //                     'Message' => 'Surname missing from request'
+        //                 ));
+        //                 break;
+        //             }
+        //             if (isset($_POST['em'])) {
+        //                 $EM = $_POST['em'];
+        //             } else {
+        //                 echo json_encode(array(
+        //                     'Status' => 'Error',
+        //                     'Message' => 'Email address missing from request'
+        //                 ));
+        //                 break;
+        //             }
+        //             if (isset($_POST['groups'])) {
+        //                 $Groups = $_POST['groups'];
+        //             } else {
+        //                 $Groups = null;
+        //             }
+        //             if (isset($_POST['expire'])) {
+        //                 $Expire = $_POST['expire'];
+        //             } else {
+        //                 $Expire = 'false';
+        //             }
+        //             $new = $ib->auth->newUser($UN,$PW,$FN,$SN,$EM,$Groups,'Local',$Expire);
+        //             echo json_encode($new,JSON_PRETTY_PRINT);
+        //         }
+        //     }
+        //     break;
         // case 'setUser':
         //     if (checkRequestMethod('POST')) {
         //         if ($ib->rbac->checkAccess("ADMIN-USERS")) {
@@ -216,53 +216,30 @@ if (!($_REQUEST['f'])) {
         //         echo json_encode($AuthContent,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
         //     }
         //     break;
-        case 'resetPassword':
-            if (checkRequestMethod('POST')) {
-                if (isset($_POST['pw'])) {
-                    echo json_encode($ib->auth->resetPassword($_POST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                } else {
-                    echo json_encode(array(
-                        'Status' => 'Error',
-                        'Message' => 'New password missing from request'
-                    ));
-                }
-            }
-            break;
-        case 'resetExpiredPassword':
-            if (checkRequestMethod('POST')) {
-                if (isset($_POST['un']) && isset($_POST['cpw']) && isset($_POST['pw'])) {
-                    echo json_encode($ib->auth->resetExpiredPassword($_REQUEST['un'],$_POST['cpw'],$_REQUEST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                } else {
-                    echo json_encode(array(
-                        'Status' => 'Error',
-                        'Message' => 'Required values missing from the request'
-                    ));
-                }
-            }
-            break;
-        case 'CheckAccess':
-            if (isset($_REQUEST['node'])) {
-                $Result = array(
-                    "node" => $_REQUEST['node']
-                );
-                if ($ib->rbac->checkAccess($_REQUEST['node'])) {
-                    $Result['permitted'] = true;
-                } else {
-                    $Result['permitted'] = false;
-                }
-                echo json_encode($Result,JSON_PRETTY_PRINT);
-            }
-            break;
-        case 'GetLog':
-            if ($ib->rbac->checkAccess("ADMIN-LOGS")) {
-                if (isset($_REQUEST['date'])) {
-                    $Date = $_REQUEST['date'];
-                } else {
-                    $Date = "";
-                }
-                echo json_encode($ib->logging->getLog($Date), JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-            }
-            break;
+        // case 'resetPassword':
+        //     if (checkRequestMethod('POST')) {
+        //         if (isset($_POST['pw'])) {
+        //             echo json_encode($ib->auth->resetPassword($_POST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+        //         } else {
+        //             echo json_encode(array(
+        //                 'Status' => 'Error',
+        //                 'Message' => 'New password missing from request'
+        //             ));
+        //         }
+        //     }
+        //     break;
+        // case 'resetExpiredPassword':
+        //     if (checkRequestMethod('POST')) {
+        //         if (isset($_POST['un']) && isset($_POST['cpw']) && isset($_POST['pw'])) {
+        //             echo json_encode($ib->auth->resetExpiredPassword($_REQUEST['un'],$_POST['cpw'],$_REQUEST['pw']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+        //         } else {
+        //             echo json_encode(array(
+        //                 'Status' => 'Error',
+        //                 'Message' => 'Required values missing from the request'
+        //             ));
+        //         }
+        //     }
+        //     break;
         // case 'GetRBACGroups':
         //     if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
         //         if (isset($_REQUEST['type'])) {
@@ -307,200 +284,338 @@ if (!($_REQUEST['f'])) {
         //         }
         //     }
         //     break;
-        case 'NewRBACGroup':
-            if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
-                if (isset($_REQUEST['name'])) {
-                    if (isset($_REQUEST['description'])) {
-                        $Description = $_REQUEST['description'];
-                    } else {
-                        $Description = null;
-                    }
-                    echo json_encode($ib->rbac->newRBACGroup($_REQUEST['name'],$Description), JSON_PRETTY_PRINT);
-                }
-            }
-            break;
-        case 'DeleteRBACGroup':
-            if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
-                if (isset($_REQUEST['id'])) {
-                    echo json_encode($ib->rbac->deleteRBACGroup($_REQUEST['id']), JSON_PRETTY_PRINT);
-                } else {
-                    return array(
-                        'Status' => 'Error',
-                        'Message' => 'Group ID Missing'
-                    );
-                }
-            }
-            break;
-        case 'GetRBACRoles':
-            if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
-                echo json_encode($ib->rbac->getRBACRoles(), JSON_PRETTY_PRINT);
-            }
-            break;
-        case 'NewRBACRole':
-            if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
-                if (isset($_REQUEST['name'])) {
-                    if (isset($_REQUEST['description'])) {
-                        $Description = $_REQUEST['description'];
-                    } else {
-                        $Description = null;
-                    }
-                    echo json_encode($ib->rbac->newRBACRole($_REQUEST['name'],$Description), JSON_PRETTY_PRINT);
-                }
-            }
-            break;
-        case 'SetRBACRole':
-            if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
-                if (isset($_REQUEST['id'])) {
-                    if (isset($_REQUEST['name'])) {
-                        $RoleName = $_REQUEST['name'];
-                    } else {
-                        $RoleName = null;
-                    }
-                    if (isset($_REQUEST['description'])) {
-                        $RoleDescription = $_REQUEST['description'];
-                    } else {
-                        $RoleDescription = null;
-                    }
-                    echo json_encode($ib->rbac->updateRBACRole($_REQUEST['id'],$RoleName,$RoleDescription), JSON_PRETTY_PRINT);
-                }
-            }
-            break;
-        case 'DeleteRBACRole':
-            if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
-                if (isset($_REQUEST['id'])) {
-                    echo json_encode($ib->rbac->deleteRBACRole($_REQUEST['id']), JSON_PRETTY_PRINT);
-                } else {
-                    return array(
-                        'Status' => 'Error',
-                        'Message' => 'Role ID Missing'
-                    );
-                }
-            }
-            break;
-        case 'GetConfig':
-            if ($ib->rbac->checkAccess("ADMIN-CONFIG")) {
-                $config = $ib->config->getConfig();
-                $config['Security']['salt'] = "********";
-                if ($config['SAML']['sp']['privateKey'] != "") {
-                    $config['SAML']['sp']['privateKey'] = "********";
-                }
-                $config['SAML']['idp']['x509cert'] = substr($config['SAML']['idp']['x509cert'],0,24).'...';
-                echo json_encode($config,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                $ib->logging->writeLog("Config","Queried Configuration","info",$_REQUEST);
-            }
-            break;
-        case 'SetConfig':
-            if (checkRequestMethod('POST')) {
-                if ($ib->rbac->checkAccess("ADMIN-CONFIG")) {
-                    $config = $ib->config->getConfig();
-                    $config['Security']['salt'] = "********";
-                    if ($config['SAML']['sp']['privateKey'] != "") {
-                        $config['SAML']['sp']['privateKey'] = "********";
-                    }
-                    $config['SAML']['idp']['x509cert'] = substr($config['SAML']['idp']['x509cert'],0,24).'...';
-                    if (isset($_POST['systemLogFileName'])) { $ib->config->setConfig("System","logfilename",$_POST['systemLogFileName']); }
-                    if (isset($_POST['systemLogDirectory'])) { $ib->config->setConfig("System","logdirectory",$_POST['systemLogDirectory']); }
-                    if (isset($_POST['systemLogLevel'])) { $ib->config->setConfig("System","loglevel",$_POST['systemLogLevel']); }
-                    if (isset($_POST['systemLogRetention'])) { $ib->config->setConfig("System","logretention",$_POST['systemLogRetention']); }
-                    if (isset($_POST['systemCURLTimeout'])) { $ib->config->setConfig("System","CURL-Timeout",$_POST['systemCURLTimeout']); }
-                    if (isset($_POST['systemCURLTimeoutConnect'])) { $ib->config->setConfig("System","CURL-ConnectTimeout",$_POST['systemCURLTimeoutConnect']); }
-                    if (isset($_POST['securitySalt'])) { $ib->config->setConfig("Security","salt",$_POST['securitySalt']); }
+        // case 'DNSToolbox':
+        //     if ($ib->rbac->checkAccess("DNS-TOOLBOX")) {
+        //         if (checkRequestMethod('GET')) {
+        //             if (isset($_GET['request']) && isset($_GET['domain'])) {
 
-                    // SAML Stuff //
-                    if (isset($_POST['samlEnabled'])) { $ib->config->setConfig("SAML","enabled",filter_var($_POST['samlEnabled'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)); }
-                    if (isset($_POST['samlAutoCreateUsers'])) { $ib->config->setConfig("SAML","AutoCreateUsers",filter_var($_POST['samlAutoCreateUsers'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)); }
-                    if (isset($_POST['samlStrict'])) { $ib->config->setConfig("SAML","strict",filter_var($_POST['samlStrict'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)); }
-                    if (isset($_POST['samlDebug'])) { $ib->config->setConfig("SAML","debug",filter_var($_POST['samlDebug'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)); }
+        //                 $domain = $_GET['domain'];
+        //                 if ($domain == '.') {
+        //                     echo json_encode(array(
+        //                         'Status' => 'Error',
+        //                         'Message' => 'Domain Name or IP missing from request'
+        //                     ));
+        //                     break;
+        //                 }
+        //                 if ($_GET['request'] != 'port') {
+        //                     if (!isset($_GET['source']) || $_GET['source'] == 'null') {
+        //                         echo json_encode(array(
+        //                             'Status' => 'Error',
+        //                             'Message' => 'DNS Server missing from request'
+        //                         ));
+        //                         break;
+        //                     } else {
+        //                         $source = $_GET['source'];
+        //                         switch ($source) {
+        //                             case 'google':
+        //                                 $sourceserver = 'dns.google';
+        //                                 break;
+        //                             case 'cloudflare':
+        //                                 $sourceserver = 'one.one.one.one';
+        //                                 break;
+        //                         }
+        //                     }
+        //                 } else {
+        //                     if ($_GET['port'] == "") {
+        //                         $port = [];
+        //                     } else {
+        //                         $port = explode(',',$_GET['port']);
+        //                     }
+        //                 }
 
-                    // SP
-                    if (isset($_POST['spEntityId']) || isset($_POST['spAcsUrl']) || isset($_POST['spSloUrl']) || isset($_POST['spX509Cert']) || isset($_POST['spPrivateKey'])) {
-                        $spconfig = $config['SAML']['sp'];
-                        if (isset($_POST['spEntityId'])) {
-                            $spconfig['entityId'] = urldecode($_POST['spEntityId']);
-                        }
-                        if (isset($_POST['spAcsUrl'])) {
-                            $spconfig['assertionConsumerService']['url'] = urldecode($_POST['spAcsUrl']);
-                        }
-                        if (isset($_POST['spSloUrl'])) {
-                            $spconfig['singleLogoutService']['url'] = urldecode($_POST['spSloUrl']);
-                        }
-                        if (isset($_POST['spX509Cert'])) {
-                            $spconfig['x509cert'] = urldecode($_POST['spX509Cert']);
-                        }
-                        if (isset($_POST['spPrivateKey'])) {
-                            $spconfig['privateKey'] = urldecode($_POST['spPrivateKey']);
-                        }
-                        $ib->config->setConfig("SAML","sp",$spconfig);
-                    }
+        //                 $DNSToolbox = new DNSToolbox();
 
-                    // IdP
-                    if (isset($_POST['idpEntityId']) || isset($_POST['idpSsoUrl']) || isset($_POST['idpSloUrl']) || isset($_POST['idpX509Cert'])) {
-                        $idpconfig = $config['SAML']['idp'];
-                        if (isset($_POST['idpEntityId'])) {
-                            $idpconfig['entityId'] = urldecode($_POST['idpEntityId']);
-                        }
-                        if (isset($_POST['idpSsoUrl'])) {
-                            $idpconfig['singleSignOnService']['url'] = urldecode($_POST['idpSsoUrl']);
-                        }
-                        if (isset($_POST['idpSloUrl'])) {
-                            $idpconfig['singleLogoutService']['url'] = urldecode($_POST['idpSloUrl']);
-                        }
-                        if (isset($_POST['idpX509Cert'])) {
-                            $idpconfig['x509cert'] = urldecode($_POST['idpX509Cert']);
-                        }
-                        $ib->config->setConfig("SAML","idp",$idpconfig);
-                    }
+        //                 $ib->logging->writeLog("DNSToolbox","A query was performed using type: ".$_GET['request'],"debug",$_GET);
+        //                 $methods = [
+        //                     'a' => 'a',
+        //                     'aaaa' => 'aaaa',
+        //                     'cname' => 'cname',
+        //                     'all' => 'all',
+        //                     'mx' => 'mx',
+        //                     'port' => 'port',
+        //                     'txt' => 'txt',
+        //                     'dmarc' => 'dmarc',
+        //                     'nameserver' => 'ns',
+        //                     'soa' => 'soa',
+        //                     'reverse' => 'reverse'
+        //                 ];
+        //                 if (array_key_exists($_GET['request'], $methods)) {
+        //                     $method = $methods[$_GET['request']];
+        //                     if ($method === 'port') {
+        //                         echo json_encode($DNSToolbox->$method($domain, $port));
+        //                     } else {
+        //                         echo json_encode($DNSToolbox->$method($domain, $sourceserver));
+        //                     }
+        //                 } else {
+        //                     echo json_encode([
+        //                         'Status' => 'Error',
+        //                         'Message' => 'Invalid Request Type'
+        //                     ]);
+        //                 }
+        //             }
+        //         }
+        //     break;
+        //     }
+        // case 'CheckAccess':
+        //     if (isset($_REQUEST['node'])) {
+        //         $Result = array(
+        //             "node" => $_REQUEST['node']
+        //         );
+        //         if ($ib->rbac->checkAccess($_REQUEST['node'])) {
+        //             $Result['permitted'] = true;
+        //         } else {
+        //             $Result['permitted'] = false;
+        //         }
+        //         echo json_encode($Result,JSON_PRETTY_PRINT);
+        //     }
+        //     break;
+        // case 'crypt':
+        //     if (checkRequestMethod('POST')) {
+        //         if (isset($_POST['key'])) {
+        //             echo json_encode(array(encrypt($_POST['key'],$ib->config->getConfig("Security","salt"))));
+        //         }
+        //     }
+        //     break;
+        // case 'getUUID':
+        //     header('Content-type: text/plain');
+        //     echo \Ramsey\Uuid\Uuid::uuid4();
+        //     break;
+        // case 'GetLog':
+        //     if ($ib->rbac->checkAccess("ADMIN-LOGS")) {
+        //         if (isset($_REQUEST['date'])) {
+        //             $Date = $_REQUEST['date'];
+        //         } else {
+        //             $Date = "";
+        //         }
+        //         echo json_encode($ib->logging->getLog($Date), JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+        //     }
+        //     break;
+        // case 'GetConfig':
+        //     if ($ib->rbac->checkAccess("ADMIN-CONFIG")) {
+        //         $config = $ib->config->getConfig();
+        //         $config['Security']['salt'] = "********";
+        //         if ($config['SAML']['sp']['privateKey'] != "") {
+        //             $config['SAML']['sp']['privateKey'] = "********";
+        //         }
+        //         $config['SAML']['idp']['x509cert'] = substr($config['SAML']['idp']['x509cert'],0,24).'...';
+        //         echo json_encode($config,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+        //         $ib->logging->writeLog("Config","Queried Configuration","info",$_REQUEST);
+        //     }
+        //     break;
+        // case 'SetConfig':
+        //     if (checkRequestMethod('POST')) {
+        //         if ($ib->rbac->checkAccess("ADMIN-CONFIG")) {
+        //             $config = $ib->config->getConfig();
+        //             $config['Security']['salt'] = "********";
+        //             if ($config['SAML']['sp']['privateKey'] != "") {
+        //                 $config['SAML']['sp']['privateKey'] = "********";
+        //             }
+        //             $config['SAML']['idp']['x509cert'] = substr($config['SAML']['idp']['x509cert'],0,24).'...';
+        //             if (isset($_POST['systemLogFileName'])) { $ib->config->setConfig("System","logfilename",$_POST['systemLogFileName']); }
+        //             if (isset($_POST['systemLogDirectory'])) { $ib->config->setConfig("System","logdirectory",$_POST['systemLogDirectory']); }
+        //             if (isset($_POST['systemLogLevel'])) { $ib->config->setConfig("System","loglevel",$_POST['systemLogLevel']); }
+        //             if (isset($_POST['systemLogRetention'])) { $ib->config->setConfig("System","logretention",$_POST['systemLogRetention']); }
+        //             if (isset($_POST['systemCURLTimeout'])) { $ib->config->setConfig("System","CURL-Timeout",$_POST['systemCURLTimeout']); }
+        //             if (isset($_POST['systemCURLTimeoutConnect'])) { $ib->config->setConfig("System","CURL-ConnectTimeout",$_POST['systemCURLTimeoutConnect']); }
+        //             if (isset($_POST['securitySalt'])) { $ib->config->setConfig("Security","salt",$_POST['securitySalt']); }
 
-                    // User Attributes
-                    if (isset($_POST['attributeUsername']) || isset($_POST['attributeFirstName']) || isset($_POST['attributeLastName']) || isset($_POST['attributeEmail']) || isset($_POST['attributeGroups'])) {
-                        $attributeconfig = $config['SAML']['attributes'];
-                        if (isset($_POST['attributeUsername'])) {
-                            $attributeconfig['Username'] = urldecode($_POST['attributeUsername']);
-                        }
-                        if (isset($_POST['attributeFirstName'])) {
-                            $attributeconfig['FirstName'] = urldecode($_POST['attributeFirstName']);
-                        }
-                        if (isset($_POST['attributeLastName'])) {
-                            $attributeconfig['LastName'] = urldecode($_POST['attributeLastName']);
-                        }
-                        if (isset($_POST['attributeEmail'])) {
-                            $attributeconfig['Email'] = urldecode($_POST['attributeEmail']);
-                        }
-                        if (isset($_POST['attributeGroups'])) {
-                            $attributeconfig['Groups'] = urldecode($_POST['attributeGroups']);
-                        }
-                        $ib->config->setConfig("SAML","attributes",$attributeconfig);
-                    }
-                    // End of SAML stuff //
+        //             // SAML Stuff //
+        //             if (isset($_POST['samlEnabled'])) { $ib->config->setConfig("SAML","enabled",filter_var($_POST['samlEnabled'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)); }
+        //             if (isset($_POST['samlAutoCreateUsers'])) { $ib->config->setConfig("SAML","AutoCreateUsers",filter_var($_POST['samlAutoCreateUsers'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)); }
+        //             if (isset($_POST['samlStrict'])) { $ib->config->setConfig("SAML","strict",filter_var($_POST['samlStrict'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)); }
+        //             if (isset($_POST['samlDebug'])) { $ib->config->setConfig("SAML","debug",filter_var($_POST['samlDebug'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)); }
 
-                    $newConfig = $ib->config->getConfig();
-                    $newConfig['Security']['salt'] = "********";
-                    if ($newConfig['SAML']['sp']['privateKey'] != "") {
-                        $newConfig['SAML']['sp']['privateKey'] = "********";
-                    }
-                    $newConfig['SAML']['idp']['x509cert'] = substr($newConfig['SAML']['idp']['x509cert'],0,24).'...';
-                    echo json_encode($newConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                    $logArr = array(
-                        "Old Configuration" => $config,
-                        "New Configuration" => $newConfig
-                    );
-                    $ib->logging->writeLog("Config","Updated configuration","warning",$logArr);
-                }
-            }
-            break;
-        case 'getChangelog':
-            if (checkRequestMethod('GET')) {
-                $MD = generate_markdown(__DIR__.'/../CHANGELOG.md');
-                header('Content-Type: text/html; charset=utf-8');
-                echo '<link href="/assets/css/changelog.css" rel="stylesheet">';
-                echo '<h1><center>Change Log</center></h1>';
-                print_r($MD);
-            }
-            break;
-        case 'getUUID':
-            header('Content-type: text/plain');
-            echo \Ramsey\Uuid\Uuid::uuid4();
-            break;
+        //             // SP
+        //             if (isset($_POST['spEntityId']) || isset($_POST['spAcsUrl']) || isset($_POST['spSloUrl']) || isset($_POST['spX509Cert']) || isset($_POST['spPrivateKey'])) {
+        //                 $spconfig = $config['SAML']['sp'];
+        //                 if (isset($_POST['spEntityId'])) {
+        //                     $spconfig['entityId'] = urldecode($_POST['spEntityId']);
+        //                 }
+        //                 if (isset($_POST['spAcsUrl'])) {
+        //                     $spconfig['assertionConsumerService']['url'] = urldecode($_POST['spAcsUrl']);
+        //                 }
+        //                 if (isset($_POST['spSloUrl'])) {
+        //                     $spconfig['singleLogoutService']['url'] = urldecode($_POST['spSloUrl']);
+        //                 }
+        //                 if (isset($_POST['spX509Cert'])) {
+        //                     $spconfig['x509cert'] = urldecode($_POST['spX509Cert']);
+        //                 }
+        //                 if (isset($_POST['spPrivateKey'])) {
+        //                     $spconfig['privateKey'] = urldecode($_POST['spPrivateKey']);
+        //                 }
+        //                 $ib->config->setConfig("SAML","sp",$spconfig);
+        //             }
+
+        //             // IdP
+        //             if (isset($_POST['idpEntityId']) || isset($_POST['idpSsoUrl']) || isset($_POST['idpSloUrl']) || isset($_POST['idpX509Cert'])) {
+        //                 $idpconfig = $config['SAML']['idp'];
+        //                 if (isset($_POST['idpEntityId'])) {
+        //                     $idpconfig['entityId'] = urldecode($_POST['idpEntityId']);
+        //                 }
+        //                 if (isset($_POST['idpSsoUrl'])) {
+        //                     $idpconfig['singleSignOnService']['url'] = urldecode($_POST['idpSsoUrl']);
+        //                 }
+        //                 if (isset($_POST['idpSloUrl'])) {
+        //                     $idpconfig['singleLogoutService']['url'] = urldecode($_POST['idpSloUrl']);
+        //                 }
+        //                 if (isset($_POST['idpX509Cert'])) {
+        //                     $idpconfig['x509cert'] = urldecode($_POST['idpX509Cert']);
+        //                 }
+        //                 $ib->config->setConfig("SAML","idp",$idpconfig);
+        //             }
+
+        //             // User Attributes
+        //             if (isset($_POST['attributeUsername']) || isset($_POST['attributeFirstName']) || isset($_POST['attributeLastName']) || isset($_POST['attributeEmail']) || isset($_POST['attributeGroups'])) {
+        //                 $attributeconfig = $config['SAML']['attributes'];
+        //                 if (isset($_POST['attributeUsername'])) {
+        //                     $attributeconfig['Username'] = urldecode($_POST['attributeUsername']);
+        //                 }
+        //                 if (isset($_POST['attributeFirstName'])) {
+        //                     $attributeconfig['FirstName'] = urldecode($_POST['attributeFirstName']);
+        //                 }
+        //                 if (isset($_POST['attributeLastName'])) {
+        //                     $attributeconfig['LastName'] = urldecode($_POST['attributeLastName']);
+        //                 }
+        //                 if (isset($_POST['attributeEmail'])) {
+        //                     $attributeconfig['Email'] = urldecode($_POST['attributeEmail']);
+        //                 }
+        //                 if (isset($_POST['attributeGroups'])) {
+        //                     $attributeconfig['Groups'] = urldecode($_POST['attributeGroups']);
+        //                 }
+        //                 $ib->config->setConfig("SAML","attributes",$attributeconfig);
+        //             }
+        //             // End of SAML stuff //
+
+        //             $newConfig = $ib->config->getConfig();
+        //             $newConfig['Security']['salt'] = "********";
+        //             if ($newConfig['SAML']['sp']['privateKey'] != "") {
+        //                 $newConfig['SAML']['sp']['privateKey'] = "********";
+        //             }
+        //             $newConfig['SAML']['idp']['x509cert'] = substr($newConfig['SAML']['idp']['x509cert'],0,24).'...';
+        //             echo json_encode($newConfig,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+        //             $logArr = array(
+        //                 "Old Configuration" => $config,
+        //                 "New Configuration" => $newConfig
+        //             );
+        //             $ib->logging->writeLog("Config","Updated configuration","warning",$logArr);
+        //         }
+        //     }
+        //     break;
+        // case 'getChangelog':
+        //     if (checkRequestMethod('GET')) {
+        //         $MD = generate_markdown(__DIR__.'/../CHANGELOG.md');
+        //         header('Content-Type: text/html; charset=utf-8');
+        //         echo '<link href="/assets/css/changelog.css" rel="stylesheet">';
+        //         echo '<h1><center>Change Log</center></h1>';
+        //         print_r($MD);
+        //     }
+        //     break;
+        // case 'getTrackingRecords':
+        //     if ($ib->rbac->checkAccess("REPORT-TRACKING")) {
+        //         if (checkRequestMethod('GET')) {
+        //             if (isset($_REQUEST['granularity']) && isset($_REQUEST['filters'])) {
+        //                 $Filters = $_REQUEST['filters'];
+        //                 if (isset($_REQUEST['start'])) { $Start = $_REQUEST['start']; } else { $Start = null; }
+        //                 if (isset($_REQUEST['end'])) { $End = $_REQUEST['end']; } else { $End = null; }
+        //                 $ib->logging->writeLog("Reporting","Queried Web Tracking","info");
+        //                 echo json_encode($ib->reporting->getTrackingRecords($_REQUEST['granularity'],json_decode($Filters,true),$Start,$End),JSON_PRETTY_PRINT);
+        //             }
+        //         }
+        //     }
+        //     break;
+        // case 'getTrackingStats':
+        //     if ($ib->rbac->checkAccess("REPORT-TRACKING")) {
+        //         if (checkRequestMethod('GET')) {
+        //             if (isset($_REQUEST['granularity']) && isset($_REQUEST['filters'])) {
+        //                 $Filters = $_REQUEST['filters'];
+        //                 if (isset($_REQUEST['start'])) { $Start = $_REQUEST['start']; } else { $Start = null; }
+        //                 if (isset($_REQUEST['end'])) { $End = $_REQUEST['end']; } else { $End = null; }
+        //                 $ib->logging->writeLog("Reporting","Queried Web Tracking Summary","debug");
+        //                 echo json_encode($ib->reporting->getTrackingStats($_REQUEST['granularity'],json_decode($Filters,true),$Start,$End),JSON_PRETTY_PRINT);
+        //             }
+        //         }
+        //     }
+        //     break;
+        // case 'getTrackingSummary':
+        //     if ($ib->rbac->checkAccess("REPORT-TRACKING")) {
+        //         if (checkRequestMethod('GET')) {
+        //             $ib->logging->writeLog("Reporting","Queried Web Tracking Summary","debug");
+        //             echo json_encode($ib->reporting->getTrackingSummary(),JSON_PRETTY_PRINT);
+        //         }
+        //     }
+        //     break;
+        // case 'DeleteRBACGroup':
+        //     if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+        //         if (isset($_REQUEST['id'])) {
+        //             echo json_encode($ib->rbac->deleteRBACGroup($_REQUEST['id']), JSON_PRETTY_PRINT);
+        //         } else {
+        //             return array(
+        //                 'Status' => 'Error',
+        //                 'Message' => 'Group ID Missing'
+        //             );
+        //         }
+        //     }
+        //     break;
+        // case 'GetRBACRoles':
+        //     if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+        //         echo json_encode($ib->rbac->getRBACRoles(), JSON_PRETTY_PRINT);
+        //     }
+        //     break;
+        // case 'DeleteRBACRole':
+        //     if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+        //         if (isset($_REQUEST['id'])) {
+        //             echo json_encode($ib->rbac->deleteRBACRole($_REQUEST['id']), JSON_PRETTY_PRINT);
+        //         } else {
+        //             return array(
+        //                 'Status' => 'Error',
+        //                 'Message' => 'Role ID Missing'
+        //             );
+        //         }
+        //     }
+        //     break;
+        // case 'NewRBACGroup':
+        //     if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+        //         if (isset($_REQUEST['name'])) {
+        //             if (isset($_REQUEST['description'])) {
+        //                 $Description = $_REQUEST['description'];
+        //             } else {
+        //                 $Description = null;
+        //             }
+        //             echo json_encode($ib->rbac->newRBACGroup($_REQUEST['name'],$Description), JSON_PRETTY_PRINT);
+        //         }
+        //     }
+        //     break;
+        // case 'NewRBACRole':
+        //     if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+        //         if (isset($_REQUEST['name'])) {
+        //             if (isset($_REQUEST['description'])) {
+        //                 $Description = $_REQUEST['description'];
+        //             } else {
+        //                 $Description = null;
+        //             }
+        //             echo json_encode($ib->rbac->newRBACRole($_REQUEST['name'],$Description), JSON_PRETTY_PRINT);
+        //         }
+        //     }
+        //     break;
+        // case 'SetRBACRole':
+        //     if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+        //         if (isset($_REQUEST['id'])) {
+        //             if (isset($_REQUEST['name'])) {
+        //                 $RoleName = $_REQUEST['name'];
+        //             } else {
+        //                 $RoleName = null;
+        //             }
+        //             if (isset($_REQUEST['description'])) {
+        //                 $RoleDescription = $_REQUEST['description'];
+        //             } else {
+        //                 $RoleDescription = null;
+        //             }
+        //             echo json_encode($ib->rbac->updateRBACRole($_REQUEST['id'],$RoleName,$RoleDescription), JSON_PRETTY_PRINT);
+        //         }
+        //     }
+        //     break;
+
+        // Security Assessments (Translate into Plugin(s))
         case 'createSecurityReport':
             if ($ib->rbac->checkAccess("B1-SECURITY-ASSESSMENT")) {
                 if (checkRequestMethod('POST')) {
@@ -541,33 +656,6 @@ if (!($_REQUEST['f'])) {
                         $id = $_REQUEST['id'];
                         echo json_encode(getProgress($id,38)); // Produces percentage for use on progress bar
                     }
-                }
-            }
-            break;
-        case 'createLicenseReport':
-            if ($ib->rbac->checkAccess("B1-LICENSE-USAGE")) {
-                if (checkRequestMethod('POST')) {
-                    if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
-                        $response = getLicenseCount($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm']);
-                        echo json_encode($response,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                    }
-                }
-            }
-            break;
-        case 'createLicenseReport2':
-            // if ($ib->rbac->checkAccess("B1-LICENSE-USAGE")) {
-                if (checkRequestMethod('POST')) {
-                    if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
-                        $response = getLicenseCount2($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm']);
-                        echo json_encode($response,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                    }
-                }
-            // }
-            break;
-        case 'crypt':
-            if (checkRequestMethod('POST')) {
-                if (isset($_POST['key'])) {
-                    echo json_encode(array(encrypt($_POST['key'],$ib->config->getConfig("Security","salt"))));
                 }
             }
             break;
@@ -810,93 +898,6 @@ if (!($_REQUEST['f'])) {
                 }
             }
             break;
-        case 'DNSToolbox':
-            if ($ib->rbac->checkAccess("DNS-TOOLBOX")) {
-                if (checkRequestMethod('GET')) {
-                    if (isset($_GET['request']) && isset($_GET['domain'])) {
-
-                        $domain = $_GET['domain'];
-                        if ($domain == '.') {
-                            echo json_encode(array(
-                                'Status' => 'Error',
-                                'Message' => 'Domain Name or IP missing from request'
-                            ));
-                            break;
-                        }
-                        if ($_GET['request'] != 'port') {
-                            if (!isset($_GET['source']) || $_GET['source'] == 'null') {
-                                echo json_encode(array(
-                                    'Status' => 'Error',
-                                    'Message' => 'DNS Server missing from request'
-                                ));
-                                break;
-                            } else {
-                                $source = $_GET['source'];
-                                switch ($source) {
-                                    case 'google':
-                                        $sourceserver = 'dns.google';
-                                        break;
-                                    case 'cloudflare':
-                                        $sourceserver = 'one.one.one.one';
-                                        break;
-                                }
-                            }
-                        } else {
-                            if ($_GET['port'] == "") {
-                                $port = [];
-                            } else {
-                                $port = explode(',',$_GET['port']);
-                            }
-                        }
-
-                        $DNSToolbox = new DNSToolbox();
-
-                        $ib->logging->writeLog("DNSToolbox","A query was performed using type: ".$_GET['request'],"debug",$_GET);
-                        switch ($_GET['request']) {
-                            case 'a':
-                                echo json_encode($DNSToolbox->a($domain,$sourceserver));
-                                break;
-                            case 'aaaa':
-                                echo json_encode($DNSToolbox->aaaa($domain,$sourceserver));
-                                break;
-                            case 'cname':
-                                echo json_encode($DNSToolbox->cname($domain,$sourceserver));
-                                break;
-                            case 'all':
-                                echo json_encode($DNSToolbox->all($domain,$sourceserver));
-                                break;
-                            case 'mx':
-                                echo json_encode($DNSToolbox->mx($domain,$sourceserver));
-                                break;
-                            case 'port':
-                                echo json_encode($DNSToolbox->port($domain,$port));
-                                break;
-                            case 'txt':
-                                echo json_encode($DNSToolbox->txt($domain,$sourceserver));
-                                break;
-                            case 'dmarc':
-                                echo json_encode($DNSToolbox->dmarc($domain,$sourceserver));
-                                break;
-                            case 'nameserver':
-                                echo json_encode($DNSToolbox->ns($domain,$sourceserver));
-                                break;
-                            case 'soa':
-                                echo json_encode($DNSToolbox->soa($domain,$sourceserver));
-                                break;
-                            case 'reverse':
-                                echo json_encode($DNSToolbox->reverse($domain,$sourceserver));
-                                break;
-                            default:
-                                echo json_encode(array(
-                                    'Status' => 'Error',
-                                    'Message' => 'Invalid Request Type'
-                                ));
-                                break;
-                        }
-                    }
-                }
-            break;
-            }
         case 'getAssessmentReports':
             if ($ib->rbac->checkAccess("REPORT-ASSESSMENTS")) {
                 if (checkRequestMethod('GET')) {
@@ -931,39 +932,27 @@ if (!($_REQUEST['f'])) {
                 }
             }
             break;
-        case 'getTrackingRecords':
-            if ($ib->rbac->checkAccess("REPORT-TRACKING")) {
-                if (checkRequestMethod('GET')) {
-                    if (isset($_REQUEST['granularity']) && isset($_REQUEST['filters'])) {
-                        $Filters = $_REQUEST['filters'];
-                        if (isset($_REQUEST['start'])) { $Start = $_REQUEST['start']; } else { $Start = null; }
-                        if (isset($_REQUEST['end'])) { $End = $_REQUEST['end']; } else { $End = null; }
-                        $ib->logging->writeLog("Reporting","Queried Web Tracking","info");
-                        echo json_encode($ib->reporting->getTrackingRecords($_REQUEST['granularity'],json_decode($Filters,true),$Start,$End),JSON_PRETTY_PRINT);
+
+        // License Usage Reports (Translate Into Plugin(s))
+        case 'createLicenseReport':
+            if ($ib->rbac->checkAccess("B1-LICENSE-USAGE")) {
+                if (checkRequestMethod('POST')) {
+                    if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
+                        $response = getLicenseCount($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm']);
+                        echo json_encode($response,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                     }
                 }
             }
             break;
-        case 'getTrackingStats':
-            if ($ib->rbac->checkAccess("REPORT-TRACKING")) {
-                if (checkRequestMethod('GET')) {
-                    if (isset($_REQUEST['granularity']) && isset($_REQUEST['filters'])) {
-                        $Filters = $_REQUEST['filters'];
-                        if (isset($_REQUEST['start'])) { $Start = $_REQUEST['start']; } else { $Start = null; }
-                        if (isset($_REQUEST['end'])) { $End = $_REQUEST['end']; } else { $End = null; }
-                        $ib->logging->writeLog("Reporting","Queried Web Tracking Summary","debug");
-                        echo json_encode($ib->reporting->getTrackingStats($_REQUEST['granularity'],json_decode($Filters,true),$Start,$End),JSON_PRETTY_PRINT);
+        case 'createLicenseReport2':
+            // if ($ib->rbac->checkAccess("B1-LICENSE-USAGE")) {
+                if (checkRequestMethod('POST')) {
+                    if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
+                        $response = getLicenseCount2($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm']);
+                        echo json_encode($response,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                     }
                 }
-            }
-            break;
-        case 'getTrackingSummary':
-            if ($ib->rbac->checkAccess("REPORT-TRACKING")) {
-                if (checkRequestMethod('GET')) {
-                    $ib->logging->writeLog("Reporting","Queried Web Tracking Summary","debug");
-                    echo json_encode($ib->reporting->getTrackingSummary(),JSON_PRETTY_PRINT);
-                }
-            }
+            // }
             break;
     }
 }

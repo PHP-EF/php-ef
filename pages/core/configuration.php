@@ -120,26 +120,26 @@
                 <br>
                 <div class="form-group">
                   <div class="form-check form-switch">
-                    <input class="form-check-input info-field" type="checkbox" id="samlEnabled" name="samlEnabled">
                     <label class="form-check-label" for="samlEnabled">Enable SAML</label>
+                    <input class="form-check-input info-field" type="checkbox" id="samlEnabled" name="samlEnabled">
                   </div>
                 </div>
                 <div class="form-group">
                   <div class="form-check form-switch">
-                    <input class="form-check-input info-field" type="checkbox" id="samlAutoCreateUsers" name="samlAutoCreateUsers">
                     <label class="form-check-label" for="samlAutoCreateUsers">Auto-Create Users</label>
+                    <input class="form-check-input info-field" type="checkbox" id="samlAutoCreateUsers" name="samlAutoCreateUsers">
                   </div>
                 </div>
                 <div class="form-group">
                   <div class="form-check form-switch">
-                    <input class="form-check-input info-field" type="checkbox" id="samlStrict" name="samlStrict">
                     <label class="form-check-label" for="samlStrict">Use Strict Mode</label>
+                    <input class="form-check-input info-field" type="checkbox" id="samlStrict" name="samlStrict">
                   </div>
                 </div>
                 <div class="form-group">
                   <div class="form-check form-switch">
-                    <input class="form-check-input info-field" type="checkbox" id="samlDebug" name="samlDebug">
                     <label class="form-check-label" for="samlDebug">Use Debug Mode</label>
+                    <input class="form-check-input info-field" type="checkbox" id="samlDebug" name="samlDebug">
                   </div>
                 </div>
               </div>
@@ -186,7 +186,8 @@
 <script>
 
   function getConfig() {
-    $.getJSON('/api?f=GetConfig', function(config) {
+    $.getJSON('/api/v2/config', function(data) {
+      let config = data.data;
       $("#systemLogFileName").val(config.System.logfilename);
       $("#systemLogDirectory").val(config.System.logdirectory);
       $("#systemLogLevel").val(config.System.loglevel);
@@ -218,8 +219,6 @@
   getConfig();
 
   $(".info-field").change(function(elem) {
-    console.log(elem);
-    console.log($(elem.target.previousElementSibling).text());
     toast("Configuration","",$(elem.target.previousElementSibling).text()+' has changed.<br><small>Save configuration to apply changes.</small>',"warning");
     $(this).addClass("changed");
   });
@@ -231,20 +230,25 @@
     for ( var i = 0; i < inspectForm.length; i++ ) {
       var e = inspectForm[i];
       if (inspectForm[i]['type'] == 'checkbox') {
-        console.log('checkbox!');
         kvpairs[e.name] = encodeURIComponent(e.checked);
       } else {
         kvpairs[e.name] = encodeURIComponent(e.value);
       }
     }
-    $.post( "/api?f=SetConfig", kvpairs).done(function( data, status ) {
-      if (data != null) {
-        toast("Success","","Successfully saved configuration","success");
-      } else {
-        toast("Error","","Failed to save configuration","danger");
+    $.ajax({
+      url: '/api/v2/config',
+      type: 'PUT',
+      data: JSON.stringify(kvpairs),
+      contentType: 'application/json',
+      success: function(setConfig) {
+        if (setConfig['result'] == 'Success') {
+          toast("Success","","Successfully saved configuration","success");
+        } else if (setConfig['result'] == 'Error') {
+          toast("Error","","Failed to save configuration","danger");
+        } else {
+          toast("API Error","","Failed to save configuration","danger","30000");
+        }
       }
-    }).fail(function( data, status ) {
-        toast("API Error","","Failed to save configuration","danger","30000");
-    })
+    });
   });
 </script>
