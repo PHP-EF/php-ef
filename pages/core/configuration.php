@@ -4,7 +4,7 @@
     die();
   }
 
-return '
+return <<<EOF
 
 <style>
 .card {
@@ -246,4 +246,4 @@ return '
     });
   });
 </script>
-';
+EOF;
