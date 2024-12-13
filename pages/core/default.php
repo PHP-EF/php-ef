@@ -1,5 +1,5 @@
 <?php
-  return '
+  return <<<EOF
   <div class="container">
     <div class="row">
       <h2>Infoblox SA Tools</h2>
@@ -34,4 +34,4 @@
   </div>
 </body>
 </html>
-';
+EOF;
