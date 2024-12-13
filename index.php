@@ -59,7 +59,7 @@
     array(
       'Name' => 'Dev',
       'Title' => 'Dev',
-      'ACL' => 'DEV-Menu',
+      'ACL' => null,
       'Type' => 'Menu',
       'Menu' => null,
       'Submenu' => null,
@@ -628,9 +628,9 @@ foreach ($navLinks as $navLink) {
   }
 
   function logout() {
-    $.get('/api?f=logout', function(data) {
+    $.get('/api/v2/logout', function(data) {
     }).done(function (data, status) {
-      if (!data['Authenticated']) {
+      if (data['response']['result'] == "success" && !data['response']['data']['Authenticated']) {
           toast("Logged Out","","Successfully Logged Out.","success");
         } else {
           toast("Error","","Failed to Log Out. Your session may still be active.","danger");
@@ -682,20 +682,19 @@ foreach ($navLinks as $navLink) {
 
     $('.infoBtn').on('click', function() {
       $('#infoModal').modal('show');
-      $.getJSON('/api?f=whoami', function(whoami) {
-        if (whoami.Groups != null) {whoami.Groups = whoami.Groups};
-        if (whoami.headers.Cookie != null) {whoami.headers.Cookie = whoami.headers.Cookie.split('; ')};
-        $('#whoami').text(JSON.stringify(whoami, null, 2));
+      $.getJSON('/api/v2/whoami', function(whoami) {
+        if (whoami.response.data.headers.Cookie != null) {whoami.response.data.headers.Cookie = whoami.response.data.headers.Cookie.split('; ')};
+        $('#whoami').text(JSON.stringify(whoami.response.data, null, 2));
       });
     });
 
     $('.profile').on('click', function() {
       $('#profileModal').modal('show');
-      $.getJSON('/api?f=whoami', function(whoami) {
-        $('#userUsername').val(whoami.Username);
-        $('#userFirstname').val(whoami.Firstname);
-        $('#userSurname').val(whoami.Surname);
-        $('#userEmail').val(whoami.Email);
+      $.getJSON('/api/v2/whoami', function(whoami) {
+        $('#userUsername').val(whoami.response.data.Username);
+        $('#userFirstname').val(whoami.response.data.Firstname);
+        $('#userSurname').val(whoami.response.data.Surname);
+        $('#userEmail').val(whoami.response.data.Email);
       });
     });
 

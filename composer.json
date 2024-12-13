@@ -10,6 +10,7 @@
         "monolog/monolog": "^3.0",
         "firebase/php-jwt": "^6.10",
         "predis/predis": "^2.2",
-        "onelogin/php-saml": "^4.2.0"
+        "onelogin/php-saml": "^4.2.0",
+        "slim/slim": "^4.14.0"
     }
 }
