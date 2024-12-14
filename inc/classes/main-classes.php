@@ -12,8 +12,6 @@ class ib {
   public $logging;
   public $db;
   public $reporting;
-  public $templates;
-  public $threatactors;
 
   public function __construct() {
       $this->api = new api();
@@ -24,8 +22,6 @@ class ib {
       $this->config = $this->core->config;
       $this->logging = $this->core->logging;
       $this->reporting = new Reporting($this->core,$this->db);
-      $this->templates = new TemplateConfig($this->core,$this->db);
-      $this->threatactors = new ThreatActorConfig($this->core,$this->db);
   }
 
   public function getVersion() {

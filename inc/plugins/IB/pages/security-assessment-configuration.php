@@ -21,7 +21,8 @@
               <h5>Threat Actor Configuration</h5>
               <p>Use the following to configure the known Threat Actors. This allows populating Threat Actors with Images / Report Links during Security Assessment Report generation.</p>
             </div>
-            <table  data-url="/api?f=getThreatActorConfig"
+            <table  data-url="/api/v2/plugin/ib/threatactors/config"
+              data-data-field="data"
               data-toggle="table"
               data-search="true"
               data-filter-control="true"
@@ -55,7 +56,8 @@
               <h5>Template Configuration</h5>
               <p>Use the following to configure the template for the Security Assessment Report Generator.</p>
             </div>
-            <table  data-url="/api?f=getSecurityAssessmentTemplates"
+            <table  data-url="/api/v2/plugin/ib/assessment/security/config"
+              data-data-field="data"
               data-toggle="table"
               data-search="true"
               data-filter-control="true"

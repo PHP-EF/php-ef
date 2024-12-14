@@ -76,10 +76,6 @@
               <div class="alert alert-info genInfo" role="alert">
                 <center>It can take up to 2 minutes to generate the list of Threat Actors, please be patient.</center>
               </div>
-              <hr>
-              <div class="progress">
-                <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-              </div>
               <br>
               <div id="spinner-container">
                 <div class="spinner-bounce">
@@ -203,15 +199,14 @@
     function getThreatActor(params) {
       var postArr = {}
       postArr.Realm = $("#Realm").find(":selected").val();
-      postArr.ActorID = $("#threatActorID").val();
       postArr.Page = params.data.pageNumber || 1;
       if ($("#APIKey")[0].value) {
         postArr.APIKey = $("#APIKey")[0].value
       }
-      queryAPI("POST", "/api?f=getThreatActor", postArr).done(function( data, status ) {
+      queryAPI("POST", "/api/v2/plugin/ib/threatactor/"+$("#threatActorID").val(), postArr).done(function( data, status ) {
         const mappedObject = {
-          total: data["actors"][0]["related_count"],
-          rows: data["actors"][0]["related_indicators"].map(indicator => ({ ioc: indicator }))
+          total: data["data"]["actors"][0]["related_count"],
+          rows: data["data"]["actors"][0]["related_indicators"].map(indicator => ({ ioc: indicator }))
         };
         params.success(mappedObject);
       }).fail(function( data, status ) {
@@ -290,17 +285,15 @@
       if ($("#APIKey")[0].value) {
         postArr.APIKey = $("#APIKey")[0].value
       }
-      queryAPI("POST", "/api?f=getThreatActors", postArr).done(function( data, status ) {
-        if (data["Status"] == "Error") {
-          toast(data["Status"],"",data["Message"],"danger","30000");
-          hideLoading(timer);
-        } else if (data["error"]) {
-          toast("Error","",data["error"][0]["message"],"danger","30000");
+      queryAPI("POST", "/api/v2/plugin/ib/threatactors", postArr).done(function( data, status ) {
+        if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger","30000");
           hideLoading(timer);
         } else {
           $("#threatActorTable").bootstrapTable("destroy");
           $("#threatActorTable").bootstrapTable({
             data: data,
+            dataField: "data",
             sortable: true,
             pagination: true,
             search: true,
