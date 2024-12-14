@@ -123,7 +123,7 @@ $("#Generate").click(function(){
       if ($("#APIKey")[0].value) {
         postArr.APIKey = $("#APIKey")[0].value
       }
-      queryAPI("POST", "/api?f=createLicenseReport", postArr).done(function( data, status ) {
+      queryAPI("POST", "/api/v2/plugin/ib/assessment/license/generate", postArr).done(function( data, status ) {
         if (data["Status"] == "Error") {
           toast(data["Status"],"",data["Error"],"danger","30000");
         } else {

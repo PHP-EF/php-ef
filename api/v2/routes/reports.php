@@ -28,7 +28,7 @@ $app->get('/reports/tracking/stats', function ($request, $response, $args) {
             $Filters = $data['filters'];
             if (isset($data['start'])) { $Start = $data['start']; } else { $Start = null; }
             if (isset($data['end'])) { $End = $data['end']; } else { $End = null; }
-            $ib->logging->writeLog("Reporting","Queried Web Tracking Summary","debug");
+            $ib->logging->writeLog("Reporting","Queried Web Tracking Stats","debug");
             $ib->api->setAPIResponseData($ib->reporting->getTrackingStats($data['granularity'],json_decode($Filters,true),$Start,$End));
         } else {
             $ib->api->setAPIResponse('Error','Required values are missing from the request');

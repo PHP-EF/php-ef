@@ -87,7 +87,7 @@ $app->post('/auth/crypt', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
     $data = $ib->api->getAPIRequestData($request);
 	if (isset($data['key'])) {
-		$ib->api->setAPIResponseData(encrypt($_POST['key'],$ib->config->getConfig("Security","salt")));
+		$ib->api->setAPIResponseData(encrypt($data['key'],$ib->config->getConfig("Security","salt")));
 	} else {
 		$ib->api->setAPIResponse('Error','key is missing from the request');
 	}

@@ -14,56 +14,6 @@ if (!($_REQUEST['f'])) {
 } else {
     switch ($_REQUEST['f']) {
         // Security Assessments (Translate into Plugin(s))
-        case 'createSecurityReport':
-            if ($ib->rbac->checkAccess("B1-SECURITY-ASSESSMENT")) {
-                if (checkRequestMethod('POST')) {
-                    if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm']) AND isset($_POST['id']) AND isset($_POST['unnamed']) AND isset($_POST['substring'])) {
-                        if (isValidUuid($_POST['id'])) {
-                            $response = generateSecurityReport($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm'],$_POST['id'],$_POST['unnamed'],$_POST['substring']);
-                            echo json_encode($response,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                        }
-                    }
-                }
-            }
-            break;
-        case 'downloadSecurityReport':
-            if ($ib->rbac->checkAccess("B1-SECURITY-ASSESSMENT")) {
-                if (checkRequestMethod('GET')) {
-                    $ib->logging->writeLog("Assessment","Downloaded security assessment report","info");
-                    if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
-                        $id = $_REQUEST['id'];
-                        $File = __DIR__.'/../files/reports/report-'.$id.'.pptx';
-                        if (file_exists($File)) {
-                            $ib->reporting->updateReportEntryStatus($id,'Downloaded');
-                            header('Content-type: application/pptx');
-                            header('Content-Disposition: inline; filename="report-'.$id.'.pptx"');
-                            header('Content-Transfer-Encoding: binary');
-                            header('Accept-Ranges: bytes');
-                            readfile($File);
-                        } else {
-                            echo 'Invalid ID';
-                        }
-                    }
-                }
-            }
-            break;
-        case 'getSecurityReportProgress':
-            if ($ib->rbac->checkAccess("B1-SECURITY-ASSESSMENT")) {
-                if (checkRequestMethod('GET')) {
-                    if (isset($_REQUEST['id']) AND isValidUuid($_REQUEST['id'])) {
-                        $id = $_REQUEST['id'];
-                        echo json_encode(getProgress($id,38)); // Produces percentage for use on progress bar
-                    }
-                }
-            }
-            break;
-        case 'getSecurityAssessmentTemplates':
-            if ($ib->rbac->checkAccess("ADMIN-SECASS")) {
-                if (checkRequestMethod('GET')) {
-                    echo json_encode($ib->templates->getTemplateConfigs(),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                }
-            }
-            break;
         case 'newSecurityAssessmentTemplate':
             if ($ib->rbac->checkAccess("ADMIN-SECASS")) {
                 if (checkRequestMethod('POST')) {
@@ -148,13 +98,6 @@ if (!($_REQUEST['f'])) {
                 }
             }
             break;
-        case 'getThreatActorConfig':
-            if ($ib->rbac->checkAccess("ADMIN-SECASS")) {
-                if (checkRequestMethod('GET')) {
-                    echo json_encode($ib->threatactors->getThreatActorConfigs(),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                }
-            }
-            break;
         case 'newThreatActorConfig':
             if ($ib->rbac->checkAccess("ADMIN-SECASS")) {
                 if (checkRequestMethod('POST')) {
@@ -185,42 +128,6 @@ if (!($_REQUEST['f'])) {
                 if (checkRequestMethod('POST')) {
                     if (isset($_POST['id'])) {
                         echo json_encode($ib->threatactors->removeThreatActorConfig($_POST['id']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                    }
-                }
-            }
-            break;
-        case 'getThreatActors':
-            if ($ib->rbac->checkAccess("B1-THREAT-ACTORS")) {
-                if (checkRequestMethod('POST')) {
-                    if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
-                        $UserInfo = GetCSPCurrentUser();
-                        if (isset($UserInfo->result->name)) {
-                            $ib->logging->writeLog("ThreatActors",$UserInfo->result->name." queried list of Threat Actors","info");
-                            $Actors = GetB1ThreatActors($_POST['StartDateTime'],$_POST['EndDateTime']);
-                            if (!isset($Actors->Error)) {
-                                echo json_encode(GetB1ThreatActorsById3($Actors,$_POST['unnamed'],$_POST['substring']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                            } else {
-                                echo json_encode($Actors);
-                            };
-                        } else {
-                            echo json_encode(array(
-                                'Status' => 'Error',
-                                'Message' => 'Invalid API Key'
-                            ));
-                        }
-                    }
-                }
-            }
-            break;
-        case 'getThreatActor':
-            if ($ib->rbac->checkAccess("B1-THREAT-ACTORS")) {
-                if (checkRequestMethod('POST')) {
-                    if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['Realm']) AND isset($_POST['ActorID']) AND isset($_POST['Page'])) {
-                        $UserInfo = GetCSPCurrentUser();
-                        if (isset($UserInfo)) {
-                            $ib->logging->writeLog("ThreatActors",$UserInfo->result->name." queried list of Threat Actor IOCs","info");
-                        }
-                        echo json_encode(GetB1ThreatActor($_POST['ActorID'],$_POST['Page']),JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
                     }
                 }
             }
@@ -295,62 +202,6 @@ if (!($_REQUEST['f'])) {
                     }
                 }
             }
-            break;
-        case 'getAssessmentReports':
-            if ($ib->rbac->checkAccess("REPORT-ASSESSMENTS")) {
-                if (checkRequestMethod('GET')) {
-                    if (isset($_REQUEST['granularity']) && isset($_REQUEST['filters'])) {
-                        $Filters = $_REQUEST['filters'];
-                        if (isset($_REQUEST['start'])) { $Start = $_REQUEST['start']; } else { $Start = null; }
-                        if (isset($_REQUEST['end'])) { $End = $_REQUEST['end']; } else { $End = null; }
-                        $ib->logging->writeLog("Reporting","Queried Assessment Reports","info");
-                        echo json_encode($ib->reporting->getAssessmentReports($_REQUEST['granularity'],json_decode($Filters,true),$Start,$End),JSON_PRETTY_PRINT);
-                    }
-                }
-            }
-            break;
-        case 'getAssessmentReportsStats':
-            if ($ib->rbac->checkAccess("REPORT-ASSESSMENTS")) {
-                if (checkRequestMethod('GET')) {
-                    if (isset($_REQUEST['granularity']) && isset($_REQUEST['filters'])) {
-                        $Filters = $_REQUEST['filters'];
-                        if (isset($_REQUEST['start'])) { $Start = $_REQUEST['start']; } else { $Start = null; }
-                        if (isset($_REQUEST['end'])) { $End = $_REQUEST['end']; } else { $End = null; }
-                        $ib->logging->writeLog("Reporting","Queried Assessment Report Stats","debug");
-                        echo json_encode($ib->reporting->getAssessmentReportsStats($_REQUEST['granularity'],json_decode($Filters,true),$Start,$End),JSON_PRETTY_PRINT);
-                    }
-                }
-            }
-            break;
-        case 'getAssessmentReportsSummary':
-            if ($ib->rbac->checkAccess("REPORT-ASSESSMENTS")) {
-                if (checkRequestMethod('GET')) {
-                    $ib->logging->writeLog("Reporting","Queried Assessment Report Summary","debug");
-                    echo json_encode($ib->reporting->getAssessmentReportsSummary(),JSON_PRETTY_PRINT);
-                }
-            }
-            break;
-
-        // License Usage Reports (Translate Into Plugin(s))
-        case 'createLicenseReport':
-            if ($ib->rbac->checkAccess("B1-LICENSE-USAGE")) {
-                if (checkRequestMethod('POST')) {
-                    if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
-                        $response = getLicenseCount($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm']);
-                        echo json_encode($response,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                    }
-                }
-            }
-            break;
-        case 'createLicenseReport2':
-            // if ($ib->rbac->checkAccess("B1-LICENSE-USAGE")) {
-                if (checkRequestMethod('POST')) {
-                    if ((isset($_POST['APIKey']) OR isset($_COOKIE['crypt'])) AND isset($_POST['StartDateTime']) AND isset($_POST['EndDateTime']) AND isset($_POST['Realm'])) {
-                        $response = getLicenseCount2($_POST['StartDateTime'],$_POST['EndDateTime'],$_POST['Realm']);
-                        echo json_encode($response,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-                    }
-                }
-            // }
             break;
     }
 }

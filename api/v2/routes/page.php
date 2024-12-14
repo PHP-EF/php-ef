@@ -21,8 +21,6 @@ $app->get('/page/plugin/{plugin}/js', function ($request, $response, $args) {
 		$ib->api->setAPIResponseData($jsContent);
 	}
 
-	$ib->api->setAPIResponseData($html);
-
 	// Return the response
 	$response->getBody()->write($GLOBALS['api']['data']);
 	return $response
@@ -39,8 +37,6 @@ $app->get('/page/plugin/{plugin}/css', function ($request, $response, $args) {
 		$cssContent = file_get_contents($pluginDir.'/styles.css');
 		$ib->api->setAPIResponseData($cssContent);
 	}
-
-	$ib->api->setAPIResponseData($html);
 
 	// Return the response
 	$response->getBody()->write($GLOBALS['api']['data']);
