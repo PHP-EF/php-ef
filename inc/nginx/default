@@ -15,7 +15,7 @@ server {
         index  index.php index.html index.htm hostingstart.html;
     }
 
-    location /api/ {
+    location /api {
         try_files $uri /api/index.php$is_args$args;
     }
 
