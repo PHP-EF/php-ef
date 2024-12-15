@@ -20,7 +20,7 @@ function getBasePath()
 {
 	$uri = $_SERVER['REQUEST_URI'];
 	$uriUse = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
-	if (stripos($uri, 'api/v2/') !== false) {
+	if (stripos($uri, 'api/') !== false) {
 		return $uriUse;
 	} else {
 		return '';

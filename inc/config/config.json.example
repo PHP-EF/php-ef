@@ -17,10 +17,10 @@
         "sp": {
             "entityId": "",
             "assertionConsumerService": {
-                "url": "https://fqdn/api/v2/auth/acs"
+                "url": "https://fqdn/api/auth/acs"
             },
             "singleLogoutService": {
-                "url": "https://fqdn/api/v2/auth/slo"
+                "url": "https://fqdn/api/auth/slo"
             },
             "x509cert": "",
             "privateKey": ""

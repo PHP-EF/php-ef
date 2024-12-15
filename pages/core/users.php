@@ -235,7 +235,7 @@ return '
     },
     "click .delete": function (e, value, row, index) {
       if(confirm("Are you sure you want to delete "+row.username+" from the list of Users? This is irriversible.") == true) {
-        queryAPI("DELETE","/api/v2/user/"+row.id).done(function(data) {
+        queryAPI("DELETE","/api/user/"+row.id).done(function(data) {
           if (data["result"] == "Success") {
             toast(data["result"],"",data["message"],"success");
             populateUsers();
@@ -254,7 +254,7 @@ return '
 
   function listGroups(row) {
     var div = document.getElementById("modalListGroup");
-    queryAPI("GET","/api/v2/rbac/groups/configurable").done(function(data) {
+    queryAPI("GET","/api/rbac/groups/configurable").done(function(data) {
       div.innerHTML = "";
       var groups = data["data"]
       for (var key in groups) {
@@ -293,7 +293,7 @@ return '
       }).get().join(",")
     }
     var id = $("#editUserID").val().trim();
-    queryAPI("PUT","/api/v2/user/"+id,data).done(function(data) {
+    queryAPI("PATCH","/api/user/"+id,data).done(function(data) {
       if (data["result"] == "Success") {
         toast(data["result"],"",data["message"],"success");
         populateUsers();
@@ -344,7 +344,7 @@ return '
 
     // Display error messages or proceed with form submission
     if (isValid) {
-      queryAPI("POST","/api/v2/users",data).done(function(data) {
+      queryAPI("POST","/api/users",data).done(function(data) {
         if (data["result"] == "Success") {
           toast(data["result"],"",data["message"],"success");
           populateUsers();
@@ -369,7 +369,7 @@ return '
       sn: $("#editUserSurname").val().trim() ? $("#editUserSurname").val().trim() : null,
       em: $("#editUserEmail").val().trim() ? $("#editUserEmail").val().trim() : null
     };
-    queryAPI("PUT","/api/v2/user/"+id,data).done(function(data) {
+    queryAPI("PATCH","/api/user/"+id,data).done(function(data) {
       if (data["result"] == "Success") {
         toast(data["result"],"",data["message"],"success");
         populateUsers();
@@ -402,7 +402,7 @@ return '
   }
 
   function populateUsers() {
-    $.getJSON("/api/v2/users", function(data) {
+    $.getJSON("/api/users", function(data) {
       if (data["Status"] == "Error") {
         toast(data["Status"],"",data["Error"],"danger","30000");
       } else if (data["error"]) {

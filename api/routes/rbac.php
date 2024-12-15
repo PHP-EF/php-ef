@@ -62,7 +62,7 @@ $app->post('/rbac/groups', function ($request, $response, $args) {
 		->withStatus($GLOBALS['responseCode']);
 });
 
-$app->put('/rbac/group/{id}', function ($request, $response, $args) {
+$app->patch('/rbac/group/{id}', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
     $data = $ib->api->getAPIRequestData($request);
     if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
@@ -127,7 +127,7 @@ $app->post('/rbac/roles', function ($request, $response, $args) {
 		->withStatus($GLOBALS['responseCode']);
 });
 
-$app->put('/rbac/role/{id}', function ($request, $response, $args) {
+$app->patch('/rbac/role/{id}', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
     if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
         $data = $ib->api->getAPIRequestData($request);

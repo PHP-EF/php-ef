@@ -32,7 +32,7 @@ return '
           <p>Use the following to configure Access Groups. These are mapped to users and used for grouping together one or more roles.</p>
         </div>
         <div class="container">
-          <table data-url="/api/v2/rbac/groups"
+          <table data-url="/api/rbac/groups"
             data-data-field="data"
             data-toggle="table"
             data-search="true"
@@ -70,7 +70,7 @@ return '
           <p>Use the following to configure Roles. These are mapped to Groups and provide access to specific website resources.</p>
         </div>
         <div class="container">
-          <table  data-url="/api/v2/rbac/roles"
+          <table  data-url="/api/rbac/roles"
             data-data-field="data"
             data-toggle="table"
             data-search="true"
@@ -284,7 +284,7 @@ return '
     $("#editGroupID").val(row.id);
     var div = document.getElementById("modalListGroup");
     $("#editGroupDescription").val(row["Description"]);
-    $.getJSON("/api/v2/rbac/roles", function(result) {
+    $.getJSON("/api/rbac/roles", function(result) {
       let roleinfo = result["data"];
       div.innerHTML = "";
       for (var role in roleinfo) {
@@ -320,7 +320,7 @@ return '
           key: targetid,
           value: toggle
         }
-        queryAPI("PUT","/api/v2/rbac/group/"+id,data).done(function(data) {
+        queryAPI("PATCH","/api/rbac/group/"+id,data).done(function(data) {
           if (data["result"] == "Success") {
             if (toggle == "enabled") {
               toast("Success", "", "Successfully added " + targetid + " to " + group, "success");
@@ -351,7 +351,7 @@ return '
     },
     "click .delete": function (e, value, row, index) {
       if(confirm("Are you sure you want to delete "+row.Name+" from Role Based Access? This is irriversible.") == true) {
-        queryAPI("DELETE","/api/v2/rbac/group/"+row.id).done(function(data) {
+        queryAPI("DELETE","/api/rbac/group/"+row.id).done(function(data) {
           if (data["result"] == "Success") {
             toast("Success","","Successfully deleted "+row.Name+" from Role Based Access","success");
             $("#rbacGroupsTable").bootstrapTable("refresh");
@@ -374,7 +374,7 @@ return '
     },
     "click .delete": function (e, value, row, index) {
       if(confirm("Are you sure you want to delete the "+row.name+" role? This is irriversible.") == true) {
-        queryAPI("DELETE","/api/v2/rbac/role/"+row.id).done(function(data) {
+        queryAPI("DELETE","/api/rbac/role/"+row.id).done(function(data) {
           if (data["result"] == "Success") {
             toast("Success","","Successfully deleted "+row.name+" from Role Based Access","success");
             $("#rbacRolesTable").bootstrapTable("refresh");
@@ -398,7 +398,7 @@ return '
       name: name,
       description: description
     };
-    queryAPI("PUT","/api/v2/rbac/role/"+id,data).done(function(data) {
+    queryAPI("PATCH","/api/rbac/role/"+id,data).done(function(data) {
       if (data["result"] == "Success") {
         toast("Success","","Successfully edited "+name+" description to: "+description,"success");
         $("#rbacRolesTable").bootstrapTable("refresh");
@@ -420,7 +420,7 @@ return '
     let data = {
       description: description
     };
-    queryAPI("PUT","/api/v2/rbac/group/"+id,data).done(function(data) {
+    queryAPI("PATCH","/api/rbac/group/"+id,data).done(function(data) {
       if (data["result"] == "Success") {
         toast("Success", "", "Successfully edited " + group + " description to: " + description, "success");
         $("#rbacGroupsTable").bootstrapTable("refresh");
@@ -442,7 +442,7 @@ return '
       name: groupName,
       description: groupDescription
     };
-    queryAPI("POST","/api/v2/rbac/groups",data).done(function(data) {
+    queryAPI("POST","/api/rbac/groups",data).done(function(data) {
       if (data["result"] == "Success") {
         toast("Success","","Successfully created group: "+groupName,"success");
         $("#rbacGroupsTable").bootstrapTable("refresh");
@@ -464,7 +464,7 @@ return '
       name: roleName,
       description: roleDescription
     }
-    queryAPI("POST","/api/v2/rbac/roles",data).done(function(data) {
+    queryAPI("POST","/api/rbac/roles",data).done(function(data) {
       if (data["result"] == "Success") {
         toast("Success","","Successfully created role: "+roleName,"success");
         $("#rbacRolesTable").bootstrapTable("refresh");

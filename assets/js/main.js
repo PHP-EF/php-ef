@@ -8,7 +8,6 @@ function queryAPI(type,path,data=null,contentType="application/json",asyncValue=
 	switch (type) {
 		case 'get':
 		case 'GET':
-		case 'g':
 			return $.ajax({
 				url:path,
 				method:"GET",
@@ -23,7 +22,6 @@ function queryAPI(type,path,data=null,contentType="application/json",asyncValue=
 			});
 		case 'delete':
 		case 'DELETE':
-		case 'd':
 			return $.ajax({
 				url:path,
 				method:"DELETE",
@@ -38,7 +36,6 @@ function queryAPI(type,path,data=null,contentType="application/json",asyncValue=
 			});
 		case 'post':
 		case 'POST':
-		case 'p':
 			return $.ajax({
 				url:path,
 				method:"POST",
@@ -69,6 +66,22 @@ function queryAPI(type,path,data=null,contentType="application/json",asyncValue=
 				data:data,
 				contentType: contentType
 			});
+    case 'patch':
+    case 'PATCH':
+      return $.ajax({
+        url:path,
+        method:"PATCH",
+        async: asyncValue,
+        beforeSend: function(request) {
+          $.xhrPool.push(request);
+        },
+        complete: function(jqXHR) {
+          var i = $.xhrPool.indexOf(jqXHR); //  get index for current connection completed
+          if (i > -1) $.xhrPool.splice(i, 1); //  removes from list by index
+        },
+        data:data,
+        contentType: contentType
+      });
 		default:
 			console.warn('API: Method Not Supported');
 	}
@@ -111,10 +124,10 @@ function getCookie(name) {
 async function heartBeat() {
   const delay = ms => new Promise(res => setTimeout(res, ms));
   try {
-    const response = await fetch('/api/v2/auth/heartbeat', {cache: "no-cache"});
+    const response = await fetch('/api/auth/heartbeat', {cache: "no-cache"});
     if (response.status == "200") {
       while (true) {
-	      let response2 = await fetch('/api/v2/auth/heartbeat', {cache: "no-cache"});
+	      let response2 = await fetch('/api/auth/heartbeat', {cache: "no-cache"});
         if (response2.status == "301") {
           window.location.href = "/login.php?redirect_uri="+window.location.href.replace("#","?");
 	      }
@@ -257,7 +270,7 @@ function loadMainWindow(element) {
     // } else {
     //   window.parent.document.getElementById('mainFrame').src = '/pages/'+hashsplit[1]+".php";
     // }
-    queryAPI('GET','/api/v2/page/'+hashsplit[1]).done(function(data) {
+    queryAPI('GET','/api/page/'+hashsplit[1]).done(function(data) {
       $('#mainWindow').html('');
       $('#mainWindow').html(data);
       $('.dark-theme .table-striped').addClass('table-dark');
@@ -281,13 +294,13 @@ function loadMainWindow(element) {
         doubleParent.parent().addClass('showMenu');
       }
     }
-    queryAPI('GET','/api/v2/page/'+hashsplit[1]).done(function(data) {
+    queryAPI('GET','/api/page/'+hashsplit[1]).done(function(data) {
       $('#mainWindow').html('');
       $('#mainWindow').html(data);
       $('.dark-theme .table-striped').addClass('table-dark');
     });
   } else {
-    queryAPI('GET','/api/v2/page/core/default').done(function(data) {
+    queryAPI('GET','/api/page/core/default').done(function(data) {
       $('#mainWindow').html('');
       $('#mainWindow').html(data);
       $('.dark-theme .table-striped').addClass('table-dark');
@@ -519,7 +532,7 @@ const trackingConfig = {
   browserInfo: true,
   processData: function(data) {
     $.ajax({
-      url: '/api/v2/t',
+      url: '/api/t',
       type: 'POST',
       data: JSON.stringify(data),
       contentType: "application/json; charset=utf-8",
@@ -645,7 +658,7 @@ if (!tId) {
 
 // Function to send data using sendBeacon
 function sendTrackingData(data) {
-  const url = '/api/v2/t';
+  const url = '/api/t';
   const payload = JSON.stringify(data);
   const blob = new Blob([payload], { type: 'application/json; charset=utf-8' });
   navigator.sendBeacon(url, blob);

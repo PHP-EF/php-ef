@@ -203,7 +203,7 @@
       if ($("#APIKey")[0].value) {
         postArr.APIKey = $("#APIKey")[0].value
       }
-      queryAPI("POST", "/api/v2/plugin/ib/threatactor/"+$("#threatActorID").val(), postArr).done(function( data, status ) {
+      queryAPI("POST", "/api/plugin/ib/threatactor/"+$("#threatActorID").val(), postArr).done(function( data, status ) {
         const mappedObject = {
           total: data["data"]["actors"][0]["related_count"],
           rows: data["data"]["actors"][0]["related_indicators"].map(indicator => ({ ioc: indicator }))
@@ -285,7 +285,7 @@
       if ($("#APIKey")[0].value) {
         postArr.APIKey = $("#APIKey")[0].value
       }
-      queryAPI("POST", "/api/v2/plugin/ib/threatactors", postArr).done(function( data, status ) {
+      queryAPI("POST", "/api/plugin/ib/threatactors", postArr).done(function( data, status ) {
         if (data["result"] == "Error") {
           toast(data["result"],"",data["message"],"danger","30000");
           hideLoading(timer);

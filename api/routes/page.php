@@ -2,7 +2,7 @@
 $app->get('/page/{category}/{page}', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
 
-	$ib->api->setAPIResponseData(include_once(__DIR__."/../../../pages/".$args['category']."/".$args['page'].".php"));
+	$ib->api->setAPIResponseData(include_once(__DIR__."/../../pages/".$args['category']."/".$args['page'].".php"));
 
 	// Return the response
 	$response->getBody()->write($GLOBALS['api']['data']);
@@ -13,7 +13,7 @@ $app->get('/page/{category}/{page}', function ($request, $response, $args) {
 
 $app->get('/page/plugin/{plugin}/js', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-	$pluginDir = __DIR__."/../../../inc/plugins/".$args['plugin'];
+	$pluginDir = __DIR__."/../../inc/plugins/".$args['plugin'];
 
 	// Get Custom JS
 	if (file_exists($pluginDir.'/main.js')) {
@@ -30,7 +30,7 @@ $app->get('/page/plugin/{plugin}/js', function ($request, $response, $args) {
 
 $app->get('/page/plugin/{plugin}/css', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-	$pluginDir = __DIR__."/../../../inc/plugins/".$args['plugin'];
+	$pluginDir = __DIR__."/../../inc/plugins/".$args['plugin'];
 
 	// Get Custom CSS
 	if (file_exists($pluginDir.'/styles.css')) {
@@ -48,12 +48,12 @@ $app->get('/page/plugin/{plugin}/css', function ($request, $response, $args) {
 $app->get('/page/plugin/{plugin}/{page}', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
 
-	$pluginDir = __DIR__."/../../../inc/plugins/".$args['plugin'];
+	$pluginDir = __DIR__."/../../inc/plugins/".$args['plugin'];
 	$html = '';
 
-	$html .= '<link href="/api/v2/page/plugin/'.$args["plugin"].'/css" rel="stylesheet">';
+	$html .= '<link href="/api/page/plugin/'.$args["plugin"].'/css" rel="stylesheet">';
 	$html .= include_once($pluginDir."/pages/".$args['page'].".php");
-	$html .= '<script src="/api/v2/page/plugin/'.$args['plugin'].'/js" crossorigin="anonymous"></script>';
+	$html .= '<script src="/api/page/plugin/'.$args['plugin'].'/js" crossorigin="anonymous"></script>';
 
 	$ib->api->setAPIResponseData($html);
 

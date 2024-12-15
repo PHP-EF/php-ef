@@ -19,7 +19,7 @@ $app->get('/config', function ($request, $response, $args) {
 		->withStatus($GLOBALS['responseCode']);
 });
 
-$app->put('/config', function ($request, $response, $args) {
+$app->patch('/config', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
     if ($ib->rbac->checkAccess("ADMIN-CONFIG")) {
         $data = $ib->api->getAPIRequestData($request);

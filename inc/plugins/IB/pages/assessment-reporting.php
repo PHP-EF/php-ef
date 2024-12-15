@@ -219,7 +219,7 @@
     }
 
     var updateAssessmentSummaryValues = () => {
-      queryAPI("GET", "/api/v2/plugin/ib/assessment/reports/summary").done(function( response, status ) {
+      queryAPI("GET", "/api/plugin/ib/assessment/reports/summary").done(function( response, status ) {
         var data = response['data'];
         const total = data.find(item => item.type === "Total")
         $("#reportsThisDayVal").text(total["count_today"]);
@@ -235,7 +235,7 @@
     };
 
     var updateRecentAssessments = (granularity, appliedFilters, start = null, end = null) => {
-      queryAPI("GET", "/api/v2/plugin/ib/assessment/reports/records?granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( response, status ) {
+      queryAPI("GET", "/api/plugin/ib/assessment/reports/records?granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( response, status ) {
         var data = response['data'];
         $("#assessmentTable").bootstrapTable("destroy");
         $("#assessmentTable").bootstrapTable({
@@ -314,7 +314,7 @@
 
     // Define Assessments Area Chart Update Function
     var updateAssessmentsChart = (granularity, appliedFilters, start = null, end = null) => {
-      queryAPI("GET", "/api/v2/plugin/ib/assessment/reports/stats?granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( response, status ) {
+      queryAPI("GET", "/api/plugin/ib/assessment/reports/stats?granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( response, status ) {
         var data = response['data'];
         // Extract all unique dates
         const categoriesSet = new Set();

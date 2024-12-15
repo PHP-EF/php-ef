@@ -21,7 +21,7 @@
               <h5>Threat Actor Configuration</h5>
               <p>Use the following to configure the known Threat Actors. This allows populating Threat Actors with Images / Report Links during Security Assessment Report generation.</p>
             </div>
-            <table  data-url="/api/v2/plugin/ib/threatactors/config"
+            <table  data-url="/api/plugin/ib/threatactors/config"
               data-data-field="data"
               data-toggle="table"
               data-search="true"
@@ -56,7 +56,7 @@
               <h5>Template Configuration</h5>
               <p>Use the following to configure the template for the Security Assessment Report Generator.</p>
             </div>
-            <table  data-url="/api/v2/plugin/ib/assessment/security/config"
+            <table  data-url="/api/plugin/ib/assessment/security/config"
               data-data-field="data"
               data-toggle="table"
               data-search="true"
@@ -155,7 +155,7 @@
           </button>
         </div>
         <div class="modal-body" id="newThreatActorModelBody">
-          <p>Enter the Threat Actor\"s Name below to add it to the list.</p>
+          <p>Enter the Threat Actor's Name below to add it to the list.</p>
           <div class="form-group">
             <label for="newThreatActorName">Threat Actor Name</label>
             <input type="text" class="form-control" id="newThreatActorName" aria-describedby="newThreatActorNameHelp">
@@ -447,14 +447,12 @@
       },
       "click .deleteThreatActor": function (e, value, row, index) {
         if(confirm("Are you sure you want to delete "+row.Name+" from the list of Threat Actors? This is irriversible.") == true) {
-          var postArr = {}
-          postArr.id = row.id;
-          queryAPI("POST", "/api?f=removeThreatActorConfig", postArr).done(function( data, status ) {
-            if (data["Status"] == "Success") {
-              toast(data["Status"],"",data["Message"],"success");
+          queryAPI("DELETE", "/api/plugin/ib/threatactors/config/"+row.id).done(function( data, status ) {
+            if (data["result"] == "Success") {
+              toast(data["result"],"",data["message"],"success");
               $("#threatActorTable").bootstrapTable("refresh");
-            } else if (data["Status"] == "Error") {
-              toast(data["Status"],"",data["Message"],"danger","30000");
+            } else if (data["result"] == "Error") {
+              toast(data["result"],"",data["message"],"danger","30000");
             } else {
               toast("Error","","Failed to remove Threat Actor: "+row.Name,"danger","30000");
             }
@@ -469,14 +467,12 @@
       },
       "click .deleteTemplate": function (e, value, row, index) {
         if(confirm("Are you sure you want to delete "+row.TemplateName+" from the list of Templates? This is irriversible.") == true) {
-          var postArr = {}
-          postArr.id = row.id;
-          queryAPI("POST", "/api?f=removeSecurityAssessmentTemplate", postArr).done(function( data, status ) {
-            if (data["Status"] == "Success") {
-              toast(data["Status"],"",data["Message"],"success");
+          queryAPI("DELETE", "/api/plugin/ib/assessment/security/config/"+row.id).done(function( data, status ) {
+            if (data["result"] == "Success") {
+              toast(data["result"],"",data["message"],"success");
               $("#templateTable").bootstrapTable("refresh");
-            } else if (data["Status"] == "Error") {
-              toast(data["Status"],"",data["Message"],"danger","30000");
+            } else if (data["result"] == "Error") {
+              toast(data["result"],"",data["message"],"danger","30000");
             } else {
               toast("Error","","Failed to remove Template: "+row.TemplateName,"danger","30000");
             }
@@ -500,9 +496,9 @@
       }
       postArr.name = encodeURIComponent($("#newThreatActorName").val())
       postArr.URLStub = encodeURIComponent($("#newThreatActorURLStub").val())
-      queryAPI("POST", "/api?f=newThreatActorConfig", postArr).done(function( data, status ) {
-        if (data["Status"] == "Success") {
-          toast(data["Status"],"",data["Message"],"success");
+      queryAPI("POST", "/api/plugin/ib/threatactors/config", postArr).done(function( data, status ) {
+        if (data["result"] == "Success") {
+          toast(data["result"],"",data["message"],"success");
           $("#threatActorTable").bootstrapTable("refresh");
           if (svgFiles.length > 0 || pngFiles.length > 0) {
             const formData = new FormData();
@@ -515,13 +511,22 @@
               formData.append("pngFileName", threatActorFileName);
             }
             $.ajax({
-              url: "/api?f=uploadThreatActorImage", // Replace with your PHP API endpoint
+              url: "/api/plugin/ib/threatactors/config/upload",
               type: "POST",
               data: formData,
               contentType: false,
               processData: false,
               success: function(response) {
-                toast("Success","","Uploaded images","success");
+                if (response.data.Errors.length > 0) {
+                  response.data.Errors.forEach(error => {
+                    toast("Error","",error,"danger");
+                  });
+                }
+                if (response.data.Items.length > 0) {
+                  response.data.Items.forEach(item => {
+                    toast("Success","",item,"success");
+                  });
+                }
               },
               error: function(jqXHR, textStatus, errorThrown) {
                 toast("Error","","Error submitting images","danger");
@@ -529,8 +534,8 @@
               }
             });
           }
-        } else if (data["Status"] == "Error") {
-          toast(data["Status"],"",data["Message"],"danger","30000");
+        } else if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger","30000");
         } else {
           toast("Error","","Failed to add new Threat Actor","danger","30000");
         }
@@ -545,6 +550,7 @@
       const svgFiles = $("#threatActorIMGSVG")[0].files;
       const pngFiles = $("#threatActorIMGPNG")[0].files;
       const threatActorFileName = $("#threatActorName").val().toLowerCase().replace(/ /g, "-");
+      const id = encodeURIComponent($("#threatActorId").val());
       var postArr = {}
       if (svgFiles[0]) {
         postArr.SVG = threatActorFileName;
@@ -552,12 +558,11 @@
       if (svgFiles[0]) {
         postArr.PNG = threatActorFileName;
       }
-      postArr.id = encodeURIComponent($("#threatActorId").val())
       postArr.name = encodeURIComponent($("#threatActorName").val())
       postArr.URLStub = encodeURIComponent($("#threatActorURLStub").val())
-      queryAPI("POST", "/api?f=setThreatActorConfig", postArr).done(function( data, status ) {
-        if (data["Status"] == "Success") {
-          toast(data["Status"],"",data["Message"],"success");
+      queryAPI("PATCH", "/api/plugin/ib/threatactors/config/"+id, postArr).done(function( data, status ) {
+        if (data["result"] == "Success") {
+          toast(data["result"],"",data["message"],"success");
           $("#threatActorTable").bootstrapTable("refresh");
           if (svgFiles.length > 0 || pngFiles.length > 0) {
             const formData = new FormData();
@@ -570,13 +575,22 @@
               formData.append("pngFileName", threatActorFileName);
             }
             $.ajax({
-              url: "/api?f=uploadThreatActorImage", // Replace with your PHP API endpoint
+              url: "/api/plugin/ib/threatactors/config/upload",
               type: "POST",
               data: formData,
               contentType: false,
               processData: false,
               success: function(response) {
-                toast("Success","","Uploaded images","success");
+                if (response.data.Errors.length > 0) {
+                  response.data.Errors.forEach(error => {
+                    toast("Error","",error,"danger");
+                  });
+                }
+                if (response.data.Items.length > 0) {
+                  response.data.Items.forEach(item => {
+                    toast("Success","",item,"success");
+                  });
+                }
               },
               error: function(jqXHR, textStatus, errorThrown) {
                 toast("Error","","Error submitting images","danger");
@@ -584,8 +598,8 @@
               }
             });
           }
-        } else if (data["Status"] == "Error") {
-          toast(data["Status"],"",data["Message"],"danger","30000");
+        } else if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger","30000");
         } else {
           toast("Error","","Failed to update Threat Actor: "+postArr.name,"danger","30000");
         }
@@ -607,9 +621,9 @@
       if (templateFiles[0]) {
         postArr.FileName = $("#newTemplateName").val().toLowerCase().replace(/ /g, "-");
       }
-      queryAPI("POST", "/api?f=newSecurityAssessmentTemplate", postArr).done(function( data, status ) {
-        if (data["Status"] == "Success") {
-          toast(data["Status"],"",data["Message"],"success");
+      queryAPI("POST", "/api/plugin/ib/assessment/security/config", postArr).done(function( data, status ) {
+        if (data["result"] == "Success") {
+          toast(data["result"],"",data["message"],"success");
           $("#templateTable").bootstrapTable("refresh");
           if (templateFiles.length > 0) {
             const formData = new FormData();
@@ -617,16 +631,16 @@
             formData.append("TemplateName", postArr.FileName);
             toast("Uploading","Please wait..","Uploading Template..","info","30000");
             $.ajax({
-              url: "/api?f=uploadSecurityAssessmentTemplate", // Replace with your PHP API endpoint
+              url: "/api/plugin/ib/assessment/security/config/upload",
               type: "POST",
               data: formData,
               contentType: false,
               processData: false,
               success: function(response) {
-                if (response["Status"] == "Success") {
-                  toast(response["Status"],"",response["Message"],"success","30000");
-                } else if (response["Status"] == "Error") {
-                  toast(response["Status"],"",response["Message"],"danger","30000");
+                if (response["result"] == "Success") {
+                  toast(response["result"],"",response["message"],"success","30000");
+                } else if (response["result"] == "Error") {
+                  toast(response["result"],"",response["message"],"danger","30000");
                 } else {
                   toast("Error","","Failed to add new template","danger","30000");
                 }
@@ -637,8 +651,8 @@
               }
             });
           }
-        } else if (data["Status"] == "Error") {
-          toast(data["Status"],"",data["Message"],"danger","30000");
+        } else if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger","30000");
         } else {
           toast("Error","","Failed to add new template","danger","30000");
         }
@@ -651,9 +665,9 @@
 
     $(document).on("click", "#editTemplateSubmit", function(event) {
       const templateFiles = $("#templatePPTX")[0].files;
-
+      
+      var id = encodeURIComponent($("#templateId").val());
       var postArr = {}
-      postArr.id = encodeURIComponent($("#templateId").val());
       postArr.Status = encodeURIComponent($("#templateStatus").val());
       postArr.TemplateName = encodeURIComponent($("#templateName").val());
       postArr.Description = encodeURIComponent($("#templateDescription").val());
@@ -661,9 +675,9 @@
       if (templateFiles[0]) {
         postArr.FileName = $("#templateName").val().toLowerCase().replace(/ /g, "-");
       }
-      queryAPI("POST", "/api?f=setSecurityAssessmentTemplate", postArr).done(function( data, status ) {
-        if (data["Status"] == "Success") {
-          toast(data["Status"],"",data["Message"],"success");
+      queryAPI("PATCH", "/api/plugin/ib/assessment/security/config/"+id, postArr).done(function( data, status ) {
+        if (data["result"] == "Success") {
+          toast(data["result"],"",data["message"],"success");
           $("#templateTable").bootstrapTable("refresh");
           if (templateFiles.length > 0) {
             const formData = new FormData();
@@ -671,16 +685,16 @@
             formData.append("TemplateName", postArr.FileName);
             toast("Uploading","Please wait..","Uploading Template..","info","30000");
             $.ajax({
-              url: "/api?f=uploadSecurityAssessmentTemplate", // Replace with your PHP API endpoint
+              url: "/api/plugin/ib/assessment/security/config/upload", // Replace with your PHP API endpoint
               type: "POST",
               data: formData,
               contentType: false,
               processData: false,
               success: function(response) {
-                if (response["Status"] == "Success") {
-                  toast(response["Status"],"",response["Message"],"success","30000");
-                } else if (response["Status"] == "Error") {
-                  toast(response["Status"],"",response["Message"],"danger","30000");
+                if (response["result"] == "Success") {
+                  toast(response["result"],"",response["message"],"success","30000");
+                } else if (response["result"] == "Error") {
+                  toast(response["result"],"",response["message"],"danger","30000");
                 } else {
                   toast("Error","","Failed to edit template","danger","30000");
                 }
@@ -691,8 +705,8 @@
               }
             });
           }
-        } else if (data["Status"] == "Error") {
-          toast(data["Status"],"",data["Message"],"danger","30000");
+        } else if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger","30000");
         } else {
           toast("Error","","Failed to edit template","danger","30000");
         }

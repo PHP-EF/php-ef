@@ -29,7 +29,7 @@ $app->post('/users', function ($request, $response, $args) {
 		->withStatus($GLOBALS['responseCode']);
 });
 
-$app->put('/user/{id}', function ($request, $response, $args) {
+$app->patch('/user/{id}', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
     $data = $ib->api->getAPIRequestData($request);
     if ($ib->rbac->checkAccess("ADMIN-USERS")) {
