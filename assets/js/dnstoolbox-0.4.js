@@ -47,7 +47,7 @@ $("#submit").on('click', function(event) {
 function returnDnsDetails(domain, callType, port, source) {
     $('#txtHint, .info').html('');
   
-    queryAPI("GET", "/api/v2/dnstoolbox?domain=" + domain + "&request=" + callType + "&port=" + port + "&source=" + source).done(function( data ) {
+    queryAPI("GET", "/api/dnstoolbox?domain=" + domain + "&request=" + callType + "&port=" + port + "&source=" + source).done(function( data ) {
         if (data['result'] == 'Error') {
             toast(data['result'],"",data['Message'],"danger","30000");
             hideLoading();

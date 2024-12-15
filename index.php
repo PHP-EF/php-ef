@@ -498,7 +498,7 @@ foreach ($navLinks as $navLink) {
                 </div>
                 <div class="tab-pane fade" id="changelog">
                   <div>
-                    <iframe class="changeLogFrame" src="/api/v2/changelog"></iframe>
+                    <iframe class="changeLogFrame" src="/api/changelog"></iframe>
                   </div>
                 </div>
                 <!--/tabs content-->
@@ -623,7 +623,7 @@ foreach ($navLinks as $navLink) {
   }
 
   function logout() {
-    queryAPI('GET', '/api/v2/auth/logout').done(function(data) {
+    queryAPI('GET', '/api/auth/logout').done(function(data) {
       if (data['result'] == "Success" && !data['data']['Authenticated']) {
           toast("Logged Out","","Successfully Logged Out.","success");
         } else {
@@ -675,7 +675,7 @@ foreach ($navLinks as $navLink) {
 
     $('.infoBtn').on('click', function() {
       $('#infoModal').modal('show');
-      $.getJSON('/api/v2/auth/whoami', function(whoami) {
+      $.getJSON('/api/auth/whoami', function(whoami) {
         if (whoami.data.headers.Cookie != null) {whoami.data.headers.Cookie = whoami.data.headers.Cookie.split('; ')};
         $('#whoami').text(JSON.stringify(whoami.data, null, 2));
       });
@@ -683,7 +683,7 @@ foreach ($navLinks as $navLink) {
 
     $('.profile').on('click', function() {
       $('#profileModal').modal('show');
-      $.getJSON('/api/v2/auth/whoami', function(whoami) {
+      $.getJSON('/api/auth/whoami', function(whoami) {
         $('#userUsername').val(whoami.data.Username);
         $('#userFirstname').val(whoami.data.Firstname);
         $('#userSurname').val(whoami.data.Surname);
@@ -756,7 +756,7 @@ foreach ($navLinks as $navLink) {
       if (isValid) {
         var postArr = {}
         postArr.pw = password;
-        queryAPI("POST", "/api/v2/auth/password/reset", postArr).done(function( data, status ) {
+        queryAPI("POST", "/api/auth/password/reset", postArr).done(function( data, status ) {
           if (data['result'] == 'Success') {
             toast(data['result'],"",data['message'],"success");
             $('#profileModal').modal('hide');

@@ -224,7 +224,7 @@ return '
   }
 
   var updateTrackingSummaryValues = () => {
-    queryAPI("GET", "/api/v2/reports/tracking/summary").done(function( response, status ) {
+    queryAPI("GET", "/api/reports/tracking/summary").done(function( response, status ) {
       let data = response["data"];
       const total = data.find(item => item.type === "Total")
       $("#visitsThisDayVal").text(total["count_today"]);
@@ -237,7 +237,7 @@ return '
   };
 
   var updateRecentTracking = (granularity, appliedFilters, start = null, end = null) => {
-    queryAPI("GET", "/api/v2/reports/tracking/records?granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( response, status ) {
+    queryAPI("GET", "/api/reports/tracking/records?granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( response, status ) {
       let data = response["data"];
       $("#assessmentTable").bootstrapTable("destroy");
       $("#assessmentTable").bootstrapTable({
@@ -342,7 +342,7 @@ return '
 
   // Define Visitors Area Chart Update Function
   var updateVisitorsChart = (granularity, appliedFilters, start = null, end = null) => {
-    queryAPI("GET", "/api/v2/reports/tracking/stats?granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( response, status ) {
+    queryAPI("GET", "/api/reports/tracking/stats?granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( response, status ) {
       let data = response["data"];
       // Extract all unique dates
       const categoriesSet = new Set();

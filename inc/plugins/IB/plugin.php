@@ -12,7 +12,7 @@ $GLOBALS['plugins']['ib'] = [ // Plugin Name
 	'version' => '1.0.0', // SemVer of plugin
 	'image' => 'logo.png', // 1:1 non transparent image for plugin
 	'settings' => true, // does plugin need a settings modal?
-	'api' => '/api/v2/plugins/ib/settings', // api route for settings page (All Lowercase)
+	'api' => '/api/plugins/ib/settings', // api route for settings page (All Lowercase)
 ];
 
 use Label305\PptxExtractor\Basic\BasicExtractor;
@@ -227,10 +227,14 @@ class TemplateConfig extends ibPlugin {
     public function __construct() {
 		parent::__construct();
         // Create or open the SQLite database
-        $this->createSecurityAssessmentTemplateTable();
+        $this->createTemplateTable();
+
+		if (!is_dir($this->getDir()['Files'].'/templates')) {
+			mkdir($this->getDir()['Files'].'/templates', 0755, true);
+		}
     }
 
-    private function createSecurityAssessmentTemplateTable() {
+    private function createTemplateTable() {
         // Create template table if it doesn't exist
         $this->db->exec("CREATE TABLE IF NOT EXISTS templates (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -280,16 +284,11 @@ class TemplateConfig extends ibPlugin {
             $checkStmt = $this->db->prepare("SELECT COUNT(*) FROM templates WHERE FileName = :FileName OR TemplateName = :TemplateName");
             $checkStmt->execute([':FileName' => $FileName, ':TemplateName' => $TemplateName]);
             if ($checkStmt->fetchColumn() > 0) {
-                return array(
-                    'Status' => 'Error',
-                    'Message' => 'Template Name already exists'
-                );
+				$this->api->setAPIResponse('Error','Template Name already exists');
+				return false;
             }
         } catch (PDOException $e) {
-            return array(
-                'Status' => 'Error',
-                'Message' => $e
-            );
+			$this->api->setAPIResponse('Error',$e);
         }
         $stmt = $this->db->prepare("INSERT INTO templates (Status, FileName, TemplateName, Description, ThreatActorSlide, Created) VALUES (:Status, :FileName, :TemplateName, :Description, :ThreatActorSlide, :Created)");
         try {
@@ -305,16 +304,10 @@ class TemplateConfig extends ibPlugin {
                     $setStatusStmt->execute([':Status' => 'Inactive',':id' => $AT['id'],':thisid' => $id]);
                 }
             }
-            $this->core->logging->writeLog("Templates","Created New Security Assessment Template","info");
-            return array(
-                'Status' => 'Success',
-                'Message' => 'Template added successfully'
-            );
+            $this->logging->writeLog("Templates","Created New Security Assessment Template","info");
+			$this->api->setAPIResponseMessage('Template added successfully');
         } catch (PDOException $e) {
-            return array(
-                'Status' => 'Error',
-                'Message' => $e
-            );
+			$this->api->setAPIResponse('Error',$e);
         }
     }
 
@@ -327,16 +320,11 @@ class TemplateConfig extends ibPlugin {
                     $checkStmt = $this->db->prepare("SELECT COUNT(*) FROM templates WHERE (FileName = :FileName OR TemplateName = :TemplateName) AND id != :id");
                     $checkStmt->execute([':FileName' => $FileName, ':TemplateName' => $TemplateName, ':id' => $id]);
                     if ($checkStmt->fetchColumn() > 0) {
-                        return array(
-                            'Status' => 'Error',
-                            'Message' => 'Template Name already exists'
-                        );
+						$this->api->setAPIResponse('Error','Template name already exists');
+						return false;
                     }
                 } catch (PDOException $e) {
-                    return array(
-                        'Status' => 'Error',
-                        'Message' => $e
-                    );
+					$this->api->setAPIResponse('Error',$e);
                 }
             }
 
@@ -375,58 +363,42 @@ class TemplateConfig extends ibPlugin {
             $stmt = $this->db->prepare('UPDATE templates SET '.implode(", ",$prepare).' WHERE id = :id');
             $stmt->execute($execute);
             if ($FileName !== null) {
-                $uploadDir = __DIR__.'/../../files/templates/';
+                $uploadDir = $this->getDir()['Files'].'/templates/';
                 if ($templateConfig['FileName']) {
                     if (file_exists($uploadDir.$templateConfig['FileName'])) {
                         if (!unlink($uploadDir.$templateConfig['FileName'])) {
-                            return array(
-                                'Status' => 'Error',
-                                'Message' => 'Failed to delete old template file'
-                            );
+							$this->api->setAPIResponse('Error','Failed to delete old template file');
+							return false;
                         }
                     }
                 }
             }
-            $this->core->logging->writeLog("Templates","Updated Security Assessment Template: ".$TemplateName,"info");
-            return array(
-                'Status' => 'Success',
-                'Message' => 'Template updated successfully'
-            );
+            $this->logging->writeLog("Templates","Updated Security Assessment Template: ".$TemplateName,"info");
+			$this->api->setAPIResponseMessage('Template updated successfully');
         } else {
-            return array(
-                'Status' => 'Error',
-                'Message' => 'Template does not exist'
-            );
+			$this->api->setAPIResponse('Error','Template does not exist');
         }
     }
 
     public function removeTemplateConfig($id) {
         $templateConfig = $this->getTemplateConfigById($id);
         if ($templateConfig) {
-          $uploadDir = __DIR__.'/../../files/templates/';
+          $uploadDir = $this->getDir()['Files'].'/templates/';
           if ($templateConfig['FileName']) {
             if (file_exists($uploadDir.$templateConfig['FileName'])) {
                 if (!unlink($uploadDir.$templateConfig['FileName'])) {
-                    return array(
-                        'Status' => 'Error',
-                        'Message' => 'Failed to delete template file'
-                    );
+					$this->api->setAPIResponse('Error','Failed to delete template file');
+					return false;
                 }
             }
           }
           $stmt = $this->db->prepare("DELETE FROM templates WHERE id = :id");
           $stmt->execute([':id' => $id]);
           if ($this->getTemplateConfigById($id)) {
-            return array(
-              'Status' => 'Error',
-              'Message' => 'Failed to delete template'
-            );
+			$this->api->setAPIResponse('Error','Failed to delete template');
           } else {
-            $this->core->logging->writeLog("Templates","Removed Security Assessment Template: ".$id,"warning");
-            return array(
-              'Status' => 'Success',
-              'Message' => 'Template deleted successfully'
-            );
+            $this->logging->writeLog("Templates","Removed Security Assessment Template: ".$id,"warning");
+			$this->api->setAPIResponseMessage('Template deleted successfully');
           }
         }
     }
@@ -613,6 +585,15 @@ class ThreatActors extends ibPortal {
 	public function __construct() {
 		parent::__construct();
 		$this->createThreatActorTable();
+
+		$imagesDir = $this->getDir()['Assets'].'/images/Threat Actors/';
+		if (!is_dir($imagesDir)) {
+			mkdir($imagesDir, 0755, true);
+		}
+		$uploadDir = $this->getDir()['Assets'].'/images/Threat Actors/Uploads/';
+		if (!is_dir($uploadDir)) {
+			mkdir($uploadDir, 0755, true);
+		}
 	}
 
     private function createThreatActorTable() {
@@ -663,36 +644,22 @@ class ThreatActors extends ibPortal {
                 $checkStmt = $this->db->prepare("SELECT COUNT(*) FROM threat_actors WHERE Name = :Name");
                 $checkStmt->execute([':Name' => urldecode($Name)]);
                 if ($checkStmt->fetchColumn() > 0) {
-                    return array(
-                        'Status' => 'Error',
-                        'Message' => 'Threat Actor already exists'
-                    );
+					$this->api->setAPIResponse('Error','Threat Actor Already Exists');
+					return false;
                 }
             } catch (PDOException $e) {
-                return array(
-                    'Status' => 'Error',
-                    'Message' => $e
-                );
+				$this->api->setAPIResponse('Error',$e);
             }
             $stmt = $this->db->prepare("INSERT INTO threat_actors (Name, SVG, PNG, URLStub) VALUES (:Name, :SVG, :PNG, :URLStub)");
             try {
                 $stmt->execute([':Name' => urldecode($Name), ':SVG' => urldecode($SVG), ':PNG' => urldecode($PNG), ':URLStub' => urldecode($URLStub)]);
-                $this->core->logging->writeLog("ThreatActors","Created new Threat Actor: ".$Name,"info");
-                return array(
-                    'Status' => 'Success',
-                    'Message' => 'Threat Actor added successfully'
-                );
+                $this->logging->writeLog("ThreatActors","Created new Threat Actor: ".$Name,"info");
+				$this->api->setAPIResponseMessage('Threat Actor added successfully');
             } catch (PDOException $e) {
-                return array(
-                    'Status' => 'Error',
-                    'Message' => $e
-                );
+				$this->api->setAPIResponse('Error',$e);
             }
         } else {
-            return array(
-                'Status' => 'Error',
-                'Message' => 'Threat Actor name missing'
-            );
+			$this->api->setAPIResponse('Error','Threat Actor name missing');
         }
     }
 
@@ -709,16 +676,11 @@ class ThreatActors extends ibPortal {
                         $checkStmt = $this->db->prepare("SELECT COUNT(*) FROM threat_actors WHERE Name = :Name AND id != :id");
                         $checkStmt->execute([':Name' => $Name, ':id' => $id]);
                         if ($checkStmt->fetchColumn() > 0) {
-                            return array(
-                                'Status' => 'Error',
-                                'Message' => 'Threat Actor Name already exists'
-                            );
+							$this->api->setAPIResponse('Error','Threat Actor name already exists');
+							return false;
                         }
                     } catch (PDOException $e) {
-                        return array(
-                            'Status' => 'Error',
-                            'Message' => $e
-                        );
+						$this->api->setAPIResponse('Error',$e);
                     }
                     $prepare[] = 'Name = :Name';
                     $execute[':Name'] = urldecode($Name);
@@ -737,62 +699,45 @@ class ThreatActors extends ibPortal {
                 }
                 $stmt = $this->db->prepare('UPDATE threat_actors SET '.implode(", ",$prepare).' WHERE id = :id');
                 $stmt->execute($execute);
-                $this->core->logging->writeLog("ThreatActors","Updated Threat Actor: ".$Name,"info");
-                return array(
-                    'Status' => 'Success',
-                    'Message' => 'Threat Actor updated successfully'
-                );
+                $this->logging->writeLog("ThreatActors","Updated Threat Actor: ".$Name,"info");
+				$this->api->setAPIResponseMessage('Threat Actor updated successfully');
             } else {
-                return array(
-                    'Status' => 'Error',
-                    'Message' => 'Threat Actor does not exist'
-                );
+				$this->api->setAPIResponse('Error','Threat Actor does not exist');
             }
         } else {
-            return array(
-                'Status' => 'Error',
-                'Message' => 'Threat Actor name missing'
-            );
+			$this->api->setAPIResponse('Error','Threat Actor name missing');
         }
     }
 
     public function removeThreatActorConfig($id) {
         $ThreatActorConfig = $this->getThreatActorConfigById($id);
         if ($ThreatActorConfig) {
-          $uploadDir = __DIR__.'/../../assets/images/Threat Actors/Uploads/';
+          $uploadDir = $this->getDir()['Assets'].'/images/Threat Actors/Uploads/';
           if ($ThreatActorConfig['PNG']) {
             if (file_exists($uploadDir.$ThreatActorConfig['PNG'])) {
                 if (!unlink($uploadDir.$ThreatActorConfig['PNG'])) {
-                    return array(
-                        'Status' => 'Error',
-                        'Message' => 'Failed to delete PNG file'
-                    );
+					$this->api->setAPIResponse('Error','Failed to delete PNG file');
+                    return false;
                 }
             }
           }
           if ($ThreatActorConfig['SVG']) {
             if (file_exists($uploadDir.$ThreatActorConfig['SVG'])) {
                 if (!unlink($uploadDir.$ThreatActorConfig['SVG'])) {
-                    return array(
-                        'Status' => 'Error',
-                        'Message' => 'Failed to delete SVG file'
-                    );
+					$this->api->setAPIResponse('Error','Failed to delete SVG file');
+                    return false;
                 }
             }
           }
           $stmt = $this->db->prepare("DELETE FROM threat_actors WHERE id = :id");
           $stmt->execute([':id' => $id]);
           if ($this->getThreatActorConfigById($id)) {
-            return array(
-              'Status' => 'Error',
-              'Message' => 'Failed to delete Threat Actor'
-            );
+			$this->api->setAPIResponse('Error','Failed to delete Threat Actor');
+			return false;
           } else {
-            $this->core->logging->writeLog("ThreatActors","Removed Threat Actor: ".$id,"warning");
-            return array(
-              'Status' => 'Success',
-              'Message' => 'Template deleted Threat Actor'
-            );
+            $this->logging->writeLog("ThreatActors","Removed Threat Actor: ".$id,"warning");
+			$this->api->setAPIResponseMessage('Successfully deleted Threat Actor');
+			return false;
           }
         }
     }
@@ -1006,6 +951,11 @@ class SecurityAssessment extends ibPortal {
 		// Pass APIKey & Realm to ThreatActors Class
 		$this->ThreatActors = new ThreatActors();
 		$this->ThreatActors->SetCSPConfiguration($this->APIKey,$Realm);
+		// Check Active Template Exists
+		if (!$this->TemplateConfig->getActiveTemplate()) {
+			$this->api->setAPIResponse('Error','No active template selected');
+			return false;
+		}
 		// Check API Key is valid & get User Info
 		$UserInfo = $this->GetCSPCurrentUser();
 		if (is_array($UserInfo) && isset($UserInfo['Error'])) {

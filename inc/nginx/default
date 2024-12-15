@@ -15,8 +15,8 @@ server {
         index  index.php index.html index.htm hostingstart.html;
     }
 
-    location /api/v2 {
-        try_files $uri /api/v2/index.php$is_args$args;
+    location /api/ {
+        try_files $uri /api/index.php$is_args$args;
     }
 
     # redirect server error pages to the static page /50x.html

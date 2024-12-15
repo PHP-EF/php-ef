@@ -36,7 +36,7 @@ flatpickr("#reportingStartAndEndDate", {
 });
 
 function saveAPIKey(key) {
-    queryAPI("POST", "/api/v2/auth/crypt", {key: key}).done(function( data, status ) {
+    queryAPI("POST", "/api/auth/crypt", {key: key}).done(function( data, status ) {
         if (data.result == 'Success') {
             setCookie('crypt',data.data,7);
             checkAPIKey();

@@ -122,7 +122,7 @@
   }
   
   function updateProgress(id,timer) {
-    queryAPI("GET", "/api/v2/plugin/ib/assessment/security/progress?id="+id).done(function(response) {
+    queryAPI("GET", "/api/plugin/ib/assessment/security/progress?id="+id).done(function(response) {
         var data = response.data;
         var progress = parseFloat(data["Progress"]).toFixed(1); // Assuming the server returns a JSON object with a "progress" field
         $("#progress-bar").css("width", progress + "%").attr("aria-valuenow", progress).text(progress + "%");
@@ -133,7 +133,7 @@
           }, 1000);
         } else if (progress >= 100 && data["Action"] == "Done.." ) {
           toast("Success","","Security Assessment Successfully Generated","success","30000");
-          download("/api/v2/plugin/ib/assessment/security/download?id="+id);
+          download("/api/plugin/ib/assessment/security/download?id="+id);
           hideLoading(timer);
           $("#Generate").prop("disabled", false);
         }
@@ -161,7 +161,7 @@
     }
   
     $("#Generate").prop("disabled", true)
-    queryAPI("GET", "/api/v2/uuid/generate").done(function( data ) {
+    queryAPI("GET", "/api/uuid/generate").done(function( data ) {
       if (data.data) {
         let id = data.data;
         let timer = startTimer();
@@ -179,7 +179,7 @@
         if ($("#APIKey")[0].value) {
           postArr.APIKey = $("#APIKey")[0].value;
         }
-        queryAPI("POST","/api/v2/plugin/ib/assessment/security/generate", postArr).done(function( data, status ) {
+        queryAPI("POST","/api/plugin/ib/assessment/security/generate", postArr).done(function( data, status ) {
           if (data["result"] == "Success") {
             toast("Success","Do not refresh the page","Security Assessment Report Job Started Successfully","success","30000");
           } else {

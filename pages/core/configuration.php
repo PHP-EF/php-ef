@@ -186,7 +186,7 @@ return <<<EOF
 <script>
 
   function getConfig() {
-    $.getJSON("/api/v2/config", function(data) {
+    $.getJSON("/api/config", function(data) {
       let config = data.data;
       $("#systemLogFileName").val(config.System.logfilename);
       $("#systemLogDirectory").val(config.System.logdirectory);
@@ -235,7 +235,7 @@ return <<<EOF
         kvpairs[e.name] = encodeURIComponent(e.value);
       }
     }
-    queryAPI("PUT","/api/v2/config",kvpairs).done(function(data) {
+    queryAPI("PATCH","/api/config",kvpairs).done(function(data) {
       if (data["result"] == "Success") {
         toast("Success","","Successfully saved configuration","success");
       } else if (data["result"] == "Error") {

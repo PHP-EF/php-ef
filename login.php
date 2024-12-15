@@ -149,7 +149,7 @@ html {
 
 <script>
 function login() {
-  queryAPI("POST", "/api/v2/auth/login", {
+  queryAPI("POST", "/api/auth/login", {
       un: $('#un').val(),
       pw: $('#pw').val()
   }).done(function( data, status ) {
@@ -188,7 +188,7 @@ function login() {
 }
 
 function reset() {
-  queryAPI("POST", "/api/v2/auth/password/expired", {
+  queryAPI("POST", "/api/auth/password/expired", {
       un: $('#un').val(),
       cpw: $('#cpw').val(),
       pw: $('#pw').val()
@@ -209,7 +209,7 @@ function reset() {
         login();
       })
       $('#sso').click(function() {
-        location = "/api/v2/auth/sso";
+        location = "/api/auth/sso";
       })
       $('#un,#pw').keypress(function(event) {
         if (event.which == 13) {
@@ -244,7 +244,7 @@ $('#login').click(function() {
     login();
 })
 $('#sso').click(function() {
-    location = "/api/v2/auth/sso";
+    location = "/api/auth/sso";
 })
 $('#un,#pw').keypress(function(event) {
   if (event.which == 13) {

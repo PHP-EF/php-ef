@@ -123,9 +123,10 @@ $("#Generate").click(function(){
       if ($("#APIKey")[0].value) {
         postArr.APIKey = $("#APIKey")[0].value
       }
-      queryAPI("POST", "/api/v2/plugin/ib/assessment/license/generate", postArr).done(function( data, status ) {
-        if (data["Status"] == "Error") {
-          toast(data["Status"],"",data["Error"],"danger","30000");
+      queryAPI("POST", "/api/plugin/ib/assessment/license/generate", postArr).done(function( response, status ) {
+        var data = response["data"];
+        if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger","30000");
         } else {
           $("#ip_unique_dns").text(data["Unique"]["DNS"])
           $("#ip_unique_dhcp").text(data["Unique"]["DHCP"])
