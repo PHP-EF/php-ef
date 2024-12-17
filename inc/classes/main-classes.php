@@ -117,7 +117,7 @@ class Pages {
     foreach ($navLinks as $link) {
       if (!$this->pageExists($link[0])) {
         $stmt = $this->db->prepare("INSERT INTO pages (Name, Title, ACL, Type, Menu, Submenu, Url, Icon) VALUES (:Name, :Title, :ACL, :Type, :Menu, :Submenu, :Url, :Icon)");
-        $stmt->execute([':Name' => $role[0],':Title' => $role[1], ':ACL' => $role[2], ':Type' => $role[3], ':Menu' => $role[4], ':Menu' => $role[5], ':Submenu' => $role[6], ':Url' => $role[7], ':Icon' => $role[8]]);
+        $stmt->execute([':Name' => $role[0],':Title' => $role[1], ':ACL' => $role[2], ':Type' => $role[3], ':Menu' => $role[4], ':Submenu' => $role[5], ':Url' => $role[6], ':Icon' => $role[7]]);
       }
     }
   }

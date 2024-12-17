@@ -4,8 +4,9 @@ inc/logs/*
 app.db
 config.json
 !files/reports/placeholder.txt
-assets/images/*
-!assets/images/Other
+assets/images/*/*
+!assets/images/*
+!assets/images/custom/index.php
 composer.lock
 _archive
 .DS_Store
