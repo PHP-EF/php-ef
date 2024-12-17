@@ -87,7 +87,7 @@ $app->post('/auth/crypt', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
     $data = $ib->api->getAPIRequestData($request);
 	if (isset($data['key'])) {
-		$ib->api->setAPIResponseData(encrypt($data['key'],$ib->config->getConfig("Security","salt")));
+		$ib->api->setAPIResponseData(encrypt($data['key'],$ib->config->get("Security","salt")));
 	} else {
 		$ib->api->setAPIResponse('Error','key is missing from the request');
 	}
@@ -100,7 +100,7 @@ $app->post('/auth/crypt', function ($request, $response, $args) {
 // SAML SSO
 $app->get('/auth/sso', function ($request, $response, $args) {
     $ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->config->getConfig('SAML', 'enabled')) {
+    if ($ib->config->get('SAML', 'enabled')) {
         $ib->auth->sso();
     } else {
 		$ib->api->setAPIResponse('Error', 'SSO is not enabled', '400');
@@ -113,7 +113,7 @@ $app->get('/auth/sso', function ($request, $response, $args) {
 
 $app->get('/auth/slo', function ($request, $response, $args) {
     $ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->config->getConfig('SAML', 'enabled')) {
+    if ($ib->config->get('SAML', 'enabled')) {
         $ib->auth->slo();
     } else {
 		$ib->api->setAPIResponse('Error', 'SSO is not enabled', '400');
@@ -126,7 +126,7 @@ $app->get('/auth/slo', function ($request, $response, $args) {
 
 $app->post('/auth/acs', function ($request, $response, $args) {
     $ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->config->getConfig('SAML', 'enabled')) {
+    if ($ib->config->get('SAML', 'enabled')) {
         if (isset($ib->api->getAPIRequestData($request)['SAMLResponse'])) {
             $response->getBody()->write(jsonE($ib->auth->acs()));
         }
@@ -141,7 +141,7 @@ $app->post('/auth/acs', function ($request, $response, $args) {
 
 $app->get('/auth/samlMetadata', function ($request, $response, $args) {
     $ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->config->getConfig('SAML', 'enabled')) {
+    if ($ib->config->get('SAML', 'enabled')) {
         $response->getBody()->write($ib->auth->getSamlMetadata());
 		return $response
 			->withHeader('Content-Type', 'application/xml')

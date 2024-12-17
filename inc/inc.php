@@ -30,13 +30,15 @@ if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'plugins')) {
 }
 
 if (!(isset($SkipCSS))) {
-
+  $faviconPath = $ib->config->get('Styling', 'favicon')['Image'];
+  $faviconPath = $faviconPath ? $faviconPath : '/assets/images/favicon.ico';
     echo '
     <head>
       <!-- Required meta tags -->
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-      <link rel="icon" type="image/x-icon" href="/assets/images/Other/favicon.svg">
+
+      <link rel="icon" type="image/x-icon" href="' . (file_exists(dirname(__DIR__,1) . $faviconPath) ? $faviconPath : '/assets/images/php-ef-icon.png') . '">
 
       <!-- Bootstrap / jquery -->
       <script src="https://code.jquery.com/jquery-3.6.3.min.js" crossorigin="anonymous"></script>

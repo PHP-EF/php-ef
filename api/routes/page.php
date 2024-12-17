@@ -63,3 +63,47 @@ $app->get('/page/plugin/{plugin}/{page}', function ($request, $response, $args) 
 		->withHeader('Content-Type', 'text/html')
 		->withStatus($GLOBALS['responseCode']);
 });
+
+$app->get('/pages', function ($request, $response, $args) {
+	$ib = ($request->getAttribute('ib')) ?? new ib();
+    if ($ib->rbac->checkAccess("ADMIN-PAGES")) {
+		$ib->api->setAPIResponseData($ib->pages->get());
+	}
+
+	// Return the response
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json')
+		->withStatus($GLOBALS['responseCode']);
+});
+
+$app->get('/pages/hierarchy', function ($request, $response, $args) {
+	$ib = ($request->getAttribute('ib')) ?? new ib();
+	if ($ib->rbac->checkAccess("ADMIN-PAGES")) {
+		$config = $ib->pages->get();
+		$navigation = [];
+		foreach ($config as $item) {
+			if ($item['Type'] === 'Link') {
+				$navigation[] = $item;
+			} elseif ($item['Type'] === 'Menu') {
+				$navigation[$item['Name']] = $item;
+				$navigation[$item['Name']]['Items'] = [];
+			} elseif ($item['Type'] === 'MenuLink') {
+				$navigation[$item['Menu']]['Items'][] = $item;
+			} elseif ($item['Type'] === 'SubMenu') {
+				$navigation[$item['Menu']]['Items'][$item['Name']] = $item;
+				$navigation[$item['Menu']]['Items'][$item['Name']]['Items'] = [];
+			} elseif ($item['Type'] === 'SubMenuLink') {
+				$navigation[$item['Menu']]['Items'][$item['Submenu']]['Items'][] = $item;
+			}
+		}
+	}
+
+	$ib->api->setAPIResponseData($navigation);
+
+	// Return the response
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json')
+		->withStatus($GLOBALS['responseCode']);
+});

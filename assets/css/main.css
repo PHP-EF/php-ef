@@ -568,9 +568,19 @@ body .popover {
   transition: 0.5s ease;
   transition-delay: 0.1s;
 }
-.sidebar .logo-lg {
+
+/* Custom Logo */
+/* .sidebar .logo-lg {
   height: 37px;
   margin: 0px 0px 0px 50px;
+  transition: 0.3s ease;
+  transition-delay: 0.1s;
+} */
+
+/* Default Logo */
+.sidebar .logo-lg {
+  height: 50px;
+  margin: 10px 0px 0px 5px;
   transition: 0.3s ease;
   transition-delay: 0.1s;
 }
