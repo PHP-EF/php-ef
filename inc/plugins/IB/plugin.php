@@ -33,8 +33,9 @@ class ibPlugin extends ib {
 
 	public function getDir() {
 		return array(
-			'Files' => __DIR__.'/../../../files',
-			'Assets' => __DIR__.'/../../../assets'
+			'Files' => dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . '/files',
+			'Assets' => dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . '/assets',
+			'PluginData' => __DIR__ . DIRECTORY_SEPARATOR . '/data'
 		);
 	}
 }
@@ -1461,7 +1462,7 @@ class SecurityAssessment extends ibPortal {
 				// Set first slide number
 				$SlideNumber = $SlidesCount++;
 				// Copy Blank Threat Actor Image
-				copy($this->getDir()['Assets'].'/images/Threat Actors/logo-only.png',$this->getDir()['Files'].'/reports/report-'.$UUID.'/ppt/media/logo-only.png');
+				copy($this->getDir()['PluginData'].'/images/logo-only.png',$this->getDir()['Files'].'/reports/report-'.$UUID.'/ppt/media/logo-only.png');
 				// Build new Threat Actor Slides & Update PPTX Resources
 				if (isset($ThreatActorInfo)) {
 					foreach  ($ThreatActorInfo as $TAI) {
@@ -1555,8 +1556,8 @@ class SecurityAssessment extends ibPortal {
 	
 						// Virus Total PNG / SVG
 						if ($VTIndicatorFound) {
-							copy($this->getDir()['Assets'].'/images/Other/virustotal.png',$this->getDir()['Files'].'/reports/report-'.$UUID.'/ppt/media/virustotal.png');
-							copy($this->getDir()['Assets'].'/images/Other/virustotal.svg',$this->getDir()['Files'].'/reports/report-'.$UUID.'/ppt/media/virustotal.svg');
+							copy($this->getDir()['PluginData'].'/images/virustotal.png',$this->getDir()['Files'].'/reports/report-'.$UUID.'/ppt/media/virustotal.png');
+							copy($this->getDir()['PluginData'].'/images/virustotal.svg',$this->getDir()['Files'].'/reports/report-'.$UUID.'/ppt/media/virustotal.svg');
 							$xml_tas_f->appendXML('<Relationship Id="rId120" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/virustotal.png"/>');
 							$xml_tas_f->appendXML('<Relationship Id="rId121" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/virustotal.svg"/>');
 						}

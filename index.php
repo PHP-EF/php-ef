@@ -216,9 +216,15 @@
 <body>
   <div class="sidebar">
     <div class="logo-details">
-      <img class="logo-sm" src="/assets/images/Other/ib-diamonds.png"></img>
-      <!-- <span class="logo_name">Infoblox SA Tools</span> -->
-      <img class="logo-lg" src="/assets/images/Other/ib-logo-white.png"></img>
+      <?php
+      $smLogoPath = $ib->config->getConfig('Styling', 'logo-sm');
+      $smLogoPath = $smLogoPath ? $smLogoPath : '/assets/images/php-ef-icon.png';
+      echo '<img class="logo-sm" src="' . (file_exists(__DIR__ . $smLogoPath) ? $smLogoPath : '/assets/images/php-ef-icon.png') . '"></img>';
+
+      $lgLogoPath = $ib->config->getConfig('Styling', 'logo-lg');
+      $lgLogoPath = $lgLogoPath ? $lgLogoPath : '/assets/images/php-ef-icon-text.png';
+      echo '<img class="logo-lg" src="' . (file_exists(__DIR__ . $lgLogoPath) ? $lgLogoPath : '/assets/images/php-ef-icon-text.png') . '"></img>';
+      ?>
     </div>
     <ul class="nav-links">
       <?php

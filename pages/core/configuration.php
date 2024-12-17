@@ -4,7 +4,7 @@
     die();
   }
 
-return <<<EOF
+return '
 
 <style>
 .card {
@@ -25,38 +25,38 @@ return <<<EOF
               <h5>System</h5>
             </div>
             <div class="form-group">
-              <label for="systemLogFileName">Log File Name</label>
-              <input type="text" class="form-control info-field" id="systemLogFileName" aria-describedby="systemLogFileNameHelp" name="systemLogFileName">
-              <small id="systemLogFileNameHelp" class="form-text text-muted">The name of the log file <b>without</b> the file extension.</small>
+              <label for="System[logfilename]">Log File Name</label>
+              <input type="text" class="form-control info-field" id="System[logfilename]" aria-describedby="System[logfilename]Help" name="System[logfilename]">
+              <small id="System[logfilename]Help" class="form-text text-muted">The name of the log file <b>without</b> the file extension.</small>
 	          </div>
             <div class="form-group">
-              <label for="systemLogDirectory">Log Directory</label>
-              <input type="text" class="form-control info-field" id="systemLogDirectory" aria-describedby="systemLogDirectoryHelp" name="systemLogDirectory">
-              <small id="systemLogDirectoryHelp" class="form-text text-muted">The full path of the log directory including the trailing slash.</small>
+              <label for="System[logdirectory]">Log Directory</label>
+              <input type="text" class="form-control info-field" id="System[logdirectory]" aria-describedby="System[logdirectory]Help" name="System[logdirectory]">
+              <small id="System[logdirectory]Help" class="form-text text-muted">The full path of the log directory including the trailing slash.</small>
             </div>
             <div class="form-group">
-              <label for="systemLogLevel">Log Level</label>
-	            <select type="select" class="form-select info-field" id="systemLogLevel" aria-describedby="systemLogLevelHelp" name="systemLogLevel">
+              <label for="System[loglevel]">Log Level</label>
+	            <select type="select" class="form-select info-field" id="System[loglevel]" aria-describedby="System[loglevel]Help" name="System[loglevel]">
                 <option>Debug</option>
                 <option>Info</option>
                 <option>Warning</option>
               </select>
-              <small id="systemLogLevelHelp" class="form-text text-muted">Specify which log level you would like to use. Enabling <b>Debug</b> logs will generate lots of data.</small>
+              <small id="System[loglevel]Help" class="form-text text-muted">Specify which log level you would like to use. Enabling <b>Debug</b> logs will generate lots of data.</small>
 	          </div>
             <div class="form-group">
-              <label for="systemLogRetention">Log Retention</label>
-              <input type="text" class="form-control info-field" id="systemLogRetention" aria-describedby="systemLogRetentionHelp" name="systemLogRetention">
-              <small id="systemLogRetentionHelp" class="form-text text-muted">How many days to keep system logs before they are purged.</small>
+              <label for="System[logretention]">Log Retention</label>
+              <input type="text" class="form-control info-field" id="System[logretention]" aria-describedby="System[logretention]Help" name="System[logretention]">
+              <small id="System[logretention]Help" class="form-text text-muted">How many days to keep system logs before they are purged.</small>
             </div>
             <div class="form-group">
-              <label for="systemCURLTimeout">CURL Timeout</label>
-              <input type="text" class="form-control info-field" id="systemCURLTimeout" aria-describedby="systemCURLTimeoutHelp" name="systemCURLTimeout">
-              <small id="systemCURLTimeoutHelp" class="form-text text-muted">Specify the timeout used for CURL requests. (Can be increased if long running outbound API calls time out)</small>
+              <label for="System[CURL-Timeout]">CURL Timeout</label>
+              <input type="text" class="form-control info-field" id="System[CURL-Timeout]" aria-describedby="System[CURL-Timeout]Help" name="System[CURL-Timeout]">
+              <small id="System[CURL-Timeout]Help" class="form-text text-muted">Specify the timeout used for CURL requests. (Can be increased if long running outbound API calls time out)</small>
 	          </div>
             <div class="form-group">
-              <label for="systemCURLTimeoutConnect">CURL Timeout on Connect</label>
-	            <input type="text" class="form-control info-field" id="systemCURLTimeoutConnect" aria-describedby="systemCURLTimeoutConnectHelp" name="systemCURLTimeoutConnect">
-              <small id="systemCURLTimeoutConnectHelp" class="form-text text-muted">Specify the timeout used for CURL requests on connect. (Shouldn"t need to be increased)</small>
+              <label for="System[CURL-TimeoutConnect]">CURL Timeout on Connect</label>
+	            <input type="text" class="form-control info-field" id="System[CURL-TimeoutConnect]" aria-describedby="System[CURL-TimeoutConnect]Help" name="System[CURL-TimeoutConnect]">
+              <small id="System[CURL-TimeoutConnect]Help" class="form-text text-muted">Specify the timeout used for CURL requests on connect. (Shouldn"t need to be increased)</small>
 	          </div>
 	        </div>
           <br>
@@ -65,9 +65,9 @@ return <<<EOF
               <h5>Security</h5>
             </div>
             <div class="form-group">
-              <label for="securitySalt">Salt</label>
-              <input type="password" class="form-control info-field" id="securitySalt" aria-describedby="securitySaltHelp" name="securitySalt">
-              <small id="securitySaltHelp" class="form-text text-muted">The salt used to encrypt credentials.</small>
+              <label for="Security[salt]">Salt</label>
+              <input type="password" class="form-control info-field" id="Security[salt]" aria-describedby="Security[salt]Help" name="Security[salt]">
+              <small id="Security[salt]Help" class="form-text text-muted">The salt used to encrypt credentials.</small>
 	          </div>
           </div>
           <br>
@@ -79,67 +79,67 @@ return <<<EOF
               <div class="col-md-6">
                 <h4>Service Provider (SP)</h4>
                 <div class="form-group">
-                    <label for="spEntityId">Entity ID</label>
-                    <input type="text" class="form-control info-field" id="spEntityId" name="spEntityId">
+                    <label for="SAML[sp][entityId]">Entity ID</label>
+                    <input type="text" class="form-control info-field" id="SAML[sp][entityId]" name="SAML[sp][entityId]">
                 </div>
                 <div class="form-group">
-                    <label for="spAcsUrl">Assertion Consumer Service URL</label>
-                    <input type="text" class="form-control info-field" id="spAcsUrl" name="spAcsUrl">
+                    <label for="SAML[sp][assertionConsumerService][url]">Assertion Consumer Service URL</label>
+                    <input type="text" class="form-control info-field" id="SAML[sp][assertionConsumerService][url]" name="SAML[sp][assertionConsumerService][url]">
                 </div>
                 <div class="form-group">
-                    <label for="spSloUrl">Single Logout Service URL</label>
-                    <input type="text" class="form-control info-field" id="spSloUrl" name="spSloUrl">
+                    <label for="SAML[sp][singleLogoutService][url]">Single Logout Service URL</label>
+                    <input type="text" class="form-control info-field" id="SAML[sp][singleLogoutService][url]" name="SAML[sp][singleLogoutService][url]">
                 </div>
                 <div class="form-group">
-                    <label for="spX509Cert">X.509 Certificate</label>
-                    <textarea class="form-control info-field" id="spX509Cert" name="spX509Cert"></textarea>
+                    <label for="SAML[sp][x509cert]">X.509 Certificate</label>
+                    <textarea class="form-control info-field" id="SAML[sp][x509cert]" name="SAML[sp][x509cert]"></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="spPrivateKey">Private Key</label>
-                    <textarea class="form-control info-field" id="spPrivateKey" name="spPrivateKey"></textarea>
+                    <label for="SAML[sp][privateKey]">Private Key</label>
+                    <textarea class="form-control info-field" id="SAML[sp][privateKey]" name="SAML[sp][privateKey]"></textarea>
                 </div>
               </div>
               <div class="col-md-6">
                 <h4>Identity Provider (IdP)</h4>
                 <div class="form-group">
-                    <label for="idpEntityId">Entity ID</label>
-                    <input type="text" class="form-control info-field" id="idpEntityId" name="idpEntityId">
+                    <label for="SAML[idp][entityId]">Entity ID</label>
+                    <input type="text" class="form-control info-field" id="SAML[idp][entityId]" name="SAML[idp][entityId]">
                 </div>
                 <div class="form-group">
-                    <label for="idpSsoUrl">Single Sign-On Service URL</label>
-                    <input type="text" class="form-control info-field" id="idpSsoUrl" name="idpSsoUrl">
+                    <label for="SAML[idp][singleSignOnService][url]">Single Sign-On Service URL</label>
+                    <input type="text" class="form-control info-field" id="SAML[idp][singleSignOnService][url]" name="SAML[idp][singleSignOnService][url]">
                 </div>
                 <div class="form-group">
-                    <label for="idpSloUrl">Single Logout Service URL</label>
-                    <input type="text" class="form-control info-field" id="idpSloUrl" name="idpSloUrl">
+                    <label for="SAML[idp][singleLogoutService][url]">Single Logout Service URL</label>
+                    <input type="text" class="form-control info-field" id="SAML[idp][singleLogoutService][url]" name="SAML[idp][singleLogoutService][url]">
                 </div>
                 <div class="form-group">
-                    <label for="idpX509Cert">X.509 Certificate</label>
-                    <textarea class="form-control info-field" id="idpX509Cert" name="idpX509Cert"></textarea>
+                    <label for="SAML[idp][x509cert]">X.509 Certificate</label>
+                    <textarea class="form-control info-field" id="SAML[idp][x509cert]" name="SAML[idp][x509cert]"></textarea>
                 </div>
                 <br>
                 <div class="form-group">
                   <div class="form-check form-switch">
-                    <label class="form-check-label" for="samlEnabled">Enable SAML</label>
-                    <input class="form-check-input info-field" type="checkbox" id="samlEnabled" name="samlEnabled">
+                    <label class="form-check-label" for="SAML[enabled]">Enable SAML</label>
+                    <input class="form-check-input info-field" type="checkbox" id="SAML[enabled]" name="SAML[enabled]">
                   </div>
                 </div>
                 <div class="form-group">
                   <div class="form-check form-switch">
-                    <label class="form-check-label" for="samlAutoCreateUsers">Auto-Create Users</label>
-                    <input class="form-check-input info-field" type="checkbox" id="samlAutoCreateUsers" name="samlAutoCreateUsers">
+                    <label class="form-check-label" for="SAML[AutoCreateUsers]">Auto-Create Users</label>
+                    <input class="form-check-input info-field" type="checkbox" id="SAML[AutoCreateUsers]" name="SAML[AutoCreateUsers]">
                   </div>
                 </div>
                 <div class="form-group">
                   <div class="form-check form-switch">
-                    <label class="form-check-label" for="samlStrict">Use Strict Mode</label>
-                    <input class="form-check-input info-field" type="checkbox" id="samlStrict" name="samlStrict">
+                    <label class="form-check-label" for="SAML[strict]">Use Strict Mode</label>
+                    <input class="form-check-input info-field" type="checkbox" id="SAML[strict]" name="SAML[strict]">
                   </div>
                 </div>
                 <div class="form-group">
                   <div class="form-check form-switch">
-                    <label class="form-check-label" for="samlDebug">Use Debug Mode</label>
-                    <input class="form-check-input info-field" type="checkbox" id="samlDebug" name="samlDebug">
+                    <label class="form-check-label" for="SAML[debug]">Use Debug Mode</label>
+                    <input class="form-check-input info-field" type="checkbox" id="SAML[debug]" name="SAML[debug]">
                   </div>
                 </div>
               </div>
@@ -150,26 +150,26 @@ return <<<EOF
               <p>Used for mapping SAML Attributes to the account information</p>
               <div class="col-md-6">
                 <div class="form-group">
-                    <label for="attributeUsername">Username Attribute</label>
-                    <input type="text" class="form-control info-field" id="attributeUsername" name="attributeUsername">
+                    <label for="SAML[attributes][Username]">Username Attribute</label>
+                    <input type="text" class="form-control info-field" id="SAML[attributes][Username]" name="SAML[attributes][Username]">
                 </div>
                 <div class="form-group">
-                    <label for="attributeFirstName">First Name Attribute</label>
-                    <input type="text" class="form-control info-field" id="attributeFirstName" name="attributeFirstName">
+                    <label for="SAML[attributes][FirstName]">First Name Attribute</label>
+                    <input type="text" class="form-control info-field" id="SAML[attributes][FirstName]" name="SAML[attributes][FirstName]">
                 </div>
                 <div class="form-group">
-                    <label for="attributeLastName">Last Name Attribute</label>
-                    <input type="text" class="form-control info-field" id="attributeLastName" name="attributeLastName">
+                    <label for="SAML[attributes][LastName]">Last Name Attribute</label>
+                    <input type="text" class="form-control info-field" id="SAML[attributes][LastName]" name="SAML[attributes][LastName]">
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-group">
-                    <label for="attributeEmail">Email Attribute</label>
-                    <input class="form-control info-field" id="attributeEmail" name="attributeEmail">
+                    <label for="SAML[attributes][Email]">Email Attribute</label>
+                    <input class="form-control info-field" id="SAML[attributes][Email]" name="SAML[attributes][Email]">
                 </div>
                 <div class="form-group">
-                    <label for="attributeGroups">Groups Attribute</label>
-                    <input class="form-control info-field" id="attributeGroups" name="attributeGroups">
+                    <label for="SAML[attributes][Groups]">Groups Attribute</label>
+                    <input class="form-control info-field" id="SAML[attributes][Groups]" name="SAML[attributes][Groups]">
                 </div>
               </div>
             </div>
@@ -177,7 +177,7 @@ return <<<EOF
         </div>
 	    </form>
       <br>
-      <button class="btn btn-success float-end ms-1" id="submitConfig">Save Configuration</button>&nbsp;
+      <button class="btn btn-success float-end ms-1" id="submitConfig2">Save Configuration</button>&nbsp;
       <button class="btn btn-primary float-end" onclick="location.reload();">Discard Changes</button>
 	  </div>
   </div>
@@ -188,31 +188,24 @@ return <<<EOF
   function getConfig() {
     $.getJSON("/api/config", function(data) {
       let config = data.data;
-      $("#systemLogFileName").val(config.System.logfilename);
-      $("#systemLogDirectory").val(config.System.logdirectory);
-      $("#systemLogLevel").val(config.System.loglevel);
-      $("#systemLogRetention").val(config.System.logretention);
-      $("#systemCURLTimeout").val(config.System["CURL-Timeout"]);
-      $("#systemCURLTimeoutConnect").val(config.System["CURL-ConnectTimeout"]);
-      $("#securitySalt").val(config.Security.salt);
-      $("#spEntityId").val(config.SAML.sp.entityId);
-      $("#spAcsUrl").val(config.SAML.sp.assertionConsumerService.url);
-      $("#spSloUrl").val(config.SAML.sp.singleLogoutService.url);
-      $("#spX509Cert").val(config.SAML.sp.x509cert);
-      $("#spPrivateKey").val(config.SAML.sp.privateKey);
-      $("#idpEntityId").val(config.SAML.idp.entityId);
-      $("#idpSsoUrl").val(config.SAML.idp.singleSignOnService.url);
-      $("#idpSloUrl").val(config.SAML.idp.singleLogoutService.url);
-      $("#idpX509Cert").text(config.SAML.idp.x509cert);
-      $("#samlEnabled").prop("checked",config.SAML.enabled);
-      $("#samlAutoCreateUsers").prop("checked",config.SAML.AutoCreateUsers);
-      $("#samlStrict").prop("checked",config.SAML.strict);
-      $("#samlDebug").prop("checked",config.SAML.debug);
-      $("#attributeUsername").val(config.SAML.attributes.Username);
-      $("#attributeFirstName").val(config.SAML.attributes.FirstName);
-      $("#attributeLastName").val(config.SAML.attributes.LastName);
-      $("#attributeEmail").val(config.SAML.attributes.Email);
-      $("#attributeGroups").val(config.SAML.attributes.Groups);
+
+      const updateConfigValues = (config, parentKey = "") => {
+        for (const section in config) {
+          for (const key in config[section]) {
+            const value = config[section][key];
+            const fullKey = parentKey ? `${parentKey}[${section}][${key}]` : `${section}[${key}]`;
+            const selector = `#${$.escapeSelector(fullKey)}`;
+            if (typeof value === "object" && !Array.isArray(value) && value !== null) {
+              updateConfigValues({ [fullKey]: value });
+            } else if (typeof value === "boolean") {
+              $(selector).prop("checked", value);
+            } else {
+              $(selector).val(value);
+            }
+          }
+        }
+      };
+      updateConfigValues(config);
     });
   }
 
@@ -222,6 +215,42 @@ return <<<EOF
     toast("Configuration","",$(elem.target.previousElementSibling).text()+" has changed.<br><small>Save configuration to apply changes.</small>","warning");
     $(this).addClass("changed");
   });
+
+$("#submitConfig2").click(function(event) {
+    event.preventDefault();
+    var formData = $("#configurationForm .changed").serializeArray();
+    
+    // Include unchecked checkboxes in the formData
+    $("#configurationForm input.changed[type=checkbox]").each(function() {
+        formData.push({ name: this.name, value: this.checked ? true : false });
+    });
+
+    var configData = {};
+    formData.forEach(function(item) { 
+        var keys = item.name.split("[").map(function(key) {
+            return key.replace("]","");
+        });
+        var temp = configData;
+        keys.forEach(function(key, index) {
+            if (index === keys.length - 1) {
+                temp[key] = item.value;
+            } else {
+                temp[key] = temp[key] || {};
+                temp = temp[key];
+            }
+        });
+    });
+
+    queryAPI("PATCH","/api/config",configData).done(function(data) {
+        if (data["result"] == "Success") {
+            toast("Success","","Successfully saved configuration","success");
+        } else if (data["result"] == "Error") {
+            toast("Error","","Failed to save configuration","danger");
+        } else {
+            toast("API Error","","Failed to save configuration","danger","30000");
+        }
+    });
+});
 
   $("#submitConfig").click(function(event) {
     event.preventDefault();
@@ -246,4 +275,4 @@ return <<<EOF
     });
   });
 </script>
-EOF;
+';

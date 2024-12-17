@@ -257,6 +257,7 @@ function loadiFrame(element = null) {
 }
 
 function loadMainWindow(element) {
+  $('#mainWindow').html('');
   clearAllApexCharts();
   if (element != null) {
     var hashsplit = element.split('#page=');
@@ -295,13 +296,11 @@ function loadMainWindow(element) {
       }
     }
     queryAPI('GET','/api/page/'+hashsplit[1]).done(function(data) {
-      $('#mainWindow').html('');
       $('#mainWindow').html(data);
       $('.dark-theme .table-striped').addClass('table-dark');
     });
   } else {
     queryAPI('GET','/api/page/core/default').done(function(data) {
-      $('#mainWindow').html('');
       $('#mainWindow').html(data);
       $('.dark-theme .table-striped').addClass('table-dark');
     });

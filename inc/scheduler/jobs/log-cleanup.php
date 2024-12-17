@@ -1,12 +1,12 @@
 <?php
 $SkipCSS = true;
 require_once(__DIR__.'/../../inc.php');
-
 $logFiles = $ib->logging->getLogFiles();
 $daysBeforeExpiry = $ib->config->getConfig("System","logretention");
+$logFileName = $ib->config->getConfig("System","logfilename");
 
 foreach ($logFiles as $logFile) {
-  preg_match('/ib-sa-tools-(.*).log/',$logFile, $matches);
+  preg_match('/'.$logFileName.'-(.*).log/',$logFile, $matches);
   if (isset($matches[1])) {
     if (strtotime($matches[1]) < strtotime('-'.$daysBeforeExpiry.' days')) {
       echo $logFile." is over ".$daysBeforeExpiry." days old.";
