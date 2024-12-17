@@ -103,7 +103,7 @@ class Pages {
       Icon TEXT
     )");
 
-    // Insert roles if they don't exist
+    // Insert default nav links if they don't exist
     $navLinks = [
       ['Home','Home',null,'Link',null,null,'#page=core/default','fa fa-house'],
       ['Admin','Admin','ADMIN-Menu','Menu',null,null,null,'fas fa-user-shield'],
@@ -117,7 +117,7 @@ class Pages {
     foreach ($navLinks as $link) {
       if (!$this->pageExists($link[0])) {
         $stmt = $this->db->prepare("INSERT INTO pages (Name, Title, ACL, Type, Menu, Submenu, Url, Icon) VALUES (:Name, :Title, :ACL, :Type, :Menu, :Submenu, :Url, :Icon)");
-        $stmt->execute([':Name' => $role[0],':Title' => $role[1], ':ACL' => $role[2], ':Type' => $role[3], ':Menu' => $role[4], ':Submenu' => $role[5], ':Url' => $role[6], ':Icon' => $role[7]]);
+        $stmt->execute([':Name' => $link[0],':Title' => $link[1], ':ACL' => $link[2], ':Type' => $link[3], ':Menu' => $link[4], ':Submenu' => $link[5], ':Url' => $link[6], ':Icon' => $link[7]]);
       }
     }
   }

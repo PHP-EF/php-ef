@@ -793,7 +793,7 @@ class RBAC {
     $roles = [
       ['Authenticated', 'This group applies to any authenticated user', true],
       ['Everyone', 'This group applies to any user, regardless of if they are logged in or not', true],
-      ['Administrators', 'System Administrators', 'ADMIN-RBAC,ADMIN-USERS,ADMIN-CONFIG,ADMIN-LOGS', true]
+      ['Administrators', 'System Administrators', 'ADMIN-RBAC,ADMIN-USERS,ADMIN-CONFIG,ADMIN-LOGS,ADMIN-PAGES,REPORT-TRACKING', true]
     ];
 
     foreach ($roles as $role) {
@@ -830,6 +830,7 @@ class RBAC {
       ['ADMIN-LOGS', 'Grants access to view Logs'],
       ['ADMIN-CONFIG', 'Grants access to manage the Infoblox SA Tools Configuration'],
       ['ADMIN-USERS', 'Grants access to view and manage users & groups'],
+      ['ADMIN-PAGES', 'Grants the ability to view and manage Pages'],
       ['REPORT-TRACKING', 'Grants the ability to view the Web Tracking Reports']
     ];
 
