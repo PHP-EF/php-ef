@@ -1,3 +1,10 @@
+## v0.6.7
+- Cleanup IB tools into new plugin
+- Various API improvements
+- Expand plugin support for JS/CSS/Cron
+- Move navigation/pages configuration to DB
+- Create configuration page for managing navigation links
+
 ## v0.6.6
 - Finalize move to V2 API
 

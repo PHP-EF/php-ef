@@ -28,12 +28,12 @@ class CoreJwt {
           'type' => $Type
         ];
         $this->logging->writeLog("Authentication","Issued JWT token","debug",$payload);
-        return JWT::encode($payload, $this->config->getConfig()['Security']['salt'], 'HS256');
+        return JWT::encode($payload, $this->config->get()['Security']['salt'], 'HS256');
     }
 
     // Revoke a token
     public function revokeToken($token) {
-        $decoded = JWT::decode($token, new Key($this->config->getConfig()['Security']['salt'], 'HS256'));
+        $decoded = JWT::decode($token, new Key($this->config->get()['Security']['salt'], 'HS256'));
         $this->redis->set($token, json_encode($decoded), 'EX', (86400 * 30)); // Store token with expiration
         $this->logging->writeLog("Authentication","Revoked JWT token","debug",$decoded);
     }
@@ -75,7 +75,7 @@ class Auth {
     $this->CoreJwt = new CoreJwt($core);
 
     // SSO
-    $this->sso = new OneLogin\Saml2\Auth($this->config->getConfig("SAML"));
+    $this->sso = new OneLogin\Saml2\Auth($this->config->get("SAML"));
 
     // API
     $this->api = $api;
@@ -496,28 +496,28 @@ class Auth {
           'samlSessionIndex' => $this->sso->getSessionIndex()
         );
         $AttributeMap = [];
-        if ($this->config->getConfig('SAML','attributes')['Username'] && isset($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['Username']])) {
-          $AttributeMap['Username'] = $SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['Username']][0];
+        if ($this->config->get('SAML','attributes')['Username'] && isset($SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['Username']])) {
+          $AttributeMap['Username'] = $SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['Username']][0];
         } else {
           $AttributeMap['Username'] = null;
         }
-        if ($this->config->getConfig('SAML','attributes')['FirstName'] && isset($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['FirstName']])) {
-          $AttributeMap['FirstName'] = ucwords($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['FirstName']][0]);
+        if ($this->config->get('SAML','attributes')['FirstName'] && isset($SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['FirstName']])) {
+          $AttributeMap['FirstName'] = ucwords($SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['FirstName']][0]);
         } else {
           $AttributeMap['FirstName'] = null;
         }
-        if ($this->config->getConfig('SAML','attributes')['LastName'] && isset($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['LastName']])) {
-          $AttributeMap['LastName'] = ucwords($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['LastName']][0]);
+        if ($this->config->get('SAML','attributes')['LastName'] && isset($SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['LastName']])) {
+          $AttributeMap['LastName'] = ucwords($SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['LastName']][0]);
         } else {
           $AttributeMap['LastName'] = null;
         }
-        if ($this->config->getConfig('SAML','attributes')['Email'] && isset($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['Email']])) {
-          $AttributeMap['Email'] = $SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['Email']][0];
+        if ($this->config->get('SAML','attributes')['Email'] && isset($SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['Email']])) {
+          $AttributeMap['Email'] = $SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['Email']][0];
         } else {
           $AttributeMap['Email'] = null;
         }
-        if ($this->config->getConfig('SAML','attributes')['Groups'] && isset($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['Groups']])) {
-            $AttributeMap['Groups'] = implode(',',$SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['Groups']]);
+        if ($this->config->get('SAML','attributes')['Groups'] && isset($SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['Groups']])) {
+            $AttributeMap['Groups'] = implode(',',$SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['Groups']]);
         } else {
           $AttributeMap['Groups'] = '';
         }
@@ -547,7 +547,7 @@ class Auth {
               'Status' => 'Success',
               'Message' => 'User logged in'
             );
-          } else if ($this->config->getConfig('SAML','AutoCreateUsers')) {
+          } else if ($this->config->get('SAML','AutoCreateUsers')) {
             // User does not exist and will be created
             $NewUser = $this->newUser($AttributeMap['Username'], null, $AttributeMap['FirstName'], $AttributeMap['LastName'], $AttributeMap['Email'], $AttributeMap['Groups'], $type = 'SSO');
             if ($NewUser) {
@@ -640,7 +640,7 @@ class Auth {
     $IPAddress = explode(':',$IPAddress)[0];
 
     if (isset($_COOKIE['jwt'])) {
-      $secretKey = $this->config->getConfig()['Security']['salt']; // Change this to a secure key
+      $secretKey = $this->config->get()['Security']['salt']; // Change this to a secure key
       if ($this->CoreJwt->isRevoked($_COOKIE['jwt']) == true) {
         // Token is invalid
         $AuthResult = array(
@@ -773,8 +773,8 @@ class RBAC {
   }
   
   // Function to check if a role exists
-  private function roleExists($db, $roleName) {
-    $stmt = $db->prepare("SELECT COUNT(*) FROM rbac WHERE Name = :name");
+  private function roleExists($roleName) {
+    $stmt = $this->db->prepare("SELECT COUNT(*) FROM rbac WHERE Name = :name");
     $stmt->execute([':name' => $roleName]);
     return $stmt->fetchColumn() > 0;
   }
@@ -797,7 +797,7 @@ class RBAC {
     ];
 
     foreach ($roles as $role) {
-      if (!$this->roleExists($this->db, $role[0])) {
+      if (!$this->roleExists($role[0])) {
         $stmt = $this->db->prepare("INSERT INTO rbac (Name, Description, PermittedResources, Protected) VALUES (:Name, :Description, :PermittedResources, :Protected)");
         $stmt->execute([':Name' => $role[0],':Description' => $role[1], ':PermittedResources' => $role[2], ':Protected' => $role[3]]);
       }

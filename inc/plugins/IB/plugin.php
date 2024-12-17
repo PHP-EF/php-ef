@@ -51,7 +51,7 @@ class ibPortal extends ibPlugin {
 	public function SetCSPConfiguration($APIKey = null,$Realm = "US") {
 		$this->Realm = $Realm;
 		if (isset($_COOKIE['crypt'])) {
-			$this->APIKey = decrypt($_COOKIE['crypt'],$this->config->getConfig("Security","salt"));
+			$this->APIKey = decrypt($_COOKIE['crypt'],$this->config->get("Security","salt"));
 		} else {
 			$this->APIKey = $APIKey;
 		}
@@ -82,8 +82,8 @@ class ibPortal extends ibPlugin {
 		}
 	  
 		$Options = array(
-		  'timeout' => $this->config->getConfig("System","CURL-Timeout"),
-		  'connect_timeout' => $this->config->getConfig("System","CURL-ConnectTimeout")
+		  'timeout' => $this->config->get("System","CURL-Timeout"),
+		  'connect_timeout' => $this->config->get("System","CURL-ConnectTimeout")
 		);
 	  
 		return array(

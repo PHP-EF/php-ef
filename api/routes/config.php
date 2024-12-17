@@ -3,7 +3,7 @@ $app->get('/config', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
 
     if ($ib->rbac->checkAccess("ADMIN-CONFIG")) {
-        $config = $ib->config->getConfig();
+        $config = $ib->config->get();
         $config['Security']['salt'] = "********";
         if ($config['SAML']['sp']['privateKey'] != "") {
             $config['SAML']['sp']['privateKey'] = "********";
@@ -23,9 +23,9 @@ $app->patch('/config', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
     if ($ib->rbac->checkAccess("ADMIN-CONFIG")) {
         $data = $ib->api->getAPIRequestData($request);
-        $config = $ib->config->getConfig();
+        $config = $ib->config->get();
         // Update the config values with the submitted data
-        $ib->config->setConfig($config, $data);
+        $ib->config->set($config, $data);
         $ib->api->setAPIResponseMessage('Successfully updated configuration');
     }
 

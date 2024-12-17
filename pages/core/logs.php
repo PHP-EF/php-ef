@@ -7,7 +7,7 @@
   $LogFiles = array_reverse($ib->logging->getLogFiles());
   $LogFileArr = array();
     foreach ($LogFiles as $LogFile) {
-      $LogFileShort = explode(".log",explode($ib->config->getConfig("System","logfilename")."-",$LogFile)[1]);
+      $LogFileShort = explode(".log",explode($ib->config->get("System","logfilename")."-",$LogFile)[1]);
       if ($LogFileShort[0] != null) {
         array_push($LogFileArr,$LogFileShort[0]);
       }

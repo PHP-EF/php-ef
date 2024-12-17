@@ -9,6 +9,7 @@ class ib {
   public $auth;
   public $rbac;
   public $config;
+  public $pages;
   public $logging;
   public $db;
   public $reporting;
@@ -20,12 +21,13 @@ class ib {
       $this->auth = new Auth($this->core,$this->db,$this->api);
       $this->rbac = new RBAC($this->core,$this->db,$this->auth,$this->api);
       $this->config = $this->core->config;
+      $this->pages = new Pages($this->db);
       $this->logging = $this->core->logging;
       $this->reporting = new Reporting($this->core,$this->db);
   }
 
   public function getVersion() {
-    return ['v0.6.6'];
+    return ['v0.6.7'];
   }
 }
 
@@ -56,7 +58,7 @@ class Config {
     $this->configFile = $conf;
   }
 
-  public function getConfig($Section = null,$Option = null) {
+  public function get($Section = null,$Option = null) {
     $config_json = json_decode(file_get_contents($this->configFile),true); //Config file that has configurations for site.
     if($Section && $Option) {
       return $config_json[$Section][$Option];
@@ -67,7 +69,7 @@ class Config {
     }
   }
 
-  public function setConfig(&$config, $data) {
+  public function set(&$config, $data) {
     foreach ($data as $key => $value) {
       if (is_array($value) && isset($config[$key]) && is_array($config[$key])) {
           $this->setConfig($config[$key], $value);
@@ -76,6 +78,65 @@ class Config {
       }
     }
     file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+  }
+}
+
+class Pages {
+  private $db;
+
+  public function __construct($db) {
+    $this->db = $db;
+    $this->createPagesTable();
+  }
+
+  private function createPagesTable() {
+    // Create users table if it doesn't exist
+    $this->db->exec("CREATE TABLE IF NOT EXISTS pages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      Name TEXT,
+      Title TEXT,
+      ACL TEXT,
+      Type TEXT,
+      Menu TEXT,
+      Submenu TEXT,
+      Url TEXT,
+      Icon TEXT
+    )");
+
+    // Insert roles if they don't exist
+    $navLinks = [
+      ['Home','Home',null,'Link',null,null,'#page=core/default','fa fa-house'],
+      ['Admin','Admin','ADMIN-Menu','Menu',null,null,null,'fas fa-user-shield'],
+      ['Settings','Settings',null,'SubMenu','Admin',null,null,'fa fa-cog'],
+      ['Users','Users','ADMIN-USERS','SubMenuLink','Admin','Settings','#page=core/users',null],
+      ['Pages','Pages','ADMIN-PAGES','SubMenuLink','Admin','Settings','#page=core/Pages',null],
+      ['Configuration','Configuration','ADMIN-CONFIG','SubMenuLink','Admin','Settings','#page=core/configuration',null],
+      ['Role Based Access','Role Based Access','ADMIN-RBAC','SubMenuLink','Admin','Settings','#page=core/rbac',null]
+    ];
+
+    foreach ($navLinks as $link) {
+      if (!$this->pageExists($link[0])) {
+        $stmt = $this->db->prepare("INSERT INTO pages (Name, Title, ACL, Type, Menu, Submenu, Url, Icon) VALUES (:Name, :Title, :ACL, :Type, :Menu, :Submenu, :Url, :Icon)");
+        $stmt->execute([':Name' => $role[0],':Title' => $role[1], ':ACL' => $role[2], ':Type' => $role[3], ':Menu' => $role[4], ':Menu' => $role[5], ':Submenu' => $role[6], ':Url' => $role[7], ':Icon' => $role[8]]);
+      }
+    }
+  }
+
+  // Function to check if a page exists in DB
+  private function pageExists($pageName) {
+    $stmt = $this->db->prepare("SELECT COUNT(*) FROM pages WHERE Name = :name");
+    $stmt->execute([':name' => $pageName]);
+    return $stmt->fetchColumn() > 0;
+  }
+
+  public function get() {
+    $stmt = $this->db->prepare("SELECT * FROM pages");
+    $stmt->execute();
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return $users; 
+  }
+
+  public function set(&$config, $data) {
   }
 }
 
@@ -90,9 +151,9 @@ class Logging {
     global $ib;
     $now = date("d-m-Y");
     if ($LogFile == "") {
-      $LogFile = __DIR__.'/../'.$this->config->getConfig("System","logdirectory").$this->config->getConfig("System","logfilename")."-".$now.".log";
+      $LogFile = __DIR__.'/../'.$this->config->get("System","logdirectory").$this->config->get("System","logfilename")."-".$now.".log";
     }
-    $LogLevel = $this->config->getConfig("System","loglevel");
+    $LogLevel = $this->config->get("System","loglevel");
     $Context2 = json_decode(json_encode($Context), true);
     $log = new Logger($Logger);
     $log->pushProcessor(function ($record) {
@@ -141,7 +202,7 @@ class Logging {
 
   public function getLogFiles() {
     global $ib;
-    $files = array_diff(scandir(__DIR__.'/../'.$this->config->getConfig("System","logdirectory")),array('.', '..','php.error.log'));
+    $files = array_diff(scandir(__DIR__.'/../'.$this->config->get("System","logdirectory")),array('.', '..','php.error.log'));
     return $files;
   }
 
@@ -150,7 +211,7 @@ class Logging {
     if ($date == null) {
       $date = date("d-m-Y");
     }
-    $LogFile = __DIR__.'/../'.$this->config->getConfig("System","logdirectory").$this->config->getConfig("System","logfilename")."-".$date.".log";
+    $LogFile = __DIR__.'/../'.$this->config->get("System","logdirectory").$this->config->get("System","logfilename")."-".$date.".log";
     $data = file_get_contents($LogFile);
     preg_match_all('/\[(?<date>.*?)\] (?<logger>\w+).(?<level>\w+): (?<message>[^\[\{]+) (?<context>[\[\{].*[\]\}]) (?<extra>[\[\{].*[\]\}])/',$data, $matches);
     $matchArr = array();
@@ -184,7 +245,7 @@ class Logging {
         "displayname" => $displayname
       );
     }
-    $files = array_diff(scandir(__DIR__.'/../'.$this->config->getConfig("System","logdirectory")),array('.', '..'));
+    $files = array_diff(scandir(__DIR__.'/../'.$this->config->get("System","logdirectory")),array('.', '..'));
     return $matchArr;
   }
 }

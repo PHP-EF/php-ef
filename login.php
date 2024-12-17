@@ -141,7 +141,7 @@ html {
     <input type="text" placeholder="Username" name="un" id="un"/>
     <input type="password" placeholder="Password" name="pw" id="pw"/>
     <button id="login" class="login"> Sign in </button>
-    <?php if ($ib->config->getConfig('SAML','enabled')) {
+    <?php if ($ib->config->get('SAML','enabled')) {
       echo '<button id="sso" class="sso"> Single Sign On </button>';
     }?>
   </div>
@@ -201,7 +201,7 @@ function reset() {
         <input type="text" placeholder="Username" name="un" id="un"/>
         <input type="password" placeholder="Password" name="pw" id="pw"/>
         <button id="login" class="login"> Sign in </button>
-        <?php if ($ib->config->getConfig('SAML','enabled')) {
+        <?php if ($ib->config->get('SAML','enabled')) {
           echo '<button id="sso" class="sso"> Single Sign On </button>';
         }?>
       </div>`);

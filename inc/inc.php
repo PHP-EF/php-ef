@@ -30,7 +30,7 @@ if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'plugins')) {
 }
 
 if (!(isset($SkipCSS))) {
-  $faviconPath = $ib->config->getConfig('Styling', 'favicon');
+  $faviconPath = $ib->config->get('Styling', 'favicon')['Image'];
   $faviconPath = $faviconPath ? $faviconPath : '/assets/images/favicon.ico';
     echo '
     <head>

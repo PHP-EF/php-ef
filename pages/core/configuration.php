@@ -54,9 +54,9 @@ return '
               <small id="System[CURL-Timeout]Help" class="form-text text-muted">Specify the timeout used for CURL requests. (Can be increased if long running outbound API calls time out)</small>
 	          </div>
             <div class="form-group">
-              <label for="System[CURL-TimeoutConnect]">CURL Timeout on Connect</label>
-	            <input type="text" class="form-control info-field" id="System[CURL-TimeoutConnect]" aria-describedby="System[CURL-TimeoutConnect]Help" name="System[CURL-TimeoutConnect]">
-              <small id="System[CURL-TimeoutConnect]Help" class="form-text text-muted">Specify the timeout used for CURL requests on connect. (Shouldn"t need to be increased)</small>
+              <label for="System[CURL-ConnectTimeout]">CURL Timeout on Connect</label>
+	            <input type="text" class="form-control info-field" id="System[CURL-ConnectTimeout]" aria-describedby="System[CURL-ConnectTimeout]Help" name="System[CURL-ConnectTimeout]">
+              <small id="System[CURL-ConnectTimeout]Help" class="form-text text-muted">Specify the timeout used for CURL requests on connect. (Shouldn"t need to be increased)</small>
 	          </div>
 	        </div>
           <br>
@@ -67,7 +67,7 @@ return '
             <div class="form-group">
               <label for="Security[salt]">Salt</label>
               <input type="password" class="form-control info-field" id="Security[salt]" aria-describedby="Security[salt]Help" name="Security[salt]">
-              <small id="Security[salt]Help" class="form-text text-muted">The salt used to encrypt credentials.</small>
+              <small id="Security[salt]Help" class="form-text text-muted">The salt used to encrypt credentials. <b>WARNING! Changing the Salt will invalidate all client-side stored API Keys</b></small>
 	          </div>
           </div>
           <br>
@@ -177,7 +177,7 @@ return '
         </div>
 	    </form>
       <br>
-      <button class="btn btn-success float-end ms-1" id="submitConfig2">Save Configuration</button>&nbsp;
+      <button class="btn btn-success float-end ms-1" id="submitConfig">Save Configuration</button>&nbsp;
       <button class="btn btn-primary float-end" onclick="location.reload();">Discard Changes</button>
 	  </div>
   </div>
@@ -216,7 +216,7 @@ return '
     $(this).addClass("changed");
   });
 
-$("#submitConfig2").click(function(event) {
+  $("#submitConfig").click(function(event) {
     event.preventDefault();
     var formData = $("#configurationForm .changed").serializeArray();
     
@@ -249,29 +249,6 @@ $("#submitConfig2").click(function(event) {
         } else {
             toast("API Error","","Failed to save configuration","danger","30000");
         }
-    });
-});
-
-  $("#submitConfig").click(function(event) {
-    event.preventDefault();
-    var kvpairs = {};
-    var inspectForm = document.querySelector("#configurationForm").getElementsByClassName("changed");
-    for ( var i = 0; i < inspectForm.length; i++ ) {
-      var e = inspectForm[i];
-      if (inspectForm[i]["type"] == "checkbox") {
-        kvpairs[e.name] = encodeURIComponent(e.checked);
-      } else {
-        kvpairs[e.name] = encodeURIComponent(e.value);
-      }
-    }
-    queryAPI("PATCH","/api/config",kvpairs).done(function(data) {
-      if (data["result"] == "Success") {
-        toast("Success","","Successfully saved configuration","success");
-      } else if (data["result"] == "Error") {
-        toast("Error","","Failed to save configuration","danger");
-      } else {
-        toast("API Error","","Failed to save configuration","danger","30000");
-      }
     });
   });
 </script>
