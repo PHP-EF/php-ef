@@ -361,7 +361,7 @@ return '
             toast("Error","","Failed to delete "+row.Name+" from Role Based Access","danger");
           }
         }).fail(function() {
-            toast("Error", "", "Failed to remove " + targetid + " from " + group, "danger");
+            toast("Error", "", "Failed to remove " + row.Name + " from Role Based Access", "danger");
         });
       }
     }

@@ -21,7 +21,7 @@ class ib {
       $this->auth = new Auth($this->core,$this->db,$this->api);
       $this->rbac = new RBAC($this->core,$this->db,$this->auth,$this->api);
       $this->config = $this->core->config;
-      $this->pages = new Pages($this->db);
+      $this->pages = new Pages($this->db,$this->api,$this->core);
       $this->logging = $this->core->logging;
       $this->reporting = new Reporting($this->core,$this->db);
   }
@@ -83,9 +83,13 @@ class Config {
 
 class Pages {
   private $db;
+  private $api;
+  private $logging;
 
-  public function __construct($db) {
+  public function __construct($db,$api,$core) {
     $this->db = $db;
+    $this->api = $api;
+    $this->logging = $core->logging;
     $this->createPagesTable();
   }
 
@@ -106,7 +110,7 @@ class Pages {
     // Insert default nav links if they don't exist
     $navLinks = [
       ['Home','Home',null,'Link',null,null,'#page=core/default','fa fa-house'],
-      ['Admin','Admin','ADMIN-Menu','Menu',null,null,null,'fas fa-user-shield'],
+      ['Admin','Admin',null,'Menu',null,null,null,'fas fa-user-shield'],
       ['Settings','Settings',null,'SubMenu','Admin',null,null,'fa fa-cog'],
       ['Users','Users','ADMIN-USERS','SubMenuLink','Admin','Settings','#page=core/users',null],
       ['Pages','Pages','ADMIN-PAGES','SubMenuLink','Admin','Settings','#page=core/Pages',null],
@@ -128,6 +132,11 @@ class Pages {
     $stmt->execute([':name' => $pageName]);
     return $stmt->fetchColumn() > 0;
   }
+  private function getPageById($pageId) {
+    $stmt = $this->db->prepare("SELECT COUNT(*) FROM pages WHERE id = :id");
+    $stmt->execute([':id' => $pageId]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+  }
 
   public function get() {
     $stmt = $this->db->prepare("SELECT * FROM pages");
@@ -136,7 +145,84 @@ class Pages {
     return $users; 
   }
 
-  public function set(&$config, $data) {
+  public function new($Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon) {
+    $prepare = [];
+    $execute = [];
+    if (!empty($Name)) {
+      $prepare[] = 'Name';
+      $execute[':Name'] = $Name;
+    }
+    if (!empty($Title)) {
+      $prepare[] = 'Title';
+      $execute[':Title'] = $Title;
+    }
+    if (!empty($Type)) {
+      $prepare[] = 'Type';
+      $execute[':Type'] = $Type;
+    }
+    if (!empty($Url)) {
+      $prepare[] = 'Url';
+      $execute[':Url'] = $Url;
+    }
+    if (!empty($Menu)) {
+      $prepare[] = 'Menu';
+      $execute[':Menu'] = $Menu;
+    }
+    if (!empty($Submenu)) {
+      $prepare[] = 'Submenu';
+      $execute[':Submenu'] = $Submenu;
+    }
+    if (!empty($ACL)) {
+      $prepare[] = 'ACL';
+      $execute[':ACL'] = $ACL;
+    }
+    if (!empty($Icon)) {
+      $prepare[] = 'Icon';
+      $execute[':Icon'] = $Icon;
+    }
+    $valueArray = array_map(function($value) {
+      return ':' . $value;
+    }, $prepare);
+    $stmt = $this->db->prepare("INSERT INTO pages (".implode(", ",$prepare).") VALUES (".implode(', ', $valueArray).")");
+    $stmt->execute($execute);
+    $this->api->setAPIResponseMessage('Created new page successfully.');
+  }
+
+  public function set($ID,$Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon) {
+    if ($this->getPageById($ID)) {
+      $prepare = [];
+      $execute = [];
+      $stmt = $this->db->prepare('UPDATE pages SET Name = :Name, Title = :Title, Type = :Type, Url = :Url, Menu = :Menu, Submenu = :Submenu, ACL = :ACL, Icon = :Icon WHERE id = :id');
+      $stmt->execute([':id' => $ID,':Name' => $Name,':Title' => $Title,':Type' => $Type,':Url' => $Url,':Menu' => $Menu,':Submenu' => $Submenu,':ACL' => $ACL,':Icon' => $Icon]);
+      $this->api->setAPIResponseMessage('Page updated successfully');
+    } else {
+      $this->api->setAPIResponse('Error','Page does not exist');
+    }
+  }
+
+  public function delete($PageID) {
+    if ($this->getPageById($PageID)) {
+      $stmt = $this->db->prepare("DELETE FROM pages WHERE id = :id");
+      $stmt->execute([':id' => $PageID]);
+      $this->logging->writeLog("Pages","Deleted Page: $PageID","debug",$_REQUEST);
+      $this->api->setAPIResponseMessage('Page deleted successfully');  
+    } else {
+      $this->logging->writeLog("Pages","Unable to delete Page. The Page does not exist.","error",$_REQUEST);
+      $this->api->setAPIResponse('Error','Unable to delete Page. The Page does not exist.');
+    }
+  }
+
+  public function getByType($Type,$Menu = null) {
+    $Prepare = "SELECT * FROM pages WHERE Type = :Type";
+    $Execute = [':Type' => $Type];
+    if ($Menu) {
+      $Prepare .= " AND Menu = :Menu";
+      $Execute[':Menu'] = $Menu;
+    }
+    $stmt = $this->db->prepare($Prepare);
+    $stmt->execute($Execute);
+    $Pages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return $Pages; 
   }
 }
 
