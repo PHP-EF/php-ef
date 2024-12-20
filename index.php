@@ -39,7 +39,7 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8">
-    <title> Infoblox SA Tools </title>
+    <title> <?php echo $ib->config->get('Styling')['websiteTitle']; ?> </title>
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
   </head>
 <body>
@@ -293,7 +293,7 @@ foreach ($navLinks as $navLink) {
               <!--/tabs-->
               <div id="tabsJustifiedContent" class="tab-content">
                 <div class="tab-pane fade active show p-1" id="about">
-                  <p>The Infoblox SA Tools Portal offers a place for the Infoblox SA Team to leverage some web based tools.</p>
+                  <?php echo $ib->config->get('Styling')['html']['about']; ?>
                   <p>Designed by <i class="fa fa-code" style="color:red"></i> by - <a target="_blank" rel="noopener noreferrer" href="https://github.com/TehMuffinMoo">Mat Cox</a></p>
                   <hr>
                   <small>

@@ -29,7 +29,7 @@ return '
           <form id="configurationForm">
             <div class="my-4">
               <h5 class="mb-0 mt-5">Configuration</h5>
-              <p>Use the fields below to modify the configuration for the PHP-EF Portal.</p>
+              <p>Use the fields below to modify the configuration for '.$ib->config->get('Styling')['websiteTitle'].'.</p>
               <div class="card border-secondary">
                 <div class="card-title">
                   <h5>System</h5>
@@ -191,10 +191,10 @@ return '
           <form id="customisationForm">
             <div class="my-4">
               <h5 class="mb-0 mt-5">Customisation</h5>
-              <p>Use the fields below to customize the style and logos for the PHP-EF Portal.</p>
+              <p>Use the fields below to customize the style and logos for '.$ib->config->get('Styling')['websiteTitle'].'.</p>
               <div class="card border-secondary">
                 <div class="card-title">
-                  <h5>Images</h5>
+                  <h5>General</h5>
                 </div>
                 <div class="form-group row">
                   <div class="col-lg-6 col-12">
@@ -221,10 +221,15 @@ return '
                   </div>
                 </div>
                 <div class="form-group row">
-                  <div class="col-md-12">
+                  <div class="col-lg-6 col-12">
                     <label for="Styling[favicon][Image]">Favicon</label>
                     <input type="text" class="form-control info-field" id="Styling[favicon][Image]" aria-describedby="Styling[favicon][Image]Help" name="Styling[favicon][Image]">
                     <small id="Styling[favicon][Image]Help" class="form-text text-muted">The path of the favicon image.</small>
+                  </div>
+                  <div class="col-lg-6 col-12">
+                    <label for="Styling[websiteTitle]">Website Title</label>
+                    <input type="text" class="form-control info-field" id="Styling[websiteTitle]" aria-describedby="Styling[websiteTitle]Help" name="Styling[websiteTitle]">
+                    <small id="Styling[websiteTitle]Help" class="form-text text-muted">The website title.</small>
                   </div>
                 </div>
               </div>
@@ -235,9 +240,14 @@ return '
                 </div>
                 <div class="form-group row">
                   <div class="col-lg-6 col-12">
-                    <label for="Styling[homepage][html]">Homepage HTML</label>
-                    <textarea class="form-control info-field" id="Styling[homepage][html]" name="Styling[homepage][html]"></textarea>
-                    <small id="Styling[homepage][html]Help" class="form-text text-muted">The path of the small logo to be used in the top-left navbar.</small>
+                    <label for="Styling[html][homepage]">Homepage HTML</label>
+                    <textarea class="form-control info-field" id="Styling[html][homepage]" name="Styling[html][homepage]"></textarea>
+                    <small id="Styling[html][homepage]Help" class="form-text text-muted">Custom HTML for the homepage.</small>
+                  </div>
+                  <div class="col-lg-6 col-12">
+                    <label for="Styling[html][about]">About HTML</label>
+                    <textarea class="form-control info-field" id="Styling[html][about]" name="Styling[html][about]"></textarea>
+                    <small id="Styling[html][about]Help" class="form-text text-muted">Custom HTML for the about page in the information modal.</small>
                   </div>
                 </div>
               </div>

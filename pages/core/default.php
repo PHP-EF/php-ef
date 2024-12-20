@@ -2,7 +2,7 @@
   return '
   <div class="container">
     <div class="row">
-    '.$ib->config->get('Styling')['homepage']['html'].'
+    '.$ib->config->get('Styling')['html']['homepage'].'
     </div>
     <hr>
 

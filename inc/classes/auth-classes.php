@@ -827,7 +827,7 @@ class RBAC {
       // Built-In Roles
       ['ADMIN-RBAC', 'Grants the ability to view and manage Role Based Access', true],
       ['ADMIN-LOGS', 'Grants access to view Logs', true],
-      ['ADMIN-CONFIG', 'Grants access to manage the Infoblox SA Tools Configuration', true],
+      ['ADMIN-CONFIG', 'Grants access to manage the PHP-EF Configuration', true],
       ['ADMIN-USERS', 'Grants access to view and manage users & groups', true],
       ['ADMIN-PAGES', 'Grants the ability to view and manage Pages', true],
       ['REPORT-TRACKING', 'Grants the ability to view the Web Tracking Reports', true]
