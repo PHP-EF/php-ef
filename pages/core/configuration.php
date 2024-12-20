@@ -86,7 +86,7 @@ return '
                   <h5>SAML Configuration</h5>
                 </div>
                 <div class="row">
-                  <div class="col-md-6">
+                  <div class="col-lg-6 col-12">
                     <h4>Service Provider (SP)</h4>
                     <div class="form-group">
                         <label for="SAML[sp][entityId]">Entity ID</label>
@@ -109,7 +109,7 @@ return '
                         <textarea class="form-control info-field" id="SAML[sp][privateKey]" name="SAML[sp][privateKey]"></textarea>
                     </div>
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-lg-6 col-12">
                     <h4>Identity Provider (IdP)</h4>
                     <div class="form-group">
                         <label for="SAML[idp][entityId]">Entity ID</label>
@@ -158,7 +158,7 @@ return '
                 <div class="row">
                   <h4>User Attribute Mapping</h4>
                   <p>Used for mapping SAML Attributes to the account information</p>
-                  <div class="col-md-6">
+                  <div class="col-md-6 col-12">
                     <div class="form-group">
                         <label for="SAML[attributes][Username]">Username Attribute</label>
                         <input type="text" class="form-control info-field" id="SAML[attributes][Username]" name="SAML[attributes][Username]">
@@ -172,7 +172,7 @@ return '
                         <input type="text" class="form-control info-field" id="SAML[attributes][LastName]" name="SAML[attributes][LastName]">
                     </div>
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-md-6 col-12">
                     <div class="form-group">
                         <label for="SAML[attributes][Email]">Email Attribute</label>
                         <input class="form-control info-field" id="SAML[attributes][Email]" name="SAML[attributes][Email]">
@@ -187,7 +187,7 @@ return '
             </div>
           </form>
         </div>
-        <div class="tab-pane fade show active" id="customization" role="tabpanel" aria-labelledby="customization-tab">
+        <div class="tab-pane fade" id="customization" role="tabpanel" aria-labelledby="customization-tab">
           <form id="customizationForm">
             <div class="my-4">
               <h5 class="mb-0 mt-5">Customization</h5>
@@ -197,24 +197,24 @@ return '
                   <h5>Images</h5>
                 </div>
                 <div class="form-group row">
-                  <div class="col-md-6">
+                  <div class="col-lg-6 col-12">
                     <label for="Styling[logo-sm][Image]">Logo Image (Small)</label>
                     <input type="text" class="form-control info-field" id="Styling[logo-sm][Image]" aria-describedby="Styling[logo-sm][Image]Help" name="Styling[logo-sm][Image]">
                     <small id="Styling[logo-sm][Image]Help" class="form-text text-muted">The path of the small logo to be used in the top-left navbar.</small>
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-lg-6 col-12">
                     <label for="Styling[logo-sm][CSS]">Logo CSS (Small)</label>
                     <input type="text" class="form-control info-field" id="Styling[logo-sm][CSS]" aria-describedby="Styling[logo-sm][CSS]Help" name="Styling[logo-sm][CSS]">
                     <small id="Styling[logo-sm][CSS]Help" class="form-text text-muted">Custom CSS for the small logo.</small>
                   </div>
                 </div>
                 <div class="form-group row">
-                  <div class="col-md-6">
+                  <div class="col-lg-6 col-12">
                     <label for="Styling[logo-lg][Image]">Logo Image (Large)</label>
                     <input type="text" class="form-control info-field" id="Styling[logo-lg][Image]" aria-describedby="Styling[logo-lg][Image]Help" name="Styling[logo-lg][Image]">
                     <small id="Styling[logo-lg][Image]Help" class="form-text text-muted">The path of the large logo to be used in the top-left navbar.</small>
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-lg-6 col-12">
                     <label for="Styling[logo-lg][CSS]">Logo CSS (Large)</label>
                     <input type="text" class="form-control info-field" id="Styling[logo-lg][CSS]" aria-describedby="Styling[logo-lg][CSS]Help" name="Styling[logo-lg][CSS]">
                     <small id="Styling[logo-lg][CSS]Help" class="form-text text-muted">Custom CSS for the large logo.</small>
