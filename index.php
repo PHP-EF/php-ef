@@ -47,12 +47,14 @@
     <div class="logo-details">
       <?php
       $smLogoPath = $ib->config->get('Styling', 'logo-sm')['Image'];
+      $smLogoCSS = $ib->config->get('Styling', 'logo-sm')['CSS'];
       $smLogoPath = $smLogoPath ? $smLogoPath : '/assets/images/php-ef-icon.png';
-      echo '<img class="logo-sm" src="' . (file_exists(__DIR__ . $smLogoPath) ? $smLogoPath : '/assets/images/php-ef-icon.png') . '"></img>';
+      echo '<img class="logo-sm" src="' . (file_exists(__DIR__ . $smLogoPath) ? $smLogoPath : '/assets/images/php-ef-icon.png') . '" style="'.$smLogoCSS.'"></img>';
 
       $lgLogoPath = $ib->config->get('Styling', 'logo-lg')['Image'];
+      $lgLogoCSS = $ib->config->get('Styling', 'logo-lg')['CSS'];
       $lgLogoPath = $lgLogoPath ? $lgLogoPath : '/assets/images/php-ef-icon-text.png';
-      echo '<img class="logo-lg" src="' . (file_exists(__DIR__ . $lgLogoPath) ? $lgLogoPath : '/assets/images/php-ef-icon-text.png') . '"></img>';
+      echo '<img class="logo-lg" src="' . (file_exists(__DIR__ . $lgLogoPath) ? $lgLogoPath : '/assets/images/php-ef-icon-text.png') . '" style="'.$lgLogoCSS.'"></img>';
       ?>
     </div>
     <ul class="nav-links">

@@ -16,166 +16,222 @@ return '
   <div class="row justify-content-center">
     <div class="col-12 col-lg-12 col-xl-12 mx-auto">
       <h2 class="h3 mb-4 page-title">Configuration</h2>
-      <form id="configurationForm">
-        <div class="my-4">
-          <h5 class="mb-0 mt-5">Configuration</h5>
-          <p>Use the fields below to modify the configuration for the Infoblox SA Tools Portal.</p>
-          <div class="card border-secondary">
-            <div class="card-title">
-              <h5>System</h5>
-            </div>
-            <div class="form-group">
-              <label for="System[logfilename]">Log File Name</label>
-              <input type="text" class="form-control info-field" id="System[logfilename]" aria-describedby="System[logfilename]Help" name="System[logfilename]">
-              <small id="System[logfilename]Help" class="form-text text-muted">The name of the log file <b>without</b> the file extension.</small>
-	          </div>
-            <div class="form-group">
-              <label for="System[logdirectory]">Log Directory</label>
-              <input type="text" class="form-control info-field" id="System[logdirectory]" aria-describedby="System[logdirectory]Help" name="System[logdirectory]">
-              <small id="System[logdirectory]Help" class="form-text text-muted">The full path of the log directory including the trailing slash.</small>
-            </div>
-            <div class="form-group">
-              <label for="System[loglevel]">Log Level</label>
-	            <select type="select" class="form-select info-field" id="System[loglevel]" aria-describedby="System[loglevel]Help" name="System[loglevel]">
-                <option>Debug</option>
-                <option>Info</option>
-                <option>Warning</option>
-              </select>
-              <small id="System[loglevel]Help" class="form-text text-muted">Specify which log level you would like to use. Enabling <b>Debug</b> logs will generate lots of data.</small>
-	          </div>
-            <div class="form-group">
-              <label for="System[logretention]">Log Retention</label>
-              <input type="text" class="form-control info-field" id="System[logretention]" aria-describedby="System[logretention]Help" name="System[logretention]">
-              <small id="System[logretention]Help" class="form-text text-muted">How many days to keep system logs before they are purged.</small>
-            </div>
-            <div class="form-group">
-              <label for="System[CURL-Timeout]">CURL Timeout</label>
-              <input type="text" class="form-control info-field" id="System[CURL-Timeout]" aria-describedby="System[CURL-Timeout]Help" name="System[CURL-Timeout]">
-              <small id="System[CURL-Timeout]Help" class="form-text text-muted">Specify the timeout used for CURL requests. (Can be increased if long running outbound API calls time out)</small>
-	          </div>
-            <div class="form-group">
-              <label for="System[CURL-ConnectTimeout]">CURL Timeout on Connect</label>
-	            <input type="text" class="form-control info-field" id="System[CURL-ConnectTimeout]" aria-describedby="System[CURL-ConnectTimeout]Help" name="System[CURL-ConnectTimeout]">
-              <small id="System[CURL-ConnectTimeout]Help" class="form-text text-muted">Specify the timeout used for CURL requests on connect. (Shouldn"t need to be increased)</small>
-	          </div>
-	        </div>
-          <br>
-          <div class="card border-secondary">
-            <div class="card-title">
-              <h5>Security</h5>
-            </div>
-            <div class="form-group">
-              <label for="Security[salt]">Salt</label>
-              <input type="password" class="form-control info-field" id="Security[salt]" aria-describedby="Security[salt]Help" name="Security[salt]">
-              <small id="Security[salt]Help" class="form-text text-muted">The salt used to encrypt credentials. <b>WARNING! Changing the Salt will invalidate all client-side stored API Keys</b></small>
-	          </div>
-          </div>
-          <br>
-          <div class="card border-secondary">
-            <div class="card-title">
-              <h5>SAML Configuration</h5>
-            </div>
-            <div class="row">
-              <div class="col-md-6">
-                <h4>Service Provider (SP)</h4>
-                <div class="form-group">
-                    <label for="SAML[sp][entityId]">Entity ID</label>
-                    <input type="text" class="form-control info-field" id="SAML[sp][entityId]" name="SAML[sp][entityId]">
+      <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link active" id="general-tab" data-toggle="tab" href="#general" role="tab" aria-controls="general" aria-selected="true">General</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="customization-tab" data-toggle="tab" href="#customization" role="tab" aria-controls="customization" aria-selected="false">Customization</a>
+        </li>
+      </ul>
+      <div class="tab-content" id="tabContent">
+        <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
+          <form id="configurationForm">
+            <div class="my-4">
+              <h5 class="mb-0 mt-5">Configuration</h5>
+              <p>Use the fields below to modify the configuration for the PHP-EF Portal.</p>
+              <div class="card border-secondary">
+                <div class="card-title">
+                  <h5>System</h5>
                 </div>
                 <div class="form-group">
-                    <label for="SAML[sp][assertionConsumerService][url]">Assertion Consumer Service URL</label>
-                    <input type="text" class="form-control info-field" id="SAML[sp][assertionConsumerService][url]" name="SAML[sp][assertionConsumerService][url]">
+                  <label for="System[logfilename]">Log File Name</label>
+                  <input type="text" class="form-control info-field" id="System[logfilename]" aria-describedby="System[logfilename]Help" name="System[logfilename]">
+                  <small id="System[logfilename]Help" class="form-text text-muted">The name of the log file <b>without</b> the file extension.</small>
                 </div>
                 <div class="form-group">
-                    <label for="SAML[sp][singleLogoutService][url]">Single Logout Service URL</label>
-                    <input type="text" class="form-control info-field" id="SAML[sp][singleLogoutService][url]" name="SAML[sp][singleLogoutService][url]">
+                  <label for="System[logdirectory]">Log Directory</label>
+                  <input type="text" class="form-control info-field" id="System[logdirectory]" aria-describedby="System[logdirectory]Help" name="System[logdirectory]">
+                  <small id="System[logdirectory]Help" class="form-text text-muted">The full path of the log directory including the trailing slash.</small>
                 </div>
                 <div class="form-group">
-                    <label for="SAML[sp][x509cert]">X.509 Certificate</label>
-                    <textarea class="form-control info-field" id="SAML[sp][x509cert]" name="SAML[sp][x509cert]"></textarea>
+                  <label for="System[loglevel]">Log Level</label>
+                  <select type="select" class="form-select info-field" id="System[loglevel]" aria-describedby="System[loglevel]Help" name="System[loglevel]">
+                    <option>Debug</option>
+                    <option>Info</option>
+                    <option>Warning</option>
+                  </select>
+                  <small id="System[loglevel]Help" class="form-text text-muted">Specify which log level you would like to use. Enabling <b>Debug</b> logs will generate lots of data.</small>
                 </div>
                 <div class="form-group">
-                    <label for="SAML[sp][privateKey]">Private Key</label>
-                    <textarea class="form-control info-field" id="SAML[sp][privateKey]" name="SAML[sp][privateKey]"></textarea>
+                  <label for="System[logretention]">Log Retention</label>
+                  <input type="text" class="form-control info-field" id="System[logretention]" aria-describedby="System[logretention]Help" name="System[logretention]">
+                  <small id="System[logretention]Help" class="form-text text-muted">How many days to keep system logs before they are purged.</small>
+                </div>
+                <div class="form-group">
+                  <label for="System[CURL-Timeout]">CURL Timeout</label>
+                  <input type="text" class="form-control info-field" id="System[CURL-Timeout]" aria-describedby="System[CURL-Timeout]Help" name="System[CURL-Timeout]">
+                  <small id="System[CURL-Timeout]Help" class="form-text text-muted">Specify the timeout used for CURL requests. (Can be increased if long running outbound API calls time out)</small>
+                </div>
+                <div class="form-group">
+                  <label for="System[CURL-ConnectTimeout]">CURL Timeout on Connect</label>
+                  <input type="text" class="form-control info-field" id="System[CURL-ConnectTimeout]" aria-describedby="System[CURL-ConnectTimeout]Help" name="System[CURL-ConnectTimeout]">
+                  <small id="System[CURL-ConnectTimeout]Help" class="form-text text-muted">Specify the timeout used for CURL requests on connect. (Shouldn"t need to be increased)</small>
                 </div>
               </div>
-              <div class="col-md-6">
-                <h4>Identity Provider (IdP)</h4>
-                <div class="form-group">
-                    <label for="SAML[idp][entityId]">Entity ID</label>
-                    <input type="text" class="form-control info-field" id="SAML[idp][entityId]" name="SAML[idp][entityId]">
+              <br>
+              <div class="card border-secondary">
+                <div class="card-title">
+                  <h5>Security</h5>
                 </div>
                 <div class="form-group">
-                    <label for="SAML[idp][singleSignOnService][url]">Single Sign-On Service URL</label>
-                    <input type="text" class="form-control info-field" id="SAML[idp][singleSignOnService][url]" name="SAML[idp][singleSignOnService][url]">
+                  <label for="Security[salt]">Salt</label>
+                  <input type="password" class="form-control info-field" id="Security[salt]" aria-describedby="Security[salt]Help" name="Security[salt]">
+                  <small id="Security[salt]Help" class="form-text text-muted">The salt used to encrypt credentials. <b>WARNING! Changing the Salt will invalidate all client-side stored API Keys</b></small>
                 </div>
-                <div class="form-group">
-                    <label for="SAML[idp][singleLogoutService][url]">Single Logout Service URL</label>
-                    <input type="text" class="form-control info-field" id="SAML[idp][singleLogoutService][url]" name="SAML[idp][singleLogoutService][url]">
+              </div>
+              <br>
+              <div class="card border-secondary">
+                <div class="card-title">
+                  <h5>SAML Configuration</h5>
                 </div>
-                <div class="form-group">
-                    <label for="SAML[idp][x509cert]">X.509 Certificate</label>
-                    <textarea class="form-control info-field" id="SAML[idp][x509cert]" name="SAML[idp][x509cert]"></textarea>
-                </div>
-                <br>
-                <div class="form-group">
-                  <div class="form-check form-switch">
-                    <label class="form-check-label" for="SAML[enabled]">Enable SAML</label>
-                    <input class="form-check-input info-field" type="checkbox" id="SAML[enabled]" name="SAML[enabled]">
+                <div class="row">
+                  <div class="col-lg-6 col-12">
+                    <h4>Service Provider (SP)</h4>
+                    <div class="form-group">
+                        <label for="SAML[sp][entityId]">Entity ID</label>
+                        <input type="text" class="form-control info-field" id="SAML[sp][entityId]" name="SAML[sp][entityId]">
+                    </div>
+                    <div class="form-group">
+                        <label for="SAML[sp][assertionConsumerService][url]">Assertion Consumer Service URL</label>
+                        <input type="text" class="form-control info-field" id="SAML[sp][assertionConsumerService][url]" name="SAML[sp][assertionConsumerService][url]">
+                    </div>
+                    <div class="form-group">
+                        <label for="SAML[sp][singleLogoutService][url]">Single Logout Service URL</label>
+                        <input type="text" class="form-control info-field" id="SAML[sp][singleLogoutService][url]" name="SAML[sp][singleLogoutService][url]">
+                    </div>
+                    <div class="form-group">
+                        <label for="SAML[sp][x509cert]">X.509 Certificate</label>
+                        <textarea class="form-control info-field" id="SAML[sp][x509cert]" name="SAML[sp][x509cert]"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="SAML[sp][privateKey]">Private Key</label>
+                        <textarea class="form-control info-field" id="SAML[sp][privateKey]" name="SAML[sp][privateKey]"></textarea>
+                    </div>
+                  </div>
+                  <div class="col-lg-6 col-12">
+                    <h4>Identity Provider (IdP)</h4>
+                    <div class="form-group">
+                        <label for="SAML[idp][entityId]">Entity ID</label>
+                        <input type="text" class="form-control info-field" id="SAML[idp][entityId]" name="SAML[idp][entityId]">
+                    </div>
+                    <div class="form-group">
+                        <label for="SAML[idp][singleSignOnService][url]">Single Sign-On Service URL</label>
+                        <input type="text" class="form-control info-field" id="SAML[idp][singleSignOnService][url]" name="SAML[idp][singleSignOnService][url]">
+                    </div>
+                    <div class="form-group">
+                        <label for="SAML[idp][singleLogoutService][url]">Single Logout Service URL</label>
+                        <input type="text" class="form-control info-field" id="SAML[idp][singleLogoutService][url]" name="SAML[idp][singleLogoutService][url]">
+                    </div>
+                    <div class="form-group">
+                        <label for="SAML[idp][x509cert]">X.509 Certificate</label>
+                        <textarea class="form-control info-field" id="SAML[idp][x509cert]" name="SAML[idp][x509cert]"></textarea>
+                    </div>
+                    <br>
+                    <div class="form-group">
+                      <div class="form-check form-switch">
+                        <label class="form-check-label" for="SAML[enabled]">Enable SAML</label>
+                        <input class="form-check-input info-field" type="checkbox" id="SAML[enabled]" name="SAML[enabled]">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="form-check form-switch">
+                        <label class="form-check-label" for="SAML[AutoCreateUsers]">Auto-Create Users</label>
+                        <input class="form-check-input info-field" type="checkbox" id="SAML[AutoCreateUsers]" name="SAML[AutoCreateUsers]">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="form-check form-switch">
+                        <label class="form-check-label" for="SAML[strict]">Use Strict Mode</label>
+                        <input class="form-check-input info-field" type="checkbox" id="SAML[strict]" name="SAML[strict]">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="form-check form-switch">
+                        <label class="form-check-label" for="SAML[debug]">Use Debug Mode</label>
+                        <input class="form-check-input info-field" type="checkbox" id="SAML[debug]" name="SAML[debug]">
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div class="form-group">
-                  <div class="form-check form-switch">
-                    <label class="form-check-label" for="SAML[AutoCreateUsers]">Auto-Create Users</label>
-                    <input class="form-check-input info-field" type="checkbox" id="SAML[AutoCreateUsers]" name="SAML[AutoCreateUsers]">
+                <hr>
+                <div class="row">
+                  <h4>User Attribute Mapping</h4>
+                  <p>Used for mapping SAML Attributes to the account information</p>
+                  <div class="col-md-6 col-12">
+                    <div class="form-group">
+                        <label for="SAML[attributes][Username]">Username Attribute</label>
+                        <input type="text" class="form-control info-field" id="SAML[attributes][Username]" name="SAML[attributes][Username]">
+                    </div>
+                    <div class="form-group">
+                        <label for="SAML[attributes][FirstName]">First Name Attribute</label>
+                        <input type="text" class="form-control info-field" id="SAML[attributes][FirstName]" name="SAML[attributes][FirstName]">
+                    </div>
+                    <div class="form-group">
+                        <label for="SAML[attributes][LastName]">Last Name Attribute</label>
+                        <input type="text" class="form-control info-field" id="SAML[attributes][LastName]" name="SAML[attributes][LastName]">
+                    </div>
                   </div>
-                </div>
-                <div class="form-group">
-                  <div class="form-check form-switch">
-                    <label class="form-check-label" for="SAML[strict]">Use Strict Mode</label>
-                    <input class="form-check-input info-field" type="checkbox" id="SAML[strict]" name="SAML[strict]">
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="form-check form-switch">
-                    <label class="form-check-label" for="SAML[debug]">Use Debug Mode</label>
-                    <input class="form-check-input info-field" type="checkbox" id="SAML[debug]" name="SAML[debug]">
+                  <div class="col-md-6 col-12">
+                    <div class="form-group">
+                        <label for="SAML[attributes][Email]">Email Attribute</label>
+                        <input class="form-control info-field" id="SAML[attributes][Email]" name="SAML[attributes][Email]">
+                    </div>
+                    <div class="form-group">
+                        <label for="SAML[attributes][Groups]">Groups Attribute</label>
+                        <input class="form-control info-field" id="SAML[attributes][Groups]" name="SAML[attributes][Groups]">
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            <hr>
-            <div class="row">
-              <h4>User Attribute Mapping</h4>
-              <p>Used for mapping SAML Attributes to the account information</p>
-              <div class="col-md-6">
-                <div class="form-group">
-                    <label for="SAML[attributes][Username]">Username Attribute</label>
-                    <input type="text" class="form-control info-field" id="SAML[attributes][Username]" name="SAML[attributes][Username]">
-                </div>
-                <div class="form-group">
-                    <label for="SAML[attributes][FirstName]">First Name Attribute</label>
-                    <input type="text" class="form-control info-field" id="SAML[attributes][FirstName]" name="SAML[attributes][FirstName]">
-                </div>
-                <div class="form-group">
-                    <label for="SAML[attributes][LastName]">Last Name Attribute</label>
-                    <input type="text" class="form-control info-field" id="SAML[attributes][LastName]" name="SAML[attributes][LastName]">
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                    <label for="SAML[attributes][Email]">Email Attribute</label>
-                    <input class="form-control info-field" id="SAML[attributes][Email]" name="SAML[attributes][Email]">
-                </div>
-                <div class="form-group">
-                    <label for="SAML[attributes][Groups]">Groups Attribute</label>
-                    <input class="form-control info-field" id="SAML[attributes][Groups]" name="SAML[attributes][Groups]">
-                </div>
-              </div>
-            </div>
-          </div>
+          </form>
         </div>
-	    </form>
+        <div class="tab-pane fade" id="customization" role="tabpanel" aria-labelledby="customization-tab">
+          <form id="customizationForm">
+            <div class="my-4">
+              <h5 class="mb-0 mt-5">Customization</h5>
+              <p>Use the fields below to customize the style and logos for the PHP-EF Portal.</p>
+              <div class="card border-secondary">
+                <div class="card-title">
+                  <h5>Images</h5>
+                </div>
+                <div class="form-group row">
+                  <div class="col-lg-6 col-12">
+                    <label for="Styling[logo-sm][Image]">Logo Image (Small)</label>
+                    <input type="text" class="form-control info-field" id="Styling[logo-sm][Image]" aria-describedby="Styling[logo-sm][Image]Help" name="Styling[logo-sm][Image]">
+                    <small id="Styling[logo-sm][Image]Help" class="form-text text-muted">The path of the small logo to be used in the top-left navbar.</small>
+                  </div>
+                  <div class="col-lg-6 col-12">
+                    <label for="Styling[logo-sm][CSS]">Logo CSS (Small)</label>
+                    <input type="text" class="form-control info-field" id="Styling[logo-sm][CSS]" aria-describedby="Styling[logo-sm][CSS]Help" name="Styling[logo-sm][CSS]">
+                    <small id="Styling[logo-sm][CSS]Help" class="form-text text-muted">Custom CSS for the small logo.</small>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <div class="col-lg-6 col-12">
+                    <label for="Styling[logo-lg][Image]">Logo Image (Large)</label>
+                    <input type="text" class="form-control info-field" id="Styling[logo-lg][Image]" aria-describedby="Styling[logo-lg][Image]Help" name="Styling[logo-lg][Image]">
+                    <small id="Styling[logo-lg][Image]Help" class="form-text text-muted">The path of the large logo to be used in the top-left navbar.</small>
+                  </div>
+                  <div class="col-lg-6 col-12">
+                    <label for="Styling[logo-lg][CSS]">Logo CSS (Large)</label>
+                    <input type="text" class="form-control info-field" id="Styling[logo-lg][CSS]" aria-describedby="Styling[logo-lg][CSS]Help" name="Styling[logo-lg][CSS]">
+                    <small id="Styling[logo-lg][CSS]Help" class="form-text text-muted">Custom CSS for the large logo.</small>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <div class="col-md-12">
+                    <label for="Styling[favicon][Image]">Favicon</label>
+                    <input type="text" class="form-control info-field" id="Styling[favicon][Image]" aria-describedby="Styling[favicon][Image]Help" name="Styling[favicon][Image]">
+                    <small id="Styling[favicon][Image]Help" class="form-text text-muted">The path of the favicon image.</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
       <br>
       <button class="btn btn-success float-end ms-1" id="submitConfig">Save Configuration</button>&nbsp;
       <button class="btn btn-primary float-end" onclick="location.reload();">Discard Changes</button>
@@ -218,7 +274,7 @@ return '
 
   $("#submitConfig").click(function(event) {
     event.preventDefault();
-    var formData = $("#configurationForm .changed").serializeArray();
+    var formData = $("#configurationForm .changed,#customizationForm .changed").serializeArray();
     
     // Include unchecked checkboxes in the formData
     $("#configurationForm input.changed[type=checkbox]").each(function() {
@@ -250,6 +306,18 @@ return '
             toast("API Error","","Failed to save configuration","danger","30000");
         }
     });
+  });
+
+  // Function to switch tabs
+  function switchTab(tabId) {
+    $(`.nav-tabs a[href="` + tabId + `"]`).tab("show");
+    console.log(`.nav-tabs a[href="` + tabId + `"]`);
+  }
+  // Listener for tab changes
+  $("#myTab .nav-link").on("click", function(elem) {
+    elem.preventDefault();
+    console.log($(elem.target).attr("href"));
+    switchTab($(elem.target).attr("href"));
   });
 </script>
 ';
