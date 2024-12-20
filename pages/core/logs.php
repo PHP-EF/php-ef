@@ -24,7 +24,7 @@
     <div class="col-14 col-lg-14 col-xl-14 mx-auto">
       <h2 class="h3 mb-4 page-title">Logs</h2>
       <div class="my-4">
-          <p>The following table displays logs from the Infoblox SA Tools Portal.</p>
+          <p>The following table displays logs from '.$ib->config->get('Styling')['websiteTitle'].'.</p>
           <table  data-url="/api/logs"
             data-data-field="data"  
             data-toggle="table"
