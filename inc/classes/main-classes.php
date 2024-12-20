@@ -72,7 +72,7 @@ class Config {
   public function set(&$config, $data) {
     foreach ($data as $key => $value) {
       if (is_array($value) && isset($config[$key]) && is_array($config[$key])) {
-          $this->setConfig($config[$key], $value);
+          $this->set($config[$key], $value);
       } else {
           $config[$key] = $value;
       }

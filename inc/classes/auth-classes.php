@@ -823,21 +823,20 @@ class RBAC {
 
 
     // Insert roles if they don't exist
-    // This needs to be re-done when modularisation comes in
     $resources = [
       // Built-In Roles
-      ['ADMIN-RBAC', 'Grants the ability to view and manage Role Based Access'],
-      ['ADMIN-LOGS', 'Grants access to view Logs'],
-      ['ADMIN-CONFIG', 'Grants access to manage the Infoblox SA Tools Configuration'],
-      ['ADMIN-USERS', 'Grants access to view and manage users & groups'],
-      ['ADMIN-PAGES', 'Grants the ability to view and manage Pages'],
-      ['REPORT-TRACKING', 'Grants the ability to view the Web Tracking Reports']
+      ['ADMIN-RBAC', 'Grants the ability to view and manage Role Based Access', true],
+      ['ADMIN-LOGS', 'Grants access to view Logs', true],
+      ['ADMIN-CONFIG', 'Grants access to manage the Infoblox SA Tools Configuration', true],
+      ['ADMIN-USERS', 'Grants access to view and manage users & groups', true],
+      ['ADMIN-PAGES', 'Grants the ability to view and manage Pages', true],
+      ['REPORT-TRACKING', 'Grants the ability to view the Web Tracking Reports', true]
     ];
 
     foreach ($resources as $resource) {
       if (!$this->resourceExists($this->db, $resource[0])) {
-        $stmt = $this->db->prepare("INSERT INTO rbac_resources (name, description) VALUES (:Name, :Description)");
-        $stmt->execute([':Name' => $resource[0],':Description' => $resource[1]]);
+        $stmt = $this->db->prepare("INSERT INTO rbac_resources (name, description, Protected) VALUES (:Name, :Description, :Protected)");
+        $stmt->execute([':Name' => $resource[0],':Description' => $resource[1], ':Protected' => $resource[2]]);
       }
     }
   }
