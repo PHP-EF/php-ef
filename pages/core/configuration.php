@@ -21,7 +21,7 @@ return '
           <a class="nav-link active" id="general-tab" data-toggle="tab" href="#general" role="tab" aria-controls="general" aria-selected="true">General</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" id="customization-tab" data-toggle="tab" href="#customization" role="tab" aria-controls="customization" aria-selected="false">Customization</a>
+          <a class="nav-link" id="customisation-tab" data-toggle="tab" href="#customisation" role="tab" aria-controls="customisation" aria-selected="false">Customisation</a>
         </li>
       </ul>
       <div class="tab-content" id="tabContent">
@@ -29,7 +29,7 @@ return '
           <form id="configurationForm">
             <div class="my-4">
               <h5 class="mb-0 mt-5">Configuration</h5>
-              <p>Use the fields below to modify the configuration for the PHP-EF Portal.</p>
+              <p>Use the fields below to modify the configuration for '.$ib->config->get('Styling')['websiteTitle'].'.</p>
               <div class="card border-secondary">
                 <div class="card-title">
                   <h5>System</h5>
@@ -187,14 +187,14 @@ return '
             </div>
           </form>
         </div>
-        <div class="tab-pane fade" id="customization" role="tabpanel" aria-labelledby="customization-tab">
-          <form id="customizationForm">
+        <div class="tab-pane fade" id="customisation" role="tabpanel" aria-labelledby="customisation-tab">
+          <form id="customisationForm">
             <div class="my-4">
-              <h5 class="mb-0 mt-5">Customization</h5>
-              <p>Use the fields below to customize the style and logos for the PHP-EF Portal.</p>
+              <h5 class="mb-0 mt-5">Customisation</h5>
+              <p>Use the fields below to customize the style and logos for '.$ib->config->get('Styling')['websiteTitle'].'.</p>
               <div class="card border-secondary">
                 <div class="card-title">
-                  <h5>Images</h5>
+                  <h5>General</h5>
                 </div>
                 <div class="form-group row">
                   <div class="col-lg-6 col-12">
@@ -221,10 +221,33 @@ return '
                   </div>
                 </div>
                 <div class="form-group row">
-                  <div class="col-md-12">
+                  <div class="col-lg-6 col-12">
                     <label for="Styling[favicon][Image]">Favicon</label>
                     <input type="text" class="form-control info-field" id="Styling[favicon][Image]" aria-describedby="Styling[favicon][Image]Help" name="Styling[favicon][Image]">
                     <small id="Styling[favicon][Image]Help" class="form-text text-muted">The path of the favicon image.</small>
+                  </div>
+                  <div class="col-lg-6 col-12">
+                    <label for="Styling[websiteTitle]">Website Title</label>
+                    <input type="text" class="form-control info-field" id="Styling[websiteTitle]" aria-describedby="Styling[websiteTitle]Help" name="Styling[websiteTitle]">
+                    <small id="Styling[websiteTitle]Help" class="form-text text-muted">The website title.</small>
+                  </div>
+                </div>
+              </div>
+              <br>
+              <div class="card border-secondary">
+                <div class="card-title">
+                  <h5>Content</h5>
+                </div>
+                <div class="form-group row">
+                  <div class="col-lg-6 col-12">
+                    <label for="Styling[html][homepage]">Homepage HTML</label>
+                    <textarea class="form-control info-field" id="Styling[html][homepage]" name="Styling[html][homepage]"></textarea>
+                    <small id="Styling[html][homepage]Help" class="form-text text-muted">Custom HTML for the homepage.</small>
+                  </div>
+                  <div class="col-lg-6 col-12">
+                    <label for="Styling[html][about]">About HTML</label>
+                    <textarea class="form-control info-field" id="Styling[html][about]" name="Styling[html][about]"></textarea>
+                    <small id="Styling[html][about]Help" class="form-text text-muted">Custom HTML for the about page in the information modal.</small>
                   </div>
                 </div>
               </div>
@@ -274,7 +297,7 @@ return '
 
   $("#submitConfig").click(function(event) {
     event.preventDefault();
-    var formData = $("#configurationForm .changed,#customizationForm .changed").serializeArray();
+    var formData = $("#configurationForm .changed,#customisationForm .changed").serializeArray();
     
     // Include unchecked checkboxes in the formData
     $("#configurationForm input.changed[type=checkbox]").each(function() {

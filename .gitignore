@@ -3,7 +3,7 @@ files/*
 inc/logs/*
 app.db
 config.json
-!files/reports/placeholder.txt
+!files/index.php
 assets/images/*/*
 !assets/images/*
 !assets/images/custom/index.php

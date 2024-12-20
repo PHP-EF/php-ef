@@ -113,7 +113,7 @@ class Pages {
       ['Admin','Admin',null,'Menu',null,null,null,'fas fa-user-shield'],
       ['Settings','Settings',null,'SubMenu','Admin',null,null,'fa fa-cog'],
       ['Users','Users','ADMIN-USERS','SubMenuLink','Admin','Settings','#page=core/users',null],
-      ['Pages','Pages','ADMIN-PAGES','SubMenuLink','Admin','Settings','#page=core/Pages',null],
+      ['Pages','Pages','ADMIN-PAGES','SubMenuLink','Admin','Settings','#page=core/pages',null],
       ['Configuration','Configuration','ADMIN-CONFIG','SubMenuLink','Admin','Settings','#page=core/configuration',null],
       ['Role Based Access','Role Based Access','ADMIN-RBAC','SubMenuLink','Admin','Settings','#page=core/rbac',null]
     ];

@@ -2,15 +2,7 @@
   return '
   <div class="container">
     <div class="row">
-      <h2>Infoblox SA Tools</h2>
-      <hr>
-      <div class="row">
-        <div class="form-group col-md-12">
-          <p>Welcome to the Infoblox SA Tools Homepage.</p>
-          <p>You can find various tools available on this WebUI to interact with the Infoblox Portal.</p>
-        </div>
-        <div class="form-group col-md-12">
-      </div>
+    '.$ib->config->get('Styling')['html']['homepage'].'
     </div>
     <hr>
 
