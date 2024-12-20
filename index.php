@@ -15,178 +15,7 @@
     $isAuth = false;
   }
 
-  $navLinks = [
-    array(
-      'Name' => 'Home',
-      'Title' => 'Home',
-      'ACL' => null,
-      'Type' => 'Link', // Link / MenuLink / SubMenuLink / Menu / Submenu
-      'Menu' => null,
-      'Submenu' => null,
-      'Url' => '#page=default',
-      'Icon' => 'fa fa-house'
-    ),
-    array(
-      'Name' => 'DNS Toolbox',
-      'Title' => 'DNS Toolbox',
-      'ACL' => 'DNS-TOOLBOX',
-      'Type' => 'Link', // Link / MenuLink / SubMenuLink / Menu / Submenu
-      'Menu' => null,
-      'Submenu' => null,
-      'Url' => '#page=tools/dnstoolbox',
-      'Icon' => 'fa fa-toolbox'
-    ),
-    array(
-      'Name' => 'Security Assessment',
-      'Title' => 'Security Assessment Report Generator',
-      'ACL' => 'B1-SECURITY-ASSESSMENT',
-      'Type' => 'Link',
-      'Menu' => null,
-      'Submenu' => null,
-      'Url' => '#page=uddi/security-assessment',
-      'Icon' => 'fa fa-magnifying-glass-chart'
-    ),
-    array(
-      'Name' => 'Threat Actors',
-      'Title' => 'Threat Actors',
-      'ACL' => 'B1-THREAT-ACTORS',
-      'Type' => 'Link',
-      'Menu' => null,
-      'Submenu' => null,
-      'Url' => '#page=uddi/threat-actors',
-      'Icon' => 'fa fa-skull'
-    ),
-    array(
-      'Name' => 'Dev',
-      'Title' => 'Dev',
-      'ACL' => 'DEV-Menu',
-      'Type' => 'Menu',
-      'Menu' => null,
-      'Submenu' => null,
-      'Url' => null,
-      'Icon' => 'fa fa-toolbox'
-    ),
-    array(
-      'Name' => 'License Utilization',
-      'Title' => 'License Utilization',
-      'ACL' => 'B1-LICENSE-USAGE',
-      'Type' => 'MenuLink',
-      'Menu' => 'Dev',
-      'Submenu' => null,
-      'Url' => '#page=uddi/license-usage',
-      'Icon' => 'fas fa-certificate'
-    ),
-    array(
-      'Name' => 'Admin',
-      'Title' => 'Admin',
-      'ACL' => 'ADMIN-Menu',
-      'Type' => 'Menu',
-      'Menu' => null,
-      'Submenu' => null,
-      'Url' => null,
-      'Icon' => 'fas fa-user-shield'
-    ),
-    array(
-      'Name' => 'Settings',
-      'Title' => 'Settings',
-      'ACL' => null,
-      'Type' => 'SubMenu',
-      'Menu' => 'Admin',
-      'Submenu' => null,
-      'Url' => null,
-      'Icon' => 'fa fa-cog'
-    ),
-    array(
-      'Name' => 'Users',
-      'Title' => 'Users',
-      'ACL' => 'ADMIN-USERS',
-      'Type' => 'SubMenuLink',
-      'Menu' => 'Admin',
-      'Submenu' => 'Settings',
-      'Url' => '#page=core/users',
-      'Icon' => null
-    ),
-    array(
-      'Name' => 'Configuration',
-      'Title' => 'Configuration',
-      'ACL' => 'ADMIN-CONFIG',
-      'Type' => 'SubMenuLink',
-      'Menu' => 'Admin',
-      'Submenu' => 'Settings',
-      'Url' => '#page=core/configuration',
-      'Icon' => null
-    ),
-    array(
-      'Name' => 'Role Based Access',
-      'Title' => 'Role Based Access',
-      'ACL' => 'ADMIN-RBAC',
-      'Type' => 'SubMenuLink',
-      'Menu' => 'Admin',
-      'Submenu' => 'Settings',
-      'Url' => '#page=core/rbac',
-      'Icon' => null
-    ),
-    array(
-      'Name' => 'Security Assessment',
-      'Title' => 'Security Assessment',
-      'ACL' => 'ADMIN-SECASS',
-      'Type' => 'SubMenuLink',
-      'Menu' => 'Admin',
-      'Submenu' => 'Settings',
-      'Url' => '#page=core/security-assessment-configuration',
-      'Icon' => null
-    ),
-    array(
-      'Name' => 'Logs',
-      'Title' => 'Logs',
-      'ACL' => null,
-      'Type' => 'SubMenu',
-      'Menu' => 'Admin',
-      'Submenu' => null,
-      'Url' => null,
-      'Icon' => 'fa-regular fa-file'
-    ),
-    array(
-      'Name' => 'Portal Logs',
-      'Title' => 'Logs',
-      'ACL' => 'ADMIN-LOGS',
-      'Type' => 'SubMenuLink',
-      'Menu' => 'Admin',
-      'Submenu' => 'Logs',
-      'Url' => '#page=core/logs',
-      'Icon' => null
-    ),
-    array(
-      'Name' => 'Reports',
-      'Title' => 'Reports',
-      'ACL' => 'REPORT-Menu',
-      'Type' => 'Menu',
-      'Menu' => null,
-      'Submenu' => null,
-      'Url' => null,
-      'Icon' => 'fa-solid fa-chart-simple'
-    ),
-    array(
-      'Name' => 'Assessments',
-      'Title' => 'Assessment Reporting',
-      'ACL' => 'REPORT-ASSESSMENTS',
-      'Type' => 'MenuLink',
-      'Menu' => 'Reports',
-      'Submenu' => null,
-      'Url' => '#page=reports/assessments',
-      'Icon' => 'fa-solid fa-arrows-to-eye'
-    ),
-    array(
-      'Name' => 'Web Tracking',
-      'Title' => 'Web Tracking',
-      'ACL' => 'REPORT-TRACKING',
-      'Type' => 'MenuLink',
-      'Menu' => 'Reports',
-      'Submenu' => null,
-      'Url' => '#page=reports/tracking',
-      'Icon' => 'fa-solid fa-bullseye'
-    )
-  ];
+  $navLinks = $ib->pages->get();
 
   function filterNavLinksByMenu($navLinks, $menuName) {
     return array_filter($navLinks, function($link) use ($menuName) {
@@ -216,9 +45,17 @@
 <body>
   <div class="sidebar">
     <div class="logo-details">
-      <img class="logo-sm" src="/assets/images/Other/ib-diamonds.png"></img>
-      <!-- <span class="logo_name">Infoblox SA Tools</span> -->
-      <img class="logo-lg" src="/assets/images/Other/ib-logo-white.png"></img>
+      <?php
+      $smLogoPath = $ib->config->get('Styling', 'logo-sm')['Image'];
+      $smLogoCSS = $ib->config->get('Styling', 'logo-sm')['CSS'];
+      $smLogoPath = $smLogoPath ? $smLogoPath : '/assets/images/php-ef-icon.png';
+      echo '<img class="logo-sm" src="' . (file_exists(__DIR__ . $smLogoPath) ? $smLogoPath : '/assets/images/php-ef-icon.png') . '" style="'.$smLogoCSS.'"></img>';
+
+      $lgLogoPath = $ib->config->get('Styling', 'logo-lg')['Image'];
+      $lgLogoCSS = $ib->config->get('Styling', 'logo-lg')['CSS'];
+      $lgLogoPath = $lgLogoPath ? $lgLogoPath : '/assets/images/php-ef-icon-text.png';
+      echo '<img class="logo-lg" src="' . (file_exists(__DIR__ . $lgLogoPath) ? $lgLogoPath : '/assets/images/php-ef-icon-text.png') . '" style="'.$lgLogoCSS.'"></img>';
+      ?>
     </div>
     <ul class="nav-links">
       <?php
@@ -414,13 +251,7 @@ foreach ($navLinks as $navLink) {
     </div>
     <main class="page-content" id="page-content">
       <div class="container-fluid">
-        <?php
-        if (isset($iframe)) {
-        echo '<iframe id="mainFrame" name="mainFrame" height="100%" width="100%" frameborder="0" src="'.$iframe.'"></iframe>';
-        } else {
-        echo '<iframe id="mainFrame" name="mainFrame" height="100%" width="100%" frameborder="0" src="pages/default.php"></iframe>';
-        }
-        ?>
+        <div id="mainWindow" name="mainWindow"></div>
       </div>
     </main>
   </section>
@@ -504,7 +335,7 @@ foreach ($navLinks as $navLink) {
                 </div>
                 <div class="tab-pane fade" id="changelog">
                   <div>
-                    <iframe class="changeLogFrame" src="api?f=getChangelog"></iframe>
+                    <iframe class="changeLogFrame" src="/api/changelog"></iframe>
                   </div>
                 </div>
                 <!--/tabs content-->
@@ -620,7 +451,8 @@ foreach ($navLinks as $navLink) {
 </div>
 
 <script>
-  loadiFrame();
+  // loadiFrame();
+  loadMainWindow();
   heartBeat();
 
   function login() {
@@ -628,9 +460,8 @@ foreach ($navLinks as $navLink) {
   }
 
   function logout() {
-    $.get('/api?f=logout', function(data) {
-    }).done(function (data, status) {
-      if (!data['Authenticated']) {
+    queryAPI('GET', '/api/auth/logout').done(function(data) {
+      if (data['result'] == "Success" && !data['data']['Authenticated']) {
           toast("Logged Out","","Successfully Logged Out.","success");
         } else {
           toast("Error","","Failed to Log Out. Your session may still be active.","danger");
@@ -642,7 +473,6 @@ foreach ($navLinks as $navLink) {
   }
 
   function setFontSize(fontsize) {
-    console.log(fontsize);
     $('html').css('font-size',fontsize);
     setCookie('fontSize',fontsize,365);
     location.reload();
@@ -682,20 +512,19 @@ foreach ($navLinks as $navLink) {
 
     $('.infoBtn').on('click', function() {
       $('#infoModal').modal('show');
-      $.getJSON('/api?f=whoami', function(whoami) {
-        if (whoami.Groups != null) {whoami.Groups = whoami.Groups};
-        if (whoami.headers.Cookie != null) {whoami.headers.Cookie = whoami.headers.Cookie.split('; ')};
-        $('#whoami').text(JSON.stringify(whoami, null, 2));
+      $.getJSON('/api/auth/whoami', function(whoami) {
+        if (whoami.data.headers.Cookie != null) {whoami.data.headers.Cookie = whoami.data.headers.Cookie.split('; ')};
+        $('#whoami').text(JSON.stringify(whoami.data, null, 2));
       });
     });
 
     $('.profile').on('click', function() {
       $('#profileModal').modal('show');
-      $.getJSON('/api?f=whoami', function(whoami) {
-        $('#userUsername').val(whoami.Username);
-        $('#userFirstname').val(whoami.Firstname);
-        $('#userSurname').val(whoami.Surname);
-        $('#userEmail').val(whoami.Email);
+      $.getJSON('/api/auth/whoami', function(whoami) {
+        $('#userUsername').val(whoami.data.Username);
+        $('#userFirstname').val(whoami.data.Firstname);
+        $('#userSurname').val(whoami.data.Surname);
+        $('#userEmail').val(whoami.data.Email);
       });
     });
 
@@ -764,13 +593,12 @@ foreach ($navLinks as $navLink) {
       if (isValid) {
         var postArr = {}
         postArr.pw = password;
-        $.post( "/api?f=resetPassword", postArr).done(function( data, status ) {
-          if (data['Status'] == 'Success') {
-            toast(data['Status'],"",data['Message'],"success");
-            populateUsers();
+        queryAPI("POST", "/api/auth/password/reset", postArr).done(function( data, status ) {
+          if (data['result'] == 'Success') {
+            toast(data['result'],"",data['message'],"success");
             $('#profileModal').modal('hide');
-          } else if (data['Status'] == 'Error') {
-            toast(data['Status'],"",data['Message'],"danger","30000");
+          } else if (data['result'] == 'Error') {
+            toast(data['result'],"",data['message'],"danger","30000");
           } else {
             toast("Error","","Failed to reset password","danger","30000");
           }
@@ -781,7 +609,8 @@ foreach ($navLinks as $navLink) {
     });
 
     $('.toggleFrame').click(function(element) {
-      loadiFrame(element.currentTarget.href);
+      // loadiFrame(element.currentTarget.href);
+      loadMainWindow(element.currentTarget.href);
       $('.title-text').text($(element.currentTarget).data('pageName'));
     });
   });

@@ -1,3 +1,22 @@
+## v0.6.7
+- Cleanup IB tools into new plugin
+- Various API improvements
+- Expand plugin support for JS/CSS/Cron
+- Move navigation/pages configuration to DB
+- Create configuration page for managing navigation links
+
+## v0.6.6
+- Finalize move to V2 API
+
+## v0.6.5
+- Complete native API conversion from V1 to V2
+- Move pages from static content to be generated via API endpoints instead
+- Enable initial plugin support
+- Move IB pages/functions to new plugin
+
+## v0.6.4
+- Initial release of new V2 API
+
 ## v0.6.3
 - Enable support for managing roles
 

@@ -1,5 +1,6 @@
 <script>
-console.log(`%c                                                                                 @@@@@@           @@@@@@
+function launch(){
+  console.log(`%c                                                                                 @@@@@@           @@@@@@
                                                                                @@@@@@@@@@       @@@@@@@@@@
                                                                              @@@@@@@@@@@@@@   @@@@@@@@@@@@@@
                                                                            @@@@@@@@@@@@@@@@@ @@@@@@@@@@@@@@@@@
@@ -19,4 +20,8 @@ console.log(`%c                                                                 
                                                                                          @@@@@@@
                                                                                            @@@
                                                                                             @`,'background: #32a852; color: #a8324c');
+  console.info("%c PHP-EF  %c ".concat("<?php echo $ib->getVersion()[0]; ?>", " "), "color: white; background: #66D9EF; font-weight: 700; font-size: 24px; font-family: Monospace;", "color: #66D9EF; background: white; font-weight: 700; font-size: 24px; font-family: Monospace;");
+  console.info("%c Status %c ".concat("Starting Up...", " "), "color: white; background: #F92671; font-weight: 700;", "color: #F92671; background: white; font-weight: 700;");
+}
+launch();
 </script>

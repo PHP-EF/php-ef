@@ -1,143 +1,106 @@
-jQuery(function ($) {
-
-  $(".sidebar-dropdown > a").click(function() {
-    $(".sidebar-submenu").slideUp(200);
-    if (
-      $(this)
-        .parent()
-        .hasClass("active")
-    ) {
-      $(".sidebar-dropdown").removeClass("active");
-      $(this)
-        .parent()
-        .removeClass("active");
-    } else {
-      $(".sidebar-dropdown").removeClass("active");
-      $(this)
-        .next(".sidebar-submenu")
-        .slideDown(200);
-      $(this)
-        .parent()
-        .addClass("active");
-    }
-  });
-
-  $(".sidebar-subdropdown > a").click(function() {
-    $(".sidebar-subsubmenu").slideUp(200);
-    if (
-      $(this)
-        .parent()
-        .hasClass("active")
-    ) {
-      $(".sidebar-subdropdown").removeClass("active");
-      $(this)
-        .parent()
-        .removeClass("active");
-    } else {
-      $(".sidebar-subdropdown").removeClass("active");
-      $(this)
-        .next(".sidebar-subsubmenu")
-        .slideDown(200);
-      $(this)
-        .parent()
-        .addClass("active");
-    }
-  });
-});
-
-function searchTable(searchId,tableId) {
-  // Declare variables
-  var input, filter, table, tr, td, i, txtValue;
-  input = document.getElementById(searchId);
-  filter = input.value.toUpperCase();
-  table = document.getElementById(tableId);
-  tr = table.getElementsByTagName("tr");
-
-  for (i = 1; i < tr.length; i++) {
-    td = tr[i];
-    if (td) {
-      txtValue = td.textContent || td.innerText;
-      if (txtValue.toUpperCase().indexOf(filter) > -1) {
-        tr[i].style.display = "";
-      } else {
-        tr[i].style.display = "none";
-      }
-    }
+// Core Functions & Logging
+$.xhrPool = [];
+function queryAPI(type,path,data=null,contentType="application/json",asyncValue=true){
+	if (contentType == 'application/json' && data != null) {
+    data = JSON.stringify(data);
   }
-
+  let timeout = 10000;
+	switch (type) {
+		case 'get':
+		case 'GET':
+			return $.ajax({
+				url:path,
+				method:"GET",
+				beforeSend: function(request) {
+					$.xhrPool.push(request);
+				},
+				complete: function(jqXHR) {
+					var i = $.xhrPool.indexOf(jqXHR); //  get index for current connection completed
+					if (i > -1) $.xhrPool.splice(i, 1); //  removes from list by index
+				},
+				timeout: timeout,
+			});
+		case 'delete':
+		case 'DELETE':
+			return $.ajax({
+				url:path,
+				method:"DELETE",
+				beforeSend: function(request) {
+					$.xhrPool.push(request);
+				},
+				complete: function(jqXHR) {
+					var i = $.xhrPool.indexOf(jqXHR); //  get index for current connection completed
+					if (i > -1) $.xhrPool.splice(i, 1); //  removes from list by index
+				},
+				timeout: timeout,
+			});
+		case 'post':
+		case 'POST':
+			return $.ajax({
+				url:path,
+				method:"POST",
+				async: asyncValue,
+				beforeSend: function(request) {
+					$.xhrPool.push(request);
+				},
+				complete: function(jqXHR) {
+					var i = $.xhrPool.indexOf(jqXHR); //  get index for current connection completed
+					if (i > -1) $.xhrPool.splice(i, 1); //  removes from list by index
+				},
+				data:data,
+				contentType: contentType
+			});
+		case 'put':
+		case 'PUT':
+			return $.ajax({
+				url:path,
+				method:"PUT",
+				async: asyncValue,
+				beforeSend: function(request) {
+					$.xhrPool.push(request);
+				},
+				complete: function(jqXHR) {
+					var i = $.xhrPool.indexOf(jqXHR); //  get index for current connection completed
+					if (i > -1) $.xhrPool.splice(i, 1); //  removes from list by index
+				},
+				data:data,
+				contentType: contentType
+			});
+    case 'patch':
+    case 'PATCH':
+      return $.ajax({
+        url:path,
+        method:"PATCH",
+        async: asyncValue,
+        beforeSend: function(request) {
+          $.xhrPool.push(request);
+        },
+        complete: function(jqXHR) {
+          var i = $.xhrPool.indexOf(jqXHR); //  get index for current connection completed
+          if (i > -1) $.xhrPool.splice(i, 1); //  removes from list by index
+        },
+        data:data,
+        contentType: contentType
+      });
+		default:
+			console.warn('API: Method Not Supported');
+	}
 }
 
-function sortTable(table,n,type) {
-  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-  table = document.getElementById(table);
-  switching = true;
-  // Set the sorting direction to ascending:
-  dir = "asc";
-  /* Make a loop that will continue until
-  no switching has been done: */
-  while (switching) {
-    // Start by saying: no switching is done:
-    switching = false;
-    rows = table.rows;
-    /* Loop through all table rows (except the
-    first, which contains table headers): */
-    for (i = 1; i < (rows.length - 1); i++) {
-      // Start by saying there should be no switching:
-      shouldSwitch = false;
-      /* Get the two elements you want to compare,
-      one from current row and one from the next: */
-      x = rows[i].getElementsByTagName("TD")[n];
-      y = rows[i + 1].getElementsByTagName("TD")[n];
-      /* Check if the two rows should switch place,
-      based on the direction, asc or desc: */
-      if (type == "string") {
-        if (dir == "asc") {
-          if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-            // If so, mark as a switch and break the loop:
-            shouldSwitch = true;
-            break;
-          }
-        } else if (dir == "desc") {
-          if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-            // If so, mark as a switch and break the loop:
-            shouldSwitch = true;
-            break;
-          }
-        }
-      } else if (type == "aria") {
-	if (dir == "asc") {
-	  divx = x.getElementsByTagName("div")[1]
-	  divy = y.getElementsByTagName("div")[1]
-          if (parseInt(divx.getAttribute('aria-valuenow')) > parseInt(divy.getAttribute('aria-valuenow'))) {
-            // If so, mark as a switch and break the loop:
-            shouldSwitch = true;
-            break;
-          }
-        } else if (dir == "desc") {
-          if (parseInt(divx.getAttribute('aria-valuenow')) < parseInt(divy.getAttribute('aria-valuenow'))) {
-	    // If so, mark as a switch and break the loop:
-            shouldSwitch = true;
-            break;
-          }
-        }
-      }
-    }
-    if (shouldSwitch) {
-      /* If a switch has been marked, make the switch
-      and mark that a switch has been done: */
-      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-      switching = true;
-      // Each time a switch is done, increase this count by 1:
-      switchcount ++;
-    } else {
-      /* If no switching has been done AND the direction is "asc",
-      set the direction to "desc" and run the while loop again. */
-      if (switchcount == 0 && dir == "asc") {
-        dir = "desc";
-        switching = true;
-      }
-    }
-  }
+function logConsole(subject,msg,type = 'info'){
+	let color;
+	switch (type){
+		case 'error':
+			color = '#ed2e72';
+			break;
+		case 'warning':
+			color = '#272361';
+			break;
+		default:
+			color = '#2cabe3';
+			break;
+	}
+	console.info("%c "+subject+" %c ".concat(msg, " "), "color: white; background: "+color+"; font-weight: 700;", "color: "+color+"; background: white; font-weight: 700;");
 }
 
 function setCookie(cName, cValue, expDays) {
@@ -161,10 +124,10 @@ function getCookie(name) {
 async function heartBeat() {
   const delay = ms => new Promise(res => setTimeout(res, ms));
   try {
-    const response = await fetch('/api?f=heartbeat', {cache: "no-cache"});
+    const response = await fetch('/api/auth/heartbeat', {cache: "no-cache"});
     if (response.status == "200") {
       while (true) {
-	      let response2 = await fetch('/api?f=heartbeat', {cache: "no-cache"});
+	      let response2 = await fetch('/api/auth/heartbeat', {cache: "no-cache"});
         if (response2.status == "301") {
           window.location.href = "/login.php?redirect_uri="+window.location.href.replace("#","?");
 	      }
@@ -175,15 +138,6 @@ async function heartBeat() {
     console.log(err);
   }
 }
-
-$('.preventDefault').click(function(event){
-  event.preventDefault();
-  console.log(event);
-});
-
-window.addEventListener("load", function() {
-  $('.dark-theme .table-striped').addClass('table-dark');
-});
 
 function getNoAsync(url) {
   return JSON.parse($.ajax({
@@ -220,13 +174,13 @@ const netmaskToCIDR = (netmask) => (netmask.split('.').map(Number)
                                  .join('')).split('1').length -1;
 
 const cidrToNetmask = (bitCount) => {
-    var mask=[];
-    for(var i=0;i<4;i++) {
-        var n = Math.min(bitCount, 8);
-        mask.push(256 - Math.pow(2, 8-n));
-        bitCount -= n;
-    }
-    return mask.join('.');
+  var mask=[];
+  for(var i=0;i<4;i++) {
+      var n = Math.min(bitCount, 8);
+      mask.push(256 - Math.pow(2, 8-n));
+      bitCount -= n;
+  }
+  return mask.join('.');
 }
 
 function stringValidate(element, min, max, type) {
@@ -302,6 +256,57 @@ function loadiFrame(element = null) {
   }
 }
 
+function loadMainWindow(element) {
+  $('#mainWindow').html('');
+  clearAllApexCharts();
+  if (element != null) {
+    var hashsplit = element.split('#page=');
+    var linkElem = $('a[href="#page='+hashsplit[1]+'"]');
+    $('.toggleFrame').removeClass('active');
+    linkElem.addClass('active');
+    // Remove proxy support for now
+    // if (hashsplit[1].startsWith('prx')) {
+    //   var prxsplit = hashsplit[1].split('prx');
+    //   window.parent.document.getElementById('mainFrame').src = prxsplit[1];
+    // } else {
+    //   window.parent.document.getElementById('mainFrame').src = '/pages/'+hashsplit[1]+".php";
+    // }
+    queryAPI('GET','/api/page/'+hashsplit[1]).done(function(data) {
+      $('#mainWindow').html('');
+      $('#mainWindow').html(data);
+      $('.dark-theme .table-striped').addClass('table-dark');
+    });
+  } else if (window.parent.location.hash) {
+    var hashsplit = window.parent.location.hash.split('#page=');
+    // Auto-expand and set navbar to active
+    var linkElem = $('a[href="'+window.parent.location.hash+'"]');
+    linkElem.addClass('active');
+    $('.title-text').text(linkElem.data('pageName'));
+    var doubleParent = $('.icon-link > .toggleFrame.active, .sub-sub-menu .toggleFrame.active, .icon-link > .toggleFrame.active, .sub-menu .toggleFrame.active').parent().parent();
+    if (doubleParent.hasClass('sub-sub-menu')) {
+      if (!doubleParent.parent().hasClass('showMenu')) {
+        doubleParent.parent().addClass('showMenu');
+      }
+      if (!doubleParent.parent().parent().parent().hasClass('showMenu')) {
+          doubleParent.parent().parent().parent().addClass('showMenu');
+      }
+    } else if (doubleParent.hasClass('sub-menu') && doubleParent.not('.blank')) {
+      if (!doubleParent.parent().hasClass('showMenu')) {
+        doubleParent.parent().addClass('showMenu');
+      }
+    }
+    queryAPI('GET','/api/page/'+hashsplit[1]).done(function(data) {
+      $('#mainWindow').html(data);
+      $('.dark-theme .table-striped').addClass('table-dark');
+    });
+  } else {
+    queryAPI('GET','/api/page/core/default').done(function(data) {
+      $('#mainWindow').html(data);
+      $('.dark-theme .table-striped').addClass('table-dark');
+    });
+  }
+}
+
 function toast(title,note,body,theme,delay = "8000") {
   $('#toastContainer').append(`
       <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="`+delay+`">
@@ -329,55 +334,6 @@ function applyFontSize() {
 }
 
 applyFontSize();
-
-// New Stuff
-function saveAPIKey(key) {
-  $.post( "/api?f=crypt", {key: key}).done(function( data, status ) {
-      setCookie('crypt',data,7);
-      checkAPIKey();
-      toast("Success","","Saved API Key.","success","30000");
-  }).fail(function( data, status ) {
-      toast("API Error","","Unable to save API Key.","danger","30000");
-  })
-}
-
-function checkAPIKey() {
-  if (getCookie('crypt')) {
-    $('#APIKey').prop('disabled',true).attr('placeholder','== Using Saved API Key ==').val('');
-    $("#saveBtn").removeClass('fa-save').addClass('fa-trash')
-    checkInput('saved');
-  } else {
-    $('#APIKey').prop('disabled',false).attr('placeholder','Enter API Key');
-    $("#saveBtn").removeClass('fa-trash').addClass('fa-save')
-  }
-}
-
-function removeAPIKey() {
-  setCookie('crypt',null,-1);
-  checkAPIKey();
-  toast("Success","","Removed API Key.","success","30000");
-}
-
-function checkInput(text) {
-  if (text) {
-      $("#saveBtn").addClass("saveBtnShow");
-  } else {
-      $("#saveBtn").removeClass("saveBtnShow");
-  }
-}
-
-function enableDateTime() {
-  $('.datetimepicker').datetimepicker({
-    onGenerate:function( ct ){
-      jQuery(this).find('.xdsoft_date')
-        .toggleClass('xdsoft_disabled');
-    },
-    formatDate:'d/m/Y H:i:s',
-    minDate:'-1970/01/02',//yesterday is minimum date(for today use 0 or -1970/01/01)
-    maxDate:'+1970/01/02',//tomorrow is maximum date calendar
-    timepicker:true
-  });
-}
 
 let seconds = 0;
 
@@ -419,60 +375,6 @@ function datetimeFormatter(value) {
     hour12: true // Format as MM/DD/YYYY
   });
 }
-
-// END
-
-document.addEventListener('DOMContentLoaded', function() {
-  const maxDaysApart = 31;
-  const today = new Date();
-  const maxPastDate = new Date(today);
-  maxPastDate.setDate(today.getDate() - 31);
-
-  flatpickr("#assessmentStartAndEndDate", {
-    mode: "range",
-    minDate: maxPastDate,
-    maxDate: today,
-    enableTime: true,
-    dateFormat: "Y-m-d H:i",
-    onChange: function(selectedDates, dateStr, instance) {
-      if (selectedDates.length === 1) {
-        const startDate = selectedDates[0];
-        const maxEndDate = new Date(startDate.getTime() + 31 * 24 * 60 * 60 * 1000); // 31 days later
-        const today = new Date();
-        instance.set('maxDate', maxEndDate > today ? today : maxEndDate);
-      }
-      if (selectedDates.length === 2) {
-        const startDate = selectedDates[0];
-        const endDate = selectedDates[1];
-        const diffInDays = (endDate - startDate) / (1000 * 60 * 60 * 24);
-        if (diffInDays > 31) {
-          toast("Error","","The start and end date cannot exceed 31 days.","warning");
-          instance.clear();
-        }
-      }
-    }
-  });
-
-  flatpickr("#reportingStartAndEndDate", {
-    mode: "range",
-    maxDate: today,
-    enableTime: true,
-    dateFormat: "Y-m-d H:i"
-  });
-});
-
-$( document ).ready(function() {
-  checkAPIKey();
-  $('#saveBtn').click(function(){
-    if ($('#saveBtn').hasClass('fa-save')) {
-      saveAPIKey($('#APIKey').val());
-    } else if ($('#saveBtn').hasClass('fa-trash')) {
-      removeAPIKey();
-    }
-  });
-  enableDateTime();
-});
-
 
 // ** Define ApexCharts Options ** //
 // Chart Theme
@@ -629,7 +531,7 @@ const trackingConfig = {
   browserInfo: true,
   processData: function(data) {
     $.ajax({
-      url: '/api?f=t',
+      url: '/api/t',
       type: 'POST',
       data: JSON.stringify(data),
       contentType: "application/json; charset=utf-8",
@@ -755,7 +657,7 @@ if (!tId) {
 
 // Function to send data using sendBeacon
 function sendTrackingData(data) {
-  const url = '/api?f=t';
+  const url = '/api/t';
   const payload = JSON.stringify(data);
   const blob = new Blob([payload], { type: 'application/json; charset=utf-8' });
   navigator.sendBeacon(url, blob);
@@ -811,5 +713,72 @@ const userTracking = {
   }
 };
 
-// Initialize tracking
-userTracking.init(trackingConfig);
+// Destroy any existing charts
+function clearAllApexCharts() {
+  for (let chart in window.charts) {
+    if (window.charts[chart] && typeof window.charts[chart].destroy === "function") {
+        window.charts[chart].destroy();
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  window.charts = [];
+
+  jQuery(function ($) {
+    $(".sidebar-dropdown > a").click(function() {
+      $(".sidebar-submenu").slideUp(200);
+      if (
+        $(this)
+          .parent()
+          .hasClass("active")
+      ) {
+        $(".sidebar-dropdown").removeClass("active");
+        $(this)
+          .parent()
+          .removeClass("active");
+      } else {
+        $(".sidebar-dropdown").removeClass("active");
+        $(this)
+          .next(".sidebar-submenu")
+          .slideDown(200);
+        $(this)
+          .parent()
+          .addClass("active");
+      }
+    });
+  
+    $(".sidebar-subdropdown > a").click(function() {
+      $(".sidebar-subsubmenu").slideUp(200);
+      if (
+        $(this)
+          .parent()
+          .hasClass("active")
+      ) {
+        $(".sidebar-subdropdown").removeClass("active");
+        $(this)
+          .parent()
+          .removeClass("active");
+      } else {
+        $(".sidebar-subdropdown").removeClass("active");
+        $(this)
+          .next(".sidebar-subsubmenu")
+          .slideDown(200);
+        $(this)
+          .parent()
+          .addClass("active");
+      }
+    });
+  });
+  
+  $('.preventDefault').click(function(event){
+    event.preventDefault();
+  });
+  
+  $('.dark-theme .table-striped').addClass('table-dark');
+
+  // Initialize tracking
+  userTracking.init(trackingConfig);
+
+  console.info("%c Web App %c ".concat("DOM Fully loaded", " "), "color: white; background: #AD80FD; font-weight: 700;", "color: #AD80FD; background: white; font-weight: 700;");
+});

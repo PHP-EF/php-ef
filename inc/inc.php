@@ -17,23 +17,35 @@ foreach (glob(__DIR__.'/functions/*.php') as $function) {
   require_once $function; // Include each PHP file
 }
 
-if (!(isset($SkipCSS))) {
+// Include all Plugin Classes
+if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'plugins')) {
+	$folder = __DIR__ . DIRECTORY_SEPARATOR . 'plugins';
+	$directoryIterator = new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS);
+	$iteratorIterator = new RecursiveIteratorIterator($directoryIterator);
+	foreach ($iteratorIterator as $info) {
+		if ($info->getFilename() == 'plugin.php') {
+			require_once $info->getPathname();
+		}
+	}
+}
 
+if (!(isset($SkipCSS))) {
+  $faviconPath = $ib->config->get('Styling', 'favicon')['Image'];
+  $faviconPath = $faviconPath ? $faviconPath : '/assets/images/favicon.ico';
     echo '
     <head>
       <!-- Required meta tags -->
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-      <link rel="icon" type="image/x-icon" href="/assets/images/Other/favicon.svg">
 
-      <!-- Main CSS/JS -->
+      <link rel="icon" type="image/x-icon" href="' . (file_exists(dirname(__DIR__,1) . $faviconPath) ? $faviconPath : '/assets/images/php-ef-icon.png') . '">
+
+      <!-- Bootstrap / jquery -->
       <script src="https://code.jquery.com/jquery-3.6.3.min.js" crossorigin="anonymous"></script>
       <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
       <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.min.js"></script>
-      <script src="/assets/js/main.js?'.$ib->getVersion()[0].'"></script>
-      <link href="/assets/css/main.css?'.$ib->getVersion()[0].'" rel="stylesheet">
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
       <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet" crossorigin="anonymous">
       <link rel="stylesheet" href="https://rawgit.com/vitalets/x-editable/master/dist/bootstrap3-editable/css/bootstrap-editable.css" crossorigin="anonymous">
@@ -63,6 +75,10 @@ if (!(isset($SkipCSS))) {
 
       <!-- Charts -->
       <script src="/assets/js/apexcharts.min.js"></script>
+
+      <!-- Main -->
+      <script src="/assets/js/main.js?'.$ib->getVersion()[0].'"></script>
+      <link href="/assets/css/main.css?'.$ib->getVersion()[0].'" rel="stylesheet">
 
     </head>
     ';

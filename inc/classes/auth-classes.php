@@ -28,12 +28,12 @@ class CoreJwt {
           'type' => $Type
         ];
         $this->logging->writeLog("Authentication","Issued JWT token","debug",$payload);
-        return JWT::encode($payload, $this->config->getConfig()['Security']['salt'], 'HS256');
+        return JWT::encode($payload, $this->config->get()['Security']['salt'], 'HS256');
     }
 
     // Revoke a token
     public function revokeToken($token) {
-        $decoded = JWT::decode($token, new Key($this->config->getConfig()['Security']['salt'], 'HS256'));
+        $decoded = JWT::decode($token, new Key($this->config->get()['Security']['salt'], 'HS256'));
         $this->redis->set($token, json_encode($decoded), 'EX', (86400 * 30)); // Store token with expiration
         $this->logging->writeLog("Authentication","Revoked JWT token","debug",$decoded);
     }
@@ -61,8 +61,9 @@ class Auth {
   private $logging;
   private $CoreJwt;
   private $sso;
+  private $api;
 
-  public function __construct($core,$db) {
+  public function __construct($core,$db,$api) {
     $this->db = $db;
     $this->createUsersTable();
 
@@ -74,7 +75,10 @@ class Auth {
     $this->CoreJwt = new CoreJwt($core);
 
     // SSO
-    $this->sso = new OneLogin\Saml2\Auth($this->config->getConfig("SAML"));
+    $this->sso = new OneLogin\Saml2\Auth($this->config->get("SAML"));
+
+    // API
+    $this->api = $api;
   }
 
   private function createUsersTable() {
@@ -175,35 +179,24 @@ class Auth {
           $checkStmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE username = :username OR email = :email");
           $checkStmt->execute([':username' => $username, ':email' => $email]);
           if ($checkStmt->fetchColumn() > 0) {
-              return array(
-                  'Status' => 'Error',
-                  'Message' => 'Username or Email already exists'
-              );
+            $this->api->setAPIResponse('Error','Username or Email already exists');
+            return false;
           }
       } catch (PDOException $e) {
-          return array(
-              'Status' => 'Error',
-              'Message' => $e
-          );
+        $this->api->setAPIResponse('Error',$e);
       }
 
       try {
         $stmt->execute([':username' => $username, ':firstname' => $firstname, ':surname' => $surname, ':email' => $email, ':password' => $pepper['hash'], ':salt' => $pepper['salt'], ':groups' => $groups, ':created' => $currentDateTime, ':passwordexpires' => $passwordExpires, ':type' => $type]);
-          return array(
-              'Status' => 'Success',
-              'Message' => 'Created user successfully'
-          );
+          $this->api->setAPIResponseMessage('User created successfully');  
+          return true;
       } catch (PDOException $e) {
-          return array(
-              'Status' => 'Error',
-              'Message' => $e
-          );
+        $this->api->setAPIResponse('Error',$e);
+        return false;
       }
     } else {
-      return array(
-        'Status' => 'Error',
-        'Message' => 'Password does not meet the complexity requirements'
-      );
+      $this->api->setAPIResponse('Error','Password does not meet the complexity requirements');
+      return false;
     }
   }
 
@@ -257,26 +250,20 @@ class Auth {
       if ($username || $password) {
         try {
           // Check if username or email already exists
-          $checkStmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE (username = :username OR email = :email) AND id = :id");
+          $checkStmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE (username = :username OR email = :email) AND id != :id");
           $checkStmt->execute([':username' => $username, ':email' => $email, ':id' => $id]);
           if ($checkStmt->fetchColumn() > 0) {
-              return array(
-                  'Status' => 'Error',
-                  'Message' => 'Username or Email already exists'
-              );
+            $this->api->setAPIResponse('Error','Username or Email already exists');
           }
         } catch (PDOException $e) {
-            return array(
-                'Status' => 'Error',
-                'Message' => $e
-            );
+            $this->api->setAPIResponse('Error',$e);
         }
       }
 
       $prepare = [];
       $execute = [];
       $execute[':id'] = $id;
-      if ($password !== null) {
+      if (!empty($password)) {
         // Hash & salt the password for security
         $pepper = $this->hashAndSalt($password);
         $prepare[] = 'password = :password';
@@ -284,37 +271,31 @@ class Auth {
         $execute[':password'] = $pepper['hash'];
         $execute[':salt'] = $pepper['salt'];
       }
-      if ($username !== null) {
+      if (!empty($username)) {
         $prepare[] = 'username = :username';
         $execute[':username'] = $username;
       }
-      if ($firstname !== null) {
+      if (!empty($firstname)) {
         $prepare[] = 'firstname = :firstname';
         $execute[':firstname'] = $firstname;
       }
-      if ($surname !== null) {
+      if (!empty($surname)) {
         $prepare[] = 'surname = :surname';
         $execute[':surname'] = $surname;
       }
-      if ($email !== null) {
+      if (!empty($email)) {
         $prepare[] = 'email = :email';
         $execute[':email'] = $email;
       }
-      if ($groups !== null) {
+      if (!empty($groups)) {
         $prepare[] = 'groups = :groups';
         $execute[':groups'] = $groups;
       }
       $stmt = $this->db->prepare('UPDATE users SET '.implode(", ",$prepare).' WHERE id = :id');
       $stmt->execute($execute);
-      return array(
-        'Status' => 'Success',
-        'Message' => 'User updated successfully'
-      );
+      $this->api->setAPIResponseMessage('User updated successfully');
     } else {
-      return array(
-        'Status' => 'Error',
-        'Message' => 'User does not exist'
-      );
+      $this->api->setAPIResponse('Error','User does not exist');
     }
   }
 
@@ -323,15 +304,9 @@ class Auth {
       $stmt = $this->db->prepare("DELETE FROM users WHERE id = :id");
       $stmt->execute([':id' => $id]);
       if ($this->getUserById($id)) {
-        return array(
-          'Status' => 'Error',
-          'Message' => 'Failed to delete user'
-        );
+        $this->api->setAPIResponse('Error','Failed to delete user');
       } else {
-        return array(
-          'Status' => 'Success',
-          'Message' => 'User deleted successfully'
-        );
+        $this->api->setAPIResponseMessage('User deleted successfully');
       }
     }
   }
@@ -356,40 +331,28 @@ class Auth {
             try {
               $stmt = $this->db->prepare("UPDATE users SET passwordexpires = :passwordexpires, password = :password, salt = :salt WHERE id = :id");
               $stmt->execute([':id' => $user['id'], ':password' => $pepper['hash'], ':salt' => $pepper['salt'], ':passwordexpires' => $passwordExpires]);
-              return array(
-                'Status' => 'Success',
-                'Message' => 'Password reset successfully'
-              );
+              $this->api->setAPIResponseMessage('Password reset successfully');
+              return true;
             } catch (PDOException $e) {
-              return array(
-                  'Status' => 'Error',
-                  'Message' => $e
-              );
+              $this->api->setAPIResponse('Error',$e);
+              return false;
             }
           } else {
-            return array(
-              'Status' => 'Error',
-              'Message' => 'New password does not meet the complexity requirements'
-            );
+            $this->api->setAPIResponse('Error','New password does not meet the complexity requirements');
+            return false;
           }
         } else {
-          return array(
-            'Status' => 'Error',
-            'Message' => 'Cannot reset password for SSO Account'
-          );
+          $this->api->setAPIResponse('Error','Cannot reset password for SSO Account');
+          return false;
         }
       } else {
-        return array(
-          'Status' => 'Error',
-          'Message' => 'Failed to retrieve user information'
-        );
+        $this->api->setAPIResponse('Error','Failed to retrieve user information');
+        return false;
       }
     } else { // Verify failed
       $this->logging->writeLog("Authentication",$username." failed to reset password","warning");
-      return array(
-        'Status' => 'Error',
-        'Message' => 'The submitted current password is invalid'
-      );
+      $this->api->setAPIResponse('Error','The submitted current password is invalid');
+      return false;
     }
   }
 
@@ -411,39 +374,26 @@ class Auth {
             try {
               $stmt = $this->db->prepare("UPDATE users SET passwordexpires = :passwordexpires, password = :password, salt = :salt WHERE id = :id");
               $stmt->execute([':id' => $CurrentUser['id'], ':password' => $pepper['hash'], ':salt' => $pepper['salt'], ':passwordexpires' => $passwordExpires]);
-              return array(
-                'Status' => 'Success',
-                'Message' => 'Password reset successfully'
-              );
+              $this->api->setAPIResponseMessage('Password reset successfully');
             } catch (PDOException $e) {
-              return array(
-                  'Status' => 'Error',
-                  'Message' => $e
-              );
+              $this->api->setAPIResponse('Error',$e);
+              return false;
             }
           } else {
-            return array(
-              'Status' => 'Error',
-              'Message' => 'New password does not meet the complexity requirements'
-            );
+            $this->api->setAPIResponse('Error','New password does not meet the complexity requirements');
+            return false;
           }
         } else {
-          return array(
-            'Status' => 'Error',
-            'Message' => 'Cannot reset password for SSO Account'
-          );
+          $this->api->setAPIResponse('Error','Cannot reset password for SSO Account');
+          return false;
         }
       } else {
-        return array(
-          'Status' => 'Error',
-          'Message' => 'Failed to retrieve user information'
-        );
+        $this->api->setAPIResponse('Error','Failed to retrieve user information');
+        return false;
       }
     } else {
-      return array(
-        'Status' => 'Error',
-        'Message' => 'Not Authenticated'
-      );
+      $this->api->setAPIResponse('Error','Not Authenticated',401);
+      return false;
     }
   }
 
@@ -483,44 +433,41 @@ class Auth {
     return $usermap;
   }
 
-  public function login($username, $password) {
-    $user = $this->getUserByUsernameOrEmail($username,$username,true);
-    if ($user && password_verify($user['salt'].$password, $user['password'])) { // Login Successful
-      $now = new DateTime();
-      $expires = new DateTime($user['passwordexpires']);
-      if ($expires < $now)  {
-        return array(
-          'Status' => 'Expired',
-          'Message' => 'Password Expired'
-        );
+  public function login($request) {
+    if (isset($request['un']) && isset($request['pw'])) {
+      $username = $request['un'];
+      $password = $request['pw'];
+      $user = $this->getUserByUsernameOrEmail($username,$username,true);
+      if ($user && password_verify($user['salt'].$password, $user['password'])) { // Login Successful
+        $now = new DateTime();
+        $expires = new DateTime($user['passwordexpires']);
+        if ($expires < $now)  {
+          $this->api->setAPIResponse('Expired','Password Expired');
+          return false;
+        }
+        // Update last login
+        $this->updateLastLogin($user['id']);
+  
+        // Generate JWT token
+        $jwt = $this->CoreJwt->generateToken($user['username'],$user['firstname'],$user['surname'],$user['email'],explode(',',$user['groups']),$user['type']);
+        // Set JWT as a cookie
+        setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
+  
+        $this->logging->writeLog("Authentication",$username." successfully logged in","info");
+        return true;
+      } else { // Login failed
+        $this->api->setAPIResponse('Error','Invalid Credentials');
+        $this->logging->writeLog("Authentication",$username." failed to log in","warning");
+        return false;
       }
-      // Update last login
-      $this->updateLastLogin($user['id']);
-
-      // Generate JWT token
-      $jwt = $this->CoreJwt->generateToken($user['username'],$user['firstname'],$user['surname'],$user['email'],explode(',',$user['groups']),$user['type']);
-      // Set JWT as a cookie
-      setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
-
-      $Arr = array(
-        'Status' => 'Success',
-        'Location' => '/'
-      );
-      $this->logging->writeLog("Authentication",$username." successfully logged in","info",$Arr);
-      return $Arr;
-    } else { // Login failed
-      $Arr = array(
-        'Status' => 'Error',
-        'Message' => 'Invalid Credentials'
-      );
-      $this->logging->writeLog("Authentication",$username." failed to log in","warning",$Arr);
-      return $Arr;
+    } else {
+      $this->api->setAPIResponse('Error','Invalid Credentials');
     }
   }
 
   public function logout() {
     $this->CoreJwt->revokeToken($_COOKIE['jwt']);
-    return $this->getAuth();
+    $this->api->setAPIResponseData($this->getAuth());
   }
 
   public function sso() {
@@ -549,28 +496,28 @@ class Auth {
           'samlSessionIndex' => $this->sso->getSessionIndex()
         );
         $AttributeMap = [];
-        if ($this->config->getConfig('SAML','attributes')['Username'] && isset($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['Username']])) {
-          $AttributeMap['Username'] = $SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['Username']][0];
+        if ($this->config->get('SAML','attributes')['Username'] && isset($SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['Username']])) {
+          $AttributeMap['Username'] = $SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['Username']][0];
         } else {
           $AttributeMap['Username'] = null;
         }
-        if ($this->config->getConfig('SAML','attributes')['FirstName'] && isset($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['FirstName']])) {
-          $AttributeMap['FirstName'] = ucwords($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['FirstName']][0]);
+        if ($this->config->get('SAML','attributes')['FirstName'] && isset($SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['FirstName']])) {
+          $AttributeMap['FirstName'] = ucwords($SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['FirstName']][0]);
         } else {
           $AttributeMap['FirstName'] = null;
         }
-        if ($this->config->getConfig('SAML','attributes')['LastName'] && isset($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['LastName']])) {
-          $AttributeMap['LastName'] = ucwords($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['LastName']][0]);
+        if ($this->config->get('SAML','attributes')['LastName'] && isset($SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['LastName']])) {
+          $AttributeMap['LastName'] = ucwords($SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['LastName']][0]);
         } else {
           $AttributeMap['LastName'] = null;
         }
-        if ($this->config->getConfig('SAML','attributes')['Email'] && isset($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['Email']])) {
-          $AttributeMap['Email'] = $SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['Email']][0];
+        if ($this->config->get('SAML','attributes')['Email'] && isset($SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['Email']])) {
+          $AttributeMap['Email'] = $SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['Email']][0];
         } else {
           $AttributeMap['Email'] = null;
         }
-        if ($this->config->getConfig('SAML','attributes')['Groups'] && isset($SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['Groups']])) {
-            $AttributeMap['Groups'] = implode(',',$SAMLArr['samlUserdata'][$this->config->getConfig('SAML','attributes')['Groups']]);
+        if ($this->config->get('SAML','attributes')['Groups'] && isset($SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['Groups']])) {
+            $AttributeMap['Groups'] = implode(',',$SAMLArr['samlUserdata'][$this->config->get('SAML','attributes')['Groups']]);
         } else {
           $AttributeMap['Groups'] = '';
         }
@@ -600,10 +547,10 @@ class Auth {
               'Status' => 'Success',
               'Message' => 'User logged in'
             );
-          } else if ($this->config->getConfig('SAML','AutoCreateUsers')) {
+          } else if ($this->config->get('SAML','AutoCreateUsers')) {
             // User does not exist and will be created
             $NewUser = $this->newUser($AttributeMap['Username'], null, $AttributeMap['FirstName'], $AttributeMap['LastName'], $AttributeMap['Email'], $AttributeMap['Groups'], $type = 'SSO');
-            if ($NewUser['Status'] == 'Success') {
+            if ($NewUser) {
               // Update last login
               $this->updateLastLogin($this->getUserByUsernameOrEmail($AttributeMap['Username'],$AttributeMap['Email'])['id']);
               // Set Login to True
@@ -693,7 +640,7 @@ class Auth {
     $IPAddress = explode(':',$IPAddress)[0];
 
     if (isset($_COOKIE['jwt'])) {
-      $secretKey = $this->config->getConfig()['Security']['salt']; // Change this to a secure key
+      $secretKey = $this->config->get()['Security']['salt']; // Change this to a secure key
       if ($this->CoreJwt->isRevoked($_COOKIE['jwt']) == true) {
         // Token is invalid
         $AuthResult = array(
@@ -806,8 +753,9 @@ class RBAC {
   private $logging;
   private $db;
   private $auth;
+  private $api;
 
-  public function __construct($core,$db,$auth) {
+  public function __construct($core,$db,$auth,$api) {
     // Set Config
     $this->config = $core->config;
     $this->logging = $core->logging;
@@ -819,6 +767,16 @@ class RBAC {
     $this->db = $db;
     $this->createRBACTable();
     $this->createRBACResourcesDefinitionsTable();
+
+    // API
+    $this->api = $api;
+  }
+  
+  // Function to check if a role exists
+  private function roleExists($roleName) {
+    $stmt = $this->db->prepare("SELECT COUNT(*) FROM rbac WHERE Name = :name");
+    $stmt->execute([':name' => $roleName]);
+    return $stmt->fetchColumn() > 0;
   }
 
   private function createRBACTable() {
@@ -827,29 +785,30 @@ class RBAC {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       Name TEXT,
       Description TEXT,
-      PermittedResources TEXT
+      PermittedResources TEXT,
+      Protected BOOLEAN
     )");
-
-    // Function to check if a role exists
-    function roleExists($db, $roleName) {
-      $stmt = $db->prepare("SELECT COUNT(*) FROM rbac WHERE Name = :name");
-      $stmt->execute([':name' => $roleName]);
-      return $stmt->fetchColumn() > 0;
-    }
 
     // Insert roles if they don't exist
     $roles = [
-      ['Authenticated', 'This group applies to any authenticated user', ''],
-      ['Everyone', 'This group applies to any user, regardless of if they are logged in or not', ''],
-      ['Administrators', 'System Administrators', 'ADMIN-RBAC,ADMIN-USERS,ADMIN-CONFIG,ADMIN-LOGS']
+      ['Authenticated', 'This group applies to any authenticated user', true],
+      ['Everyone', 'This group applies to any user, regardless of if they are logged in or not', true],
+      ['Administrators', 'System Administrators', 'ADMIN-RBAC,ADMIN-USERS,ADMIN-CONFIG,ADMIN-LOGS,ADMIN-PAGES,REPORT-TRACKING', true]
     ];
 
     foreach ($roles as $role) {
-      if (!roleExists($this->db, $role[0])) {
-        $stmt = $this->db->prepare("INSERT INTO rbac (Name, Description, PermittedResources) VALUES (:Name, :Description, :PermittedResources)");
-        $stmt->execute([':Name' => $role[0],':Description' => $role[1], ':PermittedResources' => $role[2]]);
+      if (!$this->roleExists($role[0])) {
+        $stmt = $this->db->prepare("INSERT INTO rbac (Name, Description, PermittedResources, Protected) VALUES (:Name, :Description, :PermittedResources, :Protected)");
+        $stmt->execute([':Name' => $role[0],':Description' => $role[1], ':PermittedResources' => $role[2], ':Protected' => $role[3]]);
       }
     }
+  }
+
+  // Function to check if a resource exists
+  private function resourceExists($db, $resourceName) {
+    $stmt = $db->prepare("SELECT COUNT(*) FROM rbac_resources WHERE name = :name");
+    $stmt->execute([':name' => $resourceName]);
+    return $stmt->fetchColumn() > 0;
   }
 
   private function createRBACResourcesDefinitionsTable() {
@@ -857,52 +816,46 @@ class RBAC {
     $this->db->exec("CREATE TABLE IF NOT EXISTS rbac_resources (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT UNIQUE,
-      description TEXT
+      description TEXT,
+      Protected BOOLEAN
     )");
 
-    // Function to check if a resource exists
-    function resourceExists($db, $resourceName) {
-      $stmt = $db->prepare("SELECT COUNT(*) FROM rbac_resources WHERE name = :name");
-      $stmt->execute([':name' => $resourceName]);
-      return $stmt->fetchColumn() > 0;
-    }
+
 
     // Insert roles if they don't exist
-    // This needs to be re-done when modularisation comes in
     $resources = [
       // Built-In Roles
-      ['ADMIN-RBAC', 'Grants the ability to view and manage Role Based Access'],
-      ['ADMIN-LOGS', 'Grants access to view Logs'],
-      ['ADMIN-CONFIG', 'Grants access to manage the Infoblox SA Tools Configuration'],
-      ['ADMIN-USERS', 'Grants access to view and manage users & groups'],
-      ['REPORT-TRACKING', 'Grants the ability to view the Web Tracking Reports']
+      ['ADMIN-RBAC', 'Grants the ability to view and manage Role Based Access', true],
+      ['ADMIN-LOGS', 'Grants access to view Logs', true],
+      ['ADMIN-CONFIG', 'Grants access to manage the Infoblox SA Tools Configuration', true],
+      ['ADMIN-USERS', 'Grants access to view and manage users & groups', true],
+      ['ADMIN-PAGES', 'Grants the ability to view and manage Pages', true],
+      ['REPORT-TRACKING', 'Grants the ability to view the Web Tracking Reports', true]
     ];
 
     foreach ($resources as $resource) {
-      if (!resourceExists($this->db, $resource[0])) {
-        $stmt = $this->db->prepare("INSERT INTO rbac_resources (name, description) VALUES (:Name, :Description)");
-        $stmt->execute([':Name' => $resource[0],':Description' => $resource[1]]);
+      if (!$this->resourceExists($this->db, $resource[0])) {
+        $stmt = $this->db->prepare("INSERT INTO rbac_resources (name, description, Protected) VALUES (:Name, :Description, :Protected)");
+        $stmt->execute([':Name' => $resource[0],':Description' => $resource[1], ':Protected' => $resource[2]]);
       }
     }
   }
 
-  public function getRBACGroups($type = null) {
-    $stmt = $this->db->prepare('SELECT * FROM rbac');
+  public function getRBACGroups($protected = false, $configurable = false) {
+    $prepare = 'SELECT * FROM rbac';
+    $where = [];
+    if ($protected) {
+      $where[] = '(Protected = 0 OR Protected IS NULL)';
+    }
+    if ($configurable) {
+      $where[] = 'Name NOT IN ("Everyone","Authenticated")';
+    }
+    if (!empty($where)) {
+      $prepare .= ' WHERE '.implode(' AND ',$where);
+    }
+    $stmt = $this->db->prepare($prepare);
     $stmt->execute();
     $groups = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    if ($type != null) {
-      switch($type) {
-        case 'configurable':
-          foreach ($groups as $groupKey => $groupVal) {
-            if ($groupVal['Name'] == 'Authenticated' || $groupVal['Name'] == 'Everyone') {
-              unset($groups[$groupKey]);
-            }
-          }
-          return $groups;
-        default:
-          break;
-      }
-    }
     return $groups;
   }
 
@@ -939,21 +892,19 @@ class RBAC {
           } else {
             $PermittedResources = [];
           }
-          if ($Value == "true") {
+          if ($Value == "enabled") {
             ## Add Key to Array
             if (in_array($Role,$PermittedResources)) {
-              return array(
-                'Status' => 'Error',
-                'Message' => $Role.' is already assigned to: '.$rbac['Name']
-              );
               $this->logging->writeLog("RBAC","$Role is already assigned to ".$rbac['Name'],"debug",$rbac);
+              $this->api->setAPIResponseData('Error',$Role.' is already assigned to: '.$rbac['Name']);
+              return false;
             } else {
               $PermittedResources[] = $Role;
               $prepare[] = 'PermittedResources = :PermittedResources';
               $execute[':PermittedResources'] = implode(',',$PermittedResources);
               $this->logging->writeLog("RBAC","Added $Role to ".$rbac['Name'],"warning",$rbac);
             }
-          } else if ($Value == "false") {
+          } else if ($Value == "disabled") {
             ## Remove Key from Array
             if (in_array($Role,$PermittedResources)) {
               $ArrKey = array_search($Role, $PermittedResources);
@@ -963,62 +914,44 @@ class RBAC {
               $this->logging->writeLog("RBAC","Removed $Role from ".$rbac['Name'],"warning",$rbac);
             } else {
               $this->logging->writeLog("RBAC","$Role is not assigned to ".$rbac['Name'],"error",$rbac);
-              return array(
-                'Status' => 'Error',
-                'Message' => $Role.' is not assigned to: '.$rbac['Name']
-              );
+              $this->api->setAPIResponseData('Error',$Role.' is not assigned to: '.$rbac['Name']);
+              return false;
             }
           }
         } else {
-          return array(
-            'Status' => 'Error',
-            'Message' => 'Invalid RBAC Option specified: "'.$Role.'"'
-          );
+          $this->api->setAPIResponseData('Error','Invalid RBAC Option specified: "'.$Role.'"');
+          return false;
         }
       }
       $stmt = $this->db->prepare('UPDATE rbac SET '.implode(", ",$prepare).' WHERE id = :id');
       $stmt->execute($execute);
-      return array(
-        'Status' => 'Success',
-        'Message' => 'RBAC Group updated successfully'
-      );
+      $this->api->setAPIResponseMessage('RBAC Group updated successfully');
     } else {
-      return array(
-        'Status' => 'Error',
-        'Message' => 'RBAC Group does not exist'
-      );
+      $this->api->setAPIResponseData('Error','RBAC Group does not exist');
+      return false;
     }
-    return $rbac;
   }
 
   public function newRBACGroup($Name,$Description) {
     if (!empty($this->getRBACGroupByName($Name))) {
-      return array(
-        'Status' => 'Error',
-        'Message' => 'RBAC Group already exists with the name: '.$Name
-      );
+      $this->api->setAPIResponseData('Error','RBAC Group already exists with the name: '.$Name);
     } else {
       $stmt = $this->db->prepare("INSERT INTO rbac (Name, Description) VALUES (:Name, :Description)");
       $stmt->execute([':Name' => $Name, ':Description' => $Description]);      
-      return array(
-        'Status' => 'Success',
-        'Message' => 'RBAC Group successfully created: '.$Name
-      );
+      $this->api->setAPIResponseMessage('RBAC Group successfully created: '.$Name);
     }
   }
 
   public function deleteRBACGroup($GroupID) {
     if ($this->getRBACGroupByID($GroupID)) {
-      $this->logging->writeLog("RBAC","Deleted RBAC Group: $GroupID","debug",$_REQUEST);
       $stmt = $this->db->prepare("DELETE FROM rbac WHERE id = :id");
       $stmt->execute([':id' => $GroupID]);
+      $this->logging->writeLog("RBAC","Deleted RBAC Group: $GroupID","debug",$_REQUEST);
+      $this->api->setAPIResponseMessage('RBAC Group deleted successfully');  
     } else {
-      $this->logging->writeLog("RBAC","Error deleting RBAC Group. The group does not exist.","error",$_REQUEST);
+      $this->logging->writeLog("RBAC","Error deleting RBAC Group. The Group does not exist.","error",$_REQUEST);
+      $this->api->setAPIResponse('Error','Unable to delete RBAC Group. The Group does not exist.');
     }
-    return array(
-      'Status' => 'Success',
-      'Message' => 'RBAC Group deleted successfully'
-    );
   }
 
   public function getRBACRoles() {
@@ -1041,17 +974,11 @@ class RBAC {
 
   public function newRBACRole($Name,$Description) {
     if (!empty($this->getRBACRoleByName($Name))) {
-      return array(
-        'Status' => 'Error',
-        'Message' => 'RBAC Role already exists with the name: '.$Name
-      );
+      $this->api->setAPIResponse('Error','RBAC Role already exists with the name: '.$Name);
     } else {
       $stmt = $this->db->prepare("INSERT INTO rbac_resources (name, description) VALUES (:Name, :Description)");
       $stmt->execute([':Name' => $Name, ':Description' => $Description]);      
-      return array(
-        'Status' => 'Success',
-        'Message' => 'RBAC Role successfully created: '.$Name
-      );
+      $this->api->setAPIResponseMessage('RBAC Role successfully created: '.$Name);
     }
   }
 
@@ -1070,15 +997,9 @@ class RBAC {
       }
       $stmt = $this->db->prepare('UPDATE rbac_resources SET '.implode(", ",$prepare).' WHERE id = :id');
       $stmt->execute($execute);
-      return array(
-        'Status' => 'Success',
-        'Message' => 'RBAC Role updated successfully'
-      );
+      $this->api->setAPIResponseMessage('RBAC Role updated successfully');
     } else {
-      return array(
-        'Status' => 'Error',
-        'Message' => 'RBAC Role does not exist'
-      );
+      $this->api->setAPIResponseData('Error','RBAC Role does not exist.');
     }
   }
 
@@ -1087,13 +1008,11 @@ class RBAC {
       $this->logging->writeLog("RBAC","Deleted RBAC Role: $RoleID","debug",$_REQUEST);
       $stmt = $this->db->prepare("DELETE FROM rbac_resources WHERE id = :id");
       $stmt->execute([':id' => $RoleID]);
+      $this->api->setAPIResponseMessage('RBAC Role deleted successfully');  
     } else {
       $this->logging->writeLog("RBAC","Error deleting RBAC Role. The role does not exist.","error",$_REQUEST);
+      $this->api->setAPIResponse('Error','Unable to delete RBAC Role. The Role does not exist.');
     }
-    return array(
-      'Status' => 'Success',
-      'Message' => 'RBAC Role deleted successfully'
-    );
   }
 
   private function isResourcePermitted($rbac, $resource) {
@@ -1117,8 +1036,12 @@ class RBAC {
       $stmt->execute();
       $rbac = $stmt->fetchAll(PDO::FETCH_ASSOC);
       if ($Service != null) {
-        return $this->isResourcePermitted($rbac,$Service);
-      } else {
+        if ($this->isResourcePermitted($rbac,$Service)) {
+          return true;
+        } else {
+          $this->api->setAPIResponse('Error','Unauthorized','401');
+          return false;
+        }
       }
     } else {
       return false;

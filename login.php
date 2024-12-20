@@ -141,7 +141,7 @@ html {
     <input type="text" placeholder="Username" name="un" id="un"/>
     <input type="password" placeholder="Password" name="pw" id="pw"/>
     <button id="login" class="login"> Sign in </button>
-    <?php if ($ib->config->getConfig('SAML','enabled')) {
+    <?php if ($ib->config->get('SAML','enabled')) {
       echo '<button id="sso" class="sso"> Single Sign On </button>';
     }?>
   </div>
@@ -149,13 +149,13 @@ html {
 
 <script>
 function login() {
-  $.post( "/api?f=login", {
+  queryAPI("POST", "/api/auth/login", {
       un: $('#un').val(),
       pw: $('#pw').val()
   }).done(function( data, status ) {
-    if (data['Status'] == 'Error') {
-      toast("Authentication Error","",data['Message'],"danger","30000");
-    } else if (data['Status'] == 'Expired') {
+    if (data['result'] == 'Error') {
+      toast("Authentication Error","",data['message'],"danger","30000");
+    } else if (data['result'] == 'Expired') {
       toast("Password expired","","You must reset your password before logging in.","danger","30000");
       var un = $('#un').val()
       $('.login-wrap').html('');
@@ -178,7 +178,7 @@ function login() {
       $('#pw, #pw2').on('change', function() {
         validatePW();
       });
-    } else if (data['Status'] == 'Success') {
+    } else if (data['result'] == 'Success') {
         toast("Success!","","Successfully logged in.","success","30000");
         location = "<?php echo $RedirectUri; ?>"
     }
@@ -188,12 +188,12 @@ function login() {
 }
 
 function reset() {
-  $.post( "/api?f=resetExpiredPassword", {
+  queryAPI("POST", "/api/auth/password/expired", {
       un: $('#un').val(),
       cpw: $('#cpw').val(),
       pw: $('#pw').val()
   }).done(function( data, status ) {
-    if (data['Status'] == 'Success') {
+    if (data['result'] == 'Success') {
       toast("Success!","","Successfully reset password.","success","30000");
       $('.login-wrap').html('');
       $('.login-wrap').html(`<h2>Login</h2>
@@ -201,7 +201,7 @@ function reset() {
         <input type="text" placeholder="Username" name="un" id="un"/>
         <input type="password" placeholder="Password" name="pw" id="pw"/>
         <button id="login" class="login"> Sign in </button>
-        <?php if ($ib->config->getConfig('SAML','enabled')) {
+        <?php if ($ib->config->get('SAML','enabled')) {
           echo '<button id="sso" class="sso"> Single Sign On </button>';
         }?>
       </div>`);
@@ -209,15 +209,15 @@ function reset() {
         login();
       })
       $('#sso').click(function() {
-        location = "/api?f=sso";
+        location = "/api/auth/sso";
       })
       $('#un,#pw').keypress(function(event) {
         if (event.which == 13) {
             login();
         }
       });
-    } else if (data['Status'] == 'Error') {
-      toast("Error","",data['Message'],"danger","30000");
+    } else if (data['result'] == 'Error') {
+      toast("Error","",data['message'],"danger","30000");
     }
   }).fail(function( data, status ) {
     toast("Authentication Error","","Unknown Authentication Error","danger","30000");
@@ -244,7 +244,7 @@ $('#login').click(function() {
     login();
 })
 $('#sso').click(function() {
-    location = "/api?f=sso";
+    location = "/api/auth/sso";
 })
 $('#un,#pw').keypress(function(event) {
   if (event.which == 13) {

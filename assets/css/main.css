@@ -308,6 +308,16 @@ body .popover {
 }
 
 /*--------------------------------------------------------------
+# Pages Configuration Page
+--------------------------------------------------------------*/
+.table td i.navIcon {
+  font-size: 32px;
+  text-align: center;
+  width: 100%;
+  padding: 5px;
+}
+
+/*--------------------------------------------------------------
 # Reports
 --------------------------------------------------------------*/
 /* Filter dropdown */
@@ -486,11 +496,6 @@ body .popover {
   margin-bottom: 10px;
 }
 
-/* Recent Assessments */
-.reporting-section .recent-assessments {
-  font-size: 14px;
-}
-
 /* Granularity */
 .granularity-card .btn-group {
   display: inline-flex;
@@ -573,9 +578,19 @@ body .popover {
   transition: 0.5s ease;
   transition-delay: 0.1s;
 }
-.sidebar .logo-lg {
+
+/* Custom Logo */
+/* .sidebar .logo-lg {
   height: 37px;
   margin: 0px 0px 0px 50px;
+  transition: 0.3s ease;
+  transition-delay: 0.1s;
+} */
+
+/* Default Logo */
+.sidebar .logo-lg {
+  height: 50px;
+  margin: 10px 0px 0px 5px;
   transition: 0.3s ease;
   transition-delay: 0.1s;
 }
