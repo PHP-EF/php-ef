@@ -1,3 +1,6 @@
+## v0.6.8
+- Add additional style customisation options
+
 ## v0.6.7
 - Cleanup IB tools into new plugin
 - Various API improvements
