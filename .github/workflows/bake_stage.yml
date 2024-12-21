@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     branches:
       - stage
-  push:
-    branches:
-      - stage
+  # push:
+  #   branches:
+  #     - stage
 
 jobs:
   bake-stage:
