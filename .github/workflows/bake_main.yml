@@ -2,11 +2,9 @@ name: Build Latest Release
 
 on:
   workflow_dispatch:
+  push:
     branches:
-    - main
-  # push:
-  #   branches:
-  #     - main
+      - main
 
 jobs:
   bake-latest:
