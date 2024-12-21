@@ -2,11 +2,9 @@ name: Build Staging Release
 
 on:
   workflow_dispatch:
+  push:
     branches:
       - stage
-  # push:
-  #   branches:
-  #     - stage
 
 jobs:
   bake-stage:
