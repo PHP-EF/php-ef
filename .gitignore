@@ -1,6 +1,8 @@
 vendor/*
 files/*
 inc/logs/*
+inc/plugins/*
+!inc/plugins/Example
 app.db
 config.json
 !files/index.php
