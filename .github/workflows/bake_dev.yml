@@ -2,8 +2,6 @@ name: Build Dev Release
 
 on:
   workflow_dispatch:
-    branches:
-      - dev
   # push:
   #   branches:
   #     - dev
