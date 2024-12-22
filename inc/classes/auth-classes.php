@@ -485,18 +485,21 @@ class Auth {
         ldap_set_option($ldapconn, LDAP_OPT_REFERRALS, 0);
 
         // Authenticate as service account
-        $ldapbind = @ldap_bind($ldapconn, $config['service_dn'], $config['service_password']);
-        if (!$ldapbind) {
+        $service_bind = @ldap_bind($ldapconn, $config['service_dn'], $config['service_password']);
+        if (!$service_bind) {
             ldap_unbind($ldapconn);
-            // Authenticate as user
-            $ldaprdn = "cn=$username," . $config['user_dn'];
-            $ldapbind = @ldap_bind($ldapconn, $ldaprdn, $password);
-            if (!$ldapbind) {
-              return false;
-            }
+            return false;
         }
 
-        if ($ldapbind) {
+        // Validate User Creds
+        $ldaprdn = "cn=$username," . $config['user_dn'];
+        $user_bind = @ldap_bind($ldapconn, $ldaprdn, $password);
+        if (!$user_bind) {
+          ldap_unbind($ldapconn);
+          return false;
+        }
+
+        if ($user_bind) {
             // Search for user details
             $filter = "(".$config['attributes']['Username']."=$username)";
             $result = ldap_search($ldapconn, $config['base_dn'], $filter, [$config['attributes']['Groups'], $config['attributes']['FirstName'], $config['attributes']['Username'], $config['attributes']['LastName'], $config['attributes']['Email']]);
@@ -505,17 +508,17 @@ class Auth {
             $userDetails = [];
             if ($entries['count'] > 0) {
                 $userDetails['Groups'] = [];
-                if (isset($entries[0][$config['attributes']['Groups']])) {
-                    foreach ($entries[0][$config['attributes']['Groups']] as $group) {
-                        if ($group !== 'count') {
-                            $userDetails['Groups'][] = $group;
+                if (isset($entries[0][strtolower($config['attributes']['Groups'])])) {
+                    foreach ($entries[0][strtolower($config['attributes']['Groups'])] as $groupKey => $groupVal) {
+                        if ($groupKey !== 'count') {
+                            $userDetails['Groups'][] = $this->extractCN($groupVal);
                         }
                     }
                 }
-                $userDetails['Username'] = $entries[0][$config['attributes']['Username']][0] ?? null;
-                $userDetails['FirstName'] = $entries[0][$config['attributes']['FirstName']][0] ?? null;
-                $userDetails['LastName'] = $entries[0][$config['attributes']['LastName']][0] ?? null;
-                $userDetails['Email'] = $entries[0][$config['attributes']['Email']][0] ?? null;
+                $userDetails['Username'] = $entries[0][strtolower($config['attributes']['Username'])][0] ?? null;
+                $userDetails['FirstName'] = $entries[0][strtolower($config['attributes']['FirstName'])][0] ?? null;
+                $userDetails['LastName'] = $entries[0][strtolower($config['attributes']['LastName'])][0] ?? null;
+                $userDetails['Email'] = $entries[0][strtolower($config['attributes']['Email'])][0] ?? null;
             }
             ldap_unbind($ldapconn);
             return $userDetails;
@@ -525,6 +528,11 @@ class Auth {
         }
     }
     return false;
+  }
+
+  private function extractCN($group) {
+    preg_match('/CN=([^,]+)/', $group, $matches);
+    return $matches[1];
   }
 
   private function handleSuccessfulLogin($user) {
