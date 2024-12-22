@@ -623,7 +623,6 @@ class Auth {
       $jwt = $this->CoreJwt->generateToken($LoginArr['Username'],$LoginArr['FirstName'],$LoginArr['LastName'],$LoginArr['Email'],$LoginArr['Groups'],$LoginArr['Type']);
       // Set JWT as a cookie
       setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
-      // Redirect
       $this->api->setAPIResponseMessage('Successfully logged in');
       return true;
     }
@@ -694,7 +693,10 @@ class Auth {
           );
         } else {
           $this->CoreJwt->revokeAssertion($this->sso->getLastAssertionId(), $this->sso->getNameId(), 3600); // Store SAML Assertion for 1 hour to allow for natural expiry
-          if (!$this->createUserIfNotExists($AttributeMap,"SSO",$this->config->get('SAML','AutoCreateUsers'))) {
+          if ($this->createUserIfNotExists($AttributeMap,"SSO",$this->config->get('SAML','AutoCreateUsers'))) {
+            header('Location: /');
+            return true;
+          } else {
             return false;
           }
         }
