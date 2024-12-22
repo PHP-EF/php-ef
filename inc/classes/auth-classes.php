@@ -494,22 +494,22 @@ class Auth {
             return false;
         }
 
-        // Validate User Creds
-        $ldaprdn = "cn=$username," . $config['user_dn'];
-        $user_bind = @ldap_bind($ldapconn, $ldaprdn, $password);
-        if (!$user_bind) {
-          ldap_unbind($ldapconn);
-          return false;
-        }
-
-        if ($user_bind) {
+        if ($service_bind) {
             // Search for user details
             $filter = "(".$config['attributes']['Username']."=$username)";
-            $result = ldap_search($ldapconn, $config['base_dn'], $filter, [$config['attributes']['Groups'], $config['attributes']['FirstName'], $config['attributes']['Username'], $config['attributes']['LastName'], $config['attributes']['Email']]);
+            $result = ldap_search($ldapconn, $config['base_dn'], $filter, ["cn", $config['attributes']['Groups'], $config['attributes']['FirstName'], $config['attributes']['Username'], $config['attributes']['LastName'], $config['attributes']['Email']]);
             $entries = ldap_get_entries($ldapconn, $result);
 
             $userDetails = [];
             if ($entries['count'] > 0) {
+                // Validate User Creds
+                $ldaprdn = $entries[0]['cn'][0];
+                $user_bind = @ldap_bind($ldapconn, $ldaprdn, $password);
+                if (!$user_bind) {
+                  ldap_unbind($ldapconn);
+                  return false;
+                }
+
                 $userDetails['Groups'] = [];
                 if (isset($entries[0][strtolower($config['attributes']['Groups'])])) {
                     $rbacgroups = $this->getRBACGroups();
