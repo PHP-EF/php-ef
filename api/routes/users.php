@@ -40,11 +40,11 @@ $app->patch('/user/{id}', function ($request, $response, $args) {
             $UN = $data['un'] ?? null;
             $PW = $data['pw'] ?? null;
             $Groups = $data['groups'] ?? null;
-            if (!$FN && !$SN && !$EM && !$UN && !$PW && !$Groups) {
-                $ib->api->setAPIResponseMessage('Nothing to update');
-            } else {
+            // if (!$FN && !$SN && !$EM && !$UN && !$PW && $Groups) {
+            //     $ib->api->setAPIResponseMessage('Nothing to update');
+            // } else {
                 $ib->auth->updateUser($args['id'],$UN,$PW,$FN,$SN,$EM,$Groups);
-            }
+            // }
         } else {
             $ib->api->setAPIResponse('Error','id missing from request',400);
         }
