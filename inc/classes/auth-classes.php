@@ -435,42 +435,42 @@ class Auth {
 
   public function login($request) {
     if (isset($request['un']) && isset($request['pw'])) {
-        $username = $request['un'];
-        $password = $request['pw'];
+      $username = $request['un'];
+      $password = $request['pw'];
 
-        // Try LDAP authentication first if enabled
-        if ($this->config->get('LDAP','enabled')) {
-          $LDAPAuth = $this->ldapAuthenticate($username, $password);
-          if ($LDAPAuth) {
-            // LDAP authentication successful
-            $user = $this->getUserByUsernameOrEmail($username, $username, true);
-            if ($user) {
-                return $this->handleSuccessfulLogin($user);
+      // Try LDAP authentication first if enabled
+      if ($this->config->get('LDAP','enabled')) {
+        $LDAPAuth = $this->ldapAuthenticate($username, $password);
+        if ($LDAPAuth) {
+          // LDAP authentication successful
+          $user = $this->getUserByUsernameOrEmail($username, $username, true);
+          if ($user) {
+              return $this->handleSuccessfulLogin($user);
+          } else {
+            $AttributeMap = [];
+            $AttributeMap['Username'] = $LDAPAuth['Username'] ?? null;
+            $AttributeMap['FirstName'] = $LDAPAuth['FirstName'] ?? null;
+            $AttributeMap['LastName'] = $LDAPAuth['LastName'] ?? null;
+            $AttributeMap['Email'] = $LDAPAuth['Email'] ?? null;
+            $AttributeMap['Groups'] = implode(",",$LDAPAuth['Groups']) ?? null;
+            if ($this->createUserIfNotExists($AttributeMap,"LDAP",$this->config->get('LDAP','AutoCreateUsers'))) {
+              return true;
             } else {
-              $AttributeMap = [];
-              $AttributeMap['Username'] = $LDAPAuth['Username'] ?? null;
-              $AttributeMap['FirstName'] = $LDAPAuth['FirstName'] ?? null;
-              $AttributeMap['LastName'] = $LDAPAuth['LastName'] ?? null;
-              $AttributeMap['Email'] = $LDAPAuth['Email'] ?? null;
-              $AttributeMap['Groups'] = implode(",",$LDAPAuth['Groups']) ?? null;
-              if ($this->createUserIfNotExists($AttributeMap,"LDAP",$this->config->get('LDAP','AutoCreateUsers'))) {
-                return true;
-              } else {
-                return false;
-              };
-            }
+              return false;
+            };
           }
         }
+      }
 
-        // Fallback to local authentication
-        $user = $this->getUserByUsernameOrEmail($username, $username, true);
-        if ($user && password_verify($user['salt'].$password, $user['password'])) {
-            return $this->handleSuccessfulLogin($user);
-        } else {
-            $this->api->setAPIResponse('Error', 'Invalid Credentials');
-            $this->logging->writeLog("Authentication", $username." failed to log in", "warning");
-            return false;
-        }
+      // Fallback to local authentication
+      $user = $this->getUserByUsernameOrEmail($username, $username, true);
+      if ($user && password_verify($user['salt'].$password, $user['password'])) {
+          return $this->handleSuccessfulLogin($user);
+      } else {
+          $this->api->setAPIResponse('Error', 'Invalid Credentials');
+          $this->logging->writeLog("Authentication", $username." failed to log in", "warning");
+          return false;
+      }
     } else {
         $this->api->setAPIResponse('Error', 'Invalid Credentials');
         return false;
@@ -485,20 +485,21 @@ class Auth {
         ldap_set_option($ldapconn, LDAP_OPT_REFERRALS, 0);
 
         // Authenticate as service account
-        $service_bind = @ldap_bind($ldapconn, $config['service_dn'], $config['service_password']);
-        if (!$service_bind) {
+        $ldapbind = @ldap_bind($ldapconn, $config['service_dn'], $config['service_password']);
+        if (!$ldapbind) {
             ldap_unbind($ldapconn);
-            return false;
+            // Authenticate as user
+            $ldaprdn = "cn=$username," . $config['user_dn'];
+            $ldapbind = @ldap_bind($ldapconn, $ldaprdn, $password);
+            if (!$ldapbind) {
+              return false;
+            }
         }
-
-        // Authenticate as user
-        $ldaprdn = $config['attributes']['Username']."=$username," . $config['user_dn'];
-        $ldapbind = @ldap_bind($ldapconn, $ldaprdn, $password);
 
         if ($ldapbind) {
             // Search for user details
             $filter = "(".$config['attributes']['Username']."=$username)";
-            $result = ldap_search($ldapconn, $config['base_dn'], $filter, [$config['attributes']['Groups'], $config['attributes']['FirstName'], $config['attributes']['LastName'], $config['attributes']['Email']]);
+            $result = ldap_search($ldapconn, $config['base_dn'], $filter, [$config['attributes']['Groups'], $config['attributes']['FirstName'], $config['attributes']['Username'], $config['attributes']['LastName'], $config['attributes']['Email']]);
             $entries = ldap_get_entries($ldapconn, $result);
 
             $userDetails = [];
@@ -511,7 +512,7 @@ class Auth {
                         }
                     }
                 }
-                $userDetails['Username'] = $username;
+                $userDetails['Username'] = $entries[0][$config['attributes']['Username']][0] ?? null;
                 $userDetails['FirstName'] = $entries[0][$config['attributes']['FirstName']][0] ?? null;
                 $userDetails['LastName'] = $entries[0][$config['attributes']['LastName']][0] ?? null;
                 $userDetails['Email'] = $entries[0][$config['attributes']['Email']][0] ?? null;
