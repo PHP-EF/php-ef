@@ -37,7 +37,7 @@
         "user_dn": "dc=example,dc=com",
         "base_dn": "dc=example,dc=com",
         "attributes": {
-            "Username": "uid",
+            "Username": "sAMAccountName",
             "FirstName": "givenName",
             "LastName": "sn",
             "Email": "mail",

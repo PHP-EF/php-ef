@@ -102,25 +102,25 @@ return '
                             <div class="col-lg-6 col-12">
                               <div class="form-group">
                                   <label for="LDAP[ldap_server]">LDAP Server</label>
-                                  <input type="text" class="form-control info-field" id="LDAP[ldap_server]" name="LDAP[ldap_server]" placeholder="ldap://fqdn">
+                                  <input type="text" class="form-control info-field" id="LDAP[ldap_server]" name="LDAP[ldap_server]" placeholder="ldap://fqdn:389">
                               </div>
                               <div class="form-group">
                                   <label for="LDAP[service_dn]">LDAP Bind Username</label>
-                                  <input type="text" class="form-control info-field" id="LDAP[service_dn]" name="LDAP[service_dn]">
+                                  <input type="text" class="form-control info-field" id="LDAP[service_dn]" name="LDAP[service_dn]" placeholder="cn=read-only-admin,dc=example,dc=com">
                               </div>
                               <div class="form-group">
                                   <label for="LDAP[service_dn]">LDAP Bind Password</label>
-                                  <input type="password" class="form-control info-field" id="LDAP[service_password]" name="LDAP[service_password]">
+                                  <input type="password" class="form-control info-field" id="LDAP[service_password]" name="LDAP[service_password]" placeholder="*********">
                               </div>
                             </div>
                             <div class="col-lg-6 col-12">
                               <div class="form-group">
                                 <label for="LDAP[user_dn]">User DN</label>
-                                <input type="text" class="form-control info-field" id="LDAP[user_dn]" name="LDAP[user_dn]">
+                                <input type="text" class="form-control info-field" id="LDAP[user_dn]" name="LDAP[user_dn]" placeholder="dc=example,dc=com">
                               </div>
                               <div class="form-group">
                                 <label for="LDAP[base_dn]">Base DN</label>
-                                <input type="text" class="form-control info-field" id="LDAP[base_dn]" name="LDAP[base_dn]">
+                                <input type="text" class="form-control info-field" id="LDAP[base_dn]" name="LDAP[base_dn]" placeholder="dc=example,dc=com">
                               </div>
                               <br>
                               <div class="form-group">
@@ -144,29 +144,29 @@ return '
                             <div class="col-md-6 col-12">
                               <div class="form-group">
                                   <label for="LDAP[attributes][Username]">Username Attribute</label>
-                                  <input type="text" class="form-control info-field" id="LDAP[attributes][Username]" name="LDAP[attributes][Username]">
+                                  <input type="text" class="form-control info-field" id="LDAP[attributes][Username]" name="LDAP[attributes][Username]" placeholder="sAMAccountName">
                               </div>
                               <div class="form-group">
                                   <label for="LDAP[attributes][FirstName]">First Name Attribute</label>
-                                  <input type="text" class="form-control info-field" id="LDAP[attributes][FirstName]" name="LDAP[attributes][FirstName]">
+                                  <input type="text" class="form-control info-field" id="LDAP[attributes][FirstName]" name="LDAP[attributes][FirstName]" placeholder="givenName">
                               </div>
                               <div class="form-group">
                                   <label for="LDAP[attributes][LastName]">Last Name Attribute</label>
-                                  <input type="text" class="form-control info-field" id="LDAP[attributes][LastName]" name="LDAP[attributes][LastName]">
+                                  <input type="text" class="form-control info-field" id="LDAP[attributes][LastName]" name="LDAP[attributes][LastName]" placeholder="sn">
                               </div>
                             </div>
                             <div class="col-md-6 col-12">
                               <div class="form-group">
                                   <label for="LDAP[attributes][Email]">Email Attribute</label>
-                                  <input class="form-control info-field" id="LDAP[attributes][Email]" name="LDAP[attributes][Email]">
+                                  <input class="form-control info-field" id="LDAP[attributes][Email]" name="LDAP[attributes][Email]" placeholder="mail">
                               </div>
                               <div class="form-group">
                                   <label for="LDAP[attributes][Groups]">Groups Attribute</label>
-                                  <input class="form-control info-field" id="LDAP[attributes][Groups]" name="LDAP[attributes][Groups]">
+                                  <input class="form-control info-field" id="LDAP[attributes][Groups]" name="LDAP[attributes][Groups]" placeholder="memberOf">
                               </div>
                               <div class="form-group">
                                   <label for="LDAP[attributes][DN]">Distinguished Name Attribute</label>
-                                  <input class="form-control info-field" id="LDAP[attributes][DN]" name="LDAP[attributes][DN]">
+                                  <input class="form-control info-field" id="LDAP[attributes][DN]" name="LDAP[attributes][DN]" placeholder="distinguishedName">
                               </div>
                             </div>
                           </div>
