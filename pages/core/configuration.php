@@ -164,6 +164,10 @@ return '
                                   <label for="LDAP[attributes][Groups]">Groups Attribute</label>
                                   <input class="form-control info-field" id="LDAP[attributes][Groups]" name="LDAP[attributes][Groups]">
                               </div>
+                              <div class="form-group">
+                                  <label for="LDAP[attributes][DN]">Distinguished Name Attribute</label>
+                                  <input class="form-control info-field" id="LDAP[attributes][DN]" name="LDAP[attributes][DN]">
+                              </div>
                             </div>
                           </div>
                         </div>
