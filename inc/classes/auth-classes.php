@@ -257,6 +257,7 @@ class Auth {
           $checkStmt->execute([':username' => $username, ':email' => $email, ':id' => $id]);
           if ($checkStmt->fetchColumn() > 0) {
             $this->api->setAPIResponse('Error','Username or Email already exists');
+            return false;
           }
         } catch (PDOException $e) {
             $this->api->setAPIResponse('Error',$e);
