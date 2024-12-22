@@ -2,10 +2,15 @@
 $app->get('/config', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
 
-    if ($ib->rbac->checkAccess("ADMIN-CONFIG")) {
+    if ($ib->auth->checkAccess("ADMIN-CONFIG")) {
         $config = $ib->config->get();
-        $config['Security']['salt'] = "********";
-        if ($config['SAML']['sp']['privateKey'] != "") {
+        if (!empty($config['Security']['salt'])) {
+            $config['Security']['salt'] = "********";
+        }
+        if (!empty($config['LDAP']['service_password'])) {
+            $config['LDAP']['service_password'] = "********";
+        }
+        if (!empty($config['SAML']['sp']['privateKey'])) {
             $config['SAML']['sp']['privateKey'] = "********";
         }
         $config['SAML']['idp']['x509cert'] = substr($config['SAML']['idp']['x509cert'],0,24).'...';
@@ -21,7 +26,7 @@ $app->get('/config', function ($request, $response, $args) {
 
 $app->patch('/config', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->rbac->checkAccess("ADMIN-CONFIG")) {
+    if ($ib->auth->checkAccess("ADMIN-CONFIG")) {
         $data = $ib->api->getAPIRequestData($request);
         $config = $ib->config->get();
         // Update the config values with the submitted data

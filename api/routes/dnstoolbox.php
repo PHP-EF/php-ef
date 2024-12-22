@@ -1,7 +1,7 @@
 <?php
 $app->get('/dnstoolbox', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->rbac->checkAccess("DNS-TOOLBOX")) {
+    if ($ib->auth->checkAccess("DNS-TOOLBOX")) {
         $data = $request->getQueryParams();
         if (isset($data['request']) && isset($data['domain'])) {
 

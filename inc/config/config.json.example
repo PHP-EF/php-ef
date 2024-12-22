@@ -28,8 +28,26 @@
     "Security": {
         "salt": "somesupersecurepasswordhere"
     },
+    "LDAP": {
+        "enabled": false,
+        "AutoCreateUsers": true,
+        "ldap_server": "ldap://ldap.forumsys.com",
+        "service_dn": "cn=read-only-admin,dc=example,dc=com",
+        "service_password": "password",
+        "user_dn": "dc=example,dc=com",
+        "base_dn": "dc=example,dc=com",
+        "attributes": {
+            "Username": "sAMAccountName",
+            "FirstName": "givenName",
+            "LastName": "sn",
+            "Email": "mail",
+            "Groups": "memberOf",
+            "DN": "distinguishedName"
+        }
+    },
     "SAML": {
         "enabled": false,
+        "AutoCreateUsers": true,
         "strict": true,
         "debug": false,
         "sp": {

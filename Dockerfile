@@ -11,6 +11,7 @@ RUN apk add --no-cache \
   composer \
   nginx \
   php83 \
+  php83-ldap \
   php83-ctype \
   php83-sqlite3 \
   php83-pdo \
