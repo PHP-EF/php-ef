@@ -515,10 +515,11 @@ class Auth {
                 }
                 $userDetails['Groups'] = [];
                 if (isset($entries[0][strtolower($config['attributes']['Groups'])])) {
-                    $rbacgroups = $this->getRBACGroups();
+                    $rbacgroups = array_column($this->getRBACGroups(),"Name");
                     foreach ($entries[0][strtolower($config['attributes']['Groups'])] as $groupKey => $groupVal) {
                         if ($groupKey !== 'count') {
-                            if (in_array($groupVal,$rbacgroups)) {
+                            $groupName = $this->extractCN($groupVal);
+                            if (in_array($groupName,$rbacgroups)) {
                               $userDetails['Groups'][] = $this->extractCN($groupVal);
                             }
                         }
