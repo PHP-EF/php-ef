@@ -446,22 +446,17 @@ class Auth {
         $LDAPAuth = $this->ldapAuthenticate($username, $password);
         if ($LDAPAuth) {
           // LDAP authentication successful
-          $user = $this->getUserByUsernameOrEmail($username, $username, true);
-          if ($user) {
-              return $this->handleSuccessfulLogin($user);
+          $AttributeMap = [];
+          $AttributeMap['Username'] = $LDAPAuth['Username'] ?? null;
+          $AttributeMap['FirstName'] = $LDAPAuth['FirstName'] ?? null;
+          $AttributeMap['LastName'] = $LDAPAuth['LastName'] ?? null;
+          $AttributeMap['Email'] = $LDAPAuth['Email'] ?? null;
+          $AttributeMap['Groups'] = implode(",",$LDAPAuth['Groups']) ?? null;
+          if ($this->createUserIfNotExists($AttributeMap,"LDAP",$this->config->get('LDAP','AutoCreateUsers'))) {
+            return true;
           } else {
-            $AttributeMap = [];
-            $AttributeMap['Username'] = $LDAPAuth['Username'] ?? null;
-            $AttributeMap['FirstName'] = $LDAPAuth['FirstName'] ?? null;
-            $AttributeMap['LastName'] = $LDAPAuth['LastName'] ?? null;
-            $AttributeMap['Email'] = $LDAPAuth['Email'] ?? null;
-            $AttributeMap['Groups'] = implode(",",$LDAPAuth['Groups']) ?? null;
-            if ($this->createUserIfNotExists($AttributeMap,"LDAP",$this->config->get('LDAP','AutoCreateUsers'))) {
-              return true;
-            } else {
-              return false;
-            };
-          }
+            return false;
+          };
         }
       }
 
@@ -546,24 +541,24 @@ class Auth {
   }
 
   private function handleSuccessfulLogin($user) {
-      $now = new DateTime();
-      $expires = new DateTime($user['passwordexpires']);
-      if ($expires < $now) {
-          $this->api->setAPIResponse('Expired', 'Password Expired');
-          return false;
-      }
+    $now = new DateTime();
+    $expires = new DateTime($user['passwordexpires']);
+    if ($expires < $now) {
+        $this->api->setAPIResponse('Expired', 'Password Expired');
+        return false;
+    }
 
-      // Update last login
-      $this->updateLastLogin($user['id']);
+    // Update last login
+    $this->updateLastLogin($user['id']);
 
-      // Generate JWT token
-      $jwt = $this->CoreJwt->generateToken($user['username'], $user['firstname'], $user['surname'], $user['email'], explode(',', $user['groups']), $user['type']);
-      // Set JWT as a cookie
-      setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
+    // Generate JWT token
+    $jwt = $this->CoreJwt->generateToken($user['username'], $user['firstname'], $user['surname'], $user['email'], explode(',', $user['groups']), $user['type']);
+    // Set JWT as a cookie
+    setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
 
-      $this->logging->writeLog("Authentication", $user['username']." successfully logged in", "info");
-      $this->api->setAPIResponseMessage('Successfully logged in');
-      return true;
+    $this->logging->writeLog("Authentication", $user['username']." successfully logged in", "info");
+    $this->api->setAPIResponseMessage('Successfully logged in');
+    return true;
   }
 
   private function createUserIfNotExists($AttributeMap,$Source,$AutoCreate = false) {
