@@ -41,7 +41,8 @@
             "FirstName": "givenName",
             "LastName": "sn",
             "Email": "mail",
-            "Groups": "memberOf"
+            "Groups": "memberOf",
+            "DN": "distinguishedName"
         }
     },
     "SAML": {
