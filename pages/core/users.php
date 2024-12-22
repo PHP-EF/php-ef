@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__."/../../inc/inc.php");
-  if ($ib->rbac->checkAccess("ADMIN-USERS") == false) {
+  if ($ib->auth->checkAccess("ADMIN-USERS") == false) {
     die();
   }
 return '

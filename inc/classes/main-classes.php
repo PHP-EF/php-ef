@@ -7,7 +7,6 @@ class ib {
   private $core;
   public $api;
   public $auth;
-  public $rbac;
   public $config;
   public $pages;
   public $logging;
@@ -19,7 +18,6 @@ class ib {
       $this->db = (new db(__DIR__.'/../config/app.db'))->db;
       $this->core = new core(__DIR__.'/../config/config.json');
       $this->auth = new Auth($this->core,$this->db,$this->api);
-      $this->rbac = new RBAC($this->core,$this->db,$this->auth,$this->api);
       $this->config = $this->core->config;
       $this->pages = new Pages($this->db,$this->api,$this->core);
       $this->logging = $this->core->logging;

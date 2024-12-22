@@ -64,9 +64,6 @@ class Auth {
   private $api;
 
   public function __construct($core,$db,$api) {
-    $this->db = $db;
-    $this->createUsersTable();
-
     // Set Config
     $this->config = $core->config;
     $this->logging = $core->logging;
@@ -76,6 +73,12 @@ class Auth {
 
     // SSO
     $this->sso = new OneLogin\Saml2\Auth($this->config->get("SAML"));
+
+    // SQL
+    $this->db = $db;
+    $this->createUsersTable();
+    $this->createRBACTable();
+    $this->createRBACResourcesDefinitionsTable();
 
     // API
     $this->api = $api;
@@ -509,9 +512,12 @@ class Auth {
             if ($entries['count'] > 0) {
                 $userDetails['Groups'] = [];
                 if (isset($entries[0][strtolower($config['attributes']['Groups'])])) {
+                    $rbacgroups = $this->getRBACGroups();
                     foreach ($entries[0][strtolower($config['attributes']['Groups'])] as $groupKey => $groupVal) {
                         if ($groupKey !== 'count') {
-                            $userDetails['Groups'][] = $this->extractCN($groupVal);
+                            if (in_array($groupVal,$rbacgroups)) {
+                              $userDetails['Groups'][] = $this->extractCN($groupVal);
+                            }
                         }
                     }
                 }
@@ -833,32 +839,7 @@ class Auth {
       echo '<script>top.window.location = "/login.php?redirect_uri="+parent.window.location.href.replace("#","?")</script>';
     }
   }
-}
 
-class RBAC {
-  private $config;
-  private $logging;
-  private $db;
-  private $auth;
-  private $api;
-
-  public function __construct($core,$db,$auth,$api) {
-    // Set Config
-    $this->config = $core->config;
-    $this->logging = $core->logging;
-
-    // Define Auth
-    $this->auth = $auth;
-
-    // SQL
-    $this->db = $db;
-    $this->createRBACTable();
-    $this->createRBACResourcesDefinitionsTable();
-
-    // API
-    $this->api = $api;
-  }
-  
   // Function to check if a role exists
   private function roleExists($roleName) {
     $stmt = $this->db->prepare("SELECT COUNT(*) FROM rbac WHERE Name = :name");
@@ -1114,7 +1095,7 @@ class RBAC {
   }
 
   public function checkAccess($Service = null) {
-    $User = $this->auth->getAuth();
+    $User = $this->getAuth();
     if (isset($User['Authenticated'])) {
       $groupsArr = array_map(function($value) {
         return "'" . $value . "'";

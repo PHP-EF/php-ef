@@ -64,7 +64,7 @@ foreach ($navLinks as $navLink) {
   switch($navLink['Type']) {
       case 'Link':
           // Create Nav Link
-          if (!$navLink['ACL'] || $ib->rbac->checkAccess($navLink['ACL'])) {
+          if (!$navLink['ACL'] || $ib->auth->checkAccess($navLink['ACL'])) {
               $MenuItem .= <<<EOD
               <li class="menu-item">
                   <div class="icon-link">
@@ -88,7 +88,7 @@ foreach ($navLinks as $navLink) {
           // Check if there are any valid links or submenus
           $hasValidLinks = false;
           foreach ($filteredMenuLinks as $filteredMenuLink) {
-              if ($ib->rbac->checkAccess($filteredMenuLink['ACL'])) {
+              if ($ib->auth->checkAccess($filteredMenuLink['ACL'])) {
                   $hasValidLinks = true;
                   break;
               }
@@ -97,7 +97,7 @@ foreach ($navLinks as $navLink) {
               foreach ($filteredSubMenuLinks as $filteredSubMenuLink) {
                   $filteredSubMenuNavLinks = filterNavLinksBySubMenu($navLinks, $filteredSubMenuLink['Name']);
                   foreach ($filteredSubMenuNavLinks as $filteredSubMenuNavLink) {
-                      if ($ib->rbac->checkAccess($filteredSubMenuNavLink['ACL'])) {
+                      if ($ib->auth->checkAccess($filteredSubMenuNavLink['ACL'])) {
                           $hasValidLinks = true;
                           break 2;
                       }
@@ -121,7 +121,7 @@ foreach ($navLinks as $navLink) {
 
               // Create Nav Menu Links
               foreach ($filteredMenuLinks as $filteredMenuLink) {
-                  if ($ib->rbac->checkAccess($filteredMenuLink['ACL'])) {
+                  if ($ib->auth->checkAccess($filteredMenuLink['ACL'])) {
                       $MenuItem .= <<<EOD
                       <li>
                           <a href="{$filteredMenuLink['Url']}" class="toggleFrame" data-page-name="{$filteredMenuLink['Title']}">
@@ -153,7 +153,7 @@ foreach ($navLinks as $navLink) {
                   $SubmenuLinks = '';
                   $filteredSubMenuNavLinks = filterNavLinksBySubMenu($navLinks, $filteredSubMenuLink['Name']);
                   foreach ($filteredSubMenuNavLinks as $filteredSubMenuNavLink) {
-                      if ($ib->rbac->checkAccess($filteredSubMenuNavLink['ACL'])) {
+                      if ($ib->auth->checkAccess($filteredSubMenuNavLink['ACL'])) {
                           $SubmenuLinks .= <<<EOD
                           <a href="{$filteredSubMenuNavLink['Url']}" class="toggleFrame" data-page-name="{$filteredSubMenuNavLink['Title']}">{$filteredSubMenuNavLink['Name']}</a>
                           EOD;

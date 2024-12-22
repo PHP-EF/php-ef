@@ -67,7 +67,7 @@ $app->get('/page/plugin/{plugin}/{page}', function ($request, $response, $args) 
 $app->get('/pages', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
 	$data = $request->getQueryParams();
-    if ($ib->rbac->checkAccess("ADMIN-PAGES")) {
+    if ($ib->auth->checkAccess("ADMIN-PAGES")) {
 		if (isset($data['type'])) {
 			$Menu = $data['menu'] ?? null;
 			$ib->api->setAPIResponseData($ib->pages->getByType($data['type'],$Menu));	
@@ -85,7 +85,7 @@ $app->get('/pages', function ($request, $response, $args) {
 
 $app->post('/pages', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->rbac->checkAccess("ADMIN-PAGES")) {
+    if ($ib->auth->checkAccess("ADMIN-PAGES")) {
         $data = $ib->api->getAPIRequestData($request);
         $Name = $data['name'] ?? exit($ib->api->setAPIResponse('Error','Name missing from request'));
         $Title = $data['title'] ?? null;
@@ -105,7 +105,7 @@ $app->post('/pages', function ($request, $response, $args) {
 
 $app->patch('/page/{id}', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->rbac->checkAccess("ADMIN-PAGES")) {
+    if ($ib->auth->checkAccess("ADMIN-PAGES")) {
         if (isset($args['id'])) {
 			$data = $ib->api->getAPIRequestData($request);
 			$Name = $data['name'] ?? null;
@@ -129,7 +129,7 @@ $app->patch('/page/{id}', function ($request, $response, $args) {
 
 $app->delete('/page/{id}', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->rbac->checkAccess("ADMIN-PAGES")) {
+    if ($ib->auth->checkAccess("ADMIN-PAGES")) {
         if (isset($args['id'])) {
             $ib->pages->delete($args['id']);
         } else {
@@ -144,7 +144,7 @@ $app->delete('/page/{id}', function ($request, $response, $args) {
 
 $app->get('/pages/hierarchy', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-	if ($ib->rbac->checkAccess("ADMIN-PAGES")) {
+	if ($ib->auth->checkAccess("ADMIN-PAGES")) {
 		$config = $ib->pages->get();
 		$navigation = [];
 

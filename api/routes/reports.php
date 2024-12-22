@@ -2,7 +2,7 @@
 $app->get('/reports/tracking/records', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
     $data = $request->getQueryParams();
-    if ($ib->rbac->checkAccess("REPORT-TRACKING")) {
+    if ($ib->auth->checkAccess("REPORT-TRACKING")) {
         if (isset($data['granularity']) && isset($data['filters'])) {
             $Filters = $data['filters'];
             $Start = $data['start'] ?? null;
@@ -23,7 +23,7 @@ $app->get('/reports/tracking/records', function ($request, $response, $args) {
 $app->get('/reports/tracking/stats', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
     $data = $request->getQueryParams();
-    if ($ib->rbac->checkAccess("REPORT-TRACKING")) {
+    if ($ib->auth->checkAccess("REPORT-TRACKING")) {
         if (isset($data['granularity']) && isset($data['filters'])) {
             $Filters = $data['filters'];
             if (isset($data['start'])) { $Start = $data['start']; } else { $Start = null; }
@@ -44,7 +44,7 @@ $app->get('/reports/tracking/stats', function ($request, $response, $args) {
 $app->get('/reports/tracking/summary', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
     $data = $request->getQueryParams();
-    if ($ib->rbac->checkAccess("REPORT-TRACKING")) {
+    if ($ib->auth->checkAccess("REPORT-TRACKING")) {
         $ib->logging->writeLog("Reporting","Queried Web Tracking Summary","debug");
         $ib->api->setAPIResponseData($ib->reporting->getTrackingSummary());
     }
