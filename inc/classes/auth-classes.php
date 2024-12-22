@@ -64,9 +64,6 @@ class Auth {
   private $api;
 
   public function __construct($core,$db,$api) {
-    $this->db = $db;
-    $this->createUsersTable();
-
     // Set Config
     $this->config = $core->config;
     $this->logging = $core->logging;
@@ -76,6 +73,12 @@ class Auth {
 
     // SSO
     $this->sso = new OneLogin\Saml2\Auth($this->config->get("SAML"));
+
+    // SQL
+    $this->db = $db;
+    $this->createUsersTable();
+    $this->createRBACTable();
+    $this->createRBACResourcesDefinitionsTable();
 
     // API
     $this->api = $api;
@@ -156,7 +159,7 @@ class Auth {
 
   public function newUser($username, $password, $firstname = '', $surname = '', $email = '', $groups = '', $type = 'Local', $expire = 'false') {
     // Set random password for SSO accounts
-    if ($type == 'SSO') {
+    if ($type == 'SSO' | $type == 'LDAP') {
       $password = $this->random_password(32);
     }
     if ($this->isPasswordComplex($password)) {
@@ -254,6 +257,7 @@ class Auth {
           $checkStmt->execute([':username' => $username, ':email' => $email, ':id' => $id]);
           if ($checkStmt->fetchColumn() > 0) {
             $this->api->setAPIResponse('Error','Username or Email already exists');
+            return false;
           }
         } catch (PDOException $e) {
             $this->api->setAPIResponse('Error',$e);
@@ -287,7 +291,7 @@ class Auth {
         $prepare[] = 'email = :email';
         $execute[':email'] = $email;
       }
-      if (!empty($groups)) {
+      if (!empty($groups) || $groups == "") {
         $prepare[] = 'groups = :groups';
         $execute[':groups'] = $groups;
       }
@@ -437,31 +441,186 @@ class Auth {
     if (isset($request['un']) && isset($request['pw'])) {
       $username = $request['un'];
       $password = $request['pw'];
-      $user = $this->getUserByUsernameOrEmail($username,$username,true);
-      if ($user && password_verify($user['salt'].$password, $user['password'])) { // Login Successful
-        $now = new DateTime();
-        $expires = new DateTime($user['passwordexpires']);
-        if ($expires < $now)  {
-          $this->api->setAPIResponse('Expired','Password Expired');
-          return false;
+
+      // Try LDAP authentication first if enabled
+      if ($this->config->get('LDAP','enabled')) {
+        $LDAPAuth = $this->ldapAuthenticate($username, $password);
+        if ($LDAPAuth) {
+          // LDAP authentication successful
+          $AttributeMap = [];
+          $AttributeMap['Username'] = $LDAPAuth['Username'] ?? null;
+          $AttributeMap['FirstName'] = $LDAPAuth['FirstName'] ?? null;
+          $AttributeMap['LastName'] = $LDAPAuth['LastName'] ?? null;
+          $AttributeMap['Email'] = $LDAPAuth['Email'] ?? null;
+          $AttributeMap['Groups'] = implode(",",$LDAPAuth['Groups']) ?? null;
+          if ($this->createUserIfNotExists($AttributeMap,"LDAP",$this->config->get('LDAP','AutoCreateUsers'))) {
+            return true;
+          } else {
+            return false;
+          };
         }
+      }
+
+      // Fallback to local authentication
+      $user = $this->getUserByUsernameOrEmail($username, $username, true);
+      if ($user && password_verify($user['salt'].$password, $user['password'])) {
+          return $this->handleSuccessfulLogin($user);
+      } else {
+          $this->api->setAPIResponse('Error', 'Invalid Credentials');
+          $this->logging->writeLog("Authentication", $username." failed to log in", "warning");
+          return false;
+      }
+    } else {
+        $this->api->setAPIResponse('Error', 'Invalid Credentials');
+        return false;
+    }
+  }
+
+  private function ldapAuthenticate($username, $password) {
+    $config = $this->config->get('LDAP');
+    $ldapconn = ldap_connect($config['ldap_server']);
+    if ($ldapconn) {
+        ldap_set_option($ldapconn, LDAP_OPT_PROTOCOL_VERSION, 3);
+        ldap_set_option($ldapconn, LDAP_OPT_REFERRALS, 0);
+
+        // Authenticate as service account
+        $service_bind = @ldap_bind($ldapconn, $config['service_dn'], $config['service_password']);
+        if (!$service_bind) {
+            ldap_unbind($ldapconn);
+            return false;
+        }
+
+        if ($service_bind) {
+            // Search for user details
+            $filter = "(".$config['attributes']['Username']."=$username)";
+            $result = ldap_search($ldapconn, $config['base_dn'], $filter, [$config['attributes']['DN'], $config['attributes']['Groups'], $config['attributes']['FirstName'], $config['attributes']['Username'], $config['attributes']['LastName'], $config['attributes']['Email']]);
+            $entries = ldap_get_entries($ldapconn, $result);
+
+            $userDetails = [];
+            if ($entries['count'] > 0) {
+                // Validate User Creds
+                $ldaprdn = $entries[0][strtolower(strtolower($config['attributes']['DN']))][0] ?? null;
+                if ($ldaprdn) {
+                  $user_bind = @ldap_bind($ldapconn, $ldaprdn, $password);
+                  if (!$user_bind) {
+                    ldap_unbind($ldapconn);
+                    return false;
+                  }
+                } else {
+                  return false;
+                }
+                $userDetails['Groups'] = [];
+                if (isset($entries[0][strtolower($config['attributes']['Groups'])])) {
+                    $rbacgroups = array_column($this->getRBACGroups(),"Name");
+                    foreach ($entries[0][strtolower($config['attributes']['Groups'])] as $groupKey => $groupVal) {
+                        if ($groupKey !== 'count') {
+                            $groupName = $this->extractCN($groupVal);
+                            if (in_array($groupName,$rbacgroups)) {
+                              $userDetails['Groups'][] = $this->extractCN($groupVal);
+                            }
+                        }
+                    }
+                }
+                $userDetails['Username'] = $entries[0][strtolower($config['attributes']['Username'])][0] ?? null;
+                $userDetails['FirstName'] = $entries[0][strtolower($config['attributes']['FirstName'])][0] ?? null;
+                $userDetails['LastName'] = $entries[0][strtolower($config['attributes']['LastName'])][0] ?? null;
+                $userDetails['Email'] = $entries[0][strtolower($config['attributes']['Email'])][0] ?? null;
+            }
+            ldap_unbind($ldapconn);
+            return $userDetails;
+        } else {
+            ldap_unbind($ldapconn);
+            return false;
+        }
+    }
+    return false;
+  }
+
+  private function extractCN($group) {
+    preg_match('/CN=([^,]+)/', $group, $matches);
+    return $matches[1];
+  }
+
+  private function handleSuccessfulLogin($user) {
+    $now = new DateTime();
+    $expires = new DateTime($user['passwordexpires']);
+    if ($expires < $now) {
+        $this->api->setAPIResponse('Expired', 'Password Expired');
+        return false;
+    }
+
+    // Update last login
+    $this->updateLastLogin($user['id']);
+
+    // Generate JWT token
+    $jwt = $this->CoreJwt->generateToken($user['username'], $user['firstname'], $user['surname'], $user['email'], explode(',', $user['groups']), $user['type']);
+    // Set JWT as a cookie
+    setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
+
+    $this->logging->writeLog("Authentication", $user['username']." successfully logged in", "info");
+    $this->api->setAPIResponseMessage('Successfully logged in');
+    return true;
+  }
+
+  private function createUserIfNotExists($AttributeMap,$Source,$AutoCreate = false) {
+    // Check if matching user exists
+    $user = $this->getUserByUsernameOrEmail($AttributeMap['Username'],$AttributeMap['Email']);
+
+    if ($user) {
+      // Update last login
+      $this->updateLastLogin($user['id']);
+      // Update user info from External Auth Source
+      $stmt = $this->db->prepare("UPDATE users SET username = :username, firstname = :firstname, surname = :surname, email = :email, groups = :groups WHERE id = :id");
+      $stmt->execute([':id' => $user['id'], ':username' => $AttributeMap['Username'], ':firstname' => $AttributeMap['FirstName'], ':surname' => $AttributeMap['LastName'], ':email' => $AttributeMap['Email'], ':groups' => $AttributeMap['Groups']]);
+      // Set Login to True
+      $Login = true;
+      $this->logging->writeLog("Authentication",$AttributeMap['Username']." successfully logged in with ".$Source,"info");
+    } else if ($AutoCreate) {
+      // User does not exist and will be created
+      $NewUser = $this->newUser($AttributeMap['Username'], null, $AttributeMap['FirstName'], $AttributeMap['LastName'], $AttributeMap['Email'], $AttributeMap['Groups'], $type = $Source);
+      if ($NewUser) {
         // Update last login
-        $this->updateLastLogin($user['id']);
-  
-        // Generate JWT token
-        $jwt = $this->CoreJwt->generateToken($user['username'],$user['firstname'],$user['surname'],$user['email'],explode(',',$user['groups']),$user['type']);
-        // Set JWT as a cookie
-        setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
-  
-        $this->logging->writeLog("Authentication",$username." successfully logged in","info");
-        return true;
-      } else { // Login failed
-        $this->api->setAPIResponse('Error','Invalid Credentials');
-        $this->logging->writeLog("Authentication",$username." failed to log in","warning");
+        $this->updateLastLogin($this->getUserByUsernameOrEmail($AttributeMap['Username'],$AttributeMap['Email'])['id']);
+        // Set Login to True
+        $Login = true;
+        $this->logging->writeLog("Authentication",$AttributeMap['Username']." successfully logged in with ".$Source." and new user was created","info");
+      } else {
+        $this->logging->writeLog("Authentication","Failed to create new user: ".$AttributeMap['Username']." from ".$Source.".","info");
+        $this->api->setAPIResponse('Error','Failed to create new user');
         return false;
       }
     } else {
-      $this->api->setAPIResponse('Error','Invalid Credentials');
+      // User does not exist and won't be created
+      $this->logging->writeLog("Authentication",$AttributeMap['Username']." successfully logged in with ".$Source.", but user does not exist","warning");
+      $this->api->setAPIResponse('Error','Successfully logged in, but user not found and automatic user creation is disabled.');
+      return false;
+    }
+
+    if ($Login) {
+      // Get latest user info
+      $userinfo = $this->getUserByUsernameOrEmail($AttributeMap['Username'],$AttributeMap['Email']);
+      // Set Username to Email if Username is not present as an attribute
+      if ($userinfo['username'] == "" && $userinfo['email'] != "") {
+        $Username = $userinfo['email'];
+      } else {
+        $Username = $userinfo['username'];
+      }
+
+      $LoginArr = array(
+        'Username' => $Username,
+        'FirstName' => $userinfo['firstname'],
+        'LastName' => $userinfo['surname'],
+        'Email' => $userinfo['email'],
+        'Groups' => explode(',',$userinfo['groups']),
+        'Type' => $userinfo['type']
+      );
+
+      // Generate JWT token
+      $jwt = $this->CoreJwt->generateToken($LoginArr['Username'],$LoginArr['FirstName'],$LoginArr['LastName'],$LoginArr['Email'],$LoginArr['Groups'],$LoginArr['Type']);
+      // Set JWT as a cookie
+      setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
+      $this->api->setAPIResponseMessage('Successfully logged in');
+      return true;
     }
   }
 
@@ -523,90 +682,26 @@ class Auth {
         }
         // Add SAML assertion to redis to prevent re-use
         if ($this->CoreJwt->isRevoked($this->sso->getLastAssertionId())) {
-          $Arr = array(
+          $this->logging->writeLog("Authentication",$AttributeMap['Username']." attempted a potential replay attack.","warning",$SAMLArr);
+          return array(
             'Status' => 'Error',
             'Message' => 'SAML Assertion has been revoked'
           );
-          $this->logging->writeLog("Authentication",$AttributeMap['Username']." attempted a potential replay attack.","warning",$SAMLArr);
         } else {
           $this->CoreJwt->revokeAssertion($this->sso->getLastAssertionId(), $this->sso->getNameId(), 3600); // Store SAML Assertion for 1 hour to allow for natural expiry
-
-          // Check if matching user exists
-          $user = $this->getUserByUsernameOrEmail($AttributeMap['Username'],$AttributeMap['Email']);
-
-          if ($user) {
-            // Update last login
-            $this->updateLastLogin($user['id']);
-            // Update user info from IdP
-            $stmt = $this->db->prepare("UPDATE users SET username = :username, firstname = :firstname, surname = :surname, email = :email, groups = :groups WHERE id = :id");
-            $stmt->execute([':id' => $user['id'], ':username' => $AttributeMap['Username'], ':firstname' => $AttributeMap['FirstName'], ':surname' => $AttributeMap['LastName'], ':email' => $AttributeMap['Email'], ':groups' => $AttributeMap['Groups']]);
-            // Set Login to True
-            $Login = true;
-            $this->logging->writeLog("Authentication",$AttributeMap['Username']." successfully logged in with SSO","info",$SAMLArr);
-            $Arr = array(
-              'Status' => 'Success',
-              'Message' => 'User logged in'
-            );
-          } else if ($this->config->get('SAML','AutoCreateUsers')) {
-            // User does not exist and will be created
-            $NewUser = $this->newUser($AttributeMap['Username'], null, $AttributeMap['FirstName'], $AttributeMap['LastName'], $AttributeMap['Email'], $AttributeMap['Groups'], $type = 'SSO');
-            if ($NewUser) {
-              // Update last login
-              $this->updateLastLogin($this->getUserByUsernameOrEmail($AttributeMap['Username'],$AttributeMap['Email'])['id']);
-              // Set Login to True
-              $Login = true;
-              $this->logging->writeLog("Authentication",$AttributeMap['Username']." successfully logged in with SSO and new user was created","info",$SAMLArr);
-              $Arr = array(
-                'Status' => 'Success',
-                'Message' => 'User created'
-              );
-            } else {
-              return $NewUser;
-            }
-          } else {
-            // User does not exist and won't be created
-            $this->logging->writeLog("Authentication",$AttributeMap['Username']." successfully logged in with SSO, but user does not exist","warning",$SAMLArr);
-            $Arr = array(
-              'Status' => 'Error',
-              'Message' => 'User does not exist'
-            );
-          }
-
-          if ($Login) {
-            // Get latest user info
-            $userinfo = $this->getUserByUsernameOrEmail($AttributeMap['Username'],$AttributeMap['Email']);
-            // Set Username to Email if Username is not present as an attribute
-            if ($userinfo['username'] == "" && $userinfo['email'] != "") {
-              $Username = $userinfo['email'];
-            } else {
-              $Username = $userinfo['username'];
-            }
-
-            $LoginArr = array(
-              'Username' => $Username,
-              'FirstName' => $userinfo['firstname'],
-              'LastName' => $userinfo['surname'],
-              'Email' => $userinfo['email'],
-              'Groups' => explode(',',$userinfo['groups']),
-              'Type' => $userinfo['type']
-            );
-
-            // Generate JWT token
-            $jwt = $this->CoreJwt->generateToken($LoginArr['Username'],$LoginArr['FirstName'],$LoginArr['LastName'],$LoginArr['Email'],$LoginArr['Groups'],$LoginArr['Type']);
-            // Set JWT as a cookie
-            setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
-            // Redirect
+          if ($this->createUserIfNotExists($AttributeMap,"SSO",$this->config->get('SAML','AutoCreateUsers'))) {
             header('Location: /');
+            return true;
+          } else {
+            return false;
           }
         }
-        return $Arr;
     } else { // Login failed
-        $Arr = array(
+        $this->logging->writeLog("Authentication","User failed to log in with SSO","warning");
+        return array(
           'Status' => 'Error',
           'Message' => 'SSO Authentication Failed'
         );
-        $this->logging->writeLog("Authentication","User failed to log in with SSO","warning");
-        return $Arr;
       }
   }
 
@@ -746,32 +841,7 @@ class Auth {
       echo '<script>top.window.location = "/login.php?redirect_uri="+parent.window.location.href.replace("#","?")</script>';
     }
   }
-}
 
-class RBAC {
-  private $config;
-  private $logging;
-  private $db;
-  private $auth;
-  private $api;
-
-  public function __construct($core,$db,$auth,$api) {
-    // Set Config
-    $this->config = $core->config;
-    $this->logging = $core->logging;
-
-    // Define Auth
-    $this->auth = $auth;
-
-    // SQL
-    $this->db = $db;
-    $this->createRBACTable();
-    $this->createRBACResourcesDefinitionsTable();
-
-    // API
-    $this->api = $api;
-  }
-  
   // Function to check if a role exists
   private function roleExists($roleName) {
     $stmt = $this->db->prepare("SELECT COUNT(*) FROM rbac WHERE Name = :name");
@@ -1027,7 +1097,7 @@ class RBAC {
   }
 
   public function checkAccess($Service = null) {
-    $User = $this->auth->getAuth();
+    $User = $this->getAuth();
     if (isset($User['Authenticated'])) {
       $groupsArr = array_map(function($value) {
         return "'" . $value . "'";

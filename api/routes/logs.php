@@ -1,7 +1,7 @@
 <?php
 $app->get('/logs', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->rbac->checkAccess("ADMIN-LOGS")) {
+    if ($ib->auth->checkAccess("ADMIN-LOGS")) {
         $data = $request->getQueryParams();
         $Date = $data['date'] ?? null;
         $ib->api->setAPIResponseData($ib->logging->getLog($Date));

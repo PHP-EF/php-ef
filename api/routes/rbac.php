@@ -1,9 +1,9 @@
 <?php
 $app->get('/rbac/group/{id}', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+    if ($ib->auth->checkAccess("ADMIN-RBAC")) {
         if (isset($args['id'])) {
-            $ib->api->setAPIResponseData($ib->rbac->getRBACGroupById($args['id']));
+            $ib->api->setAPIResponseData($ib->auth->getRBACGroupById($args['id']));
         } else {
             $ib->api->setAPIResponse('Error','id missing from request',400);
         }
@@ -16,8 +16,8 @@ $app->get('/rbac/group/{id}', function ($request, $response, $args) {
 
 $app->get('/rbac/groups', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
-        $ib->api->setAPIResponseData($ib->rbac->getRBACGroups());
+    if ($ib->auth->checkAccess("ADMIN-RBAC")) {
+        $ib->api->setAPIResponseData($ib->auth->getRBACGroups());
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
@@ -27,8 +27,8 @@ $app->get('/rbac/groups', function ($request, $response, $args) {
 
 $app->get('/rbac/groups/protected', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
-        $ib->api->setAPIResponseData($ib->rbac->getRBACGroups(true));
+    if ($ib->auth->checkAccess("ADMIN-RBAC")) {
+        $ib->api->setAPIResponseData($ib->auth->getRBACGroups(true));
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
@@ -38,8 +38,8 @@ $app->get('/rbac/groups/protected', function ($request, $response, $args) {
 
 $app->get('/rbac/groups/configurable', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
-        $ib->api->setAPIResponseData($ib->rbac->getRBACGroups(null,true));
+    if ($ib->auth->checkAccess("ADMIN-RBAC")) {
+        $ib->api->setAPIResponseData($ib->auth->getRBACGroups(null,true));
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
@@ -49,11 +49,11 @@ $app->get('/rbac/groups/configurable', function ($request, $response, $args) {
 
 $app->post('/rbac/groups', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+    if ($ib->auth->checkAccess("ADMIN-RBAC")) {
         $data = $ib->api->getAPIRequestData($request);
         if (isset($data['name'])) {
             $Description = $data['description'] ?? null;
-            $ib->rbac->newRBACGroup($data['name'],$Description);
+            $ib->auth->newRBACGroup($data['name'],$Description);
         }
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -65,7 +65,7 @@ $app->post('/rbac/groups', function ($request, $response, $args) {
 $app->patch('/rbac/group/{id}', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
     $data = $ib->api->getAPIRequestData($request);
-    if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+    if ($ib->auth->checkAccess("ADMIN-RBAC")) {
         if (isset($args['id'])) {
             $GroupName = $data['name'] ?? null;
             $Description = $data['description'] ?? null;
@@ -74,7 +74,7 @@ $app->patch('/rbac/group/{id}', function ($request, $response, $args) {
             if (!$GroupName && !$Description && !$Key && !$Value) {
                 $ib->api->setAPIResponseMessage('Nothing to update');
             } else {
-                $ib->rbac->updateRBACGroup($args['id'],$GroupName,$Description,$Key,$Value);
+                $ib->auth->updateRBACGroup($args['id'],$GroupName,$Description,$Key,$Value);
             }
         } else {
             $ib->api->setAPIResponse('Error','id missing from request',400);
@@ -88,9 +88,9 @@ $app->patch('/rbac/group/{id}', function ($request, $response, $args) {
 
 $app->delete('/rbac/group/{id}', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+    if ($ib->auth->checkAccess("ADMIN-RBAC")) {
         if (isset($args['id'])) {
-            $ib->rbac->deleteRBACGroup($args['id']);
+            $ib->auth->deleteRBACGroup($args['id']);
         } else {
             $ib->api->setAPIResponse('Error','id missing from request',400);
         }
@@ -103,8 +103,8 @@ $app->delete('/rbac/group/{id}', function ($request, $response, $args) {
 
 $app->get('/rbac/roles', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
-        $ib->api->setAPIResponseData($ib->rbac->getRBACRoles());
+    if ($ib->auth->checkAccess("ADMIN-RBAC")) {
+        $ib->api->setAPIResponseData($ib->auth->getRBACRoles());
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
@@ -114,11 +114,11 @@ $app->get('/rbac/roles', function ($request, $response, $args) {
 
 $app->post('/rbac/roles', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+    if ($ib->auth->checkAccess("ADMIN-RBAC")) {
         $data = $ib->api->getAPIRequestData($request);
         if (isset($data['name'])) {
             $Description = $data['description'] ?? null;
-            $ib->rbac->newRBACRole($data['name'],$Description);
+            $ib->auth->newRBACRole($data['name'],$Description);
         }
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -129,12 +129,12 @@ $app->post('/rbac/roles', function ($request, $response, $args) {
 
 $app->patch('/rbac/role/{id}', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+    if ($ib->auth->checkAccess("ADMIN-RBAC")) {
         $data = $ib->api->getAPIRequestData($request);
         if (isset($args['id'])) {
             $RoleName = $data['name'] ?? null;
             $RoleDescription = $data['description'] ?? null;
-            $ib->rbac->updateRBACRole($args['id'],$RoleName,$RoleDescription);
+            $ib->auth->updateRBACRole($args['id'],$RoleName,$RoleDescription);
         } else {
             $ib->api->setAPIResponse('Error','id missing from request',400);
         }
@@ -147,9 +147,9 @@ $app->patch('/rbac/role/{id}', function ($request, $response, $args) {
 
 $app->delete('/rbac/role/{id}', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->rbac->checkAccess("ADMIN-RBAC")) {
+    if ($ib->auth->checkAccess("ADMIN-RBAC")) {
         if (isset($args['id'])) {
-            $ib->rbac->deleteRBACRole($args['id']);
+            $ib->auth->deleteRBACRole($args['id']);
         } else {
             $ib->api->setAPIResponse('Error','id missing from request',400);
         }
@@ -167,7 +167,7 @@ $app->get('/rbac/checkAccess', function ($request, $response, $args) {
         $Result = array(
             "node" => $_REQUEST['node']
         );
-        if ($ib->rbac->checkAccess($data['node'])) {
+        if ($ib->auth->checkAccess($data['node'])) {
             $Result['permitted'] = true;
         } else {
             $Result['permitted'] = false;

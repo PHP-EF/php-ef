@@ -1,6 +1,6 @@
 <?php
 $ib = new ib();
-if ($ib->rbac->checkAccess("REPORT-TRACKING") == false) {
+if ($ib->auth->checkAccess("REPORT-TRACKING") == false) {
   die();
 }
 return '

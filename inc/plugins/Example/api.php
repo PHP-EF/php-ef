@@ -4,7 +4,7 @@
 // **
 $app->get('/plugins/example/settings', function ($request, $response, $args) {
 	$examplePlugin = new examplePlugin();
-	// if ($examplePlugin->checkAccess('ACL-PLUGIN-...')) {
+	// if ($examplePlugin->auth->checkAccess('ACL-PLUGIN-...')) {
 		$examplePlugin->api->setAPIResponseData($examplePlugin->_pluginGetSettings());
 	// }
 	$response->getBody()->write(jsonE($GLOBALS['api']));

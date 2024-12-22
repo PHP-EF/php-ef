@@ -128,7 +128,8 @@ $app->post('/auth/acs', function ($request, $response, $args) {
     $ib = ($request->getAttribute('ib')) ?? new ib();
     if ($ib->config->get('SAML', 'enabled')) {
         if (isset($ib->api->getAPIRequestData($request)['SAMLResponse'])) {
-            $response->getBody()->write(jsonE($ib->auth->acs()));
+            $ib->auth->acs();
+			$response->getBody()->write(jsonE($GLOBALS['api']));
         }
     } else {
 		$ib->api->setAPIResponse('Error', 'SSO is not enabled', '400');

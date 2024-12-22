@@ -1,6 +1,6 @@
 <?php
   require_once(__DIR__."/../../inc/inc.php");
-  if ($ib->rbac->checkAccess("ADMIN-CONFIG") == false) {
+  if ($ib->auth->checkAccess("ADMIN-CONFIG") == false) {
     die();
   }
 
@@ -83,103 +83,212 @@ return '
               <br>
               <div class="card border-secondary">
                 <div class="card-title">
-                  <h5>SAML Configuration</h5>
+                  <h5>Authentication</h5>
                 </div>
-                <div class="row">
-                  <div class="col-lg-6 col-12">
-                    <h4>Service Provider (SP)</h4>
-                    <div class="form-group">
-                        <label for="SAML[sp][entityId]">Entity ID</label>
-                        <input type="text" class="form-control info-field" id="SAML[sp][entityId]" name="SAML[sp][entityId]">
-                    </div>
-                    <div class="form-group">
-                        <label for="SAML[sp][assertionConsumerService][url]">Assertion Consumer Service URL</label>
-                        <input type="text" class="form-control info-field" id="SAML[sp][assertionConsumerService][url]" name="SAML[sp][assertionConsumerService][url]">
-                    </div>
-                    <div class="form-group">
-                        <label for="SAML[sp][singleLogoutService][url]">Single Logout Service URL</label>
-                        <input type="text" class="form-control info-field" id="SAML[sp][singleLogoutService][url]" name="SAML[sp][singleLogoutService][url]">
-                    </div>
-                    <div class="form-group">
-                        <label for="SAML[sp][x509cert]">X.509 Certificate</label>
-                        <textarea class="form-control info-field" id="SAML[sp][x509cert]" name="SAML[sp][x509cert]"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="SAML[sp][privateKey]">Private Key</label>
-                        <textarea class="form-control info-field" id="SAML[sp][privateKey]" name="SAML[sp][privateKey]"></textarea>
-                    </div>
-                  </div>
-                  <div class="col-lg-6 col-12">
-                    <h4>Identity Provider (IdP)</h4>
-                    <div class="form-group">
-                        <label for="SAML[idp][entityId]">Entity ID</label>
-                        <input type="text" class="form-control info-field" id="SAML[idp][entityId]" name="SAML[idp][entityId]">
-                    </div>
-                    <div class="form-group">
-                        <label for="SAML[idp][singleSignOnService][url]">Single Sign-On Service URL</label>
-                        <input type="text" class="form-control info-field" id="SAML[idp][singleSignOnService][url]" name="SAML[idp][singleSignOnService][url]">
-                    </div>
-                    <div class="form-group">
-                        <label for="SAML[idp][singleLogoutService][url]">Single Logout Service URL</label>
-                        <input type="text" class="form-control info-field" id="SAML[idp][singleLogoutService][url]" name="SAML[idp][singleLogoutService][url]">
-                    </div>
-                    <div class="form-group">
-                        <label for="SAML[idp][x509cert]">X.509 Certificate</label>
-                        <textarea class="form-control info-field" id="SAML[idp][x509cert]" name="SAML[idp][x509cert]"></textarea>
-                    </div>
-                    <br>
-                    <div class="form-group">
-                      <div class="form-check form-switch">
-                        <label class="form-check-label" for="SAML[enabled]">Enable SAML</label>
-                        <input class="form-check-input info-field" type="checkbox" id="SAML[enabled]" name="SAML[enabled]">
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <div class="form-check form-switch">
-                        <label class="form-check-label" for="SAML[AutoCreateUsers]">Auto-Create Users</label>
-                        <input class="form-check-input info-field" type="checkbox" id="SAML[AutoCreateUsers]" name="SAML[AutoCreateUsers]">
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <div class="form-check form-switch">
-                        <label class="form-check-label" for="SAML[strict]">Use Strict Mode</label>
-                        <input class="form-check-input info-field" type="checkbox" id="SAML[strict]" name="SAML[strict]">
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <div class="form-check form-switch">
-                        <label class="form-check-label" for="SAML[debug]">Use Debug Mode</label>
-                        <input class="form-check-input info-field" type="checkbox" id="SAML[debug]" name="SAML[debug]">
+                <div class="accordion" id="ldapConfigAccordian">
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="ldapConfigAccordianHeading">
+                      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#ldapConfig" aria-expanded="true" aria-controls="ldapConfig">
+                      LDAP Configuration
+                      </button>
+                    </h2>
+                    <div id="ldapConfig" class="accordion-collapse collapse" aria-labelledby="ldapConfigAccordianHeading" data-bs-parent="#ldapConfigAccordian">
+                      <div class="accordion-body">
+                        <div class="card border-secondary">
+                          <div class="card-title">
+                            <h5>LDAP Configuration</h5>
+                          </div>
+                          <div class="row">
+                            <div class="col-lg-6 col-12">
+                              <div class="form-group">
+                                  <label for="LDAP[ldap_server]">LDAP Server</label>
+                                  <input type="text" class="form-control info-field" id="LDAP[ldap_server]" name="LDAP[ldap_server]" placeholder="ldap://fqdn">
+                              </div>
+                              <div class="form-group">
+                                  <label for="LDAP[service_dn]">LDAP Bind Username</label>
+                                  <input type="text" class="form-control info-field" id="LDAP[service_dn]" name="LDAP[service_dn]">
+                              </div>
+                              <div class="form-group">
+                                  <label for="LDAP[service_dn]">LDAP Bind Password</label>
+                                  <input type="password" class="form-control info-field" id="LDAP[service_password]" name="LDAP[service_password]">
+                              </div>
+                            </div>
+                            <div class="col-lg-6 col-12">
+                              <div class="form-group">
+                                <label for="LDAP[user_dn]">User DN</label>
+                                <input type="text" class="form-control info-field" id="LDAP[user_dn]" name="LDAP[user_dn]">
+                              </div>
+                              <div class="form-group">
+                                <label for="LDAP[base_dn]">Base DN</label>
+                                <input type="text" class="form-control info-field" id="LDAP[base_dn]" name="LDAP[base_dn]">
+                              </div>
+                              <br>
+                              <div class="form-group">
+                                <div class="form-check form-switch">
+                                  <label class="form-check-label" for="LDAP[enabled]">Enable LDAP</label>
+                                  <input class="form-check-input info-field" type="checkbox" id="LDAP[enabled]" name="LDAP[enabled]">
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="form-check form-switch">
+                                  <label class="form-check-label" for="LDAP[AutoCreateUsers]">Auto-Create Users</label>
+                                  <input class="form-check-input info-field" type="checkbox" id="LDAP[AutoCreateUsers]" name="LDAP[AutoCreateUsers]">
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <hr>
+                          <div class="row">
+                            <h4>User Attribute Mapping</h4>
+                            <p>Used for mapping LDAP Attributes to the account information</p>
+                            <div class="col-md-6 col-12">
+                              <div class="form-group">
+                                  <label for="LDAP[attributes][Username]">Username Attribute</label>
+                                  <input type="text" class="form-control info-field" id="LDAP[attributes][Username]" name="LDAP[attributes][Username]">
+                              </div>
+                              <div class="form-group">
+                                  <label for="LDAP[attributes][FirstName]">First Name Attribute</label>
+                                  <input type="text" class="form-control info-field" id="LDAP[attributes][FirstName]" name="LDAP[attributes][FirstName]">
+                              </div>
+                              <div class="form-group">
+                                  <label for="LDAP[attributes][LastName]">Last Name Attribute</label>
+                                  <input type="text" class="form-control info-field" id="LDAP[attributes][LastName]" name="LDAP[attributes][LastName]">
+                              </div>
+                            </div>
+                            <div class="col-md-6 col-12">
+                              <div class="form-group">
+                                  <label for="LDAP[attributes][Email]">Email Attribute</label>
+                                  <input class="form-control info-field" id="LDAP[attributes][Email]" name="LDAP[attributes][Email]">
+                              </div>
+                              <div class="form-group">
+                                  <label for="LDAP[attributes][Groups]">Groups Attribute</label>
+                                  <input class="form-control info-field" id="LDAP[attributes][Groups]" name="LDAP[attributes][Groups]">
+                              </div>
+                              <div class="form-group">
+                                  <label for="LDAP[attributes][DN]">Distinguished Name Attribute</label>
+                                  <input class="form-control info-field" id="LDAP[attributes][DN]" name="LDAP[attributes][DN]">
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <hr>
-                <div class="row">
-                  <h4>User Attribute Mapping</h4>
-                  <p>Used for mapping SAML Attributes to the account information</p>
-                  <div class="col-md-6 col-12">
-                    <div class="form-group">
-                        <label for="SAML[attributes][Username]">Username Attribute</label>
-                        <input type="text" class="form-control info-field" id="SAML[attributes][Username]" name="SAML[attributes][Username]">
-                    </div>
-                    <div class="form-group">
-                        <label for="SAML[attributes][FirstName]">First Name Attribute</label>
-                        <input type="text" class="form-control info-field" id="SAML[attributes][FirstName]" name="SAML[attributes][FirstName]">
-                    </div>
-                    <div class="form-group">
-                        <label for="SAML[attributes][LastName]">Last Name Attribute</label>
-                        <input type="text" class="form-control info-field" id="SAML[attributes][LastName]" name="SAML[attributes][LastName]">
-                    </div>
-                  </div>
-                  <div class="col-md-6 col-12">
-                    <div class="form-group">
-                        <label for="SAML[attributes][Email]">Email Attribute</label>
-                        <input class="form-control info-field" id="SAML[attributes][Email]" name="SAML[attributes][Email]">
-                    </div>
-                    <div class="form-group">
-                        <label for="SAML[attributes][Groups]">Groups Attribute</label>
-                        <input class="form-control info-field" id="SAML[attributes][Groups]" name="SAML[attributes][Groups]">
+                <br>
+                <div class="accordion" id="samlConfigAccordian">
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="samlConfigAccordianHeading">
+                      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#samlConfig" aria-expanded="true" aria-controls="samlConfig">
+                      SAML Configuration
+                      </button>
+                    </h2>
+                    <div id="samlConfig" class="accordion-collapse collapse" aria-labelledby="samlConfigAccordianHeading" data-bs-parent="#samlConfigAccordian">
+                      <div class="accordion-body">
+                        <div class="card border-secondary">
+                          <div class="card-title">
+                            <h5>SAML Configuration</h5>
+                          </div>
+                          <div class="row">
+                            <div class="col-lg-6 col-12">
+                              <h4>Service Provider (SP)</h4>
+                              <div class="form-group">
+                                  <label for="SAML[sp][entityId]">Entity ID</label>
+                                  <input type="text" class="form-control info-field" id="SAML[sp][entityId]" name="SAML[sp][entityId]">
+                              </div>
+                              <div class="form-group">
+                                  <label for="SAML[sp][assertionConsumerService][url]">Assertion Consumer Service URL</label>
+                                  <input type="text" class="form-control info-field" id="SAML[sp][assertionConsumerService][url]" name="SAML[sp][assertionConsumerService][url]">
+                              </div>
+                              <div class="form-group">
+                                  <label for="SAML[sp][singleLogoutService][url]">Single Logout Service URL</label>
+                                  <input type="text" class="form-control info-field" id="SAML[sp][singleLogoutService][url]" name="SAML[sp][singleLogoutService][url]">
+                              </div>
+                              <div class="form-group">
+                                  <label for="SAML[sp][x509cert]">X.509 Certificate</label>
+                                  <textarea class="form-control info-field" id="SAML[sp][x509cert]" name="SAML[sp][x509cert]"></textarea>
+                              </div>
+                              <div class="form-group">
+                                  <label for="SAML[sp][privateKey]">Private Key</label>
+                                  <textarea class="form-control info-field" id="SAML[sp][privateKey]" name="SAML[sp][privateKey]"></textarea>
+                              </div>
+                            </div>
+                            <div class="col-lg-6 col-12">
+                              <h4>Identity Provider (IdP)</h4>
+                              <div class="form-group">
+                                  <label for="SAML[idp][entityId]">Entity ID</label>
+                                  <input type="text" class="form-control info-field" id="SAML[idp][entityId]" name="SAML[idp][entityId]">
+                              </div>
+                              <div class="form-group">
+                                  <label for="SAML[idp][singleSignOnService][url]">Single Sign-On Service URL</label>
+                                  <input type="text" class="form-control info-field" id="SAML[idp][singleSignOnService][url]" name="SAML[idp][singleSignOnService][url]">
+                              </div>
+                              <div class="form-group">
+                                  <label for="SAML[idp][singleLogoutService][url]">Single Logout Service URL</label>
+                                  <input type="text" class="form-control info-field" id="SAML[idp][singleLogoutService][url]" name="SAML[idp][singleLogoutService][url]">
+                              </div>
+                              <div class="form-group">
+                                  <label for="SAML[idp][x509cert]">X.509 Certificate</label>
+                                  <textarea class="form-control info-field" id="SAML[idp][x509cert]" name="SAML[idp][x509cert]"></textarea>
+                              </div>
+                              <br>
+                              <div class="form-group">
+                                <div class="form-check form-switch">
+                                  <label class="form-check-label" for="SAML[enabled]">Enable SAML</label>
+                                  <input class="form-check-input info-field" type="checkbox" id="SAML[enabled]" name="SAML[enabled]">
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="form-check form-switch">
+                                  <label class="form-check-label" for="SAML[AutoCreateUsers]">Auto-Create Users</label>
+                                  <input class="form-check-input info-field" type="checkbox" id="SAML[AutoCreateUsers]" name="SAML[AutoCreateUsers]">
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="form-check form-switch">
+                                  <label class="form-check-label" for="SAML[strict]">Use Strict Mode</label>
+                                  <input class="form-check-input info-field" type="checkbox" id="SAML[strict]" name="SAML[strict]">
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="form-check form-switch">
+                                  <label class="form-check-label" for="SAML[debug]">Use Debug Mode</label>
+                                  <input class="form-check-input info-field" type="checkbox" id="SAML[debug]" name="SAML[debug]">
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <hr>
+                          <div class="row">
+                            <h4>User Attribute Mapping</h4>
+                            <p>Used for mapping SAML Attributes to the account information</p>
+                            <div class="col-md-6 col-12">
+                              <div class="form-group">
+                                  <label for="SAML[attributes][Username]">Username Attribute</label>
+                                  <input type="text" class="form-control info-field" id="SAML[attributes][Username]" name="SAML[attributes][Username]">
+                              </div>
+                              <div class="form-group">
+                                  <label for="SAML[attributes][FirstName]">First Name Attribute</label>
+                                  <input type="text" class="form-control info-field" id="SAML[attributes][FirstName]" name="SAML[attributes][FirstName]">
+                              </div>
+                              <div class="form-group">
+                                  <label for="SAML[attributes][LastName]">Last Name Attribute</label>
+                                  <input type="text" class="form-control info-field" id="SAML[attributes][LastName]" name="SAML[attributes][LastName]">
+                              </div>
+                            </div>
+                            <div class="col-md-6 col-12">
+                              <div class="form-group">
+                                  <label for="SAML[attributes][Email]">Email Attribute</label>
+                                  <input class="form-control info-field" id="SAML[attributes][Email]" name="SAML[attributes][Email]">
+                              </div>
+                              <div class="form-group">
+                                  <label for="SAML[attributes][Groups]">Groups Attribute</label>
+                                  <input class="form-control info-field" id="SAML[attributes][Groups]" name="SAML[attributes][Groups]">
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
