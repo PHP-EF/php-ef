@@ -592,17 +592,17 @@ function splitUrl(url) {
   };
 }
 
-// Function to split pathname into Page Category and Page Name
-function splitPathname(pathname) {
-  console.log(pathname);
-  if (pathname === '/') {
+// Function to split hash into Page Category and Page Name
+function splitHash(hash) {
+  const pagesMap = hash.match(/^#page=(plugin\/)?([^\/]+)\/([^\/]+)$/);
+  if (pagesMap) {
     return {
-      pageCategory: 'home',
-      pageName: 'home'
+      pageCategory: pagesMap[2],
+      pageName: pagesMap[3]
     };
   }
 
-  const homeMatch = pathname.match(/^\/([^\/]+)$/);
+  const homeMatch = window.location.pathname.match(/^\/([^\/]+)$/);
   if (homeMatch) {
     return {
       pageCategory: 'home',
@@ -610,11 +610,10 @@ function splitPathname(pathname) {
     };
   }
 
-  const pagesMap = pathname.match(/^#page=(plugin\/)?([^\/]+)\/([^\/]+)$/);
-  if (pagesMap) {
+  if (hash === '') {
     return {
-      pageCategory: pagesMap[2],
-      pageName: pagesMap[3]
+      pageCategory: 'home',
+      pageName: 'home'
     };
   }
 
@@ -666,7 +665,7 @@ const userTracking = {
     currentPage: window.location.href,
     browserInfo: getBrowserInfo(),
     urlComponents: splitUrl(window.location.href),
-    pageDetails: splitPathname(window.location.hash),
+    pageDetails: splitHash(window.location.hash),
     tId: tId
   },
   init: function(config) {
@@ -695,7 +694,7 @@ const userTracking = {
     this.trackTimeOnPage();
     this.data.currentPage = window.location.href;
     this.data.urlComponents = splitUrl(window.location.href);
-    this.data.pageDetails = splitPathname(window.location.hash);
+    this.data.pageDetails = splitHash(window.location.hash);
     this.data.startTime = Date.now();
   },
   processData: function() {

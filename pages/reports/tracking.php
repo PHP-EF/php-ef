@@ -501,7 +501,7 @@ return '
       labels: categories,
       yaxis: [{
         title: {
-          text: "Time Spent (hrs)"
+          text: "Time Spent"
         },
         labels: {
           formatter: function (val) {
@@ -527,10 +527,20 @@ return '
         y: {
           formatter: function (val, { series, seriesIndex, dataPointIndex, w }) {
             if (w.globals.seriesNames[seriesIndex] === "Time Spent") {
-              const hours = Math.floor(val / 3600);
-              const minutes = Math.floor((val % 3600) / 60);
-              const seconds = Math.floor(val % 60);
-              return `${hours}h ${minutes}m ${seconds}s`;
+              const days = Math.floor(val / 86400); // 86400 seconds in a day
+              const hours = Math.floor((val % 86400) / 3600); // remaining hours
+              const minutes = Math.floor((val % 3600) / 60); // remaining minutes
+              const seconds = Math.floor(val % 60); // remaining seconds
+
+              if (days > 0) {
+                return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+              } else if (hours > 0) {
+                return `${hours}h ${minutes}m ${seconds}s`;
+              } else if (minutes > 0) {
+                return `${minutes}m ${seconds}s`;
+              } else {
+                return `${seconds}s`;
+              }
             } else {
               return val;
             }
