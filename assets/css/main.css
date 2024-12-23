@@ -1263,6 +1263,14 @@ body .bootstrap-table .fixed-table-container .fixed-table-body {
   margin: auto;
 }
 
+/* Form Generation */
+.input-group .input-group-btn {
+  right: 10px;
+  top: 5px;
+  position: absolute;
+  z-index: 1000;
+}
+
 /* Responsive Styling */
 @media (min-width: 576px) {
   body .container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl {

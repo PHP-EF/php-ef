@@ -77,6 +77,17 @@ class Config {
     }
     file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
   }
+
+  public function setPlugin(&$config, $data, $plugin) {
+    foreach ($data as $key => $value) {
+      if (is_array($value) && isset($config[$key]) && is_array($config[$key])) {
+          $this->setPlugin($config[$key], $value);
+      } else {
+          $config['Plugins'][$plugin][$key] = $value;
+      }
+    }
+    file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+  }
 }
 
 class Pages {

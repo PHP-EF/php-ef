@@ -2,7 +2,7 @@
 // **
 // USED TO DEFINE CUSTOM API ROUTES
 // **
-$app->get('/plugins/example/settings', function ($request, $response, $args) {
+$app->get('/plugin/example/settings', function ($request, $response, $args) {
 	$examplePlugin = new examplePlugin();
 	// if ($examplePlugin->auth->checkAccess('ACL-PLUGIN-...')) {
 		$examplePlugin->api->setAPIResponseData($examplePlugin->_pluginGetSettings());

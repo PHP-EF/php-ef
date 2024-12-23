@@ -23,6 +23,9 @@ return '
         <li class="nav-item">
           <a class="nav-link" id="customisation-tab" data-toggle="tab" href="#customisation" role="tab" aria-controls="customisation" aria-selected="false">Customisation</a>
         </li>
+                <li class="nav-item">
+          <a class="nav-link" id="plugins-tab" data-toggle="tab" href="#plugins" role="tab" aria-controls="plugins" aria-selected="false">Plugins</a>
+        </li>
       </ul>
       <div class="tab-content" id="tabContent">
         <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
@@ -363,6 +366,41 @@ return '
             </div>
           </form>
         </div>
+        <div class="tab-pane fade" id="plugins" role="tabpanel" aria-labelledby="plugins-tab">
+          <div class="my-4">
+            <h5 class="mb-0 mt-5">Plugins</h5>
+            <p>Use the following to configure Plugins installed on '.$ib->config->get('Styling')['websiteTitle'].'.</p>
+          </div>
+          <div class="card">
+            <div class="container">
+              <table data-url="/api/config/plugins"
+                data-data-field="data"
+                data-toggle="table"
+                data-search="true"
+                data-filter-control="true"
+                data-show-refresh="true"
+                data-pagination="true"
+                data-toolbar="#toolbar"
+                data-sort-name="Name"
+                data-sort-order="asc"
+                data-page-size="25"
+                class="table table-striped" id="pluginsTable">
+
+                <thead>
+                  <tr>
+                    <th data-field="state" data-checkbox="true"></th>
+                    <th data-field="name" data-sortable="true">Plugin Name</th>
+                    <th data-field="author" data-sortable="true">Author</th>
+                    <th data-field="category" data-sortable="true">Category</th>
+                    <th data-field="version" data-sortable="true">Version</th>
+                    <th data-field="link" data-sortable="true">URL</th>
+                    <th data-formatter="pluginActionFormatter" data-events="pluginActionEvents">Actions</th>
+                  </tr>
+                </thead>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
       <br>
       <button class="btn btn-success float-end ms-1" id="submitConfig">Save Configuration</button>&nbsp;
@@ -371,8 +409,27 @@ return '
   </div>
 </div>
 
-<script>
+<!-- Plugin Settings Modal -->
+<div class="modal fade" id="pluginSettingsModal" tabindex="-1" role="dialog" aria-labelledby="pluginSettingsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="pluginSettingsModalLabel"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="modal-body" id="pluginSettingsModalBody">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="editPluginSaveButton">Save</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
+<script>
   function getConfig() {
     $.getJSON("/api/config", function(data) {
       let config = data.data;
@@ -443,13 +500,85 @@ return '
   // Function to switch tabs
   function switchTab(tabId) {
     $(`.nav-tabs a[href="` + tabId + `"]`).tab("show");
-    console.log(`.nav-tabs a[href="` + tabId + `"]`);
   }
   // Listener for tab changes
   $("#myTab .nav-link").on("click", function(elem) {
     elem.preventDefault();
-    console.log($(elem.target).attr("href"));
     switchTab($(elem.target).attr("href"));
   });
+
+
+  // PLUGINS //
+  function buildPluginSettingsModal(row){
+    try {
+      queryAPI("GET",row.api).done(function(settingsResponse) {
+        $("#pluginSettingsModalBody").html(buildFormGroup(settingsResponse.data));
+        $("#pluginSettingsModalLabel").text("Plugin Settings: "+row.name);
+        $(".info-field").change(function(elem) {
+          toast("Configuration","",$(elem.target).data("label")+" has changed.<br><small>Save configuration to apply changes.</small>","warning");
+          $(this).addClass("changed");
+        });
+        $("#editPluginSaveButton").on("click",function(elem) {
+          editPluginSubmit(row);
+        });
+        try {
+          queryAPI("GET","/api/config/plugins/"+row.name).done(function(configResponse) {
+            let data = configResponse.data;
+            for (const key in data) {
+              if (data.hasOwnProperty(key)) {
+                  const value = data[key];
+                  $(`#pluginSettingsModal [name="${key}"]`).val(value);
+              }
+            }
+          }).fail(function(xhr) {
+            logConsole("Error",xhr,"error");
+          });
+        } catch(e) {
+          logConsole("Error",e,"error");
+        }
+      }).fail(function(xhr) {
+        logConsole("Error",xhr,"error");
+      });;
+    } catch(e) {
+      logConsole("Error",e,"error");
+    }
+  }
+
+  function editPluginSubmit(row) {
+    // Serialize the form data into an array
+    var serializedArray = $("#pluginSettingsModal .info-field.changed").serializeArray();
+
+    // Convert the array into an object
+    var formData = {};
+    serializedArray.forEach(function(item) {
+        formData[item.name] = item.value;
+    });
+
+    queryAPI("PATCH","/api/config/plugins/"+row.name,formData).done(function(data) {
+      if (data["result"] == "Success") {
+          toast(data["result"],"",data["message"],"success");
+      } else if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger");
+      } else {
+          toast("API Error","","Failed to save configuration","danger","30000");
+      }
+    });
+  }
+
+  function pluginActionFormatter(value, row, index) {
+    if (row.settings) {
+      var actions = `<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`
+      return actions
+    }
+  }
+
+  window.pluginActionEvents = {
+    "click .edit": function (e, value, row, index) {
+      buildPluginSettingsModal(row);
+      $("#pluginSettingsModal").modal("show");
+    }
+  }
+
+  $("#pluginsTable").bootstrapTable();
 </script>
 ';
