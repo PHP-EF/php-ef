@@ -1,6 +1,7 @@
 ## v0.6.8
 - Add additional style customisation options
 - Add LDAP Support
+- Improvements to web tracking
 
 ## v0.6.7
 - Cleanup IB tools into new plugin
