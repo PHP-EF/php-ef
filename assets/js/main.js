@@ -782,6 +782,17 @@ document.addEventListener('DOMContentLoaded', function() {
   console.info("%c Web App %c ".concat("DOM Fully loaded", " "), "color: white; background: #AD80FD; font-weight: 700;", "color: #AD80FD; background: white; font-weight: 700;");
 });
 
+function initPasswordToggle() {
+  $('.passwordToggle').on('click',function(elem) {
+    let el = $(elem.target).parent().parent().prev();
+    if (el.attr('type') == "password") {
+      el.attr('type','text');
+    } else {
+      el.attr('type','password');
+    }
+  })
+}
+
 function createRandomString(length) {
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
   const characters = letters+'0123456789';

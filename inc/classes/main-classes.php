@@ -59,11 +59,11 @@ class Config {
   public function get($Section = null,$Option = null) {
     $config_json = json_decode(file_get_contents($this->configFile),true); //Config file that has configurations for site.
     if($Section && $Option) {
-      return $config_json[$Section][$Option];
+      return $config_json[$Section][$Option] ?? null;
     } elseif($Section) {
-      return $config_json[$Section];
+      return $config_json[$Section] ?? null;
     } else {
-      return $config_json;
+      return $config_json ?? null;
     }
   }
 
