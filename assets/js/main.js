@@ -649,10 +649,9 @@ if (!tId) {
 
 // Function to send data using sendBeacon
 function sendTrackingData(data) {
-  const url = '/api/t';
-  const payload = JSON.stringify(data);
-  const blob = new Blob([payload], { type: 'application/json; charset=utf-8' });
-  navigator.sendBeacon(url, blob);
+  queryAPI("POST","/api/t",data).fail(function() {
+    logConsole('Error','Unable to submit tracking data','error');
+  });
 }
 
 // Tracking object
