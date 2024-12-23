@@ -863,7 +863,7 @@ class Auth {
     $roles = [
       ['Authenticated', 'This group applies to any authenticated user', true],
       ['Everyone', 'This group applies to any user, regardless of if they are logged in or not', true],
-      ['Administrators', 'System Administrators', 'ADMIN-RBAC,ADMIN-USERS,ADMIN-CONFIG,ADMIN-LOGS,ADMIN-PAGES,ADMIN-PLUGINS,REPORT-TRACKING', true]
+      ['Administrators', 'System Administrators', 'ADMIN-RBAC,ADMIN-USERS,ADMIN-CONFIG,ADMIN-LOGS,ADMIN-PAGES,REPORT-TRACKING', true]
     ];
 
     foreach ($roles as $role) {
@@ -900,7 +900,6 @@ class Auth {
       ['ADMIN-CONFIG', 'Grants access to manage the PHP-EF Configuration', true],
       ['ADMIN-USERS', 'Grants access to view and manage users & groups', true],
       ['ADMIN-PAGES', 'Grants the ability to view and manage Pages', true],
-      ['ADMIN-PLUGINS', 'Grants the ability to view and manage Plugins', true],
       ['REPORT-TRACKING', 'Grants the ability to view the Web Tracking Reports', true]
     ];
 

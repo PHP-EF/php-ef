@@ -812,22 +812,6 @@ function selectOptions(options, active){
 	return selectOptions;
 }
 
-function buildPluginSettingsModal(plugin){
-	queryAPI('GET',"/api/config/plugins/"+plugin).done(function(configResponse) {
-		try {
-      console.log(configResponse);
-      queryAPI('GET',configResponse.data.api).done(function(settingsResponse) {
-			  $('#pluginSettingsModalBody').html(buildFormGroup(settingsResponse.data));
-        console.log(buildFormGroup(settingsResponse.data));
-      });
-		}catch(e) {
-			logConsole(e,data,'error');
-		}
-	}).fail(function(xhr) {
-		logConsole('error',xhr,'error');
-	});
-}
-
 function buildFormGroup(array){
   var mainCount = 0;
   var group = '<div id="tabsJustifiedContent" class="tab-content">';
@@ -937,62 +921,43 @@ function buildFormItem(item){
   //+tof(item.value,'c')+`
   switch (item.type) {
     case 'select-input':
-      return smallLabel + '<input list="'+item.name+'Options" data-changed="false" lang="en" type="text" class="form-control' + extraClass + '"' + placeholder + value + id + name + disabled + type + label + attr + ' autocomplete="new-password" /><datalist id="'+item.name+'Options">' + selectOptions(item.options, item.value) + '</datalist>';
-      break;
+      return smallLabel + '<input list="'+item.name+'Options" lang="en" type="text" class="form-control info-field' + extraClass + '"' + placeholder + value + id + name + disabled + type + label + attr + ' autocomplete="new-password" /><datalist id="'+item.name+'Options">' + selectOptions(item.options, item.value) + '</datalist>';
     case 'input':
     case 'text':
-      return smallLabel+'<input data-changed="false" lang="en" type="text" class="form-control'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" />';
-      break;
-        case 'number':
-            return smallLabel+'<input data-changed="false" lang="en" type="number" class="form-control'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" />';
-            break;
+      return smallLabel+'<input lang="en" type="text" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" />';
+    case 'number':
+      return smallLabel+'<input lang="en" type="number" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" />';
     case 'textbox':
-      return smallLabel+'<textarea data-changed="false" class="form-control'+extraClass+'"'+placeholder+id+name+disabled+type+label+attr+' autocomplete="new-password">'+textarea+'</textarea>';
-      break;
+      return smallLabel+'<textarea class="form-control info-field'+extraClass+'"'+placeholder+id+name+disabled+type+label+attr+' autocomplete="new-password">'+textarea+'</textarea>';
     case 'password':
-      return smallLabel+'<input data-changed="false" lang="en" type="password" class="form-control'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" />';
-      break;
+      return smallLabel+'<input lang="en" type="password" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" />';
     case 'password-alt':
-      return smallLabel+'<div class="input-group"><input data-changed="false" lang="en" type="password" class="password-alt form-control'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" /><span class="input-group-btn"> <button class="btn btn-default showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
-      break;
+      return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" /><span class="input-group-btn"> <button class="btn btn-default showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
     case 'password-alt-copy':
-      return smallLabel+'<div class="input-group"><input data-changed="false" lang="en" type="password" class="password-alt form-control'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" /><span class="input-group-btn"> <button class="btn btn-primary clipboard" type="button" data-clipboard-text="'+item.value+'"><i class="fa icon-docs"></i></button></span><span class="input-group-btn"> <button class="btn btn-inverse showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
-      break;
+      return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" /><span class="input-group-btn"> <button class="btn btn-primary clipboard" type="button" data-clipboard-text="'+item.value+'"><i class="fa icon-docs"></i></button></span><span class="input-group-btn"> <button class="btn btn-inverse showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
     case 'hidden':
-      return '<input data-changed="false" lang="en" type="hidden" class="form-control'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' />';
-      break;
+      return '<input lang="en" type="hidden" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' />';
     case 'select':
-      return smallLabel+'<select class="form-control'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'>'+selectOptions(item.options, item.value)+'</select>';
-      break;
+      return smallLabel+'<select class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'>'+selectOptions(item.options, item.value)+'</select>';
     case 'select2':
-            var select2ID = (item.id) ? '#'+item.id : '.'+item.name;
-            let settings = (item.settings) ? item.settings : '{}';
-            return smallLabel+'<select class="m-b-10 '+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' multiple="multiple" data-placeholder="">'+selectOptions(item.options, item.value)+'</select><script>$("'+select2ID+'").select2('+settings+').on("select2:unselecting", function() { $(this).data("unselecting", true); }).on("select2:opening", function(e) { if ($(this).data("unselecting")) { $(this).removeData("unselecting");  e.preventDefault(); } });</script>';
-      break;
+      var select2ID = (item.id) ? '#'+item.id : '.'+item.name;
+      let settings = (item.settings) ? item.settings : '{}';
+      return smallLabel+'<select class="m-b-10 info-field '+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' multiple="multiple" data-placeholder="">'+selectOptions(item.options, item.value)+'</select><script>$("'+select2ID+'").select2('+settings+').on("select2:unselecting", function() { $(this).data("unselecting", true); }).on("select2:opening", function(e) { if ($(this).data("unselecting")) { $(this).removeData("unselecting");  e.preventDefault(); } });</script>';
     case 'switch':
     case 'checkbox':
-      return smallLabel+'<input data-changed="false" type="checkbox" class="js-switch'+extraClass+'" data-size="medium" data-color="#99d683" data-secondary-color="#f96262"'+name+value+tof(item.value,'c')+id+disabled+type+label+attr+' /><input data-changed="false" type="hidden"'+name+'value="false">';
-      break;
+      return smallLabel+'<input type="checkbox" class="js-switch info-field'+extraClass+'" data-size="medium" data-color="#99d683" data-secondary-color="#f96262"'+name+value+tof(item.value,'c')+id+disabled+type+label+attr+' /><input type="hidden"'+name+'value="false">';
     case 'button':
       return smallLabel+'<button class="btn btn-sm btn-success btn-rounded waves-effect waves-light b-none'+extraClass+'" '+href+attr+' type="button"><span class="btn-label"><i class="'+icon+'"></i></span><span lang="en">'+text+'</span></button>';
-      break;
     case 'blank':
       return '';
-      break;
     case 'accordion':
       return '<div class="panel-group'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'  aria-multiselectable="true" role="tablist">'+accordionOptions(item.options, item.id)+'</div>';
-      break;
     case 'html':
       return item.html;
-            break;
-        case 'arrayMultiple':
-            return '<span class="text-danger">BuildFormItem Class not setup...';
-            break;
-    case 'cron':
-      return `${smallLabel}<div class="input-group"><input data-changed="false" class="form-control ${extraClass}" ${placeholder} ${value} ${id} ${name} ${disabled} ${type} ${label} ${attr} autocomplete="new-password"><span class="input-group-btn"><button class="btn btn-info test-cron" type="button"><i class="fa fa-flask"></i></button></span></div>`;
-      break;
-        case 'folder':
-            return `${smallLabel}<div class="input-group"><input data-changed="false" class="form-control ${extraClass}" ${placeholder} ${value} ${id} ${name} ${disabled} ${type} ${label} ${attr} autocomplete="new-password"><span class="input-group-btn"><button class="btn btn-info test-folder" type="button"><i class="fa fa-flask"></i></button></span></div>`;
+    case 'arrayMultiple':
+      return '<span class="text-danger">BuildFormItem Class not setup...';
+    case 'folder':
+      return `${smallLabel}<div class="input-group"><input class="form-control ${extraClass}" ${placeholder} ${value} ${id} ${name} ${disabled} ${type} ${label} ${attr} autocomplete="new-password"><span class="input-group-btn"><button class="btn btn-info test-folder" type="button"><i class="fa fa-flask"></i></button></span></div>`;
     default:
       return '<span class="text-danger">BuildFormItem Class not setup...';
   }

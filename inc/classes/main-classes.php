@@ -77,6 +77,17 @@ class Config {
     }
     file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
   }
+
+  public function setPlugin(&$config, $data, $plugin) {
+    foreach ($data as $key => $value) {
+      if (is_array($value) && isset($config[$key]) && is_array($config[$key])) {
+          $this->setPlugin($config[$key], $value);
+      } else {
+          $config['Plugins'][$plugin][$key] = $value;
+      }
+    }
+    file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+  }
 }
 
 class Pages {
@@ -113,7 +124,6 @@ class Pages {
       ['Logs','Logs',null,'SubMenu','Admin',null,null,'fa-regular fa-file'],
       ['Users','Users','ADMIN-USERS','SubMenuLink','Admin','Settings','#page=core/users',null],
       ['Pages','Pages','ADMIN-PAGES','SubMenuLink','Admin','Settings','#page=core/pages',null],
-      ['Plugins','Plugins','ADMIN-PLUGINS','SubMenuLink','Admin','Settings','#page=core/plugins',null],
       ['Configuration','Configuration','ADMIN-CONFIG','SubMenuLink','Admin','Settings','#page=core/configuration',null],
       ['Role Based Access','Role Based Access','ADMIN-RBAC','SubMenuLink','Admin','Settings','#page=core/rbac',null],
       ['Portal Logs','Portal Logs','ADMIN-LOGS','SubMenuLink','Admin','Logs','#page=core/logs',null],
