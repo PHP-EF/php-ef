@@ -10,15 +10,15 @@
     "Styling": {
         "websiteTitle": "PHP-EF",
         "logo-sm": {
-            "Image": "", // EXAMPLE: /assets/images/custom/my-logo-sm.png
+            "Image": "",
             "CSS": ""
         },
         "logo-lg": {
-            "Image": "", // EXAMPLE: /assets/images/custom/my-logo-lg.png
-            "CSS": "" // EXAMPLE: height: 37px; margin: 5px 0px 0px 50px
+            "Image": "",
+            "CSS": ""
         },
         "favicon": {
-            "Image": "" // EXAMPLE: /assets/images/custom/my-favicon.svg
+            "Image": ""
         },
         "html": {
             "homepage": "<h2>PHP Extensible Framework</h2>\r\n<hr>\r\n<div class=\"row\">\r\n  <div class=\"form-group col-md-12\">\r\n    <p>Welcome to the PHP-EF Homepage.</p>\r\n    <p>You can use this to build your own custom web applications through the use of plugins.</p>\r\n  </div>\r\n</div>",

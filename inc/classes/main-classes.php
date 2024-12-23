@@ -14,9 +14,9 @@ class ib {
   public $reporting;
 
   public function __construct() {
-      $this->api = new api();
       $this->db = (new db(__DIR__.'/../config/app.db'))->db;
-      $this->core = new core(__DIR__.'/../config/config.json');
+      $this->api = new api();
+      $this->core = new core(__DIR__.'/../config/config.json',$this->api);
       $this->auth = new Auth($this->core,$this->db,$this->api);
       $this->config = $this->core->config;
       $this->pages = new Pages($this->db,$this->api,$this->core);
@@ -33,8 +33,8 @@ class core {
   public $config;
   public $logging;
 
-  public function __construct($configFile) {
-    $this->config = new Config($configFile);
+  public function __construct($configFile,$api) {
+    $this->config = new Config($configFile,$api);
     $this->logging = new Logging($this->config);
   }
 }
@@ -51,9 +51,11 @@ class db {
 
 class Config {
   private $configFile;
+  private $api;
 
-  public function __construct($conf) {
+  public function __construct($conf,$api) {
     $this->configFile = $conf;
+    $this->api = $api;
   }
 
   public function get($Section = null,$Option = null) {
@@ -75,6 +77,7 @@ class Config {
           $config[$key] = $value;
       }
     }
+    $this->api->setAPIResponseMessage('Successfully updated configuration');
     file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
   }
 
@@ -86,6 +89,7 @@ class Config {
           $config['Plugins'][$plugin][$key] = $value;
       }
     }
+    $this->api->setAPIResponseMessage('Successfully updated configuration');
     file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
   }
 }
