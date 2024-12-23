@@ -592,36 +592,28 @@ function splitUrl(url) {
   };
 }
 
-// Function to split pathname into Page Category and Page Name
-function splitPathname(pathname) {
-  if (pathname === '/') {
+// Function to split hash into Page Category and Page Name
+function splitHash(hash) {
+  const pagesMap = hash.match(/^#page=(plugin\/)?([^\/]+)\/([^\/]+)$/);
+  if (pagesMap) {
+    return {
+      pageCategory: pagesMap[2],
+      pageName: pagesMap[3]
+    };
+  }
+
+  const homeMatch = window.location.pathname.match(/^\/([^\/]+)$/);
+  if (homeMatch) {
+    return {
+      pageCategory: 'home',
+      pageName: homeMatch[1]
+    };
+  }
+
+  if (hash === '') {
     return {
       pageCategory: 'home',
       pageName: 'home'
-    };
-  }
-
-  const loginMatch = pathname.match(/^\/([^\/]+)$/);
-  if (loginMatch) {
-    return {
-      pageCategory: 'home',
-      pageName: loginMatch[1]
-    };
-  }
-
-  const singlePageMatch = pathname.match(/^\/pages\/([^\/]+)$/);
-  if (singlePageMatch) {
-    return {
-      pageCategory: 'home',
-      pageName: singlePageMatch[1]
-    };
-  }
-
-  const doublePageMatch = pathname.match(/^\/pages\/([^\/]+)\/([^\/]+)$/);
-  if (doublePageMatch) {
-    return {
-      pageCategory: doublePageMatch[1],
-      pageName: doublePageMatch[2]
     };
   }
 
@@ -673,7 +665,7 @@ const userTracking = {
     currentPage: window.location.href,
     browserInfo: getBrowserInfo(),
     urlComponents: splitUrl(window.location.href),
-    pageDetails: splitPathname(window.location.pathname),
+    pageDetails: splitHash(window.location.hash),
     tId: tId
   },
   init: function(config) {
@@ -686,6 +678,7 @@ const userTracking = {
     if (config.timeOnPage) {
       window.addEventListener('beforeunload', this.trackTimeOnPage.bind(this));
     }
+    window.addEventListener('hashchange', this.trackNavigation.bind(this));
   },
   trackMouseMovement: function(event) {
     this.data.mouseMovements.push({ x: event.clientX, y: event.clientY, time: Date.now() });
@@ -696,6 +689,13 @@ const userTracking = {
   trackTimeOnPage: function() {
     this.data.endTime = Date.now();
     this.processData();
+  },
+  trackNavigation: function() {
+    this.trackTimeOnPage();
+    this.data.currentPage = window.location.href;
+    this.data.urlComponents = splitUrl(window.location.href);
+    this.data.pageDetails = splitHash(window.location.hash);
+    this.data.startTime = Date.now();
   },
   processData: function() {
     const timeSpent = this.data.endTime - this.data.startTime;

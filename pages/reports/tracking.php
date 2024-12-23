@@ -483,7 +483,7 @@ return '
 
     // Extracting the data for the page activity chart
     const categories = Object.keys(aggregatedData);
-    const timeSpent = categories.map(page => Math.round((aggregatedData[page].timeSpent / 1000) / 60));
+    const timeSpent = categories.map(page => Math.round((aggregatedData[page].timeSpent / 1000)));
     const visits = categories.map(page => aggregatedData[page].visits);
     window.charts.pageActivityChart.updateOptions({
       series: [{
@@ -501,7 +501,21 @@ return '
       labels: categories,
       yaxis: [{
         title: {
-          text: "Time Spent (mins)"
+          text: "Time Spent"
+        },
+        labels: {
+          formatter: function (val) {
+            const days = Math.floor((val / 3600) / 24);
+            const hours = Math.floor(val / 3600);
+            const minutes = Math.floor((val % 3600) / 60);
+            if (days > 0) {
+              return `${days}d`;
+            } else if (hours > 0) {
+              return `${hours}h`;
+            } else {
+              return `${minutes}m`;
+            }
+          }
         }
       }, {
         opposite: true,
@@ -509,6 +523,30 @@ return '
           text: "Total Visits"
         }
       }],
+      tooltip: {
+        y: {
+          formatter: function (val, { series, seriesIndex, dataPointIndex, w }) {
+            if (w.globals.seriesNames[seriesIndex] === "Time Spent") {
+              const days = Math.floor(val / 86400); // 86400 seconds in a day
+              const hours = Math.floor((val % 86400) / 3600); // remaining hours
+              const minutes = Math.floor((val % 3600) / 60); // remaining minutes
+              const seconds = Math.floor(val % 60); // remaining seconds
+
+              if (days > 0) {
+                return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+              } else if (hours > 0) {
+                return `${hours}h ${minutes}m ${seconds}s`;
+              } else if (minutes > 0) {
+                return `${minutes}m ${seconds}s`;
+              } else {
+                return `${seconds}s`;
+              }
+            } else {
+              return val;
+            }
+          }
+        }
+      },
       chart: {
         events: {
           dataPointSelection: (event, chartContext, config) => {
