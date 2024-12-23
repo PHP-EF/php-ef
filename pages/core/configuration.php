@@ -513,6 +513,7 @@ return '
     try {
       queryAPI("GET",row.api).done(function(settingsResponse) {
         $("#pluginSettingsModalBody").html(buildFormGroup(settingsResponse.data));
+        initPasswordToggle();
         $("#pluginSettingsModalLabel").text("Plugin Settings: "+row.name);
         $(".info-field").change(function(elem) {
           toast("Configuration","",$(elem.target).data("label")+" has changed.<br><small>Save configuration to apply changes.</small>","warning");
