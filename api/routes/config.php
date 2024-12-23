@@ -39,3 +39,48 @@ $app->patch('/config', function ($request, $response, $args) {
 		->withHeader('Content-Type', 'application/json;charset=UTF-8')
 		->withStatus($GLOBALS['responseCode']);
 });
+
+$app->get('/config/plugins', function ($request, $response, $args) {
+	$ib = ($request->getAttribute('ib')) ?? new ib();
+
+    $list = [];
+    foreach ($GLOBALS['plugins'] as $key => $value) {
+        $list[] = $value;
+    }
+	$ib->api->setAPIResponseData($list);
+
+	// Return the response
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json')
+		->withStatus($GLOBALS['responseCode']);
+});
+
+
+$app->get('/config/plugins/{plugin}', function ($request, $response, $args) {
+	$ib = ($request->getAttribute('ib')) ?? new ib();
+
+	$ib->api->setAPIResponseData($ib->config->get('Plugins',$args['plugin']));
+
+	// Return the response
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json')
+		->withStatus($GLOBALS['responseCode']);
+});
+
+$app->patch('/config/plugins/{plugin}', function ($request, $response, $args) {
+	$ib = ($request->getAttribute('ib')) ?? new ib();
+    if ($ib->auth->checkAccess("ADMIN-CONFIG")) {
+        $data = $ib->api->getAPIRequestData($request);
+        $config = $ib->config->get();
+        // Update the config values with the submitted data
+        $ib->config->setPlugin($config, $data, $args['plugin']);
+        $ib->api->setAPIResponseMessage('Successfully updated plugin configuration');
+    }
+
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json;charset=UTF-8')
+		->withStatus($GLOBALS['responseCode']);
+});

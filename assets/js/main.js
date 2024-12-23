@@ -781,3 +781,184 @@ document.addEventListener('DOMContentLoaded', function() {
 
   console.info("%c Web App %c ".concat("DOM Fully loaded", " "), "color: white; background: #AD80FD; font-weight: 700;", "color: #AD80FD; background: white; font-weight: 700;");
 });
+
+function createRandomString(length) {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  const characters = letters+'0123456789';
+  let result = letters.charAt(Math.floor(Math.random() * letters.length)); // Ensure the first character is a letter
+  const charactersLength = characters.length;
+  for (let i = 1; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
+
+function cleanClass(string){
+	return string.replace(/ +/g, "-").replace(/\W+/g, "-");
+}
+
+function selectOptions(options, active){
+	var selectOptions = '';
+	$.each(options, function(i,v) {
+		activeTest = active.split(',');
+		if(activeTest.length > 1){
+			var selected = (arrayContains(v.value, activeTest)) ? 'selected' : '';
+		}else{
+			var selected = (active.toString() == v.value) ? 'selected' : '';
+		}
+		var disabled = (v.disabled) ? ' disabled' : '';
+		selectOptions += '<option '+selected+disabled+' value="'+v.value+'">'+v.name+'</option>';
+	});
+	return selectOptions;
+}
+
+function buildFormGroup(array){
+  var mainCount = 0;
+  var group = '<div id="tabsJustifiedContent" class="tab-content">';
+  var uList = '<ul id="tabsJustified" class="nav nav-tabs info-nav">';
+  $.each(array, function(i,v) {
+    console.log
+    mainCount++;
+    var count = 0;
+    var total = v.length;
+    var active = (mainCount == 1) ? 'active' : '';
+    var customID = createRandomString(10);
+    if(i == 'custom'){
+      group += v;
+    }else{
+        uList += `<li role="presentation" class="nav-item `+active+`"><a href="" data-bs-target="#`+customID+cleanClass(i)+`" data-bs-toggle="tab" class="nav-link small text-uppercase"><span lang="en">`+i+`</span></a></li>`;
+      group += `
+        <!-- FORM GROUP -->
+        <div class="tab-pane `+active+`" id="`+customID+cleanClass(i)+`">
+      `;
+      $.each(v, function(i,v) {
+        var override = '6';
+        if(typeof v.override !== 'undefined'){
+          override = v.override;
+        }
+                var arrayMultiple = false;
+                if(typeof v.type !== 'undefined'){
+                    if(v.type == 'arrayMultiple'){
+                        arrayMultiple = true;
+                    }
+                }
+        count++;
+                if (count % 2 !== 0) {
+                    group += '<div class="row start">';
+                }
+                var helpID = '#help-info-'+v.name;
+                var helpTip = (v.help) ? '<sup><a class="help-tip" data-toggle="collapse" href="'+helpID+'" aria-expanded="true"><i class="m-l-5 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>' : '';
+                var builtItems = '';
+                if(arrayMultiple == true){
+                    $.each(v.value, function(index,value){
+                        if (typeof value === 'object'){
+                            builtItems += '<div class="row m-b-40">';
+                            $.each(value, function(number,formItem) {
+                              let clearfix = (formItem.type == 'blank') ? '<div class="clearfix"></div>' : '';
+                                builtItems += `
+                                    <!-- INPUT BOX  Yes Multiple -->
+                                    <div class="col-md-6 p-b-10">
+                                        <div class="form-group">
+                                            <label class="control-label col-md-12"><span lang="en">${formItem.label}</span>${helpTip}</label>
+                                            <div class="col-md-12">${buildFormItem(formItem)}</div> <!-- end div -->
+                                        </div>
+                                    </div>
+                                    ${clearfix}
+                                    <!--/ INPUT BOX -->
+                                `;
+                            });
+                            builtItems += '</div>';
+                        }else{
+                            builtItems += buildFormItem(value);
+                        }
+                    });
+
+                }else{
+                    builtItems = `
+          <!-- INPUT BOX  no Multiple-->
+          <div class="col-md-`+override+` p-b-10">
+            <div class="form-group">
+              <label class="control-label col-md-12"><span lang="en">${v.label}</span>${helpTip}</label>
+              <div class="col-md-12">
+                ${buildFormItem(v)}
+              </div>
+            </div>
+          </div>
+          <!--/ INPUT BOX -->
+        `;
+                }
+                group += builtItems;
+                if (count % 2 == 0 || count == total) {
+                    group += '</div><!--end-->';
+                }
+            });
+      group += '</div>';
+    }
+  });
+  return uList+'</ul>'+group+'</div>';
+}
+
+function buildFormItem(item){
+  var placeholder = (item.placeholder) ? ' placeholder="'+item.placeholder+'"' : '';
+  var id = (item.id) ? ' id="'+item.id+'"' : '';
+  var type = (item.type) ? ' data-type="'+item.type+'"' : '';
+  var label = (item.label) ? ' data-label="'+item.label+'"' : '';
+  var value = (item.value) ? ' value="'+item.value+'"' : '';
+  var textarea = (item.value) ? item.value : '';
+  var name = (item.name) ? ' name="'+item.name+'"' : '';
+  var extraClass = (item.class) ? ' '+item.class : '';
+  var icon = (item.icon) ? ' '+item.icon : '';
+  var text = (item.text) ? ' '+item.text : '';
+  var attr = (item.attr) ? ' '+item.attr : '';
+  var disabled = (item.disabled) ? ' disabled' : '';
+  var href = (item.href) ? ' href="'+item.href+'"' : '';
+  var pwd1 = createRandomString(6);
+  var pwd2 = createRandomString(6);
+  var pwd3 = createRandomString(6);
+  var helpInfo = (item.help) ? '<div class="collapse" id="help-info-'+item.name+'"><blockquote lang="en">'+item.help+'</blockquote></div>' : '';
+    var smallLabel = (item.smallLabel) ? '<label><span lang="en">'+item.smallLabel+'</span></label>'+helpInfo : ''+helpInfo;
+
+  //+tof(item.value,'c')+`
+  switch (item.type) {
+    case 'select-input':
+      return smallLabel + '<input list="'+item.name+'Options" lang="en" type="text" class="form-control info-field' + extraClass + '"' + placeholder + value + id + name + disabled + type + label + attr + ' autocomplete="new-password" /><datalist id="'+item.name+'Options">' + selectOptions(item.options, item.value) + '</datalist>';
+    case 'input':
+    case 'text':
+      return smallLabel+'<input lang="en" type="text" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" />';
+    case 'number':
+      return smallLabel+'<input lang="en" type="number" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" />';
+    case 'textbox':
+      return smallLabel+'<textarea class="form-control info-field'+extraClass+'"'+placeholder+id+name+disabled+type+label+attr+' autocomplete="new-password">'+textarea+'</textarea>';
+    case 'password':
+      return smallLabel+'<input lang="en" type="password" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" />';
+    case 'password-alt':
+      return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" /><span class="input-group-btn"> <button class="btn btn-default showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
+    case 'password-alt-copy':
+      return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" /><span class="input-group-btn"> <button class="btn btn-primary clipboard" type="button" data-clipboard-text="'+item.value+'"><i class="fa icon-docs"></i></button></span><span class="input-group-btn"> <button class="btn btn-inverse showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
+    case 'hidden':
+      return '<input lang="en" type="hidden" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' />';
+    case 'select':
+      return smallLabel+'<select class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'>'+selectOptions(item.options, item.value)+'</select>';
+    case 'select2':
+      var select2ID = (item.id) ? '#'+item.id : '.'+item.name;
+      let settings = (item.settings) ? item.settings : '{}';
+      return smallLabel+'<select class="m-b-10 info-field '+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' multiple="multiple" data-placeholder="">'+selectOptions(item.options, item.value)+'</select><script>$("'+select2ID+'").select2('+settings+').on("select2:unselecting", function() { $(this).data("unselecting", true); }).on("select2:opening", function(e) { if ($(this).data("unselecting")) { $(this).removeData("unselecting");  e.preventDefault(); } });</script>';
+    case 'switch':
+    case 'checkbox':
+      return smallLabel+'<input type="checkbox" class="js-switch info-field'+extraClass+'" data-size="medium" data-color="#99d683" data-secondary-color="#f96262"'+name+value+tof(item.value,'c')+id+disabled+type+label+attr+' /><input type="hidden"'+name+'value="false">';
+    case 'button':
+      return smallLabel+'<button class="btn btn-sm btn-success btn-rounded waves-effect waves-light b-none'+extraClass+'" '+href+attr+' type="button"><span class="btn-label"><i class="'+icon+'"></i></span><span lang="en">'+text+'</span></button>';
+    case 'blank':
+      return '';
+    case 'accordion':
+      return '<div class="panel-group'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'  aria-multiselectable="true" role="tablist">'+accordionOptions(item.options, item.id)+'</div>';
+    case 'html':
+      return item.html;
+    case 'arrayMultiple':
+      return '<span class="text-danger">BuildFormItem Class not setup...';
+    case 'folder':
+      return `${smallLabel}<div class="input-group"><input class="form-control ${extraClass}" ${placeholder} ${value} ${id} ${name} ${disabled} ${type} ${label} ${attr} autocomplete="new-password"><span class="input-group-btn"><button class="btn btn-info test-folder" type="button"><i class="fa fa-flask"></i></button></span></div>`;
+    default:
+      return '<span class="text-danger">BuildFormItem Class not setup...';
+  }
+}
