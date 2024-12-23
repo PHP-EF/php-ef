@@ -11,3 +11,4 @@ services:
     volumes:
       - ./php-ef/config:/var/www/html/inc/config
       - ./php-ef/plugins:/var/www/html/inc/plugins
+      - ./php-ef/logs:/var/www/html/inc/logs
