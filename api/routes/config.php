@@ -39,3 +39,32 @@ $app->patch('/config', function ($request, $response, $args) {
 		->withHeader('Content-Type', 'application/json;charset=UTF-8')
 		->withStatus($GLOBALS['responseCode']);
 });
+
+$app->get('/config/plugins', function ($request, $response, $args) {
+	$ib = ($request->getAttribute('ib')) ?? new ib();
+
+    $list = [];
+    foreach ($GLOBALS['plugins'] as $key => $value) {
+        $list[] = $value;
+    }
+	$ib->api->setAPIResponseData($list);
+
+	// Return the response
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json')
+		->withStatus($GLOBALS['responseCode']);
+});
+
+
+$app->get('/config/plugins/{plugin}', function ($request, $response, $args) {
+	$ib = ($request->getAttribute('ib')) ?? new ib();
+
+	$ib->api->setAPIResponseData($GLOBALS['plugins'][$args['plugin']]);
+
+	// Return the response
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json')
+		->withStatus($GLOBALS['responseCode']);
+});

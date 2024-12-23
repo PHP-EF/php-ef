@@ -12,13 +12,32 @@ $GLOBALS['plugins']['example'] = [ // Plugin Name
 	'version' => '1.0.0', // SemVer of plugin
 	'image' => 'logo.png', // 1:1 non transparent image for plugin
 	'settings' => true, // does plugin need a settings modal?
-	'api' => '/api/plugins/example/settings', // api route for settings page (All Lowercase)
+	'api' => '/api/plugin/example/settings', // api route for settings page, or null if no settings page
 ];
 
 class examplePlugin extends ib
 {
 	public function _pluginGetSettings()
 	{
-        return include_once(__DIR__ . DIRECTORY_SEPARATOR . 'config.php');
+		return array(
+			'About' => array (
+				settingsOption('notice', '', ['title' => 'Information', 'body' => '
+				<p>This is an example plugin.</p>
+				<br/>']),
+			),
+			'Plugin Settings' => array(
+				settingsOption('password', 'EXAMPLEPLUGIN-Password'),
+				settingsOption('input', 'EXAMPLEPLUGIN-Config1', ['label' => 'Some option 1']),
+				settingsOption('input', 'EXAMPLEPLUGIN-Config2', ['label' => 'Some option 2']),
+				settingsOption('blank'),
+				settingsOption('input', 'EXAMPLEPLUGIN-Config3', ['label' => 'Some option 3']),
+				settingsOption('button', '', ['label' => 'Undo', 'icon' => 'fa fa-undo', 'text' => 'Retrieve', 'attr' => 'onclick="doSomething();"']),
+			),
+			'Connection Settings' => array(
+				settingsOption('url', 'EXAMPLEPLUGIN-URL'),
+				settingsOption('password-alt', 'EXAMPLEPLUGIN-Token'),
+				settingsOption('select', 'EXAMPLEPLUGIN-Server', ['label' => 'Preferred Server', 'options' => array(array("name" => 'Option 1', "value" => 'opt1'),array("name" => 'Option 2', "value" => 'opt2'))]),
+			),
+		);
 	}
 }
