@@ -558,6 +558,7 @@ return '
     queryAPI("PATCH","/api/config/plugins/"+row.name,formData).done(function(data) {
       if (data["result"] == "Success") {
           toast(data["result"],"",data["message"],"success");
+          $("#pluginSettingsModal").modal("hide");
       } else if (data["result"] == "Error") {
           toast(data["result"],"",data["message"],"danger");
       } else {

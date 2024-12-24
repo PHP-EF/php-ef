@@ -1109,7 +1109,7 @@ class Auth {
         if ($this->isResourcePermitted($rbac,$Service)) {
           return true;
         } else {
-          $this->api->setAPIResponse('Error','Unauthorized','401');
+          $this->api->setAPIResponse('Error','Unauthorized');
           return false;
         }
       } else {
