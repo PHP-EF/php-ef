@@ -25,7 +25,7 @@ class ib {
   }
 
   public function getVersion() {
-    return ['v0.6.8'];
+    return ['v0.6.9'];
   }
 }
 
@@ -240,6 +240,56 @@ class Pages {
     $stmt->execute($Execute);
     $Pages = $stmt->fetchAll(PDO::FETCH_ASSOC);
     return $Pages; 
+  }
+
+  private function getPagesRecursively($directory,$pluginName = null) {
+    $result = [];
+
+    $files = scandir($directory);
+    foreach ($files as $file) {
+      if ($file === '.' || $file === '..') {
+          continue;
+      }
+
+      $filePath = $directory . DIRECTORY_SEPARATOR . $file;
+      if (is_dir($filePath)) {
+        $result = array_merge($result, $this->getPagesRecursively($filePath,$pluginName));
+      } else {
+        $result[] = [
+            'plugin' => $pluginName,
+            'directory' => basename($directory),
+            'filename' => pathinfo($filePath, PATHINFO_FILENAME)
+        ];
+      }
+    }
+    return $result;
+  }
+
+  private function getAllPluginPagesRecursively() {
+    $pluginPages = [];
+
+    $pluginsDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'plugins';
+    if (file_exists($pluginsDir)) {
+        $directoryIterator = new DirectoryIterator($pluginsDir);
+        foreach ($directoryIterator as $pluginDir) {
+            if ($pluginDir->isDir() && !$pluginDir->isDot()) {
+                $pagesDir = $pluginDir->getPathname() . DIRECTORY_SEPARATOR . 'pages';
+                if (file_exists($pagesDir) && is_dir($pagesDir)) {
+                    $pluginPages = array_merge($pluginPages, $this->getPagesRecursively($pagesDir,$pluginDir->getFilename()));
+                }
+            }
+        }
+    }
+    return $pluginPages;
+  }
+
+  public function getAllAvailablePages() {
+    $result = array();
+    // Get Built In Pages
+    $result = array_merge($result, $this->getPagesRecursively(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'pages'));
+    // Get Plugin Pages
+    $result = array_merge($result, $this->getAllPluginPagesRecursively());
+    return $result;
   }
 }
 
