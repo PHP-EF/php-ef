@@ -14,9 +14,9 @@ class ib {
   public $reporting;
 
   public function __construct() {
-      $this->api = new api();
       $this->db = (new db(__DIR__.'/../config/app.db'))->db;
-      $this->core = new core(__DIR__.'/../config/config.json');
+      $this->api = new api();
+      $this->core = new core(__DIR__.'/../config/config.json',$this->api);
       $this->auth = new Auth($this->core,$this->db,$this->api);
       $this->config = $this->core->config;
       $this->pages = new Pages($this->db,$this->api,$this->core);
@@ -25,7 +25,174 @@ class ib {
   }
 
   public function getVersion() {
-    return ['v0.6.8'];
+    return ['v0.6.9'];
+  }
+
+  public function settingsOption($type, $name = null, $extras = null) {
+    $type = strtolower(str_replace('-', '', $type));
+    $setting = [
+        'name' => $name,
+        'value' => ''
+    ];
+    switch ($type) {
+        case 'auth':
+            $settingMerge = [
+                'type' => 'select',
+                'options' => $this->auth->getRBACRolesForMenu()
+            ];
+            break;
+        case 'enable':
+            $settingMerge = [
+                'type' => 'switch',
+                'label' => 'Enable',
+            ];
+            break;
+        case 'test':
+            $settingMerge = [
+                'type' => 'button',
+                'label' => 'Test Connection',
+                'icon' => 'fa fa-flask',
+                'class' => 'pull-right',
+                'text' => 'Test Connection',
+                'attr' => 'onclick="testAPIConnection(\'' . $name . '\')"',
+                'help' => 'Remember! Please save before using the test button!'
+            ];
+            break;
+        case 'url':
+            $settingMerge = [
+                'type' => 'input',
+                'label' => 'URL',
+                'help' => 'Please make sure to use local IP address and port - You also may use local dns name too.',
+                'placeholder' => 'http(s)://hostname:port'
+            ];
+            break;
+        case 'cron':
+            $settingMerge = [
+                'type' => 'cron',
+                'label' => 'Cron Schedule',
+                'help' => 'You may use either Cron format or - @hourly, @daily, @monthly',
+                'placeholder' => '* * * * *'
+            ];
+            break;
+        case 'folder':
+            $settingMerge = [
+                'type' => 'folder',
+                'label' => 'Save Path',
+                'help' => 'Folder path',
+                'placeholder' => '/path/to/folder'
+            ];
+            break;
+        case 'username':
+            $settingMerge = [
+                'type' => 'input',
+                'label' => 'Username',
+            ];
+            break;
+        case 'password':
+            $settingMerge = [
+                'type' => 'password',
+                'label' => 'Password',
+            ];
+            break;
+        case 'passwordalt':
+            $settingMerge = [
+                'type' => 'password-alt',
+                'label' => 'Password',
+            ];
+            break;
+        case 'passwordaltcopy':
+            $settingMerge = [
+                'type' => 'password-alt-copy',
+                'label' => 'Password',
+            ];
+            break;
+        case 'apikey':
+        case 'token':
+            $settingMerge = [
+                'type' => 'password-alt',
+                'label' => 'API Key/Token',
+            ];
+            break;
+        case 'notice':
+            $settingMerge = [
+                'type' => 'html',
+                'override' => 12,
+                'label' => '',
+                'html' => '
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="panel panel-' . ($extras['notice'] ?? 'info') . '">
+                                <div class="panel-heading">
+                                    <span lang="en">' . ($extras['title'] ?? 'Attention') . '</span>
+                                </div>
+                                <div class="panel-wrapper" aria-expanded="true">
+                                    <div class="panel-body">
+                                        <span lang="en">' . ($extras['body'] ?? '') . '</span>
+                                        <span>' . ($extras['bodyHTML'] ?? '') . '</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    '
+            ];
+            break;
+        case 'about':
+            $settingMerge = [
+                'type' => 'html',
+                'override' => 12,
+                'label' => '',
+                'html' => '
+                    <div class="panel panel-default">
+                        <div class="panel-wrapper collapse in">
+                            <div class="panel-body">
+                                <h3 lang="en">' . ucwords($name) . ' Homepage Item</h3>
+                                <p lang="en">' . $extras["about"] . '</p>
+                            </div>
+                        </div>
+                    </div>'
+            ];
+            break;
+        case 'title':
+            $settingMerge = [
+                'type' => 'input',
+                'label' => 'Title',
+                'help' => 'Sets the title of this homepage module',
+            ];
+            break;
+        case 'limit':
+            $settingMerge = [
+                'type' => 'number',
+                'label' => 'Item Limit',
+            ];
+            break;
+        case 'blank':
+            $settingMerge = [
+                'type' => 'blank',
+                'label' => '',
+            ];
+            break;
+        case 'precodeeditor':
+            $settingMerge = [
+                'type' => 'textbox',
+                'class' => 'hidden ' . $name . 'Textarea',
+                'label' => '',
+            ];
+            break;
+        default:
+            $settingMerge = [
+                'type' => strtolower($type),
+                'label' => ''
+            ];
+            break;
+    }
+    $setting = array_merge($settingMerge, $setting);
+    if ($extras) {
+        if (gettype($extras) == 'array') {
+            $setting = array_merge($setting, $extras);
+        }
+    }
+    return $setting;
   }
 }
 
@@ -33,8 +200,8 @@ class core {
   public $config;
   public $logging;
 
-  public function __construct($configFile) {
-    $this->config = new Config($configFile);
+  public function __construct($configFile,$api) {
+    $this->config = new Config($configFile,$api);
     $this->logging = new Logging($this->config);
   }
 }
@@ -51,9 +218,11 @@ class db {
 
 class Config {
   private $configFile;
+  private $api;
 
-  public function __construct($conf) {
+  public function __construct($conf,$api) {
     $this->configFile = $conf;
+    $this->api = $api;
   }
 
   public function get($Section = null,$Option = null) {
@@ -75,6 +244,7 @@ class Config {
           $config[$key] = $value;
       }
     }
+    $this->api->setAPIResponseMessage('Successfully updated configuration');
     file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
   }
 
@@ -86,6 +256,7 @@ class Config {
           $config['Plugins'][$plugin][$key] = $value;
       }
     }
+    $this->api->setAPIResponseMessage('Successfully updated configuration');
     file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
   }
 }
@@ -236,6 +407,56 @@ class Pages {
     $stmt->execute($Execute);
     $Pages = $stmt->fetchAll(PDO::FETCH_ASSOC);
     return $Pages; 
+  }
+
+  private function getPagesRecursively($directory,$pluginName = null) {
+    $result = [];
+
+    $files = scandir($directory);
+    foreach ($files as $file) {
+      if ($file === '.' || $file === '..') {
+          continue;
+      }
+
+      $filePath = $directory . DIRECTORY_SEPARATOR . $file;
+      if (is_dir($filePath)) {
+        $result = array_merge($result, $this->getPagesRecursively($filePath,$pluginName));
+      } else {
+        $result[] = [
+            'plugin' => $pluginName,
+            'directory' => basename($directory),
+            'filename' => pathinfo($filePath, PATHINFO_FILENAME)
+        ];
+      }
+    }
+    return $result;
+  }
+
+  private function getAllPluginPagesRecursively() {
+    $pluginPages = [];
+
+    $pluginsDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'plugins';
+    if (file_exists($pluginsDir)) {
+        $directoryIterator = new DirectoryIterator($pluginsDir);
+        foreach ($directoryIterator as $pluginDir) {
+            if ($pluginDir->isDir() && !$pluginDir->isDot()) {
+                $pagesDir = $pluginDir->getPathname() . DIRECTORY_SEPARATOR . 'pages';
+                if (file_exists($pagesDir) && is_dir($pagesDir)) {
+                    $pluginPages = array_merge($pluginPages, $this->getPagesRecursively($pagesDir,$pluginDir->getFilename()));
+                }
+            }
+        }
+    }
+    return $pluginPages;
+  }
+
+  public function getAllAvailablePages() {
+    $result = array();
+    // Get Built In Pages
+    $result = array_merge($result, $this->getPagesRecursively(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'pages'));
+    // Get Plugin Pages
+    $result = array_merge($result, $this->getAllPluginPagesRecursively());
+    return $result;
   }
 }
 

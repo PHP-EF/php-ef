@@ -1109,13 +1109,31 @@ class Auth {
         if ($this->isResourcePermitted($rbac,$Service)) {
           return true;
         } else {
-          $this->api->setAPIResponse('Error','Unauthorized','401');
+          $this->api->setAPIResponse('Error','Unauthorized');
           return false;
         }
+      } else {
+        return true;
       }
     } else {
       return false;
     }
     return false;
+  }
+
+  public function getRBACRolesForMenu() {
+    $roles = array_column($this->getRBACRoles(),'name');
+    $roleKeyValuePairs = [];
+    $roleKeyValuePairs[] = [
+      "name" => "None",
+      "value" => ""
+    ];
+    $roleKeyValuePairs = array_merge($roleKeyValuePairs,array_map(function($item) {
+      return [
+        "name" => $item,
+        "value" => $item
+      ];
+    }, $roles));
+    return $roleKeyValuePairs;
   }
 }
