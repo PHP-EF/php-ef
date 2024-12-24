@@ -1118,4 +1118,20 @@ class Auth {
     }
     return false;
   }
+
+  public function getRBACRolesForMenu() {
+    $roles = array_column($this->getRBACRoles(),'name');
+    $roleKeyValuePairs = [];
+    $roleKeyValuePairs[] = [
+      "name" => "None",
+      "value" => ""
+    ];
+    $roleKeyValuePairs = array_merge($roleKeyValuePairs,array_map(function($item) {
+      return [
+        "name" => $item,
+        "value" => $item
+      ];
+    }, $roles));
+    return $roleKeyValuePairs;
+  }
 }
