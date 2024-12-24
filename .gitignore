@@ -3,8 +3,8 @@ files/*
 inc/logs/*
 inc/plugins/*
 !inc/plugins/Example
-app.db
-config.json
+inc/config/*
+!config.json.example
 !files/index.php
 assets/images/*/*
 !assets/images/*
