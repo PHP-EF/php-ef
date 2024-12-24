@@ -1112,6 +1112,8 @@ class Auth {
           $this->api->setAPIResponse('Error','Unauthorized','401');
           return false;
         }
+      } else {
+        return true;
       }
     } else {
       return false;
