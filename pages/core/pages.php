@@ -80,9 +80,9 @@ return '
           <small id="pageTitleHelp" class="form-text text-muted">The title of the page shown in the top navigation bar.</small>
         </div>
         <div class="form-group">
-          <label for="pageUrl">URL</label>
-          <input type="text" class="form-control" id="pageUrl" aria-describedby="pageUrlHelp">
-          <small id="pageUrlHelp" class="form-text text-muted">The URL of the page to to display when this link is clicked.</small>
+          <label for="pageUrl">Page</label>
+          <select class="form-select dynamic" id="pageUrl" aria-describedby="pageUrlHelp"></select>
+          <small id="pageUrlHelp" class="form-text text-muted">The page to to display when this link is clicked.</small>
         </div>
         <div class="form-group">
           <label for="pageACL">Role</label>
@@ -321,6 +321,23 @@ return '
           pageMenuContainer.append(option);
       });
       row.Menu ? pageMenuContainer.val(row.Menu) : pageMenuContainer.val("");
+    })
+
+    const pageUrlContainer = $("#pageUrl");
+    queryAPI("GET","/api/pages/list").done(function(menuData) {
+      pageUrlContainer.append(`<option value="" selected>None</option>`);
+      $.each(menuData.data, function(index, item) {
+          if (item.plugin) {
+            var name = "Plugin: "+item.plugin+" / "+item.filename;
+            var val = "#page=plugin/"+item.plugin+"/"+item.filename;
+          } else {
+            var name = item.directory+" / "+item.filename;
+            var val = "#page="+item.directory+"/"+item.filename;
+          }
+          const option = $("<option></option>").val(val).text(name);
+          pageUrlContainer.append(option);
+      });
+      row.Url ? pageUrlContainer.val(row.Url) : pageUrlContainer.val("");
     })
     
     updateSubMenus(row);

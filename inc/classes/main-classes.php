@@ -14,9 +14,9 @@ class ib {
   public $reporting;
 
   public function __construct() {
-      $this->api = new api();
       $this->db = (new db(__DIR__.'/../config/app.db'))->db;
-      $this->core = new core(__DIR__.'/../config/config.json');
+      $this->api = new api();
+      $this->core = new core(__DIR__.'/../config/config.json',$this->api);
       $this->auth = new Auth($this->core,$this->db,$this->api);
       $this->config = $this->core->config;
       $this->pages = new Pages($this->db,$this->api,$this->core);
@@ -25,7 +25,7 @@ class ib {
   }
 
   public function getVersion() {
-    return ['v0.6.8'];
+    return ['v0.6.9'];
   }
 }
 
@@ -33,8 +33,8 @@ class core {
   public $config;
   public $logging;
 
-  public function __construct($configFile) {
-    $this->config = new Config($configFile);
+  public function __construct($configFile,$api) {
+    $this->config = new Config($configFile,$api);
     $this->logging = new Logging($this->config);
   }
 }
@@ -51,9 +51,11 @@ class db {
 
 class Config {
   private $configFile;
+  private $api;
 
-  public function __construct($conf) {
+  public function __construct($conf,$api) {
     $this->configFile = $conf;
+    $this->api = $api;
   }
 
   public function get($Section = null,$Option = null) {
@@ -75,6 +77,7 @@ class Config {
           $config[$key] = $value;
       }
     }
+    $this->api->setAPIResponseMessage('Successfully updated configuration');
     file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
   }
 
@@ -86,6 +89,7 @@ class Config {
           $config['Plugins'][$plugin][$key] = $value;
       }
     }
+    $this->api->setAPIResponseMessage('Successfully updated configuration');
     file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
   }
 }
@@ -236,6 +240,56 @@ class Pages {
     $stmt->execute($Execute);
     $Pages = $stmt->fetchAll(PDO::FETCH_ASSOC);
     return $Pages; 
+  }
+
+  private function getPagesRecursively($directory,$pluginName = null) {
+    $result = [];
+
+    $files = scandir($directory);
+    foreach ($files as $file) {
+      if ($file === '.' || $file === '..') {
+          continue;
+      }
+
+      $filePath = $directory . DIRECTORY_SEPARATOR . $file;
+      if (is_dir($filePath)) {
+        $result = array_merge($result, $this->getPagesRecursively($filePath,$pluginName));
+      } else {
+        $result[] = [
+            'plugin' => $pluginName,
+            'directory' => basename($directory),
+            'filename' => pathinfo($filePath, PATHINFO_FILENAME)
+        ];
+      }
+    }
+    return $result;
+  }
+
+  private function getAllPluginPagesRecursively() {
+    $pluginPages = [];
+
+    $pluginsDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'plugins';
+    if (file_exists($pluginsDir)) {
+        $directoryIterator = new DirectoryIterator($pluginsDir);
+        foreach ($directoryIterator as $pluginDir) {
+            if ($pluginDir->isDir() && !$pluginDir->isDot()) {
+                $pagesDir = $pluginDir->getPathname() . DIRECTORY_SEPARATOR . 'pages';
+                if (file_exists($pagesDir) && is_dir($pagesDir)) {
+                    $pluginPages = array_merge($pluginPages, $this->getPagesRecursively($pagesDir,$pluginDir->getFilename()));
+                }
+            }
+        }
+    }
+    return $pluginPages;
+  }
+
+  public function getAllAvailablePages() {
+    $result = array();
+    // Get Built In Pages
+    $result = array_merge($result, $this->getPagesRecursively(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'pages'));
+    // Get Plugin Pages
+    $result = array_merge($result, $this->getAllPluginPagesRecursively());
+    return $result;
   }
 }
 

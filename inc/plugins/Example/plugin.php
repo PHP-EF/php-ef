@@ -26,7 +26,7 @@ class examplePlugin extends ib
 				<br/>']),
 			),
 			'Plugin Settings' => array(
-				settingsOption('password', 'Password'),
+				settingsOption('password', 'Password', ['label' => 'Some Password']),
 				settingsOption('input', 'Config1', ['label' => 'Some option 1']),
 				settingsOption('input', 'Config2', ['label' => 'Some option 2']),
 				settingsOption('blank'),

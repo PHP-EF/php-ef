@@ -1,3 +1,7 @@
+## v0.6.9
+- Various improvements to plugin configuration
+- Include new pages discovery
+
 ## v0.6.8
 - Add additional style customisation options
 - Add LDAP Support

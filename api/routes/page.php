@@ -186,3 +186,16 @@ $app->get('/pages/hierarchy', function ($request, $response, $args) {
 		->withHeader('Content-Type', 'application/json')
 		->withStatus($GLOBALS['responseCode']);
 });
+
+$app->get('/pages/list', function ($request, $response, $args) {
+	$ib = ($request->getAttribute('ib')) ?? new ib();
+	if ($ib->auth->checkAccess("ADMIN-PAGES")) {
+		$ib->api->setAPIResponseData($ib->pages->getAllAvailablePages());
+	}
+
+	// Return the response
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json')
+		->withStatus($GLOBALS['responseCode']);
+});
