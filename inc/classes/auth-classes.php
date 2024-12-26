@@ -861,9 +861,9 @@ class Auth {
 
     // Insert roles if they don't exist
     $roles = [
-      ['Authenticated', 'This group applies to any authenticated user', true],
-      ['Everyone', 'This group applies to any user, regardless of if they are logged in or not', true],
-      ['Administrators', 'System Administrators', 'ADMIN-RBAC,ADMIN-USERS,ADMIN-CONFIG,ADMIN-LOGS,ADMIN-PAGES,REPORT-TRACKING', true]
+      ['Authenticated', 'This group applies to any authenticated user', '', true],
+      ['Everyone', 'This group applies to any user, regardless of if they are logged in or not', '', true],
+      ['Administrators', 'System Administrators', '', true]
     ];
 
     foreach ($roles as $role) {
@@ -954,48 +954,52 @@ class Auth {
         $execute[':Description'] = $Description;
         $this->logging->writeLog("RBAC","Updated description for: ".$rbac['Name'],"info",$rbac);
       }
-      if ($Role != null) {
-        // Check if role exists in definitions
-        if (in_array($Role, array_column($roles, 'name'))) {
-          if ($rbac['PermittedResources'] != "") {
-            $PermittedResources = explode(',',$rbac['PermittedResources']);
+      if ($rbac['Name'] != 'Administrators') {
+        if ($Role != null) {
+          // Check if role exists in definitions
+          if (in_array($Role, array_column($roles, 'name'))) {
+            if ($rbac['PermittedResources'] != "") {
+              $PermittedResources = explode(',',$rbac['PermittedResources']);
+            } else {
+              $PermittedResources = [];
+            }
+            if ($Value == "enabled") {
+              ## Add Key to Array
+              if (in_array($Role,$PermittedResources)) {
+                $this->logging->writeLog("RBAC","$Role is already assigned to ".$rbac['Name'],"debug",$rbac);
+                $this->api->setAPIResponseData('Error',$Role.' is already assigned to: '.$rbac['Name']);
+                return false;
+              } else {
+                $PermittedResources[] = $Role;
+                $prepare[] = 'PermittedResources = :PermittedResources';
+                $execute[':PermittedResources'] = implode(',',$PermittedResources);
+                $this->logging->writeLog("RBAC","Added $Role to ".$rbac['Name'],"warning",$rbac);
+              }
+            } else if ($Value == "disabled") {
+              ## Remove Key from Array
+              if (in_array($Role,$PermittedResources)) {
+                $ArrKey = array_search($Role, $PermittedResources);
+                unset($PermittedResources[$ArrKey]);
+                $prepare[] = 'PermittedResources = :PermittedResources';
+                $execute[':PermittedResources'] = implode(',',$PermittedResources);
+                $this->logging->writeLog("RBAC","Removed $Role from ".$rbac['Name'],"warning",$rbac);
+              } else {
+                $this->logging->writeLog("RBAC","$Role is not assigned to ".$rbac['Name'],"error",$rbac);
+                $this->api->setAPIResponseData('Error',$Role.' is not assigned to: '.$rbac['Name']);
+                return false;
+              }
+            }
           } else {
-            $PermittedResources = [];
+            $this->api->setAPIResponseData('Error','Invalid RBAC Option specified: "'.$Role.'"');
+            return false;
           }
-          if ($Value == "enabled") {
-            ## Add Key to Array
-            if (in_array($Role,$PermittedResources)) {
-              $this->logging->writeLog("RBAC","$Role is already assigned to ".$rbac['Name'],"debug",$rbac);
-              $this->api->setAPIResponseData('Error',$Role.' is already assigned to: '.$rbac['Name']);
-              return false;
-            } else {
-              $PermittedResources[] = $Role;
-              $prepare[] = 'PermittedResources = :PermittedResources';
-              $execute[':PermittedResources'] = implode(',',$PermittedResources);
-              $this->logging->writeLog("RBAC","Added $Role to ".$rbac['Name'],"warning",$rbac);
-            }
-          } else if ($Value == "disabled") {
-            ## Remove Key from Array
-            if (in_array($Role,$PermittedResources)) {
-              $ArrKey = array_search($Role, $PermittedResources);
-              unset($PermittedResources[$ArrKey]);
-              $prepare[] = 'PermittedResources = :PermittedResources';
-              $execute[':PermittedResources'] = implode(',',$PermittedResources);
-              $this->logging->writeLog("RBAC","Removed $Role from ".$rbac['Name'],"warning",$rbac);
-            } else {
-              $this->logging->writeLog("RBAC","$Role is not assigned to ".$rbac['Name'],"error",$rbac);
-              $this->api->setAPIResponseData('Error',$Role.' is not assigned to: '.$rbac['Name']);
-              return false;
-            }
-          }
-        } else {
-          $this->api->setAPIResponseData('Error','Invalid RBAC Option specified: "'.$Role.'"');
-          return false;
         }
+        $stmt = $this->db->prepare('UPDATE rbac SET '.implode(", ",$prepare).' WHERE id = :id');
+        $stmt->execute($execute);
+        $this->api->setAPIResponseMessage('RBAC Group updated successfully');
+      } else {
+        $this->api->setAPIResponse('Error','You cannot modify the Administrators groups\' permissions');
       }
-      $stmt = $this->db->prepare('UPDATE rbac SET '.implode(", ",$prepare).' WHERE id = :id');
-      $stmt->execute($execute);
-      $this->api->setAPIResponseMessage('RBAC Group updated successfully');
     } else {
       $this->api->setAPIResponseData('Error','RBAC Group does not exist');
       return false;
@@ -1013,11 +1017,20 @@ class Auth {
   }
 
   public function deleteRBACGroup($GroupID) {
-    if ($this->getRBACGroupByID($GroupID)) {
-      $stmt = $this->db->prepare("DELETE FROM rbac WHERE id = :id");
-      $stmt->execute([':id' => $GroupID]);
-      $this->logging->writeLog("RBAC","Deleted RBAC Group: $GroupID","debug",$_REQUEST);
-      $this->api->setAPIResponseMessage('RBAC Group deleted successfully');  
+    $group = $this->getRBACGroupByID($GroupID)[0];
+    if ($group) {
+      $protected = $group['Protected'] ?? false;
+      if (!$protected) {
+        $stmt = $this->db->prepare("DELETE FROM rbac WHERE id = :id");
+        if ($stmt->execute([':id' => $GroupID])) {
+          $this->api->setAPIResponseMessage('RBAC Group deleted successfully');
+        } else {
+          $this->api->setAPIResponse('Error', $this->db->lastErrorMsg());
+        }
+        $this->logging->writeLog("RBAC","Deleted RBAC Group: $GroupID","debug",$_REQUEST);
+      } else {
+        $this->api->setAPIResponse('Error','Unable to delete a protected group');
+      }
     } else {
       $this->logging->writeLog("RBAC","Error deleting RBAC Group. The Group does not exist.","error",$_REQUEST);
       $this->api->setAPIResponse('Error','Unable to delete RBAC Group. The Group does not exist.');
@@ -1054,31 +1067,45 @@ class Auth {
 
   public function updateRBACRole($id,$roleName,$roleDescription) {
     if ($this->getRBACRoleByID($id)) {
-      $prepare = [];
-      $execute = [];
-      $execute[':id'] = $id;
-      if ($roleName !== null) {
-        $prepare[] = 'name = :name';
-        $execute[':name'] = $roleName;
+      $protected = $group['Protected'] ?? false;
+      if (!$protected) {
+        $prepare = [];
+        $execute = [];
+        $execute[':id'] = $id;
+        if ($roleName !== null) {
+          $prepare[] = 'name = :name';
+          $execute[':name'] = $roleName;
+        }
+        if ($roleDescription !== null) {
+          $prepare[] = 'description = :description';
+          $execute[':description'] = $roleDescription;
+        }
+        $stmt = $this->db->prepare('UPDATE rbac_resources SET '.implode(", ",$prepare).' WHERE id = :id');
+        $stmt->execute($execute);
+        $this->api->setAPIResponseMessage('RBAC Role updated successfully');
+      } else {
+        $this->api->setAPIResponse('Error','You cannot modify a protected role');
       }
-      if ($roleDescription !== null) {
-        $prepare[] = 'description = :description';
-        $execute[':description'] = $roleDescription;
-      }
-      $stmt = $this->db->prepare('UPDATE rbac_resources SET '.implode(", ",$prepare).' WHERE id = :id');
-      $stmt->execute($execute);
-      $this->api->setAPIResponseMessage('RBAC Role updated successfully');
     } else {
       $this->api->setAPIResponseData('Error','RBAC Role does not exist.');
     }
   }
 
   public function deleteRBACRole($RoleID) {
-    if ($this->getRBACRoleByID($RoleID)) {
-      $this->logging->writeLog("RBAC","Deleted RBAC Role: $RoleID","debug",$_REQUEST);
-      $stmt = $this->db->prepare("DELETE FROM rbac_resources WHERE id = :id");
-      $stmt->execute([':id' => $RoleID]);
-      $this->api->setAPIResponseMessage('RBAC Role deleted successfully');  
+    $role = $this->getRBACRoleByID($RoleID);
+    if ($role) {
+      $protected = $role['Protected'] ?? false;
+      if (!$protected) {
+        $this->logging->writeLog("RBAC","Deleted RBAC Role: $RoleID","debug",$_REQUEST);
+        $stmt = $this->db->prepare("DELETE FROM rbac_resources WHERE id = :id");
+        if ($stmt->execute([':id' => $RoleID])) {
+          $this->api->setAPIResponseMessage('RBAC Role deleted successfully');
+        } else {
+          $this->api->setAPIResponse('Error', $this->db->lastErrorMsg());
+        }
+      } else {
+        $this->api->setAPIResponse('Error', "You cannot delete a protected role");
+      }
     } else {
       $this->logging->writeLog("RBAC","Error deleting RBAC Role. The role does not exist.","error",$_REQUEST);
       $this->api->setAPIResponse('Error','Unable to delete RBAC Role. The Role does not exist.');
@@ -1102,6 +1129,10 @@ class Auth {
       $groupsArr = array_map(function($value) {
         return "'" . $value . "'";
       }, $User['Groups']);
+      if (in_array('Administrators',$User['Groups'])) {
+        // Always return true for Administrators group
+        return true;
+      }
       $stmt = $this->db->prepare('SELECT * FROM rbac WHERE Name IN ('.implode(',',$groupsArr).')');
       $stmt->execute();
       $rbac = $stmt->fetchAll(PDO::FETCH_ASSOC);
