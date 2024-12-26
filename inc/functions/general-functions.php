@@ -212,3 +212,13 @@ function isValidFileType($fileName, $validExtensions) {
     $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
     return in_array($fileExtension, $validExtensions);
 }
+
+function sanitizeInput($input) {
+    // Replace spaces with underscores
+    $input = str_replace(' ', '_', $input);
+    
+    // Remove special characters
+    $input = preg_replace('/[^A-Za-z0-9_]/', '', $input);
+    
+    return $input;
+}
