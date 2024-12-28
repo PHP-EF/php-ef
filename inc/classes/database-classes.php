@@ -89,7 +89,7 @@ class dbHelper {
       }
       $this->pdo->commit();
       $this->updateDatabaseVersion($newVersion);
-      echo "Database schema updated successfully from version $currentVersion to $newVersion.";
+      echo "Database schema updated successfully from version $currentVersion to $newVersion. Refresh the page to reload.";
       die();
     } catch (Exception $e) {
       $this->pdo->rollBack();
