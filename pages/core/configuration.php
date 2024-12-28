@@ -630,9 +630,9 @@ return '
         text: "Edit Plugin URL(s)",
         icon: "bi bi-pencil-square",
         event: function() {
+          $("#urlList").html("");
           populatePluginRepositories();
           $("#onlinePluginsModal").modal("show");
-          $("#onlinePluginsModal input").val("");
         },
         attributes: {
           title: "Edit Plugin URL(s)",
@@ -671,6 +671,41 @@ return '
         toast("Error", "", "Failed to query list of repositories", "danger");
     });
   }
+
+  function getAllRepositoryUrls() {
+    const urlList = document.getElementById("urlList");
+    const listItems = urlList.getElementsByTagName("li");
+    const urls = [];
+    for (let i = 0; i < listItems.length; i++) {
+      const listItem = listItems[i];
+      const link = listItem.getElementsByTagName("a")[0];
+      if (link) {
+        urls.push(link.href);
+      } else {
+        urls.push(listItem.textContent.trim());
+      }
+    }
+    return urls;
+}
+
+  $("#editOnlinePluginsSaveButton").on("click",function(elem) {
+    var list = getAllRepositoryUrls();
+    var arr = {
+      "PluginRepositories": list
+    }
+    queryAPI("PATCH","/api/config",arr).done(function(data) {
+      if (data["result"] == "Success") {
+        toast(data["result"],"",data["message"],"success");
+        $("#onlinePluginsModal").modal("hide");
+      } else if (data["result"] == "Error") {
+        toast(data["result"],"",data["message"],"danger");
+      } else {
+        toast("API Error","","Failed to save repository configuration","danger","30000");
+      }
+    }).fail(function(xhr) {
+      toast("API Error","","Failed to save repository configuration","danger","30000");
+    });
+  })
 
   $("#pluginsTable").bootstrapTable();
 </script>

@@ -33,14 +33,6 @@ class Plugins {
         return $this->core->config->get('PluginRepositories');
     }
 
-    public function setPluginRepositories($list) {
-        $Arr = array(
-            'PluginRepositories' => $list
-        );
-        $Config = $this->core->config->get();
-        return $this->core->config->set($Config,$Arr);
-    }
-
     public function getAvailablePlugins() {
         $installedPlugins = $this->getInstalledPlugins();
         $onlinePlugins = $this->getOnlinePlugins();
