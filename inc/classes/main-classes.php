@@ -11,21 +11,33 @@ class ib {
   public $pages;
   public $logging;
   public $db;
+  public $dbHelper;
   public $reporting;
 
   public function __construct() {
-      $this->db = (new db(__DIR__.'/../config/app.db'))->db;
-      $this->api = new api();
-      $this->core = new core(__DIR__.'/../config/config.json',$this->api);
-      $this->auth = new Auth($this->core,$this->db,$this->api);
-      $this->config = $this->core->config;
-      $this->pages = new Pages($this->db,$this->api,$this->core);
-      $this->logging = $this->core->logging;
-      $this->reporting = new Reporting($this->core,$this->db);
+    $this->core = new core(__DIR__.'/../config/config.json',$this->api);
+    $this->db = (new db(__DIR__.'/../config/app.db',$this->core,$this->getVersion()[0]))->db;
+    $this->dbHelper = new dbHelper($this->db);
+    $this->api = new api();
+    $this->auth = new Auth($this->core,$this->db,$this->api);
+    $this->config = $this->core->config;
+    $this->pages = new Pages($this->db,$this->api,$this->core);
+    $this->logging = $this->core->logging;
+    $this->reporting = new Reporting($this->core,$this->db);
+    $this->checkDB();
   }
 
   public function getVersion() {
-    return ['v0.6.9'];
+    return ['0.7.0'];
+  }
+
+  // Initiate Database Migration if required
+  private function checkDB() {
+    $currentVersion = $this->dbHelper->getDatabaseVersion();
+    $newVersion = $this->getVersion()[0];
+    if ($currentVersion < $newVersion) {
+        $this->dbHelper->updateDatabaseSchema($currentVersion, $newVersion);
+    }
   }
 
   public function settingsOption($type, $name = null, $extras = null) {
@@ -206,16 +218,6 @@ class core {
   }
 }
 
-class db {
-  public $db;
-
-  public function __construct($dbFile) {
-    // Create or open the SQLite database
-    $this->db = new PDO("sqlite:$dbFile");
-    $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-  }
-}
-
 class Config {
   private $configFile;
   private $api;
@@ -274,39 +276,42 @@ class Pages {
   }
 
   private function createPagesTable() {
-    // Create users table if it doesn't exist
-    $this->db->exec("CREATE TABLE IF NOT EXISTS pages (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      Name TEXT,
-      Title TEXT,
-      ACL TEXT,
-      Type TEXT,
-      Menu TEXT,
-      Submenu TEXT,
-      Url TEXT,
-      Icon TEXT,
-      Weight INTEGER
-    )");
+    $dbHelper = new dbHelper($this->db);
+    if (!$dbHelper->tableExists("pages")) {
+      // Create pages table if it doesn't exist
+      $this->db->exec("CREATE TABLE IF NOT EXISTS pages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        Name TEXT,
+        Title TEXT,
+        ACL TEXT,
+        Type TEXT,
+        Menu TEXT,
+        Submenu TEXT,
+        Url TEXT,
+        Icon TEXT,
+        Weight INTEGER
+      )");
 
-    // Insert default nav links if they don't exist
-    $navLinks = [
-      ['Home','Home',null,'Link',null,null,'#page=core/default','fa fa-house',1],
-      ['Admin','Admin',null,'Menu',null,null,null,'fas fa-user-shield',2],
-      ['Reports','Reports',null,'Menu',null,null,null,'fa-solid fa-chart-simple',3],
-      ['Settings','Settings',null,'SubMenu','Admin',null,null,'fa fa-cog',1],
-      ['Logs','Logs',null,'SubMenu','Admin',null,null,'fa-regular fa-file',2],
-      ['Users','Users','ADMIN-USERS','SubMenuLink','Admin','Settings','#page=core/users',null,1],
-      ['Pages','Pages','ADMIN-PAGES','SubMenuLink','Admin','Settings','#page=core/pages',null,2],
-      ['Configuration','Configuration','ADMIN-CONFIG','SubMenuLink','Admin','Settings','#page=core/configuration',null,3],
-      ['Role Based Access','Role Based Access','ADMIN-RBAC','SubMenuLink','Admin','Settings','#page=core/rbac',null,4],
-      ['Portal Logs','Portal Logs','ADMIN-LOGS','SubMenuLink','Admin','Logs','#page=core/logs',null,1],
-      ['Web Tracking','Web Tracking',"REPORT-TRACKING",'MenuLink',"Reports",null,"#page=reports/tracking",'fa-solid fa-bullseye',1]
-    ];
+      // Insert default nav links if they don't exist
+      $navLinks = [
+        ['Home','Home',null,'Link',null,null,'#page=core/default','fa fa-house',1],
+        ['Admin','Admin',null,'Menu',null,null,null,'fas fa-user-shield',2],
+        ['Reports','Reports',null,'Menu',null,null,null,'fa-solid fa-chart-simple',3],
+        ['Settings','Settings',null,'SubMenu','Admin',null,null,'fa fa-cog',1],
+        ['Logs','Logs',null,'SubMenu','Admin',null,null,'fa-regular fa-file',2],
+        ['Users','Users','ADMIN-USERS','SubMenuLink','Admin','Settings','#page=core/users',null,1],
+        ['Pages','Pages','ADMIN-PAGES','SubMenuLink','Admin','Settings','#page=core/pages',null,2],
+        ['Configuration','Configuration','ADMIN-CONFIG','SubMenuLink','Admin','Settings','#page=core/configuration',null,3],
+        ['Role Based Access','Role Based Access','ADMIN-RBAC','SubMenuLink','Admin','Settings','#page=core/rbac',null,4],
+        ['Portal Logs','Portal Logs','ADMIN-LOGS','SubMenuLink','Admin','Logs','#page=core/logs',null,1],
+        ['Web Tracking','Web Tracking',"REPORT-TRACKING",'MenuLink',"Reports",null,"#page=reports/tracking",'fa-solid fa-bullseye',1]
+      ];
 
-    foreach ($navLinks as $link) {
-      if (!$this->pageExists($link[0])) {
-        $stmt = $this->db->prepare("INSERT INTO pages (Name, Title, ACL, Type, Menu, Submenu, Url, Icon, Weight) VALUES (:Name, :Title, :ACL, :Type, :Menu, :Submenu, :Url, :Icon, :Weight)");
-        $stmt->execute([':Name' => $link[0],':Title' => $link[1], ':ACL' => $link[2], ':Type' => $link[3], ':Menu' => $link[4], ':Submenu' => $link[5], ':Url' => $link[6], ':Icon' => $link[7], ':Weight' => $link[8]]);
+      foreach ($navLinks as $link) {
+        if (!$this->pageExists($link[0])) {
+          $stmt = $this->db->prepare("INSERT INTO pages (Name, Title, ACL, Type, Menu, Submenu, Url, Icon, Weight) VALUES (:Name, :Title, :ACL, :Type, :Menu, :Submenu, :Url, :Icon, :Weight)");
+          $stmt->execute([':Name' => $link[0],':Title' => $link[1], ':ACL' => $link[2], ':Type' => $link[3], ':Menu' => $link[4], ':Submenu' => $link[5], ':Url' => $link[6], ':Icon' => $link[7], ':Weight' => $link[8]]);
+        }
       }
     }
   }

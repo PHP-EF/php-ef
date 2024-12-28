@@ -16,7 +16,7 @@
       </div>
       <div class="mb-2">
         <small>
-          Running Version: '.$ib->getVersion()[0].'
+          Running Version: v'.$ib->getVersion()[0].'
           </a>
         </small>
       </div>

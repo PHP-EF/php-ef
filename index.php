@@ -297,7 +297,7 @@ foreach ($navLinks as $navLink) {
                   <p>Designed by <i class="fa fa-code" style="color:red"></i> by - <a target="_blank" rel="noopener noreferrer" href="https://github.com/TehMuffinMoo">Mat Cox</a></p>
                   <hr>
                   <small>
-                    Running Version: <?php echo $ib->getVersion()[0]; ?>
+                    Running Version: v<?php echo $ib->getVersion()[0]; ?>
                     </a>
                   </small>
                   <br>
