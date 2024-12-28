@@ -850,26 +850,29 @@ class Auth {
   }
 
   private function createRBACTable() {
-    // Create users table if it doesn't exist
-    $this->db->exec("CREATE TABLE IF NOT EXISTS rbac (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      Name TEXT,
-      Description TEXT,
-      PermittedResources TEXT,
-      Protected BOOLEAN
-    )");
+    $dbHelper = new dbHelper($this->db);
+    if (!$dbHelper->tableExists("rbac",$this->db)) {
+      // Create rbac table if it doesn't exist
+      $this->db->exec("CREATE TABLE IF NOT EXISTS rbac (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        Name TEXT,
+        Description TEXT,
+        PermittedResources TEXT,
+        Protected BOOLEAN
+      )");
 
-    // Insert roles if they don't exist
-    $roles = [
-      ['Authenticated', 'This group applies to any authenticated user', '', true],
-      ['Everyone', 'This group applies to any user, regardless of if they are logged in or not', '', true],
-      ['Administrators', 'System Administrators', '', true]
-    ];
+      // Insert roles if they don't exist
+      $roles = [
+        ['Authenticated', 'This group applies to any authenticated user', '', true],
+        ['Everyone', 'This group applies to any user, regardless of if they are logged in or not', '', true],
+        ['Administrators', 'System Administrators', '', true]
+      ];
 
-    foreach ($roles as $role) {
-      if (!$this->roleExists($role[0])) {
-        $stmt = $this->db->prepare("INSERT INTO rbac (Name, Description, PermittedResources, Protected) VALUES (:Name, :Description, :PermittedResources, :Protected)");
-        $stmt->execute([':Name' => $role[0],':Description' => $role[1], ':PermittedResources' => $role[2], ':Protected' => $role[3]]);
+      foreach ($roles as $role) {
+        if (!$this->roleExists($role[0])) {
+          $stmt = $this->db->prepare("INSERT INTO rbac (Name, Description, PermittedResources, Protected) VALUES (:Name, :Description, :PermittedResources, :Protected)");
+          $stmt->execute([':Name' => $role[0],':Description' => $role[1], ':PermittedResources' => $role[2], ':Protected' => $role[3]]);
+        }
       }
     }
   }
@@ -882,31 +885,32 @@ class Auth {
   }
 
   private function createRBACResourcesDefinitionsTable() {
-    // Create users table if it doesn't exist
-    $this->db->exec("CREATE TABLE IF NOT EXISTS rbac_resources (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT UNIQUE,
-      description TEXT,
-      Protected BOOLEAN
-    )");
+    $dbHelper = new dbHelper($this->db);
+    if (!$dbHelper->tableExists("rbac_resources",$this->db)) {
+      // Create rbac roles table if it doesn't exist
+      $this->db->exec("CREATE TABLE IF NOT EXISTS rbac_resources (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE,
+        description TEXT,
+        Protected BOOLEAN
+      )");
 
+      // Insert roles if they don't exist
+      $resources = [
+        // Built-In Roles
+        ['ADMIN-RBAC', 'Grants the ability to view and manage Role Based Access', true],
+        ['ADMIN-LOGS', 'Grants access to view Logs', true],
+        ['ADMIN-CONFIG', 'Grants access to manage the PHP-EF Configuration', true],
+        ['ADMIN-USERS', 'Grants access to view and manage users & groups', true],
+        ['ADMIN-PAGES', 'Grants the ability to view and manage Pages', true],
+        ['REPORT-TRACKING', 'Grants the ability to view the Web Tracking Reports', true]
+      ];
 
-
-    // Insert roles if they don't exist
-    $resources = [
-      // Built-In Roles
-      ['ADMIN-RBAC', 'Grants the ability to view and manage Role Based Access', true],
-      ['ADMIN-LOGS', 'Grants access to view Logs', true],
-      ['ADMIN-CONFIG', 'Grants access to manage the PHP-EF Configuration', true],
-      ['ADMIN-USERS', 'Grants access to view and manage users & groups', true],
-      ['ADMIN-PAGES', 'Grants the ability to view and manage Pages', true],
-      ['REPORT-TRACKING', 'Grants the ability to view the Web Tracking Reports', true]
-    ];
-
-    foreach ($resources as $resource) {
-      if (!$this->resourceExists($this->db, $resource[0])) {
-        $stmt = $this->db->prepare("INSERT INTO rbac_resources (name, description, Protected) VALUES (:Name, :Description, :Protected)");
-        $stmt->execute([':Name' => $resource[0],':Description' => $resource[1], ':Protected' => $resource[2]]);
+      foreach ($resources as $resource) {
+        if (!$this->resourceExists($this->db, $resource[0])) {
+          $stmt = $this->db->prepare("INSERT INTO rbac_resources (name, description, Protected) VALUES (:Name, :Description, :Protected)");
+          $stmt->execute([':Name' => $resource[0],':Description' => $resource[1], ':Protected' => $resource[2]]);
+        }
       }
     }
   }

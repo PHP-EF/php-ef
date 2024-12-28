@@ -1,3 +1,9 @@
+## v0.7.0
+### BREAKING CHANGE
+- Add page ordering and support for preference changes by draggable rows
+- This requires a new 'Weight' column to be created in the database which is not done automatically.
+- You can either create the new Weight column manually, or drop the pages table and allow it to be re-created automatically.
+
 ## v0.6.9
 - Various improvements to plugin configuration
 - Include new pages discovery

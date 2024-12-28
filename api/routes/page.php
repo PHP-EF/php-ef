@@ -68,11 +68,12 @@ $app->get('/pages', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
 	$data = $request->getQueryParams();
     if ($ib->auth->checkAccess("ADMIN-PAGES")) {
-		if (isset($data['type'])) {
-			$Menu = $data['menu'] ?? null;
-			$ib->api->setAPIResponseData($ib->pages->getByType($data['type'],$Menu));	
+		$Menu = $data['menu'] ?? null;
+		$SubMenu = $data['submenu'] ?? null;
+		if ($Menu || $SubMenu) {
+			$ib->api->setAPIResponseData($ib->pages->getByMenu($Menu,$SubMenu));
 		} else {
-			$ib->api->setAPIResponseData($ib->pages->get());
+			$ib->api->setAPIResponseData($ib->pages->get());	
 		}
 	}
 
@@ -126,6 +127,24 @@ $app->patch('/page/{id}', function ($request, $response, $args) {
 		->withHeader('Content-Type', 'application/json;charset=UTF-8')
 		->withStatus($GLOBALS['responseCode']);
 });
+
+// Update CMDB Column Weight
+$app->patch('/page/{id}/weight', function ($request, $response, $args) {
+	$ib = ($request->getAttribute('ib')) ?? new ib();
+    if ($ib->auth->checkAccess("ADMIN-PAGES")) {
+		$data = $ib->api->getAPIRequestData($request);
+		if (isset($data['weight'])) {
+			$ib->pages->updatePageWeight($args['id'],$data['weight']);
+		} else {
+			$ib->api->setAPIResponse('Error','Weight missing from request');
+		}        
+	}
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json;charset=UTF-8')
+		->withStatus($GLOBALS['responseCode']);
+});
+
 
 $app->delete('/page/{id}', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
@@ -194,6 +213,44 @@ $app->get('/pages/list', function ($request, $response, $args) {
 	}
 
 	// Return the response
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json')
+		->withStatus($GLOBALS['responseCode']);
+});
+
+$app->get('/pages/root', function ($request, $response, $args) {
+	$ib = ($request->getAttribute('ib')) ?? new ib();
+    if ($ib->auth->checkAccess("ADMIN-PAGES")) {
+		$ib->api->setAPIResponseData($ib->pages->getMainLinksAndMenus());	
+	}
+
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json')
+		->withStatus($GLOBALS['responseCode']);
+});
+
+$app->get('/pages/menus', function ($request, $response, $args) {
+	$ib = ($request->getAttribute('ib')) ?? new ib();
+    if ($ib->auth->checkAccess("ADMIN-PAGES")) {
+		$ib->api->setAPIResponseData($ib->pages->getByType('Menu'));	
+	}
+
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json')
+		->withStatus($GLOBALS['responseCode']);
+});
+
+$app->get('/pages/submenus', function ($request, $response, $args) {
+	$ib = ($request->getAttribute('ib')) ?? new ib();
+	$data = $request->getQueryParams();
+    if ($ib->auth->checkAccess("ADMIN-PAGES")) {
+		$Menu = $data['menu'] ?? null;
+		$ib->api->setAPIResponseData($ib->pages->getByType('SubMenu',$Menu));	
+	}
+
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
 		->withHeader('Content-Type', 'application/json')

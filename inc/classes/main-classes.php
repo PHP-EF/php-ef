@@ -11,21 +11,33 @@ class ib {
   public $pages;
   public $logging;
   public $db;
+  public $dbHelper;
   public $reporting;
 
   public function __construct() {
-      $this->db = (new db(__DIR__.'/../config/app.db'))->db;
-      $this->api = new api();
-      $this->core = new core(__DIR__.'/../config/config.json',$this->api);
-      $this->auth = new Auth($this->core,$this->db,$this->api);
-      $this->config = $this->core->config;
-      $this->pages = new Pages($this->db,$this->api,$this->core);
-      $this->logging = $this->core->logging;
-      $this->reporting = new Reporting($this->core,$this->db);
+    $this->core = new core(__DIR__.'/../config/config.json',$this->api);
+    $this->db = (new db(__DIR__.'/../config/app.db',$this->core,$this->getVersion()[0]))->db;
+    $this->dbHelper = new dbHelper($this->db);
+    $this->api = new api();
+    $this->auth = new Auth($this->core,$this->db,$this->api);
+    $this->config = $this->core->config;
+    $this->pages = new Pages($this->db,$this->api,$this->core);
+    $this->logging = $this->core->logging;
+    $this->reporting = new Reporting($this->core,$this->db);
+    $this->checkDB();
   }
 
   public function getVersion() {
-    return ['v0.6.9'];
+    return ['0.7.0'];
+  }
+
+  // Initiate Database Migration if required
+  private function checkDB() {
+    $currentVersion = $this->dbHelper->getDatabaseVersion();
+    $newVersion = $this->getVersion()[0];
+    if ($currentVersion < $newVersion) {
+        $this->dbHelper->updateDatabaseSchema($currentVersion, $newVersion);
+    }
   }
 
   public function settingsOption($type, $name = null, $extras = null) {
@@ -206,16 +218,6 @@ class core {
   }
 }
 
-class db {
-  public $db;
-
-  public function __construct($dbFile) {
-    // Create or open the SQLite database
-    $this->db = new PDO("sqlite:$dbFile");
-    $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-  }
-}
-
 class Config {
   private $configFile;
   private $api;
@@ -274,38 +276,42 @@ class Pages {
   }
 
   private function createPagesTable() {
-    // Create users table if it doesn't exist
-    $this->db->exec("CREATE TABLE IF NOT EXISTS pages (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      Name TEXT,
-      Title TEXT,
-      ACL TEXT,
-      Type TEXT,
-      Menu TEXT,
-      Submenu TEXT,
-      Url TEXT,
-      Icon TEXT
-    )");
+    $dbHelper = new dbHelper($this->db);
+    if (!$dbHelper->tableExists("pages")) {
+      // Create pages table if it doesn't exist
+      $this->db->exec("CREATE TABLE IF NOT EXISTS pages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        Name TEXT,
+        Title TEXT,
+        ACL TEXT,
+        Type TEXT,
+        Menu TEXT,
+        Submenu TEXT,
+        Url TEXT,
+        Icon TEXT,
+        Weight INTEGER
+      )");
 
-    // Insert default nav links if they don't exist
-    $navLinks = [
-      ['Home','Home',null,'Link',null,null,'#page=core/default','fa fa-house'],
-      ['Admin','Admin',null,'Menu',null,null,null,'fas fa-user-shield'],
-      ['Settings','Settings',null,'SubMenu','Admin',null,null,'fa fa-cog'],
-      ['Logs','Logs',null,'SubMenu','Admin',null,null,'fa-regular fa-file'],
-      ['Users','Users','ADMIN-USERS','SubMenuLink','Admin','Settings','#page=core/users',null],
-      ['Pages','Pages','ADMIN-PAGES','SubMenuLink','Admin','Settings','#page=core/pages',null],
-      ['Configuration','Configuration','ADMIN-CONFIG','SubMenuLink','Admin','Settings','#page=core/configuration',null],
-      ['Role Based Access','Role Based Access','ADMIN-RBAC','SubMenuLink','Admin','Settings','#page=core/rbac',null],
-      ['Portal Logs','Portal Logs','ADMIN-LOGS','SubMenuLink','Admin','Logs','#page=core/logs',null],
-      ['Reports','Reports',null,'Menu',null,null,null,'fa-solid fa-chart-simple'],
-      ['Web Tracking','Web Tracking',"REPORT-TRACKING",'MenuLink',"Reports",null,"#page=reports/tracking",'fa-solid fa-bullseye']
-    ];
+      // Insert default nav links if they don't exist
+      $navLinks = [
+        ['Home','Home',null,'Link',null,null,'#page=core/default','fa fa-house',1],
+        ['Admin','Admin',null,'Menu',null,null,null,'fas fa-user-shield',2],
+        ['Reports','Reports',null,'Menu',null,null,null,'fa-solid fa-chart-simple',3],
+        ['Settings','Settings',null,'SubMenu','Admin',null,null,'fa fa-cog',1],
+        ['Logs','Logs',null,'SubMenu','Admin',null,null,'fa-regular fa-file',2],
+        ['Users','Users','ADMIN-USERS','SubMenuLink','Admin','Settings','#page=core/users',null,1],
+        ['Pages','Pages','ADMIN-PAGES','SubMenuLink','Admin','Settings','#page=core/pages',null,2],
+        ['Configuration','Configuration','ADMIN-CONFIG','SubMenuLink','Admin','Settings','#page=core/configuration',null,3],
+        ['Role Based Access','Role Based Access','ADMIN-RBAC','SubMenuLink','Admin','Settings','#page=core/rbac',null,4],
+        ['Portal Logs','Portal Logs','ADMIN-LOGS','SubMenuLink','Admin','Logs','#page=core/logs',null,1],
+        ['Web Tracking','Web Tracking',"REPORT-TRACKING",'MenuLink',"Reports",null,"#page=reports/tracking",'fa-solid fa-bullseye',1]
+      ];
 
-    foreach ($navLinks as $link) {
-      if (!$this->pageExists($link[0])) {
-        $stmt = $this->db->prepare("INSERT INTO pages (Name, Title, ACL, Type, Menu, Submenu, Url, Icon) VALUES (:Name, :Title, :ACL, :Type, :Menu, :Submenu, :Url, :Icon)");
-        $stmt->execute([':Name' => $link[0],':Title' => $link[1], ':ACL' => $link[2], ':Type' => $link[3], ':Menu' => $link[4], ':Submenu' => $link[5], ':Url' => $link[6], ':Icon' => $link[7]]);
+      foreach ($navLinks as $link) {
+        if (!$this->pageExists($link[0])) {
+          $stmt = $this->db->prepare("INSERT INTO pages (Name, Title, ACL, Type, Menu, Submenu, Url, Icon, Weight) VALUES (:Name, :Title, :ACL, :Type, :Menu, :Submenu, :Url, :Icon, :Weight)");
+          $stmt->execute([':Name' => $link[0],':Title' => $link[1], ':ACL' => $link[2], ':Type' => $link[3], ':Menu' => $link[4], ':Submenu' => $link[5], ':Url' => $link[6], ':Icon' => $link[7], ':Weight' => $link[8]]);
+        }
       }
     }
   }
@@ -316,14 +322,17 @@ class Pages {
     $stmt->execute([':name' => $pageName]);
     return $stmt->fetchColumn() > 0;
   }
+
   private function getPageById($pageId) {
-    $stmt = $this->db->prepare("SELECT COUNT(*) FROM pages WHERE id = :id");
+    $stmt = $this->db->prepare("SELECT * FROM pages WHERE id = :id");
     $stmt->execute([':id' => $pageId]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
   }
 
   public function get() {
-    $stmt = $this->db->prepare("SELECT * FROM pages");
+    $prepare = "SELECT * FROM pages ORDER BY Weight";
+    
+    $stmt = $this->db->prepare($prepare);
     $stmt->execute();
     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     return $users; 
@@ -396,6 +405,46 @@ class Pages {
     }
   }
 
+  public function getByMenu($Menu = null,$SubMenu = null) {
+    $Filters = [];
+    $Prepare = "SELECT * FROM pages";
+    $Execute = [];
+    $Types = [];
+    if ($Menu) {
+      $Filters[] = 'Menu = :Menu';
+      $Types[] = "MenuLink";
+      $Types[] = "SubMenu";
+      $Execute[':Menu'] = $Menu;
+    }
+    if ($SubMenu) {
+      $Filters[] = 'SubMenu = :SubMenu';
+      $Types[] = "SubMenuLink";
+      $Execute[':SubMenu'] = $SubMenu;
+    }
+    if ($Filters) {
+      $Prepare .= " WHERE ".implode(" AND ",$Filters);
+      if ($Types) {
+        $typesArr = array_map(function($value) {
+          return "'" . $value . "'";
+        }, $Types);
+        $Prepare .= ' AND Type IN ('.implode(',',$typesArr).')';        
+      }
+    }
+    $Prepare .= " ORDER BY Weight";
+
+    $stmt = $this->db->prepare($Prepare);
+    $stmt->execute($Execute);
+    $Pages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return $Pages; 
+  }
+
+  public function getMainLinksAndMenus() {
+    $stmt = $this->db->prepare('SELECT * FROM pages WHERE Type IN (\'Menu\',\'Link\') ORDER BY Weight');
+    $stmt->execute($Execute);
+    $Pages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return $Pages; 
+  }
+
   public function getByType($Type,$Menu = null) {
     $Prepare = "SELECT * FROM pages WHERE Type = :Type";
     $Execute = [':Type' => $Type];
@@ -403,6 +452,7 @@ class Pages {
       $Prepare .= " AND Menu = :Menu";
       $Execute[':Menu'] = $Menu;
     }
+    $Prepare .= " ORDER BY Weight";
     $stmt = $this->db->prepare($Prepare);
     $stmt->execute($Execute);
     $Pages = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -457,6 +507,71 @@ class Pages {
     // Get Plugin Pages
     $result = array_merge($result, $this->getAllPluginPagesRecursively());
     return $result;
+  }
+
+	// Function to manage updating weights of Pages/Menus/Submenus
+  public function updatePageWeight($id, $Weight) {
+    $Page = $this->getPageById($id);
+
+    if ($Page) {
+        $originalWeight = $Page['Weight'];
+
+        // Update the weight of the specific row
+        $updateRow = $this->db->prepare("UPDATE pages SET Weight = :Weight WHERE id = :id;");
+        $execute = [":id" => $id, ":Weight" => $Weight];
+
+        if ($updateRow->execute($execute)) {
+            // Prepare to shift the weights of other rows
+            if ($Weight > $originalWeight) {
+                $Prepare = 'UPDATE pages SET Weight = Weight - 1 WHERE id != :id AND Weight > :originalWeight AND Weight <= :Weight';
+            } else {
+                $Prepare = 'UPDATE pages SET Weight = Weight + 1 WHERE id != :id AND Weight < :originalWeight AND Weight >= :Weight';
+            }
+
+            $StrictWeights = '';
+
+            if ($Page['Type'] == "Menu" || $Page['Type'] == "Link") {
+                $Prepare .= ' AND Type IN (\'Menu\',\'Link\')';
+                $StrictWeights = ' WHERE Type IN (\'Menu\',\'Link\')';
+            } elseif ($Page['Type'] == "SubMenu" || $Page['Type'] == "MenuLink") {
+                $Prepare .= ' AND Type IN (\'SubMenu\',\'MenuLink\') AND Menu = :Menu';
+                $StrictWeights = ' WHERE Type IN (\'SubMenu\',\'MenuLink\')';
+                $execute[':Menu'] = $Page['Menu'];
+            } elseif ($Page['Type'] == "SubMenuLink") {
+                $Prepare .= ' AND Type = "SubMenuLink" AND Submenu = :SubMenu';
+                $StrictWeights = ' WHERE Type IN (\'SubMenuLink\')';
+                $execute[':SubMenu'] = $Page['Submenu'];
+            }
+
+            $execute[':originalWeight'] = $originalWeight;
+            $updateOtherRows = $this->db->prepare($Prepare);
+
+            if ($updateOtherRows->execute($execute)) {
+                // Enforce strict weight assignment
+                $enforceConsecutiveWeights = $this->db->prepare('
+                    WITH NumberedRows AS (
+                        SELECT 
+                            id, 
+                            ROW_NUMBER() OVER (ORDER BY Weight) AS row_number
+                        FROM 
+                            pages
+                        ' . $StrictWeights . '
+                    )
+                    UPDATE pages
+                    SET Weight = (SELECT row_number FROM NumberedRows WHERE pages.id = NumberedRows.id)
+                    ' . $StrictWeights . ';
+                ');
+
+                if ($enforceConsecutiveWeights->execute()) {
+                    $this->api->setAPIResponseMessage('Successfully updated position');
+                    return true;
+                }
+            }
+        }
+    } else {
+        $this->api->setAPIResponse('Error', 'Column not found');
+        return false;
+    }
   }
 }
 

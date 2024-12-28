@@ -238,6 +238,18 @@ return '
     $("#pageModal").modal("show");
   }
 
+  function determineType(type) {
+    switch(type) {
+      case "Link":
+      case "MenuLink":
+      case "SubMenuLink":
+        return "Link";
+      case "Menu":
+      case "SubMenu":
+        return "Menu";
+    }
+  }
+
   function editPage(row) {
     $("#pageID").val(row.id);
     $("#pageName").val(row.Name);
@@ -253,17 +265,7 @@ return '
       $("#pageSubMenu").attr("disabled", false);
     }
 
-    switch(row.Type) {
-      case "Link":
-      case "MenuLink":
-      case "SubMenuLink":
-        $("#pageType").val("Link");
-        break;
-      case "Menu":
-      case "SubMenu":
-        $("#pageType").val("Menu");
-        break;
-    }
+    $("#pageType").val(determineType(row.Type));
     updateDropDowns(row);
   }
 
@@ -314,7 +316,7 @@ return '
     });
 
     const pageMenuContainer = $("#pageMenu");
-    queryAPI("GET","/api/pages?type=Menu").done(function(menuData) {
+    queryAPI("GET","/api/pages/menus").done(function(menuData) {
       pageMenuContainer.append(`<option value="" selected>None</option>`);
       $.each(menuData.data, function(index, item) {
           const option = $("<option></option>").val(item.Name).text(item.Name);
@@ -348,7 +350,7 @@ return '
     if (!row.Menu) {
         row.Menu = "None";
     }
-    queryAPI("GET","/api/pages?type=SubMenu&menu="+row.Menu).done(function(subMenuData) {
+    queryAPI("GET","/api/pages/submenus?menu="+row.Menu).done(function(subMenuData) {
       pageSubMenuContainer.html("");
       pageSubMenuContainer.append(`<option value="" selected>None</option>`);
       $.each(subMenuData.data, function(index, item) {
@@ -361,35 +363,46 @@ return '
     hideUnneccessaryInputs();
   }
 
+  function typeFormatter(value, row, index) {
+    return determineType(value);
+  }
+
   function pageIconFormatter(value, row, index) {
       return `<i class="navIcon `+value+`"></i>`
   }
 
-  function createTableHtml(index, items) {
-      let html = [];
+  function menuDetailFormatter(index,row) {
+    return detailFormatter(index,row,"menu");
+  }
+
+  function submenuDetailFormatter(index,row) {
+    return detailFormatter(index,row,"submenu");
+  }
+  
+  function createTableHtml(index, prefix) {
+  console.log(index,prefix);
       let theme = getCookie("theme") == "dark" ? "table-dark" : "";
-      
-      html.push(`<table class="table table-striped `+theme+`" id="child-table-` + index +`"></table>`);
-      return html.join("");
+      return `<table class="table table-striped `+theme+`" id="`+prefix+`-table-` + index +`"></table>`;
   }
 
-  function detailFormatter(index, row) {
+  function detailFormatter(index, row, prefix) {
       let html = [];
-      if (row.Items) {
-          html.push(createTableHtml(index, Array.isArray(row.Items) ? row.Items : Object.values(row.Items)));
-      }
+      html.push(createTableHtml(index,prefix));
       return html.join("");
   }
 
-  function initializeChildTable(index, row, detail) {
-      if (!row.Items) return;
-      const childTableId = `#child-table-${index}`;
-      const detailView = !Array.isArray(row.Items);
+  function initializeMenuTable(index, row, detail) {
+      const childTableId = `#menu-table-${index}`;
+      console.log(row);
       $(childTableId).bootstrapTable({
-          data: Array.isArray(row.Items) ? row.Items : Object.values(row.Items),
-          detailView: detailView,
-          detailFormatter: detailFormatter,
-          onExpandRow: initializeChildTable,
+          url: "/api/pages?menu="+row.Name,
+          dataField: "data",
+          detailView: true,
+          detailFormatter: submenuDetailFormatter,
+          onExpandRow: initializeSubMenuTable,
+          reorderableRows: true,
+          rowAttributes: "rowAttributes",
+          onReorderRow: onReorderRow,
           columns: [{
             field: "Icon",
             title: "Icon",
@@ -398,6 +411,45 @@ return '
           },{
             field: "Type",
             title: "Type",
+            formatter: "typeFormatter",
+            sortable: true
+          },{
+            field: "Name",
+            title: "Name",
+            sortable: true
+          },{
+            field: "Title",
+            title: "Title",
+            sortable: true
+          },{
+            field: "Url",
+            title: "URL",
+            sortable: true
+          },{
+            field: "ACL",
+            title: "ACL",
+            sortable: true
+          },{
+            title: "Actions",
+            formatter: "pageActionFormatter",
+            events: "pageActionEvents"
+          }]
+      });
+  }
+
+  function initializeSubMenuTable(index, row, detail) {
+      const childTableId = `#submenu-table-${index}`;
+      console.log("/api/pages?submenu="+row.Name+"&menu="+row.Menu);
+      $(childTableId).bootstrapTable({
+          url: "/api/pages?submenu="+row.Name+"&menu="+row.Menu,
+          dataField: "data",
+          reorderableRows: true,
+          rowAttributes: "rowAttributes",
+          onReorderRow: onReorderRow,
+          columns: [{
+            field: "Type",
+            title: "Type",
+            formatter: "typeFormatter",
             sortable: true
           },{
             field: "Name",
@@ -424,21 +476,37 @@ return '
   }
 
   function buildPagesTable() {
-    queryAPI("GET","/api/pages/hierarchy",false).done(function(data) {
+    $("#pagesTable").bootstrapTable("destroy");
+    $("#pagesTable").bootstrapTable({
+        url: "/api/pages/root",
+        dataField: "data",
+        detailView: true,
+        detailFormatter: menuDetailFormatter,
+        onExpandRow: initializeMenuTable,
+        reorderableRows: true,
+        rowAttributes: "rowAttributes",
+        onReorderRow: onReorderRow
+    });
+  }
+
+  function rowAttributes(row, index) {
+    return {
+      "id": "row-"+row.id
+    }
+  }
+
+  function onReorderRow(data,row,oldrow,table) {
+    var key = data.findIndex(item => item.id === row.id) + 1;
+    queryAPI("PATCH","/api/page/"+row.id+"/weight",{"weight": key}).done(function(data) {
       if (data["result"] == "Success") {
-        const flattenedData = Object.values(data["data"]); // Flatten your JSON data here
-        $("#pagesTable").bootstrapTable("destroy");
-        $("#pagesTable").bootstrapTable({
-            data: flattenedData,
-            detailView: true,
-            detailFormatter: detailFormatter,
-            onExpandRow: initializeChildTable
-        });
+          toast(data["result"],"",data["message"],"success");
       } else if (data["result"] == "Error") {
-        toast(data["result"],"",data["message"],"danger","30000");
+          toast(data["result"],"",data["message"],"danger");
+      } else {
+          toast("API Error","","Failed To Edit "+row.Type+" Position","danger","30000");
       }
     }).fail(function() {
-        toast("Error", "", "Failed to query page information", "danger");
+      toast("API Error","","Failed To Edit "+row.Type+" Position","danger","30000");
     });
   }
   

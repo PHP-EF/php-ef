@@ -80,8 +80,8 @@ if (!(isset($SkipCSS))) {
       <script src="/assets/js/apexcharts.min.js"></script>
 
       <!-- Main -->
-      <script src="/assets/js/main.js?'.$ib->getVersion()[0].'"></script>
-      <link href="/assets/css/main.css?'.$ib->getVersion()[0].'" rel="stylesheet">
+      <script src="/assets/js/main.js?v'.$ib->getVersion()[0].'"></script>
+      <link href="/assets/css/main.css?v'.$ib->getVersion()[0].'" rel="stylesheet">
 
     </head>
     ';
