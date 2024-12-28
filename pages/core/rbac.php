@@ -210,11 +210,13 @@ return '
 
 <script>
   function groupActionFormatter(value, row, index) {
-    var actions = `<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`
-    if (!row["Protected"]) {
-      actions += `<a class="delete" title="Delete"><i class="fa fa-trash"></i></a>`
+    if (row["Name"] != "Administrators") {
+      var actions = `<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`
+      if (!row["Protected"]) {
+        actions += `<a class="delete" title="Delete"><i class="fa fa-trash"></i></a>`
+      }
+      return actions
     }
-    return actions
   }
 
   function roleActionFormatter(value, row, index) {
@@ -400,7 +402,7 @@ return '
     };
     queryAPI("PATCH","/api/rbac/role/"+id,data).done(function(data) {
       if (data["result"] == "Success") {
-        toast("Success","","Successfully edited "+name+" description to: "+description,"success");
+        toast(data["result"],"",data["message"],"success");
         $("#rbacRolesTable").bootstrapTable("refresh");
         $("#roleEditModal").modal("hide");
       } else if (data["result"] == "Error") {
@@ -422,7 +424,7 @@ return '
     };
     queryAPI("PATCH","/api/rbac/group/"+id,data).done(function(data) {
       if (data["result"] == "Success") {
-        toast("Success", "", "Successfully edited " + group + " description to: " + description, "success");
+        toast(data["result"], "", data["message"], "success");
         $("#rbacGroupsTable").bootstrapTable("refresh");
         $("#groupEditModal").modal("hide");
       } else if (data["result"] == "Error") {
@@ -444,7 +446,7 @@ return '
     };
     queryAPI("POST","/api/rbac/groups",data).done(function(data) {
       if (data["result"] == "Success") {
-        toast("Success","","Successfully created group: "+groupName,"success");
+        toast(data["result"],"",data["message"],"success");
         $("#rbacGroupsTable").bootstrapTable("refresh");
         $("#newItemModal").modal("hide");
       } else if (data["result"] == "Error") {
@@ -466,7 +468,7 @@ return '
     }
     queryAPI("POST","/api/rbac/roles",data).done(function(data) {
       if (data["result"] == "Success") {
-        toast("Success","","Successfully created role: "+roleName,"success");
+        toast(data["result"],"",data["message"],"success");
         $("#rbacRolesTable").bootstrapTable("refresh");
         $("#newItemModal").modal("hide");
       } else if (data["result"] == "Error") {

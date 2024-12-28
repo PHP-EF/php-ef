@@ -16,7 +16,7 @@
       </div>
       <div class="mb-2">
         <small>
-          Running Version: '.$ib->getVersion()[0].'
+          <span class="fa-solid fa-code-compare"></span> PHP-EF: v'.$ib->getVersion()[0].' | <span class="fa-solid fa-database"></span> Database: v'.$ib->dbHelper->getDatabaseVersion().'
           </a>
         </small>
       </div>
