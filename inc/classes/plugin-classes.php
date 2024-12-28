@@ -20,10 +20,7 @@ class Plugins {
 
     public function getOnlinePlugins() {
         $installedPlugins = $this->getInstalledPlugins();
-        $list = [
-            'https://github.com/TehMuffinMoo/php-ef-plugin-ib',
-            'https://github.com/TehMuffinMoo/php-ef-plugin-cmdb'
-        ];
+        $list = $this->core->config->get('PluginRepositories');
         $results = [];
         foreach ($list as $l) {
             $ls = explode('https://github.com/',$l);
