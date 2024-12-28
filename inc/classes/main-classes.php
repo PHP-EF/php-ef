@@ -263,6 +263,12 @@ class Config {
     $this->api->setAPIResponseMessage('Successfully updated configuration');
     file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
   }
+
+  public function setRepositories(&$config,$list) {
+    $config['PluginRepositories'] = $list;
+    $this->api->setAPIResponseMessage('Successfully updated repository configuration');
+    file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+  }
 }
 
 class Pages {

@@ -450,19 +450,8 @@ return '
               <button class="btn btn-outline-success" type="button" id="addUrl">Add URL</button>
             </div>
           </div>
-          <ul id="urlList" class="list-group mt-3"></ul>
+          <ul id="urlList" class="list-group mt-3 urlList"></ul>
         </div>
-
-        <script>
-
-        $("#addUrl").click(function() {
-          var url = $("#urlInput").val();
-          if (url) {
-              $("#urlList").append(`<li class="list-group-item">` + url + `</li>`);
-              $("#urlInput").val("");
-          }
-        });
-        </script>
       </div>
       <div class="modal-footer">
         <button class="btn btn-primary" id="editOnlinePluginsSaveButton">Save</button>
@@ -656,11 +645,21 @@ return '
             link.href = url;
             link.textContent = url;
 
+            // Create an i element
+            const trash = document.createElement("i");
+            trash.classList = "fa fa-trash removeUrl";
+
             // Append the link to the list item
             listItem.appendChild(link);
+            // Append the icon to the list item
+            listItem.appendChild(trash);
 
             // Append the list item to the ul
             urlList.appendChild(listItem);
+        });
+
+        $(".removeUrl").click(function(elem) {
+          $(elem.target).parent().remove();
         });
       } else if (data["result"] == "Error") {
         toast(data["result"],"",data["message"],"danger","30000");
@@ -686,14 +685,19 @@ return '
       }
     }
     return urls;
-}
+  }
+
+  $("#addUrl").click(function() {
+    var url = $("#urlInput").val();
+    if (url) {
+        $("#urlList").append(`<li class="list-group-item">` + url + `</li>`);
+        $("#urlInput").val("");
+    }
+  });
 
   $("#editOnlinePluginsSaveButton").on("click",function(elem) {
     var list = getAllRepositoryUrls();
-    var arr = {
-      "PluginRepositories": list
-    }
-    queryAPI("PATCH","/api/config",arr).done(function(data) {
+    queryAPI("POST","/api/plugins/repositories",{list: list}).done(function(data) {
       if (data["result"] == "Success") {
         toast(data["result"],"",data["message"],"success");
         $("#onlinePluginsModal").modal("hide");

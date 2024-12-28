@@ -34,3 +34,20 @@ $app->get('/plugins/repositories', function ($request, $response, $args) {
 		->withHeader('Content-Type', 'application/json')
 		->withStatus($GLOBALS['responseCode']);
 });
+
+$app->post('/plugins/repositories', function ($request, $response, $args) {
+	$ib = ($request->getAttribute('ib')) ?? new ib();
+	$data = $ib->api->getAPIRequestData($request);
+	if (isset($data['list'])) {
+		$config = $ib->config->get();
+		$ib->api->setAPIResponseData($ib->config->setRepositories($config,$data['list']));
+	} else {
+		$ib->api->setAPIResponse('Error','List missing from request');
+	}
+
+    $response->getBody()->write(jsonE($GLOBALS['api']));
+	// Return the response
+	return $response
+		->withHeader('Content-Type', 'application/json')
+		->withStatus($GLOBALS['responseCode']);
+});
