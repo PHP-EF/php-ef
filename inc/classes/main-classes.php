@@ -13,17 +13,19 @@ class ib {
   public $db;
   public $dbHelper;
   public $reporting;
+  public $plugins;
 
   public function __construct() {
     $this->core = new core(__DIR__.'/../config/config.json',$this->api);
     $this->db = (new db(__DIR__.'/../config/app.db',$this->core,$this->getVersion()[0]))->db;
     $this->dbHelper = new dbHelper($this->db);
-    $this->api = new api();
+    $this->api = new api($this->core);
     $this->auth = new Auth($this->core,$this->db,$this->api);
     $this->config = $this->core->config;
     $this->pages = new Pages($this->db,$this->api,$this->core);
     $this->logging = $this->core->logging;
     $this->reporting = new Reporting($this->core,$this->db);
+    $this->plugins = new Plugins($this->api,$this->core,$this->db);
     $this->checkDB();
   }
 

@@ -3,9 +3,9 @@
 // USED TO DEFINE PLUGIN INFORMATION & CLASS
 // **
 
-// PLUGIN INFORMATION
-$GLOBALS['plugins']['example'] = [ // Plugin Name
-	'name' => 'example', // Plugin Name
+// PLUGIN INFORMATION - This should match what is in plugin.json
+$GLOBALS['plugins']['Example'] = [ // Plugin Name
+	'name' => 'Example', // Plugin Name
 	'author' => 'TehMuffinMoo', // Who wrote the plugin
 	'category' => 'Testing', // One to Two Word Description
 	'link' => 'https://github.com/TehMuffinMoo', // Link to plugin info

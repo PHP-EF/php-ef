@@ -373,7 +373,7 @@ return '
           </div>
           <div class="card">
             <div class="container">
-              <table data-url="/api/config/plugins"
+              <table data-url="/api/plugins/available"
                 data-data-field="data"
                 data-toggle="table"
                 data-search="true"
@@ -394,6 +394,8 @@ return '
                     <th data-field="category" data-sortable="true">Category</th>
                     <th data-field="version" data-sortable="true">Version</th>
                     <th data-field="link" data-sortable="true">URL</th>
+                    <th data-field="status" data-sortable="true">Status</th>
+                    <th data-field="source" data-sortable="true">Source</th>
                     <th data-formatter="pluginActionFormatter" data-events="pluginActionEvents">Actions</th>
                   </tr>
                 </thead>
@@ -582,5 +584,6 @@ return '
   }
 
   $("#pluginsTable").bootstrapTable();
+  $("#availablePluginsTable").bootstrapTable();
 </script>
 ';

@@ -2,10 +2,16 @@
 $app->get('/page/{category}/{page}', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
 
-	$ib->api->setAPIResponseData(include_once(__DIR__."/../../pages/".$args['category']."/".$args['page'].".php"));
+	$pagePath = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'pages' . DIRECTORY_SEPARATOR . $args['category'] . DIRECTORY_SEPARATOR . $args['page'] . '.php';
+	if (file_exists($pagePath)) {
+		$ib->api->setAPIResponseData(include_once($pagePath));
+		$response->getBody()->write($GLOBALS['api']['data']);
+	} else {
+		$ib->api->setAPIResponse('Error','Page not found');
+		$response->getBody()->write(jsonE($GLOBALS['api']));
+	}
 
 	// Return the response
-	$response->getBody()->write($GLOBALS['api']['data']);
 	return $response
 		->withHeader('Content-Type', 'text/html')
 		->withStatus($GLOBALS['responseCode']);
@@ -13,7 +19,7 @@ $app->get('/page/{category}/{page}', function ($request, $response, $args) {
 
 $app->get('/page/plugin/{plugin}/js', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-	$pluginDir = __DIR__."/../../inc/plugins/".$args['plugin'];
+	$pluginDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $args['plugin'];
 
 	// Get Custom JS
 	if (file_exists($pluginDir.'/main.js')) {
@@ -30,7 +36,7 @@ $app->get('/page/plugin/{plugin}/js', function ($request, $response, $args) {
 
 $app->get('/page/plugin/{plugin}/css', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
-	$pluginDir = __DIR__."/../../inc/plugins/".$args['plugin'];
+	$pluginDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $args['plugin'];
 
 	// Get Custom CSS
 	if (file_exists($pluginDir.'/styles.css')) {
@@ -48,17 +54,22 @@ $app->get('/page/plugin/{plugin}/css', function ($request, $response, $args) {
 $app->get('/page/plugin/{plugin}/{page}', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
 
-	$pluginDir = __DIR__."/../../inc/plugins/".$args['plugin'];
-	$html = '';
-
-	$html .= '<link href="/api/page/plugin/'.$args["plugin"].'/css" rel="stylesheet">';
-	$html .= include_once($pluginDir."/pages/".$args['page'].".php");
-	$html .= '<script src="/api/page/plugin/'.$args['plugin'].'/js" crossorigin="anonymous"></script>';
-
-	$ib->api->setAPIResponseData($html);
+	
+	$pluginDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $args['plugin'];
+	$pagePath = $pluginDir . DIRECTORY_SEPARATOR . 'pages' . DIRECTORY_SEPARATOR . $args['page'] . '.php';
+	if (file_exists($pagePath)) {
+		$html = '';
+		$html .= '<link href="/api/page/plugin/'.$args["plugin"].'/css" rel="stylesheet">';
+		$html .= include_once($pagePath);
+		$html .= '<script src="/api/page/plugin/'.$args['plugin'].'/js" crossorigin="anonymous"></script>';
+		$ib->api->setAPIResponseData($html);
+		$response->getBody()->write($GLOBALS['api']['data']);
+	} else {
+		$ib->api->setAPIResponse('Error','Page not found');
+		$response->getBody()->write(jsonE($GLOBALS['api']));
+	}
 
 	// Return the response
-	$response->getBody()->write($GLOBALS['api']['data']);
 	return $response
 		->withHeader('Content-Type', 'text/html')
 		->withStatus($GLOBALS['responseCode']);
