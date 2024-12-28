@@ -2,8 +2,10 @@
 class api {
 	public $query;
 
-	public function __construct($core) {
-		$this->query = new query($core);
+	public function __construct($core = null) {
+		if ($core) {
+			$this->query = new query($core);
+		}
 	}
 
 	public function setAPIResponse($result = null, $message = null, $responseCode = null, $data = null) {

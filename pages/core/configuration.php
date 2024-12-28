@@ -384,6 +384,7 @@ return '
                 data-sort-name="Name"
                 data-sort-order="asc"
                 data-page-size="25"
+                data-buttons="pluginsButtons"
                 class="table table-striped" id="pluginsTable">
 
                 <thead>
@@ -425,6 +426,46 @@ return '
       </div>
       <div class="modal-footer">
         <button class="btn btn-primary" id="editPluginSaveButton">Save</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Online Plugins Modal -->
+<div class="modal fade" id="onlinePluginsModal" tabindex="-1" role="dialog" aria-labelledby="onlinePluginsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="onlinePluginsModalLabel">Github Repository URLs</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="modal-body" id="onlinePluginsModalBody">
+        <div class="container mt-2">
+          <div class="input-group mb-3">
+            <input id="urlInput" type="text" class="form-control" placeholder="https://github.com/TehMuffinMoo/example" aria-label="Github Repository URL">
+            <div class="input-group-append">
+              <button class="btn btn-outline-success" type="button" id="addUrl">Add URL</button>
+            </div>
+          </div>
+          <ul id="urlList" class="list-group mt-3"></ul>
+        </div>
+
+        <script>
+
+        $("#addUrl").click(function() {
+          var url = $("#urlInput").val();
+          if (url) {
+              $("#urlList").append(`<li class="list-group-item">` + url + `</li>`);
+              $("#urlInput").val("");
+          }
+        });
+        </script>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="editOnlinePluginsSaveButton">Save</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
@@ -583,7 +624,54 @@ return '
     }
   }
 
+  function pluginsButtons() {
+    return {
+      btnEditPluginURLs: {
+        text: "Edit Plugin URL(s)",
+        icon: "bi bi-pencil-square",
+        event: function() {
+          populatePluginRepositories();
+          $("#onlinePluginsModal").modal("show");
+          $("#onlinePluginsModal input").val("");
+        },
+        attributes: {
+          title: "Edit Plugin URL(s)",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
+  function populatePluginRepositories() {
+    queryAPI("GET","/api/plugins/repositories").done(function(data) {
+      if (data["result"] == "Success") {
+        // Loop through the URLs and create list items
+        data["data"].forEach(url => {
+            // Create a new li element
+            const listItem = document.createElement("li");
+            listItem.className = "list-group-item"; // Add Bootstrap class for styling
+
+            // Create an a element
+            const link = document.createElement("a");
+            link.href = url;
+            link.textContent = url;
+
+            // Append the link to the list item
+            listItem.appendChild(link);
+
+            // Append the list item to the ul
+            urlList.appendChild(listItem);
+        });
+      } else if (data["result"] == "Error") {
+        toast(data["result"],"",data["message"],"danger","30000");
+      } else {
+        toast("Error", "", "Failed to query list of repositories", "danger");
+      }
+    }).fail(function() {
+        toast("Error", "", "Failed to query list of repositories", "danger");
+    });
+  }
+
   $("#pluginsTable").bootstrapTable();
-  $("#availablePluginsTable").bootstrapTable();
 </script>
 ';

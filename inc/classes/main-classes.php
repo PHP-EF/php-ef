@@ -16,7 +16,7 @@ class ib {
   public $plugins;
 
   public function __construct() {
-    $this->core = new core(__DIR__.'/../config/config.json',$this->api);
+    $this->core = new core(__DIR__.'/../config/config.json',(new api()));
     $this->db = (new db(__DIR__.'/../config/app.db',$this->core,$this->getVersion()[0]))->db;
     $this->dbHelper = new dbHelper($this->db);
     $this->api = new api($this->core);
@@ -442,7 +442,7 @@ class Pages {
 
   public function getMainLinksAndMenus() {
     $stmt = $this->db->prepare('SELECT * FROM pages WHERE Type IN (\'Menu\',\'Link\') ORDER BY Weight');
-    $stmt->execute($Execute);
+    $stmt->execute();
     $Pages = $stmt->fetchAll(PDO::FETCH_ASSOC);
     return $Pages; 
   }

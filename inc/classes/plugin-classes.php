@@ -32,6 +32,18 @@ class Plugins {
         return $results;
     }
 
+    public function getPluginRepositories() {
+        return $this->core->config->get('PluginRepositories');
+    }
+
+    public function setPluginRepositories($list) {
+        $Arr = array(
+            'PluginRepositories' => $list
+        );
+        $Config = $this->core->config->get();
+        return $this->core->config->set($Config,$Arr);
+    }
+
     public function getAvailablePlugins() {
         $installedPlugins = $this->getInstalledPlugins();
         $onlinePlugins = $this->getOnlinePlugins();
@@ -57,12 +69,20 @@ class Plugins {
                 $plugin['status'] = in_array($plugin['name'], $installedPluginNames) ? 'Installed' : 'Available';
                 if (in_array($plugin['name'], $installedPluginNames) && in_array($plugin['name'], $onlinePluginNames)) {
                     $plugin['source'] = 'Online';
+                    // Merge online and local plugin details
+                    $onlinePlugin = current(array_filter($onlinePlugins, function($p) use ($plugin) {
+                        return isset($p[0]['name']) && $p[0]['name'] === $plugin['name'];
+                    }));
+                    $plugin = array_merge($plugin, $onlinePlugin[0]);
                 } elseif (in_array($plugin['name'], $installedPluginNames)) {
                     $plugin['source'] = 'Local';
                 } else {
                     $plugin['source'] = 'Online';
                 }
                 $uniquePlugins[$plugin['name']] = $plugin;
+            } else {
+                // Merge details if the plugin is already in the uniquePlugins array
+                $uniquePlugins[$plugin['name']] = array_merge($uniquePlugins[$plugin['name']], $plugin);
             }
         }
     

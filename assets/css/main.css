@@ -216,7 +216,8 @@ input.changed, select.changed {
   display: inline-block!important;
   padding: .575rem 2.5rem .575rem .75rem!important;
 }
-.form-control {
+.form-control,
+.input-group-append > button {
   padding: 0.575rem!important;
 }
 
