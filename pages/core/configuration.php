@@ -385,6 +385,7 @@ return '
                 data-sort-order="asc"
                 data-page-size="25"
                 data-buttons="pluginsButtons"
+                data-response-handler="responseHandler"
                 class="table table-striped" id="pluginsTable">
 
                 <thead>
@@ -393,7 +394,7 @@ return '
                     <th data-field="name" data-sortable="true">Plugin Name</th>
                     <th data-field="author" data-sortable="true">Author</th>
                     <th data-field="category" data-sortable="true">Category</th>
-                    <th data-field="local_version" data-sortable="true">Version</th>
+                    <th data-field="version" data-sortable="true">Version</th>
                     <th data-field="link" data-sortable="true">URL</th>
                     <th data-field="status" data-sortable="true">Status</th>
                     <th data-field="source" data-sortable="true">Source</th>
@@ -603,6 +604,8 @@ return '
   function pluginUpdatesFormatter(value, row, index) {
     if (row.version < row.online_version) {
       return `<span class="badge bg-info">Update Available</span>`;
+    } else if (row.source == "Local") {
+      return `<span class="badge bg-secondary">Unknown</span>`;
     } else {
       return `<span class="badge bg-success">Up to date</span>`;
     }
@@ -617,7 +620,11 @@ return '
       buttons.push(`<a class="install" title="Install"><i class="fa-solid fa-download"></i></a>&nbsp;`);
     } else if (row.status == "Installed") {
       buttons.push(`<a class="uninstall" title="Uninstall"><i class="fa-solid fa-trash-can"></i></a>&nbsp;`);
-      buttons.push(`<a class="reinstall" title="Reinstall"><i class="fa-solid fa-arrow-rotate-right"></i></a>&nbsp;`);
+      if (row.version < row.online_version) {
+        buttons.push(`<a class="update" title="Update"><i class="fa-solid fa-upload"></i></a>&nbsp;`);      
+      } else {
+        buttons.push(`<a class="reinstall" title="Reinstall"><i class="fa-solid fa-arrow-rotate-right"></i></a>&nbsp;`);
+      }
     }
     return buttons.join("");
   }
@@ -634,6 +641,9 @@ return '
       uninstallPlugin(row);
     },
     "click .reinstall": function (e, value, row, index) {
+      reinstallPlugin(row);
+    },
+    "click .update": function (e, value, row, index) {
       reinstallPlugin(row);
     }
   }
@@ -804,6 +814,15 @@ return '
         logConsole("Error",e,"error");
       }
     }
+  }
+
+  function responseHandler(data) {
+    if (data.result === "Warning" && Array.isArray(data.message)) {
+        data.message.forEach(warning => {
+            toast("Warning", "", warning, "warning","30000");
+        });
+    }
+    return data.data;
   }
 
   $("#pluginsTable").bootstrapTable();

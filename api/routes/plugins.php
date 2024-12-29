@@ -14,7 +14,12 @@ $app->get('/plugins/installed', function ($request, $response, $args) {
 $app->get('/plugins/available', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
 
-	$ib->api->setAPIResponseData($ib->plugins->getAvailablePlugins());
+	$results = $ib->plugins->getAvailablePlugins();
+	if (empty($results['warnings'])) {
+		$ib->api->setAPIResponseData($results['results']);
+	} else {
+		$ib->api->setAPIResponse('Warning',$results['warnings'],200,$results['results']);
+	}
 
     $response->getBody()->write(jsonE($GLOBALS['api']));
 	// Return the response

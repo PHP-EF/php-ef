@@ -283,6 +283,9 @@ body .popover {
 .toast-body {
   color: #000;
 }
+body.dark-theme .toast small {
+  color: #000;
+}
 
 /* Save Button Show */
 .saveBtnShow {
@@ -1260,7 +1263,6 @@ body .bootstrap-table .fixed-table-container .fixed-table-body {
             transform: scale(1);
   }
 }
-
 
 /* Loading Div */
 .row.loading-div {

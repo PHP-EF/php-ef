@@ -102,7 +102,10 @@ class query {
 		return $Data;
 	}
 
-	private function decodeJsonResponse($response) {
+	private function decodeResponse($response) {
+		if ($response->status_code >= 400 && $response->status_code < 600) {
+			return false;
+		}
 		$contentType = $response->headers['content-type'] ?? '';
 		if (strpos($contentType, 'application/json') !== false || strpos($contentType, 'text/plain') !== false) {
 			$decoded = json_decode($response->body, true);
@@ -110,14 +113,14 @@ class query {
 				return $decoded;
 			}
 		}
-		return $response->body;
+		return $response;
 	}
 
 	public function get($Url,$Headers = null,$Options = null) {
 		$OptionsArr = $this->buildOptions($Options);
 		$HeadersArr = $this->buildHeaders($Headers);
 		$Result = WpOrg\Requests\Requests::get($Url, $HeadersArr, $OptionsArr);
-		return $this->decodeJsonResponse($Result);
+		return $this->decodeResponse($Result);
 	}
 
 	public function post($Url,$Data,$Headers = null,$Options = null) {
@@ -125,7 +128,7 @@ class query {
 		$HeadersArr = $this->buildHeaders($Headers);
 		$Data = $this->prepareData($Data, $HeadersArr);
 		$Result = WpOrg\Requests\Requests::post($Url, $HeadersArr, $Data, $OptionsArr);
-		return $this->decodeJsonResponse($Result);
+		return $this->decodeResponse($Result);
 	}
 
 	public function put($Url,$Data,$Headers = null,$Options = null) {
@@ -133,7 +136,7 @@ class query {
 		$HeadersArr = $this->buildHeaders($Headers);
 		$Data = $this->prepareData($Data, $HeadersArr);
 		$Result = WpOrg\Requests\Requests::put($Url, $HeadersArr, $OptionsArr);
-		return $this->decodeJsonResponse($Result);
+		return $this->decodeResponse($Result);
 	}
 
 	public function patch($Url,$Data,$Headers = null,$Options = null) {
@@ -141,13 +144,13 @@ class query {
 		$HeadersArr = $this->buildHeaders($Headers);
 		$Data = $this->prepareData($Data, $HeadersArr);
 		$Result = WpOrg\Requests\Requests::patch($Url, $HeadersArr, $OptionsArr);
-		return $this->decodeJsonResponse($Result);
+		return $this->decodeResponse($Result);
 	}
 
 	public function delete($Url,$Data,$Headers = null,$Options = null) {
 		$OptionsArr = $this->buildOptions($Options);
 		$HeadersArr = $this->buildHeaders($Headers);
 		$Result = WpOrg\Requests\Requests::delete($Url, $HeadersArr, $OptionsArr);
-		return $this->decodeJsonResponse($Result);
+		return $this->decodeResponse($Result);
 	}
 }

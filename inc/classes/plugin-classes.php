@@ -22,11 +22,21 @@ class Plugins {
         $installedPlugins = $this->getInstalledPlugins();
         $list = $this->core->config->get('PluginRepositories');
         $results = [];
+        $warnings = [];
         foreach ($list as $l) {
-            $ls = explode('https://github.com/',$l);
-            $results[] = $this->api->query->get('https://raw.githubusercontent.com/'.$ls[1].'/refs/heads/main/plugin.json');
+            $ls = explode('https://github.com/', $l);
+            $url = 'https://raw.githubusercontent.com/' . $ls[1] . '/refs/heads/main/plugin.json';
+            $response = $this->api->query->get($url);
+            if ($response === false) {
+                $warnings[] = 'Plugin.json invalid or not found<hr><small>'.$url.'</small>';
+            } else {
+                $results[] = $response;
+            }
         }
-        return $results;
+        return array(
+            "results" => $results,
+            "warnings" => $warnings
+        );
     }
 
     public function getPluginRepositories() {
@@ -35,9 +45,12 @@ class Plugins {
 
     public function getAvailablePlugins() {
         $installedPlugins = $this->getInstalledPlugins();
-        $onlinePlugins = $this->getOnlinePlugins();
+        $onlinePluginsData = $this->getOnlinePlugins();
+        $onlinePlugins = $onlinePluginsData['results'];
+        $onlinePluginsWarnings = $onlinePluginsData['warnings'];
+
         $allPlugins = array_merge($onlinePlugins, $installedPlugins);
-    
+
         // Flatten the array if there are nested arrays
         $flattenedPlugins = [];
         foreach ($allPlugins as $plugin) {
@@ -80,7 +93,10 @@ class Plugins {
         // Convert back to a list
         $result = array_values($uniquePlugins);
     
-        return $result;
+        return array(
+            "results" => $result,
+            "warnings" => $onlinePluginsWarnings
+        );
     }
 
     public function install($data) {
