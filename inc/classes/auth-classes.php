@@ -836,8 +836,7 @@ class Auth {
   }
 
   public function signinRedirect() {
-    if ($this->getAuth()['Authenticated']) {
-    } else {
+    if (!$this->getAuth()['Authenticated']) {
       echo '<script>top.window.location = "/login.php?redirect_uri="+parent.window.location.href.replace("#","?")</script>';
     }
   }
@@ -1121,7 +1120,6 @@ class Auth {
       $resources = explode(',', $group['PermittedResources']);
       if (in_array($resource,$resources)) {
           return true;
-      } else {
       }
     }
     return false;
