@@ -107,4 +107,25 @@ class Plugins {
             $this->api->setAPIResponse('Error', 'Name and Repository are required');
         }
     }
+
+    public function uninstall($data) {
+        if (isset($data['name']) && isset($data['repo'])) {
+            $dir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $data['name'];
+            if (file_exists($dir)) {
+                try {
+                    if (rmdirRecursive($dir)) {
+                        $this->api->setAPIResponseMessage('Successfully uninstalled plugin');
+                    } else {
+                        $this->api->setAPIResponse('Error', 'Failed to remove plugin directory: ' . $dir);
+                    };
+                } catch (Exception $e) {
+                    $this->api->setAPIResponse('Error', 'Exception occurred while cloning repository: ' . $e->getMessage());
+                }
+            } else {
+                $this->api->setAPIResponse('Error', 'Plugin directory: ' . $dir . ' does not exist');
+            }
+        } else {
+            $this->api->setAPIResponse('Error', 'Name and Repository are required');
+        }
+    }
 }

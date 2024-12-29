@@ -746,7 +746,27 @@ return '
   }
 
   function uninstallPlugin(row){
-    console.log(row);
+    if(confirm("Are you sure you want to uninstall the "+row.name+" plugin?") == true) {
+      toast("Uninstalling","","Uninstalling "+row["name"]+"...","info");
+      try {
+        queryAPI("POST","/api/plugins/uninstall",row).done(function(data) {
+          if (data["result"] == "Success") {
+            toast(data["result"],"",data["message"],"success");
+            $("#pluginsTable").bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger");
+          } else {
+            toast("API Error","","Failed to uninstall plugin","danger","30000");
+          }
+        }).fail(function(xhr) {
+          toast("API Error","","Failed to uninstall plugin","danger","30000");
+          logConsole("Error",xhr,"error");
+        });;
+      } catch(e) {
+        toast("API Error","","Failed to uninstall plugin","danger","30000");
+        logConsole("Error",e,"error");
+      }
+    }
   }
 
   $("#pluginsTable").bootstrapTable();

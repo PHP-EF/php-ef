@@ -4,6 +4,11 @@ ini_set('error_log',__DIR__.'/logs/php.error.log');
 // Include Composer
 require_once(__DIR__.'/../vendor/autoload.php');
 
+// Include Functions
+foreach (glob(__DIR__.'/functions/*.php') as $function) {
+  require_once $function; // Include each PHP file
+}
+
 // Include Classes
 foreach (glob(__DIR__.'/classes/*.php') as $class) {
   require_once $class; // Include each PHP file
@@ -11,11 +16,6 @@ foreach (glob(__DIR__.'/classes/*.php') as $class) {
 
 // Instantiate Class Builder
 $ib = new ib();
-
-// Include Functions
-foreach (glob(__DIR__.'/functions/*.php') as $function) {
-  require_once $function; // Include each PHP file
-}
 
 // Include all Plugin Classes
 if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'plugins')) {
