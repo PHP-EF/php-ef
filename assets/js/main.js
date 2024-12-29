@@ -274,7 +274,6 @@ function loadMainWindow(element) {
     queryAPI('GET','/api/page/'+hashsplit[1]).done(function(data) {
       $('#mainWindow').html('');
       $('#mainWindow').html(data);
-      $('.dark-theme .table-striped').addClass('table-dark');
     });
   } else if (window.parent.location.hash) {
     var hashsplit = window.parent.location.hash.split('#page=');
@@ -297,12 +296,10 @@ function loadMainWindow(element) {
     }
     queryAPI('GET','/api/page/'+hashsplit[1]).done(function(data) {
       $('#mainWindow').html(data);
-      $('.dark-theme .table-striped').addClass('table-dark');
     });
   } else {
     queryAPI('GET','/api/page/core/default').done(function(data) {
       $('#mainWindow').html(data);
-      $('.dark-theme .table-striped').addClass('table-dark');
     });
   }
 }
@@ -773,8 +770,6 @@ document.addEventListener('DOMContentLoaded', function() {
   $('.preventDefault').click(function(event){
     event.preventDefault();
   });
-  
-  $('.dark-theme .table-striped').addClass('table-dark');
 
   // Initialize tracking
   userTracking.init(trackingConfig);

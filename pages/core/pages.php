@@ -381,8 +381,7 @@ return '
   
   function createTableHtml(index, prefix) {
   console.log(index,prefix);
-      let theme = getCookie("theme") == "dark" ? "table-dark" : "";
-      return `<table class="table table-striped `+theme+`" id="`+prefix+`-table-` + index +`"></table>`;
+      return `<table class="table table-striped" id="`+prefix+`-table-` + index +`"></table>`;
   }
 
   function detailFormatter(index, row, prefix) {
