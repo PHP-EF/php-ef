@@ -33,6 +33,7 @@ RUN apk add --no-cache \
   php83-xmlreader \
   php83-xmlwriter \
   php83-simplexml \
+  php83-posix \
   supervisor \
   redis \
   git

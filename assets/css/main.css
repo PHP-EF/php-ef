@@ -330,6 +330,10 @@ body.dark-theme .toast small {
   align-items: center;
 }
 
+.urlList > .list-group-item.newUrl {
+  background-color: #fffaf0;
+}
+
 /*--------------------------------------------------------------
 # Reports
 --------------------------------------------------------------*/

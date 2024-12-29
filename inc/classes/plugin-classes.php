@@ -129,7 +129,7 @@ class Plugins {
     }
 
     public function uninstall($data) {
-        if (isset($data['name']) && isset($data['repo'])) {
+        if (isset($data['name'])) {
             $dir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $data['name'];
             if (file_exists($dir)) {
                 try {
@@ -140,13 +140,13 @@ class Plugins {
                         $this->api->setAPIResponse('Error', 'Failed to remove plugin directory: ' . $dir);
                     };
                 } catch (Exception $e) {
-                    $this->api->setAPIResponse('Error', 'Exception occurred while cloning repository: ' . $e->getMessage());
+                    $this->api->setAPIResponse('Error', 'Exception occurred while removing plugin: ' . $e->getMessage());
                 }
             } else {
                 $this->api->setAPIResponse('Error', 'Plugin directory: ' . $dir . ' does not exist');
             }
         } else {
-            $this->api->setAPIResponse('Error', 'Name and Repository are required');
+            $this->api->setAPIResponse('Error', 'Plugin name is required');
         }
         return false;
     }
