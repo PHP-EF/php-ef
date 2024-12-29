@@ -696,9 +696,6 @@ return '
               urlList.appendChild(listItem);
           });
         }
-        $(".removeUrl").click(function(elem) {
-          $(elem.target).parent().remove();
-        });
       } else if (data["result"] == "Error") {
         toast(data["result"],"",data["message"],"danger","30000");
       } else {
@@ -713,13 +710,18 @@ return '
     const urlList = document.getElementById("urlList");
     const listItems = urlList.getElementsByTagName("li");
     const urls = [];
+    const githubRepoPattern = /^https:\/\/github\.com\/[^\/]+\/[^\/]+$/;
+
     for (let i = 0; i < listItems.length; i++) {
       const listItem = listItems[i];
       const link = listItem.getElementsByTagName("a")[0];
-      if (link) {
-        urls.push(link.href);
+      let url = link ? link.href : listItem.textContent.trim();
+
+      if (githubRepoPattern.test(url)) {
+        urls.push(url);
       } else {
-        urls.push(listItem.textContent.trim());
+        toast("Warning", "", "Invalid Github URL: "+url, "warning");
+        return false;
       }
     }
     return urls;
@@ -728,26 +730,33 @@ return '
   $("#addUrl").click(function() {
     var url = $("#urlInput").val();
     if (url) {
-        $("#urlList").append(`<li class="list-group-item">` + url + `</li>`);
+        $("#urlList").append(`<li class="list-group-item newUrl"><a href="` + url + `">` + url + `</a><i class="fa fa-trash removeUrl"></i></li>`);
         $("#urlInput").val("");
     }
   });
 
+  // Remove URL from the list using event delegation
+  $("#urlList").on("click", ".removeUrl", function(elem) {
+      $(elem.target).parent().remove();
+  });
+
   $("#editOnlinePluginsSaveButton").on("click",function(elem) {
     var list = getAllRepositoryUrls();
-    queryAPI("POST","/api/plugins/repositories",{list: list}).done(function(data) {
-      if (data["result"] == "Success") {
-        toast(data["result"],"",data["message"],"success");
-        $("#pluginsTable").bootstrapTable("refresh");
-        $("#onlinePluginsModal").modal("hide");
-      } else if (data["result"] == "Error") {
-        toast(data["result"],"",data["message"],"danger");
-      } else {
+    if (list) {
+      queryAPI("POST","/api/plugins/repositories",{list: list}).done(function(data) {
+        if (data["result"] == "Success") {
+          toast(data["result"],"",data["message"],"success");
+          $("#pluginsTable").bootstrapTable("refresh");
+          $("#onlinePluginsModal").modal("hide");
+        } else if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger");
+        } else {
+          toast("API Error","","Failed to save repository configuration","danger","30000");
+        }
+      }).fail(function(xhr) {
         toast("API Error","","Failed to save repository configuration","danger","30000");
-      }
-    }).fail(function(xhr) {
-      toast("API Error","","Failed to save repository configuration","danger","30000");
-    });
+      });
+    }
   })
 
   function installPlugin(row){
