@@ -216,7 +216,8 @@ input.changed, select.changed {
   display: inline-block!important;
   padding: .575rem 2.5rem .575rem .75rem!important;
 }
-.form-control {
+.form-control,
+.input-group-append > button {
   padding: 0.575rem!important;
 }
 
@@ -282,6 +283,9 @@ body .popover {
 .toast-body {
   color: #000;
 }
+body.dark-theme .toast small {
+  color: #000;
+}
 
 /* Save Button Show */
 .saveBtnShow {
@@ -315,6 +319,15 @@ body .popover {
   text-align: center;
   width: 100%;
   padding: 5px;
+}
+
+/*--------------------------------------------------------------
+# Configuration Page
+--------------------------------------------------------------*/
+.urlList > .list-group-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 /*--------------------------------------------------------------
@@ -1250,7 +1263,6 @@ body .bootstrap-table .fixed-table-container .fixed-table-body {
             transform: scale(1);
   }
 }
-
 
 /* Loading Div */
 .row.loading-div {

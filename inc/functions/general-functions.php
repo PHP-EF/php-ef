@@ -121,12 +121,25 @@ function compressZip(string $saveLocation, string $archiveLocation) {
     }
 }
 
-function rmdirRecursive($dir)
-{
-    $files = array_diff(scandir($dir), array('.', '..'));
-    foreach($files as $file) {
-        (is_dir("$dir/$file")) ? rmdirRecursive("$dir/$file") : unlink("$dir/$file");
+function rmdirRecursive($dir) {
+    if (!is_dir($dir)) {
+        return false;
     }
+
+    $files = array_diff(scandir($dir), array('.', '..'));
+    foreach ($files as $file) {
+        $path = "$dir/$file";
+        if (is_dir($path)) {
+            if (!rmdirRecursive($path)) {
+                return false;
+            }
+        } else {
+            if (!unlink($path)) {
+                return false;
+            }
+        }
+    }
+
     return rmdir($dir);
 }
 

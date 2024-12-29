@@ -373,7 +373,7 @@ return '
           </div>
           <div class="card">
             <div class="container">
-              <table data-url="/api/config/plugins"
+              <table data-url="/api/plugins/available"
                 data-data-field="data"
                 data-toggle="table"
                 data-search="true"
@@ -384,6 +384,8 @@ return '
                 data-sort-name="Name"
                 data-sort-order="asc"
                 data-page-size="25"
+                data-buttons="pluginsButtons"
+                data-response-handler="responseHandler"
                 class="table table-striped" id="pluginsTable">
 
                 <thead>
@@ -394,6 +396,9 @@ return '
                     <th data-field="category" data-sortable="true">Category</th>
                     <th data-field="version" data-sortable="true">Version</th>
                     <th data-field="link" data-sortable="true">URL</th>
+                    <th data-field="status" data-sortable="true">Status</th>
+                    <th data-field="source" data-sortable="true">Source</th>
+                    <th data-field="update" data-sortable="true" data-formatter="pluginUpdatesFormatter">Updates</th>
                     <th data-formatter="pluginActionFormatter" data-events="pluginActionEvents">Actions</th>
                   </tr>
                 </thead>
@@ -423,6 +428,35 @@ return '
       </div>
       <div class="modal-footer">
         <button class="btn btn-primary" id="editPluginSaveButton">Save</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Online Plugins Modal -->
+<div class="modal fade" id="onlinePluginsModal" tabindex="-1" role="dialog" aria-labelledby="onlinePluginsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="onlinePluginsModalLabel">Github Repository URLs</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="modal-body" id="onlinePluginsModalBody">
+        <div class="container mt-2">
+          <div class="input-group mb-3">
+            <input id="urlInput" type="text" class="form-control" placeholder="https://github.com/TehMuffinMoo/example" aria-label="Github Repository URL">
+            <div class="input-group-append">
+              <button class="btn btn-outline-success" type="button" id="addUrl">Add URL</button>
+            </div>
+          </div>
+          <ul id="urlList" class="list-group mt-3 urlList"></ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="editOnlinePluginsSaveButton">Save</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
@@ -567,18 +601,228 @@ return '
     });
   }
 
-  function pluginActionFormatter(value, row, index) {
-    if (row.settings) {
-      var actions = `<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`
-      return actions
+  function pluginUpdatesFormatter(value, row, index) {
+    if (row.version < row.online_version) {
+      return `<span class="badge bg-info">Update Available</span>`;
+    } else if (row.source == "Local") {
+      return `<span class="badge bg-secondary">Unknown</span>`;
+    } else {
+      return `<span class="badge bg-success">Up to date</span>`;
     }
+  }
+
+  function pluginActionFormatter(value, row, index) {
+    var buttons = [];
+    if (row.settings) {
+      buttons.push(`<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`);
+    }
+    if (row.status == "Available") {
+      buttons.push(`<a class="install" title="Install"><i class="fa-solid fa-download"></i></a>&nbsp;`);
+    } else if (row.status == "Installed") {
+      buttons.push(`<a class="uninstall" title="Uninstall"><i class="fa-solid fa-trash-can"></i></a>&nbsp;`);
+      if (row.version < row.online_version) {
+        buttons.push(`<a class="update" title="Update"><i class="fa-solid fa-upload"></i></a>&nbsp;`);      
+      } else {
+        buttons.push(`<a class="reinstall" title="Reinstall"><i class="fa-solid fa-arrow-rotate-right"></i></a>&nbsp;`);
+      }
+    }
+    return buttons.join("");
   }
 
   window.pluginActionEvents = {
     "click .edit": function (e, value, row, index) {
       buildPluginSettingsModal(row);
       $("#pluginSettingsModal").modal("show");
+    },
+    "click .install": function (e, value, row, index) {
+      installPlugin(row);
+    },
+    "click .uninstall": function (e, value, row, index) {
+      uninstallPlugin(row);
+    },
+    "click .reinstall": function (e, value, row, index) {
+      reinstallPlugin(row);
+    },
+    "click .update": function (e, value, row, index) {
+      reinstallPlugin(row);
     }
+  }
+
+  function pluginsButtons() {
+    return {
+      btnEditPluginURLs: {
+        text: "Edit Plugin URL(s)",
+        icon: "bi bi-pencil-square",
+        event: function() {
+          $("#urlList").html("");
+          populatePluginRepositories();
+          $("#onlinePluginsModal").modal("show");
+        },
+        attributes: {
+          title: "Edit Plugin URL(s)",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
+  function populatePluginRepositories() {
+    queryAPI("GET","/api/plugins/repositories").done(function(data) {
+      if (data["result"] == "Success") {
+        // Loop through the URLs and create list items
+        data["data"].forEach(url => {
+            // Create a new li element
+            const listItem = document.createElement("li");
+            listItem.className = "list-group-item"; // Add Bootstrap class for styling
+
+            // Create an a element
+            const link = document.createElement("a");
+            link.href = url;
+            link.textContent = url;
+
+            // Create an i element
+            const trash = document.createElement("i");
+            trash.classList = "fa fa-trash removeUrl";
+
+            // Append the link to the list item
+            listItem.appendChild(link);
+            // Append the icon to the list item
+            listItem.appendChild(trash);
+
+            // Append the list item to the ul
+            urlList.appendChild(listItem);
+        });
+
+        $(".removeUrl").click(function(elem) {
+          $(elem.target).parent().remove();
+        });
+      } else if (data["result"] == "Error") {
+        toast(data["result"],"",data["message"],"danger","30000");
+      } else {
+        toast("Error", "", "Failed to query list of repositories", "danger");
+      }
+    }).fail(function() {
+        toast("Error", "", "Failed to query list of repositories", "danger");
+    });
+  }
+
+  function getAllRepositoryUrls() {
+    const urlList = document.getElementById("urlList");
+    const listItems = urlList.getElementsByTagName("li");
+    const urls = [];
+    for (let i = 0; i < listItems.length; i++) {
+      const listItem = listItems[i];
+      const link = listItem.getElementsByTagName("a")[0];
+      if (link) {
+        urls.push(link.href);
+      } else {
+        urls.push(listItem.textContent.trim());
+      }
+    }
+    return urls;
+  }
+
+  $("#addUrl").click(function() {
+    var url = $("#urlInput").val();
+    if (url) {
+        $("#urlList").append(`<li class="list-group-item">` + url + `</li>`);
+        $("#urlInput").val("");
+    }
+  });
+
+  $("#editOnlinePluginsSaveButton").on("click",function(elem) {
+    var list = getAllRepositoryUrls();
+    queryAPI("POST","/api/plugins/repositories",{list: list}).done(function(data) {
+      if (data["result"] == "Success") {
+        toast(data["result"],"",data["message"],"success");
+        $("#onlinePluginsModal").modal("hide");
+      } else if (data["result"] == "Error") {
+        toast(data["result"],"",data["message"],"danger");
+      } else {
+        toast("API Error","","Failed to save repository configuration","danger","30000");
+      }
+    }).fail(function(xhr) {
+      toast("API Error","","Failed to save repository configuration","danger","30000");
+    });
+  })
+
+  function installPlugin(row){
+    toast("Installing","","Installing "+row["name"]+"...","info");
+    try {
+      queryAPI("POST","/api/plugins/install",row).done(function(data) {
+        if (data["result"] == "Success") {
+          toast(data["result"],"",data["message"],"success");
+          $("#pluginsTable").bootstrapTable("refresh");
+        } else if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger");
+        } else {
+          toast("API Error","","Failed to install plugin","danger","30000");
+        }
+      }).fail(function(xhr) {
+        toast("API Error","","Failed to install plugin","danger","30000");
+        logConsole("Error",xhr,"error");
+      });;
+    } catch(e) {
+      toast("API Error","","Failed to install plugin","danger","30000");
+      logConsole("Error",e,"error");
+    }
+  }
+
+  function uninstallPlugin(row){
+    if(confirm("Are you sure you want to uninstall the "+row.name+" plugin?") == true) {
+      toast("Uninstalling","","Uninstalling "+row["name"]+"...","info");
+      try {
+        queryAPI("POST","/api/plugins/uninstall",row).done(function(data) {
+          if (data["result"] == "Success") {
+            toast(data["result"],"",data["message"],"success");
+            $("#pluginsTable").bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger");
+          } else {
+            toast("API Error","","Failed to uninstall plugin","danger","30000");
+          }
+        }).fail(function(xhr) {
+          toast("API Error","","Failed to uninstall plugin","danger","30000");
+          logConsole("Error",xhr,"error");
+        });;
+      } catch(e) {
+        toast("API Error","","Failed to uninstall plugin","danger","30000");
+        logConsole("Error",e,"error");
+      }
+    }
+  }
+
+  function reinstallPlugin(row){
+    if(confirm("Are you sure you want to reinstall the "+row.name+" plugin?") == true) {
+      toast("Reinstalling","","Reinstalling "+row["name"]+"...","info");
+      try {
+        queryAPI("POST","/api/plugins/reinstall",row).done(function(data) {
+          if (data["result"] == "Success") {
+            toast(data["result"],"",data["message"],"success");
+            $("#pluginsTable").bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger");
+          } else {
+            toast("API Error","","Failed to reinstall plugin","danger","30000");
+          }
+        }).fail(function(xhr) {
+          toast("API Error","","Failed to reinstall plugin","danger","30000");
+          logConsole("Error",xhr,"error");
+        });;
+      } catch(e) {
+        toast("API Error","","Failed to reinstall plugin","danger","30000");
+        logConsole("Error",e,"error");
+      }
+    }
+  }
+
+  function responseHandler(data) {
+    if (data.result === "Warning" && Array.isArray(data.message)) {
+        data.message.forEach(warning => {
+            toast("Warning", "", warning, "warning","30000");
+        });
+    }
+    return data.data;
   }
 
   $("#pluginsTable").bootstrapTable();

@@ -1,0 +1,17 @@
+[
+    {
+      "name": "Example",
+      "repo": "https://github.com/TehMuffinMoo",
+      "author": "TehMuffinMoo",
+      "category": "Testing",
+      "description": "This PHP-EF plugin is an example one.",
+      "icon": "https://raw.githubusercontent.com/TehMuffinMoo/php-ef-plugin-example/main/logo.png",
+      "contact": "https://github.com/TehMuffinMoo/",
+      "link": "https://github.com/TehMuffinMoo/",
+      "version": "1.0.0",
+      "minimum_php-ef_version": "0.6.0",
+      "release_date": "2024-12-20",
+      "last_updated": "2024-12-24",
+      "github_folder": ""
+    }
+]

@@ -42,11 +42,7 @@ $app->patch('/config', function ($request, $response, $args) {
 $app->get('/config/plugins', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
     if ($ib->auth->checkAccess("ADMIN-CONFIG")) {
-        $list = [];
-        foreach ($GLOBALS['plugins'] as $key => $value) {
-            $list[] = $value;
-        }
-        $ib->api->setAPIResponseData($list);
+        $ib->api->setAPIResponseData($ib->plugins->getInstalledPlugins());
     }
 	// Return the response
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -54,7 +50,6 @@ $app->get('/config/plugins', function ($request, $response, $args) {
 		->withHeader('Content-Type', 'application/json')
 		->withStatus($GLOBALS['responseCode']);
 });
-
 
 $app->get('/config/plugins/{plugin}', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();

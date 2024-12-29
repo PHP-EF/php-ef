@@ -1,7 +1,7 @@
 ARG ALPINE_VERSION=3.20
 FROM alpine:${ALPINE_VERSION}
-LABEL Maintainer="TehMuffinMoo"
-LABEL Description="PHP and NGINX Dockerfile to support PHP-EF."
+LABEL maintainer="TehMuffinMoo" \
+      description="PHP and NGINX Dockerfile to support PHP-EF."
 # Setup document root
 WORKDIR /var/www/html
 
@@ -34,7 +34,8 @@ RUN apk add --no-cache \
   php83-xmlwriter \
   php83-simplexml \
   supervisor \
-  redis
+  redis \
+  git
 
 # Configure nginx - http
 COPY Docker/config/nginx.conf /etc/nginx/nginx.conf

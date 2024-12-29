@@ -11,6 +11,7 @@
         "firebase/php-jwt": "^6.10",
         "predis/predis": "^2.2",
         "onelogin/php-saml": "^4.2.0",
-        "slim/slim": "^4.14.0"
+        "slim/slim": "^4.14.0",
+        "czproject/git-php": "^4.3.0"
     }
 }

@@ -13,22 +13,24 @@ class ib {
   public $db;
   public $dbHelper;
   public $reporting;
+  public $plugins;
 
   public function __construct() {
-    $this->core = new core(__DIR__.'/../config/config.json',$this->api);
+    $this->core = new core(__DIR__.'/../config/config.json',(new api()));
     $this->db = (new db(__DIR__.'/../config/app.db',$this->core,$this->getVersion()[0]))->db;
     $this->dbHelper = new dbHelper($this->db);
-    $this->api = new api();
+    $this->api = new api($this->core);
     $this->auth = new Auth($this->core,$this->db,$this->api);
     $this->config = $this->core->config;
     $this->pages = new Pages($this->db,$this->api,$this->core);
     $this->logging = $this->core->logging;
     $this->reporting = new Reporting($this->core,$this->db);
+    $this->plugins = new Plugins($this->api,$this->core,$this->db);
     $this->checkDB();
   }
 
   public function getVersion() {
-    return ['0.7.0'];
+    return ['0.7.1'];
   }
 
   // Initiate Database Migration if required
@@ -261,6 +263,12 @@ class Config {
     $this->api->setAPIResponseMessage('Successfully updated configuration');
     file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
   }
+
+  public function setRepositories(&$config,$list) {
+    $config['PluginRepositories'] = $list;
+    $this->api->setAPIResponseMessage('Successfully updated repository configuration');
+    file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+  }
 }
 
 class Pages {
@@ -440,7 +448,7 @@ class Pages {
 
   public function getMainLinksAndMenus() {
     $stmt = $this->db->prepare('SELECT * FROM pages WHERE Type IN (\'Menu\',\'Link\') ORDER BY Weight');
-    $stmt->execute($Execute);
+    $stmt->execute();
     $Pages = $stmt->fetchAll(PDO::FETCH_ASSOC);
     return $Pages; 
   }
