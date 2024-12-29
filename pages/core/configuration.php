@@ -670,29 +670,30 @@ return '
     queryAPI("GET","/api/plugins/repositories").done(function(data) {
       if (data["result"] == "Success") {
         // Loop through the URLs and create list items
-        data["data"].forEach(url => {
-            // Create a new li element
-            const listItem = document.createElement("li");
-            listItem.className = "list-group-item"; // Add Bootstrap class for styling
+        if (data["data"]) {
+          data["data"].forEach(url => {
+              // Create a new li element
+              const listItem = document.createElement("li");
+              listItem.className = "list-group-item"; // Add Bootstrap class for styling
 
-            // Create an a element
-            const link = document.createElement("a");
-            link.href = url;
-            link.textContent = url;
+              // Create an a element
+              const link = document.createElement("a");
+              link.href = url;
+              link.textContent = url;
 
-            // Create an i element
-            const trash = document.createElement("i");
-            trash.classList = "fa fa-trash removeUrl";
+              // Create an i element
+              const trash = document.createElement("i");
+              trash.classList = "fa fa-trash removeUrl";
 
-            // Append the link to the list item
-            listItem.appendChild(link);
-            // Append the icon to the list item
-            listItem.appendChild(trash);
+              // Append the link to the list item
+              listItem.appendChild(link);
+              // Append the icon to the list item
+              listItem.appendChild(trash);
 
-            // Append the list item to the ul
-            urlList.appendChild(listItem);
-        });
-
+              // Append the list item to the ul
+              urlList.appendChild(listItem);
+          });
+        }
         $(".removeUrl").click(function(elem) {
           $(elem.target).parent().remove();
         });
@@ -735,6 +736,7 @@ return '
     queryAPI("POST","/api/plugins/repositories",{list: list}).done(function(data) {
       if (data["result"] == "Success") {
         toast(data["result"],"",data["message"],"success");
+        $("#pluginsTable").bootstrapTable("refresh");
         $("#onlinePluginsModal").modal("hide");
       } else if (data["result"] == "Error") {
         toast(data["result"],"",data["message"],"danger");
