@@ -607,7 +607,7 @@ return '
     } else if (row.source == "Local") {
       return `<span class="badge bg-secondary">Unknown</span>`;
     } else if (row.status == "Available") {
-      return `<span class="badge badge-outline bg-success">Not Installed</span>`;
+      return `<span class="badge bg-primary">Not Installed</span>`;
     } else {
       return `<span class="badge bg-success">Up to date</span>`;
     }
