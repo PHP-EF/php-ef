@@ -48,7 +48,7 @@ class Plugins {
             }
         }
     
-        // Remove duplicates based on 'name' and mark status and source
+        // Remove duplicates based on 'name' and mark status, source, and version
         $uniquePlugins = [];
         $installedPluginNames = array_column($installedPlugins, 'name');
         $onlinePluginNames = array_column(array_merge(...$onlinePlugins), 'name'); // Flatten online plugins
@@ -63,10 +63,12 @@ class Plugins {
                         return isset($p[0]['name']) && $p[0]['name'] === $plugin['name'];
                     }));
                     $plugin = array_merge($plugin, $onlinePlugin[0]);
+                    $plugin['online_version'] = $onlinePlugin[0]['version'];
                 } elseif (in_array($plugin['name'], $installedPluginNames)) {
                     $plugin['source'] = 'Local';
                 } else {
                     $plugin['source'] = 'Online';
+                    $plugin['online_version'] = $plugin['version'];
                 }
                 $uniquePlugins[$plugin['name']] = $plugin;
             } else {
@@ -93,6 +95,7 @@ class Plugins {
                     } else {
                         if (file_exists($dir)) {
                             $this->api->setAPIResponseMessage('Successfully installed plugin');
+                            return true;
                         } else {
                             $this->api->setAPIResponseMessage('Failed to install plugin into '. $dir);
                         }
@@ -106,6 +109,7 @@ class Plugins {
         } else {
             $this->api->setAPIResponse('Error', 'Name and Repository are required');
         }
+        return false;
     }
 
     public function uninstall($data) {
@@ -115,6 +119,7 @@ class Plugins {
                 try {
                     if (rmdirRecursive($dir)) {
                         $this->api->setAPIResponseMessage('Successfully uninstalled plugin');
+                        return true;
                     } else {
                         $this->api->setAPIResponse('Error', 'Failed to remove plugin directory: ' . $dir);
                     };
@@ -126,6 +131,20 @@ class Plugins {
             }
         } else {
             $this->api->setAPIResponse('Error', 'Name and Repository are required');
+        }
+        return false;
+    }
+
+    public function reinstall($data) {
+        if ($this->uninstall($data)) {
+            if ($this->install($data)) {
+                $this->api->setAPIResponseMessage('Successfully reinstalled plugin');
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
         }
     }
 }

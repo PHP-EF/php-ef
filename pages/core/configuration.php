@@ -393,10 +393,11 @@ return '
                     <th data-field="name" data-sortable="true">Plugin Name</th>
                     <th data-field="author" data-sortable="true">Author</th>
                     <th data-field="category" data-sortable="true">Category</th>
-                    <th data-field="version" data-sortable="true">Version</th>
+                    <th data-field="local_version" data-sortable="true">Version</th>
                     <th data-field="link" data-sortable="true">URL</th>
                     <th data-field="status" data-sortable="true">Status</th>
                     <th data-field="source" data-sortable="true">Source</th>
+                    <th data-field="update" data-sortable="true" data-formatter="pluginUpdatesFormatter">Updates</th>
                     <th data-formatter="pluginActionFormatter" data-events="pluginActionEvents">Actions</th>
                   </tr>
                 </thead>
@@ -599,6 +600,14 @@ return '
     });
   }
 
+  function pluginUpdatesFormatter(value, row, index) {
+    if (row.version < row.online_version) {
+      return `<span class="badge bg-info">Update Available</span>`;
+    } else {
+      return `<span class="badge bg-success">Up to date</span>`;
+    }
+  }
+
   function pluginActionFormatter(value, row, index) {
     var buttons = [];
     if (row.settings) {
@@ -608,6 +617,7 @@ return '
       buttons.push(`<a class="install" title="Install"><i class="fa-solid fa-download"></i></a>&nbsp;`);
     } else if (row.status == "Installed") {
       buttons.push(`<a class="uninstall" title="Uninstall"><i class="fa-solid fa-trash-can"></i></a>&nbsp;`);
+      buttons.push(`<a class="reinstall" title="Reinstall"><i class="fa-solid fa-arrow-rotate-right"></i></a>&nbsp;`);
     }
     return buttons.join("");
   }
@@ -622,6 +632,9 @@ return '
     },
     "click .uninstall": function (e, value, row, index) {
       uninstallPlugin(row);
+    },
+    "click .reinstall": function (e, value, row, index) {
+      reinstallPlugin(row);
     }
   }
 
@@ -764,6 +777,30 @@ return '
         });;
       } catch(e) {
         toast("API Error","","Failed to uninstall plugin","danger","30000");
+        logConsole("Error",e,"error");
+      }
+    }
+  }
+
+  function reinstallPlugin(row){
+    if(confirm("Are you sure you want to reinstall the "+row.name+" plugin?") == true) {
+      toast("Reinstalling","","Reinstalling "+row["name"]+"...","info");
+      try {
+        queryAPI("POST","/api/plugins/reinstall",row).done(function(data) {
+          if (data["result"] == "Success") {
+            toast(data["result"],"",data["message"],"success");
+            $("#pluginsTable").bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger");
+          } else {
+            toast("API Error","","Failed to reinstall plugin","danger","30000");
+          }
+        }).fail(function(xhr) {
+          toast("API Error","","Failed to reinstall plugin","danger","30000");
+          logConsole("Error",xhr,"error");
+        });;
+      } catch(e) {
+        toast("API Error","","Failed to reinstall plugin","danger","30000");
         logConsole("Error",e,"error");
       }
     }

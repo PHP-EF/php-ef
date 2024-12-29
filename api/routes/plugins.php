@@ -49,6 +49,19 @@ $app->post('/plugins/uninstall', function ($request, $response, $args) {
 		->withStatus($GLOBALS['responseCode']);
 });
 
+$app->post('/plugins/reinstall', function ($request, $response, $args) {
+	$ib = ($request->getAttribute('ib')) ?? new ib();
+	$data = $ib->api->getAPIRequestData($request);
+
+	$ib->plugins->reinstall($data);
+
+    $response->getBody()->write(jsonE($GLOBALS['api']));
+	// Return the response
+	return $response
+		->withHeader('Content-Type', 'application/json')
+		->withStatus($GLOBALS['responseCode']);
+});
+
 $app->get('/plugins/repositories', function ($request, $response, $args) {
 	$ib = ($request->getAttribute('ib')) ?? new ib();
 
