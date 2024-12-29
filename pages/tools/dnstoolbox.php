@@ -185,6 +185,3 @@ if (isset($_REQUEST['location'])) {
   $return .= '$("#source").val("'.$_REQUEST['location'].'");';
 }
 return $return;
-?>
-</script>
-
