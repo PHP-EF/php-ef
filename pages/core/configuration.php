@@ -606,6 +606,8 @@ return '
       return `<span class="badge bg-info">Update Available</span>`;
     } else if (row.source == "Local") {
       return `<span class="badge bg-secondary">Unknown</span>`;
+    } else if (row.status == "Available") {
+      return `<span class="badge badge-outline bg-success">Not Installed</span>`;
     } else {
       return `<span class="badge bg-success">Up to date</span>`;
     }
