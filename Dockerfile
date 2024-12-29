@@ -60,6 +60,7 @@ RUN echo '* * * * * /usr/local/bin/php /var/www/html/inc/scheduler/scheduler.php
 USER nobody
 
 # Copy PHP-EF
+COPY --chown=nobody CHANGELOG.md /var/www/html/
 COPY --chown=nobody *.php /var/www/html/
 COPY --chown=nobody composer.json /var/www/html/
 COPY --chown=nobody api /var/www/html/api
