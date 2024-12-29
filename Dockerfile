@@ -34,7 +34,8 @@ RUN apk add --no-cache \
   php83-xmlwriter \
   php83-simplexml \
   supervisor \
-  redis
+  redis \
+  git
 
 # Configure nginx - http
 COPY Docker/config/nginx.conf /etc/nginx/nginx.conf

@@ -600,16 +600,28 @@ return '
   }
 
   function pluginActionFormatter(value, row, index) {
+    var buttons = [];
     if (row.settings) {
-      var actions = `<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`
-      return actions
+      buttons.push(`<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`);
     }
+    if (row.status == "Available") {
+      buttons.push(`<a class="install" title="Install"><i class="fa-solid fa-download"></i></a>&nbsp;`);
+    } else if (row.status == "Installed") {
+      buttons.push(`<a class="uninstall" title="Uninstall"><i class="fa-solid fa-trash-can"></i></a>&nbsp;`);
+    }
+    return buttons.join("");
   }
 
   window.pluginActionEvents = {
     "click .edit": function (e, value, row, index) {
       buildPluginSettingsModal(row);
       $("#pluginSettingsModal").modal("show");
+    },
+    "click .install": function (e, value, row, index) {
+      installPlugin(row);
+    },
+    "click .uninstall": function (e, value, row, index) {
+      uninstallPlugin(row);
     }
   }
 
@@ -710,6 +722,32 @@ return '
       toast("API Error","","Failed to save repository configuration","danger","30000");
     });
   })
+
+  function installPlugin(row){
+    toast("Installing","","Installing "+row["name"]+"...","info");
+    try {
+      queryAPI("POST","/api/plugins/install",row).done(function(data) {
+        if (data["result"] == "Success") {
+          toast(data["result"],"",data["message"],"success");
+          $("#pluginsTable").bootstrapTable("refresh");
+        } else if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger");
+        } else {
+          toast("API Error","","Failed to install plugin","danger","30000");
+        }
+      }).fail(function(xhr) {
+        toast("API Error","","Failed to install plugin","danger","30000");
+        logConsole("Error",xhr,"error");
+      });;
+    } catch(e) {
+      toast("API Error","","Failed to install plugin","danger","30000");
+      logConsole("Error",e,"error");
+    }
+  }
+
+  function uninstallPlugin(row){
+    console.log(row);
+  }
 
   $("#pluginsTable").bootstrapTable();
 </script>
