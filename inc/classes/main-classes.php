@@ -30,7 +30,7 @@ class ib {
   }
 
   public function getVersion() {
-    return ['0.7.0'];
+    return ['0.7.1'];
   }
 
   // Initiate Database Migration if required

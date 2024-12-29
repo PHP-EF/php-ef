@@ -1,3 +1,9 @@
+## v0.7.1
+- Add plugin management
+- Add/Remove Plugin Repository URLs
+- Install/Uninstall/Reinstall Plugins from Github
+- Add update checking
+
 ## v0.7.0
 ### BREAKING CHANGE
 - Add page ordering and support for preference changes by draggable rows
