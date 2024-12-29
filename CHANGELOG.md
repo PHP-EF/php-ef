@@ -1,8 +1,15 @@
+## v0.7.1
+- Add plugin management
+- Add/Remove Plugin Repository URLs
+- Install/Uninstall/Reinstall Plugins from Github
+- Add update checking
+
 ## v0.7.0
 ### BREAKING CHANGE
 - Add page ordering and support for preference changes by draggable rows
 - This requires a new 'Weight' column to be created in the database which is not done automatically.
 - You can either create the new Weight column manually, or drop the pages table and allow it to be re-created automatically.
+- Database migration scripts are included for any version after this one, to avoid future breaking changes.
 
 ## v0.6.9
 - Various improvements to plugin configuration
