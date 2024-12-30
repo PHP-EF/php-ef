@@ -82,6 +82,16 @@ return '
                   <input type="password" class="form-control info-field" id="Security[salt]" aria-describedby="Security[salt]Help" name="Security[salt]">
                   <small id="Security[salt]Help" class="form-text text-muted">The salt used to encrypt credentials. <b>WARNING! Changing the Salt will invalidate all client-side stored API Keys</b></small>
                 </div>
+                <div class="form-group">
+                  <label for="Security[Headers][X-Frame-Options]">X-Frame-Options</label>
+                  <input type="text" class="form-control info-field" placeholder="SAMEORIGIN" id="Security[Headers][X-Frame-Options]" aria-describedby="Security[Headers][X-Frame-Options]Help" name="Security[Headers][X-Frame-Options]">
+                  <small id="Security[Headers][X-Frame-Options]Help" class="form-text text-muted">Customise the X-Frame-Options header</b></small>
+                </div>
+                <div class="form-group">
+                  <label for="Security[Headers][Frame-Source]">Content Security Policy: Frame Source</label>
+                  <input type="text" class="form-control info-field" placeholder="self" id="Security[Headers][Frame-Source]" aria-describedby="Security[Headers][Frame-Source]Help" name="Security[Headers][Frame-Source]">
+                  <small id="Security[Headers][Frame-Source]Help" class="form-text text-muted">Customise the frame-src component of the Content Security Policy header. It is strongly advised to leave this alone unless you know what you are doing.</b></small>
+                </div>
               </div>
               <br>
               <div class="card border-secondary">
@@ -420,6 +430,7 @@ return '
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="pluginSettingsModalLabel"></h5>
+        <span id="pluginName" hidden></span>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
           <span aria-hidden="true"></span>
         </button>
@@ -427,7 +438,7 @@ return '
       <div class="modal-body" id="pluginSettingsModalBody">
       </div>
       <div class="modal-footer">
-        <button class="btn btn-primary" id="editPluginSaveButton">Save</button>
+        <button class="btn btn-primary editPluginSaveButton">Save</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
@@ -549,12 +560,10 @@ return '
         $("#pluginSettingsModalBody").html(buildFormGroup(settingsResponse.data));
         initPasswordToggle();
         $("#pluginSettingsModalLabel").text("Plugin Settings: "+row.name);
+        $("#pluginName").text(row.name);
         $(".info-field").change(function(elem) {
           toast("Configuration","",$(elem.target).data("label")+" has changed.<br><small>Save configuration to apply changes.</small>","warning");
           $(this).addClass("changed");
-        });
-        $("#editPluginSaveButton").on("click",function(elem) {
-          editPluginSubmit(row);
         });
         try {
           queryAPI("GET","/api/config/plugins/"+row.name).done(function(configResponse) {
@@ -562,7 +571,12 @@ return '
             for (const key in data) {
               if (data.hasOwnProperty(key)) {
                   const value = data[key];
-                  $(`#pluginSettingsModal [name="${key}"]`).val(value);
+                  const element = $(`#pluginSettingsModal [name="${key}"]`);
+                  if (element.attr("type") === "checkbox") {
+                    element.prop("checked", value);
+                  } else {
+                    element.val(value);
+                  }
               }
             }
           }).fail(function(xhr) {
@@ -579,17 +593,33 @@ return '
     }
   }
 
-  function editPluginSubmit(row) {
-    // Serialize the form data into an array
-    var serializedArray = $("#pluginSettingsModal .info-field.changed").serializeArray();
+  $("#pluginSettingsModal").on("click", ".editPluginSaveButton", function(elem) {
+      editPluginSubmit();
+  });
+
+  function editPluginSubmit() {
+    var pluginName = $("#pluginName").text();
+    var serializedArray = $("#pluginSettingsModal .changed[type!=checkbox]").serializeArray();
+    
+    // Include unchecked checkboxes in the formData
+    $("#pluginSettingsModal input.changed[type=checkbox]").each(function() {
+        serializedArray.push({ name: this.name, value: this.checked ? true : false });
+    });
 
     // Convert the array into an object
     var formData = {};
     serializedArray.forEach(function(item) {
-        formData[item.name] = item.value;
+        if (formData[item.name]) {
+            if (!Array.isArray(formData[item.name])) {
+                formData[item.name] = [formData[item.name]];
+            }
+            formData[item.name].push(item.value);
+        } else {
+            formData[item.name] = item.value;
+        }
     });
 
-    queryAPI("PATCH","/api/config/plugins/"+row.name,formData).done(function(data) {
+    queryAPI("PATCH","/api/config/plugins/"+pluginName,formData).done(function(data) {
       if (data["result"] == "Success") {
           toast(data["result"],"",data["message"],"success");
           $("#pluginSettingsModal").modal("hide");

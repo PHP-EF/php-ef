@@ -29,6 +29,18 @@ if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'plugins')) {
 	}
 }
 
+// ** Set Headers ** //
+// X-Frame-Options
+$XFrameOptions = $ib->config->get('Security', 'Headers')['X-Frame-Options'] ?? 'SAMEORIGIN';
+$iFrameLinks = $ib->pages->getiFrameLinks();
+$AllowList = [];
+if (!empty($iFrameLinks)) {
+  $AllowList = array_column($iFrameLinks,'Name');
+}
+$FrameSource = $ib->config->get('Security', 'Headers')['Frame-Source'] ?: implode(' ',$AllowList);
+header('X-Frame-Options: ' . ($XFrameOptions ?: 'SAMEORIGIN'));
+header("Content-Security-Policy:  default-src 'self'; script-src 'self' https://code.jquery.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rawgit.com https://code.jquery.com https://unpkg.com 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self'; object-src 'none'; frame-ancestors 'self'; frame-src 'self' $FrameSource; base-uri 'self'; form-action 'self';");
+
 if (!(isset($SkipCSS))) {
   $faviconPath = $ib->config->get('Styling', 'favicon')['Image'];
   $faviconPath = $faviconPath ? $faviconPath : '/assets/images/favicon.ico';

@@ -59,7 +59,7 @@ class dbHelper {
 
     // Add the new version if it's not already in the updates list
     if (!array_key_exists($newVersion, $allUpdates)) {
-      $allUpdates[$newVersion] = [];
+        $allUpdates[$newVersion] = [];
     }
 
     // Sort versions to maintain the correct order
@@ -68,33 +68,36 @@ class dbHelper {
     $versions = array_keys($allUpdates);
     $currentIndex = array_search($currentVersion, $versions);
     if ($currentIndex === false) {
-      $currentIndex = 0;
+        $currentIndex = 0;
     }
     $newIndex = array_search($newVersion, $versions);
 
     if ($currentIndex >= $newIndex) {
-      echo "Invalid version update path from $currentVersion to $newVersion.";
-      die();
+        echo "Invalid version update path from $currentVersion to $newVersion.";
+        die();
     }
 
     try {
-      $this->pdo->beginTransaction();
-      for ($i = $currentIndex + 1; $i <= $newIndex; $i++) {
-        $version = $versions[$i];
-        if (isset($allUpdates[$version])) {
-          foreach ($allUpdates[$version] as $query) {
-            $this->pdo->exec($query);
-          }
+        $this->pdo->beginTransaction();
+        for ($i = $currentIndex + 1; $i <= $newIndex; $i++) {
+            $version = $versions[$i];
+            if (isset($allUpdates[$version])) {
+                foreach ($allUpdates[$version] as $query) {
+                    // Execute the migration query
+                    $this->pdo->exec($query);
+                }
+            }
         }
-      }
-      $this->pdo->commit();
-      $this->updateDatabaseVersion($newVersion);
-      echo "Database schema updated successfully from version $currentVersion to $newVersion. Refresh the page to reload.";
-      die();
+        // Commit the transaction
+        $this->pdo->commit();
+        // Update the database version
+        $this->updateDatabaseVersion($newVersion);
+        echo "Database schema updated successfully from version $currentVersion to $newVersion. Refresh the page to reload.";
     } catch (Exception $e) {
-      $this->pdo->rollBack();
-      echo "Failed to update database schema: " . $e->getMessage();
-      die();
+        // Roll back the transaction in case of an error
+        $this->pdo->rollBack();
+        echo "Failed to update database schema: " . $e->getMessage();
+        die();
     }
   }
 
@@ -108,6 +111,11 @@ class dbHelper {
             FROM pages AS t2
             WHERE t2.Weight <= pages.Weight
         );' // Populate Initial Weights
+      ],
+      '0.7.1' => [],
+      '0.7.2' => [
+        "ALTER TABLE pages ADD COLUMN LinkType INTEGER", // Add Weight Column to Pages
+        "UPDATE pages SET LinkType = 'Native'"
       ]
     ];
   }

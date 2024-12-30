@@ -274,6 +274,8 @@ function loadMainWindow(element) {
     queryAPI('GET','/api/page/'+hashsplit[1]).done(function(data) {
       $('#mainWindow').html('');
       $('#mainWindow').html(data);
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        toast(textStatus,"","Unable to load the requested page.<br>"+jqXHR.status+": "+errorThrown,"danger");
     });
   } else if (window.parent.location.hash) {
     var hashsplit = window.parent.location.hash.split('#page=');
@@ -296,10 +298,14 @@ function loadMainWindow(element) {
     }
     queryAPI('GET','/api/page/'+hashsplit[1]).done(function(data) {
       $('#mainWindow').html(data);
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+      toast(textStatus,"","Unable to load the requested page.<br>"+jqXHR.status+": "+errorThrown,"danger");
     });
   } else {
     queryAPI('GET','/api/page/core/default').done(function(data) {
       $('#mainWindow').html(data);
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+      toast(textStatus,"","Unable to load the requested page.<br>"+jqXHR.status+": "+errorThrown,"danger");
     });
   }
 }
@@ -823,7 +829,6 @@ function buildFormGroup(array){
   var group = '<div id="tabsJustifiedContent" class="tab-content">';
   var uList = '<ul id="tabsJustified" class="nav nav-tabs info-nav">';
   $.each(array, function(i,v) {
-    console.log
     mainCount++;
     var count = 0;
     var total = v.length;
@@ -945,13 +950,11 @@ function buildFormItem(item){
       return '<input lang="en" type="hidden" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' />';
     case 'select':
       return smallLabel+'<select class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'>'+selectOptions(item.options, item.value)+'</select>';
-    case 'select2':
-      var select2ID = (item.id) ? '#'+item.id : '.'+item.name;
-      let settings = (item.settings) ? item.settings : '{}';
-      return smallLabel+'<select class="m-b-10 info-field '+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' multiple="multiple" data-placeholder="">'+selectOptions(item.options, item.value)+'</select><script>$("'+select2ID+'").select2('+settings+').on("select2:unselecting", function() { $(this).data("unselecting", true); }).on("select2:opening", function(e) { if ($(this).data("unselecting")) { $(this).removeData("unselecting");  e.preventDefault(); } });</script>';
+    case 'selectmultiple':
+      return smallLabel+'<select class="form-control info-field'+extraClass+'" multiple '+placeholder+value+id+name+disabled+type+label+attr+'>'+selectOptions(item.options, item.value)+'</select>';
     case 'switch':
     case 'checkbox':
-      return smallLabel+'<input type="checkbox" class="js-switch info-field'+extraClass+'" data-size="medium" data-color="#99d683" data-secondary-color="#f96262"'+name+value+tof(item.value,'c')+id+disabled+type+label+attr+' /><input type="hidden"'+name+'value="false">';
+      return smallLabel+'<div class="form-check form-switch"><input class="form-check-input info-field'+extraClass+'" type="checkbox"'+name+value+id+disabled+type+label+attr+' /></div>';
     case 'button':
       return smallLabel+'<button class="btn btn-sm btn-success btn-rounded waves-effect waves-light b-none'+extraClass+'" '+href+attr+' type="button"><span class="btn-label"><i class="'+icon+'"></i></span><span lang="en">'+text+'</span></button>';
     case 'blank':
