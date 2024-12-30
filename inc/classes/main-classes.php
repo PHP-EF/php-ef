@@ -4,6 +4,7 @@ use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 
 class ib {
+  public $hooks;
   private $core;
   public $api;
   public $auth;
@@ -16,11 +17,12 @@ class ib {
   public $plugins;
 
   public function __construct() {
+    $this->hooks = new hooks();
     $this->core = new core(__DIR__.'/../config/config.json',(new api()));
     $this->db = (new db(__DIR__.'/../config/app.db',$this->core,$this->getVersion()[0]))->db;
     $this->dbHelper = new dbHelper($this->db);
     $this->api = new api($this->core);
-    $this->auth = new Auth($this->core,$this->db,$this->api);
+    $this->auth = new Auth($this->core,$this->db,$this->api,$this->hooks);
     $this->config = $this->core->config;
     $this->pages = new Pages($this->db,$this->api,$this->core);
     $this->logging = $this->core->logging;

@@ -17,6 +17,11 @@ $GLOBALS['plugins']['Example'] = [ // Plugin Name
 
 class examplePlugin extends ib
 {
+
+	public function __construct() {
+		parent::__construct();
+	}
+
 	public function _pluginGetSettings()
 	{
 		return array(
