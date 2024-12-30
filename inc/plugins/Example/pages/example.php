@@ -1,6 +1,6 @@
 <?php
   $examplePlugin = new examplePlugin();
-  if ($examplePlugin->auth->checkAccess($examplePlugin->auth->checkAccess('Plugin','example')['ACL-READ']) == false) {
+  if ($examplePlugin->auth->checkAccess($examplePlugin->auth->checkAccess('Plugins','Example')['ACL-READ'] ?? null) == false) {
     die();
   }
   return <<<EOF
