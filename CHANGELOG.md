@@ -1,3 +1,7 @@
+## v0.7.2
+- Minor updates to prep for iFrame support
+- Bugfixes & cleanup
+
 ## v0.7.1
 - Add plugin management
 - Add/Remove Plugin Repository URLs
