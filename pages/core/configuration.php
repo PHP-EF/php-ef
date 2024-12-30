@@ -554,42 +554,44 @@ return '
 
 
   // PLUGINS //
-  function buildPluginSettingsModal(row){
+  function buildPluginSettingsModal(row) {
     try {
-      queryAPI("GET",row.api).done(function(settingsResponse) {
+      queryAPI("GET", row.api).done(function(settingsResponse) {
         $("#pluginSettingsModalBody").html(buildFormGroup(settingsResponse.data));
         initPasswordToggle();
-        $("#pluginSettingsModalLabel").text("Plugin Settings: "+row.name);
+        $("#pluginSettingsModalLabel").text("Plugin Settings: " + row.name);
         $("#pluginName").text(row.name);
         $(".info-field").change(function(elem) {
-          toast("Configuration","",$(elem.target).data("label")+" has changed.<br><small>Save configuration to apply changes.</small>","warning");
+          toast("Configuration", "", $(elem.target).data("label") + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
           $(this).addClass("changed");
         });
         try {
-          queryAPI("GET","/api/config/plugins/"+row.name).done(function(configResponse) {
+          queryAPI("GET", "/api/config/plugins/" + row.name).done(function(configResponse) {
             let data = configResponse.data;
             for (const key in data) {
               if (data.hasOwnProperty(key)) {
-                  const value = data[key];
-                  const element = $(`#pluginSettingsModal [name="${key}"]`);
-                  if (element.attr("type") === "checkbox") {
-                    element.prop("checked", value);
-                  } else {
-                    element.val(value);
-                  }
+                const value = data[key];
+                const element = $(`#pluginSettingsModal [name="${key}"]`);
+                if (element.attr("type") === "checkbox") {
+                  element.prop("checked", value);
+                } else if (element.is("input[multiple]")) {
+                  console.log(element.data("type"));
+                } else {
+                  element.val(value);
+                }
               }
             }
           }).fail(function(xhr) {
-            logConsole("Error",xhr,"error");
+            logConsole("Error", xhr, "error");
           });
-        } catch(e) {
-          logConsole("Error",e,"error");
+        } catch (e) {
+          logConsole("Error", e, "error");
         }
       }).fail(function(xhr) {
-        logConsole("Error",xhr,"error");
-      });;
-    } catch(e) {
-      logConsole("Error",e,"error");
+        logConsole("Error", xhr, "error");
+      });
+    } catch (e) {
+      logConsole("Error", e, "error");
     }
   }
 
@@ -609,25 +611,37 @@ return '
     // Convert the array into an object
     var formData = {};
     serializedArray.forEach(function(item) {
+        var element = $(`[name="` + item.name + `"]`);
         if (formData[item.name]) {
             if (!Array.isArray(formData[item.name])) {
                 formData[item.name] = [formData[item.name]];
             }
             formData[item.name].push(item.value);
         } else {
-            formData[item.name] = item.value;
+            // Check if the element is a select with the multiple attribute
+            if (element.is("select[multiple]")) {
+              if (item.value !== "") {
+                formData[item.name] = [item.value];
+              } else {
+                formData[item.name] = item.value;
+              }
+            } else if (element.is("input[multiple]")) {
+              formData[item.name] = getInputMultipleEntries(element);
+            } else {
+                formData[item.name] = item.value;
+            }
         }
     });
 
-    queryAPI("PATCH","/api/config/plugins/"+pluginName,formData).done(function(data) {
-      if (data["result"] == "Success") {
-          toast(data["result"],"",data["message"],"success");
-          $("#pluginSettingsModal").modal("hide");
-      } else if (data["result"] == "Error") {
-          toast(data["result"],"",data["message"],"danger");
-      } else {
-          toast("API Error","","Failed to save configuration","danger","30000");
-      }
+    queryAPI("PATCH", "/api/config/plugins/" + pluginName, formData).done(function(data) {
+        if (data["result"] == "Success") {
+            toast(data["result"], "", data["message"], "success");
+            $("#pluginSettingsModal").modal("hide");
+        } else if (data["result"] == "Error") {
+            toast(data["result"], "", data["message"], "danger");
+        } else {
+            toast("API Error", "", "Failed to save configuration", "danger", "30000");
+        }
     });
   }
 

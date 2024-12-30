@@ -335,13 +335,15 @@ body.dark-theme .toast small {
 /*--------------------------------------------------------------
 # Configuration Page
 --------------------------------------------------------------*/
-.urlList > .list-group-item {
+.urlList > .list-group-item,
+.inputEntries > .list-group-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.urlList > .list-group-item.newUrl {
+.urlList > .list-group-item.newUrl
+.inputEntries > .list-group-item.inputEntry {
   background-color: #fffaf0;
 }
 
