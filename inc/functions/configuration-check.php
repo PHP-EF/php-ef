@@ -13,22 +13,32 @@ function checkConfiguration() {
     function dependencyCheck($dependencies, $type = 'installation') {
         $output = '';
         $allPassed = true;
+    
         foreach ($dependencies as $dep => $check) {
             $output .= "<tr><td>$dep</td>";
             $result = $check();
-            if ($result) {
-                if ($type === 'connectivity' && is_string($result)) {
-                    $status = $result;
-                } else {
+            $status = $result ? ($type === 'connectivity' ? 'Connected' : 'Installed') : ($type === 'connectivity' ? 'Not Connected' : 'Not Installed');
+            $class = $result ? 'installed' : 'not-installed';
+    
+            if (!is_bool($result)) {
+                if (strpos($result, "not found") === false && strpos($result, "failed") === false && strpos($result, "error") === false) {
                     $status = $type === 'connectivity' ? 'Connected' : 'Installed';
+                    $class = 'installed';
+                } else {
+                    $status = $type === 'connectivity' ? 'Not Connected' : 'Not Installed';
+                    $class = 'not-installed';
                 }
-                $output .= "<td><span class='status installed'>$status</span></td></tr>";
+                $message = $result;
             } else {
-                $status = $type === 'installation' ? 'Not Installed' : 'Not Connected';
-                $output .= "<td><span class='status not-installed'>$status</span></td></tr>";
+                $message = $result ? 'Success' : 'Failed';
+            }
+    
+            $output .= "<td><span class='status $class'>$status</span></td><td>$message</td></tr>";
+            if (!$result) {
                 $allPassed = false;
             }
         }
+    
         return [$output, $allPassed];
     }
 
@@ -45,15 +55,15 @@ function checkConfiguration() {
         try {
             $appDb = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'app.db';
             $db = new PDO("sqlite:$appDb");
-            return true;
+            return true; // Return true if connection is successful
         } catch (Exception $e) {
-            return false;
+            return $e->getMessage(); // Return the error message if an exception is raised
         }
     }
 
     // Define dependencies
     $systemDependencies = [
-        'supervisor' => function() { return shell_exec("supervisord -v 2>&1"); },
+        // 'supervisor' => function() { return shell_exec("supervisord -v 2>&1"); },
         'redis' => function() { return shell_exec("redis-cli -v"); },
         'git' => function() { return shell_exec("git --version"); },
         'curl' => function() { return function_exists('curl_version'); },
@@ -76,7 +86,6 @@ function checkConfiguration() {
         'php-curl' => function() { return extension_loaded("curl"); },
         'php-dom' => function() { return extension_loaded("dom"); },
         'php-fileinfo' => function() { return extension_loaded("fileinfo"); },
-        'php-fpm' => function() { return shell_exec("php-fpm -v 2>&1"); },
         'php-gd' => function() { return extension_loaded("gd"); },
         'php-intl' => function() { return extension_loaded("intl"); },
         'php-mbstring' => function() { return extension_loaded("mbstring"); },
@@ -158,7 +167,7 @@ if (!$cc['systemPassed'] || !$cc['connectivityPassed'] || !$cc['phpPassed']) {
                             <h4>System Dependencies</h4>
                             <table class='table table-bordered'>
                                 <thead>
-                                    <tr><th>Dependency</th><th>Status</th></tr>
+                                    <tr><th>Dependency</th><th>Status</th><th>Message</th></tr>
                                 </thead>
                                 <tbody>".$cc['systemOutput']."</tbody>
                             </table>
@@ -166,7 +175,7 @@ if (!$cc['systemPassed'] || !$cc['connectivityPassed'] || !$cc['phpPassed']) {
                             <h4>Connectivity Tests</h4>
                             <table class='table table-bordered'>
                                 <thead>
-                                    <tr><th>Dependency</th><th>Status</th></tr>
+                                    <tr><th>Dependency</th><th>Status</th><th>Message</th></tr>
                                 </thead>
                                 <tbody>".$cc['connectivityOutput']."</tbody>
                             </table>
@@ -174,7 +183,7 @@ if (!$cc['systemPassed'] || !$cc['connectivityPassed'] || !$cc['phpPassed']) {
                             <h4>PHP Dependencies</h4>
                             <table class='table table-bordered'>
                                 <thead>
-                                    <tr><th>Dependency</th><th>Status</th></tr>
+                                    <tr><th>Dependency</th><th>Status</th><th>Message</th></tr>
                                 </thead>
                                 <tbody>".$cc['phpOutput']."</tbody>
                             </table>
@@ -188,5 +197,4 @@ if (!$cc['systemPassed'] || !$cc['connectivityPassed'] || !$cc['phpPassed']) {
 }
 
 // Continue with normal flow if all checks pass
-// Your normal application code here
 ?>
