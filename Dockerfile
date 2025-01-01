@@ -36,8 +36,7 @@ RUN apk add --no-cache \
   php83-posix \
   supervisor \
   redis \
-  git \
-  crontab
+  git
 
 # Configure nginx - http
 COPY Docker/config/nginx.conf /etc/nginx/nginx.conf
@@ -56,7 +55,7 @@ COPY Docker/config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN chown -R nobody:nobody /var/www/html /run /var/lib/nginx /var/log/nginx /var/log/redis
 
 # Configure Cron
-RUN echo '* * * * * /usr/local/bin/php /var/www/html/inc/scheduler/scheduler.php' > /etc/crontabs/root
+RUN echo '* * * * * /usr/local/bin/php /var/www/html/inc/scheduler/scheduler.php' > /var/spool/cron/crontabs/root
 
 # Switch to use a non-root user from here on
 USER nobody
