@@ -254,6 +254,13 @@ p.pNoMargin {
   visibility: hidden;
 }
 
+/* Metric Circle */
+.metric-circle {
+  border: solid 2px;
+  border-radius: 100px;
+  padding: 10px 20px;
+}
+
 /* Popover */
 body .popover {
   display: none;
