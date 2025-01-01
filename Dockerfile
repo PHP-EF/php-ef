@@ -56,7 +56,7 @@ COPY Docker/config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN chown -R nobody:nobody /var/www/html /run /var/lib/nginx /var/log/nginx /var/log/redis
 
 # Configure Cron
-RUN echo '* * * * * /usr/local/bin/php /var/www/html/inc/scheduler/scheduler.php' > /var/spool/cron/crontabs/nobody
+RUN echo '* * * * * /usr/bin/php /var/www/html/inc/scheduler/scheduler.php' > /var/spool/cron/crontabs/nobody
 RUN touch /var/log/cron.log
 RUN chown nobody:nogroup /var/log/cron.log
 
