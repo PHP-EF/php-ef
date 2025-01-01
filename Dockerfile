@@ -37,7 +37,7 @@ RUN apk add --no-cache \
   supervisor \
   redis \
   git \
-  cron
+  crontab
 
 # Configure nginx - http
 COPY Docker/config/nginx.conf /etc/nginx/nginx.conf
