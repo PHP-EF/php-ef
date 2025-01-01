@@ -57,6 +57,8 @@ RUN chown -R nobody:nobody /var/www/html /run /var/lib/nginx /var/log/nginx /var
 
 # Configure Cron
 RUN echo '* * * * * /usr/local/bin/php /var/www/html/inc/scheduler/scheduler.php' > /var/spool/cron/crontabs/nobody
+RUN touch /var/log/cron.log
+RUN chown nobody:nogroup /var/log/cron.log
 
 # Switch to use a non-root user from here on
 USER nobody
