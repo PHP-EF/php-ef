@@ -36,7 +36,8 @@ RUN apk add --no-cache \
   php83-posix \
   supervisor \
   redis \
-  git
+  git \
+  cron
 
 # Configure nginx - http
 COPY Docker/config/nginx.conf /etc/nginx/nginx.conf
