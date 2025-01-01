@@ -60,8 +60,8 @@ RUN chown -R nobody:nobody /var/www/html /run /var/lib/nginx /var/log/nginx /var
 RUN echo '* * * * * /usr/bin/php /var/www/html/inc/scheduler/scheduler.php' > /var/spool/cron/crontabs/nobody
 RUN touch /var/log/cron.log
 RUN chown nobody:nogroup /var/log/cron.log
-RUN setcap cap_setgid=ep /usr/sbin/crond
-RUN setcap cap_setuid=ep /usr/sbin/crond
+# RUN setcap cap_setgid=ep /usr/sbin/crond
+# RUN setcap cap_setuid=ep /usr/sbin/crond
 
 # Switch to use a non-root user from here on
 USER nobody
