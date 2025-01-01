@@ -36,7 +36,8 @@ RUN apk add --no-cache \
   php83-posix \
   supervisor \
   redis \
-  git
+  git \
+  busybox-suid
 
 # Configure nginx - http
 COPY Docker/config/nginx.conf /etc/nginx/nginx.conf
