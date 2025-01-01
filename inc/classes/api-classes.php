@@ -107,7 +107,7 @@ class query {
 			return $response;
 		}
 		if ($response->status_code >= 400 && $response->status_code < 600) {
-			return false;
+			return $response;
 		}
 		$contentType = $response->headers['content-type'] ?? '';
 		if (strpos($contentType, 'application/json') !== false || strpos($contentType, 'text/plain') !== false) {
