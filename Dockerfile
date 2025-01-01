@@ -70,7 +70,7 @@ RUN curl -fsSLO "$SUPERCRONIC_URL" \
 # Configure Crontab
 RUN mkdir /supercronic
 RUN echo '* * * * * /usr/bin/php /var/www/html/inc/scheduler/scheduler.php' > /supercronic/crontab
-RUN chown -R nobody:nogroup /supercronic
+RUN chown -R nobody:nogroup /supercronic /usr/local/bin/supercronic
 
 # Switch to use a non-root user from here on
 USER nobody
