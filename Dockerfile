@@ -37,7 +37,8 @@ RUN apk add --no-cache \
   supervisor \
   redis \
   git \
-  busybox-suid
+  busybox-suid \ 
+  libcap
 
 # Configure nginx - http
 COPY Docker/config/nginx.conf /etc/nginx/nginx.conf
