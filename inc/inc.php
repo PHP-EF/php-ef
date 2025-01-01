@@ -34,7 +34,7 @@ if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'plugins')) {
 
 // ** Set Headers ** //
 // X-Frame-Options
-$XFrameOptions = $ib->config->get('Security', 'Headers')['X-Frame-Options'] ?: 'SAMEORIGIN';
+$XFrameOptions = $ib->config->get('Security', 'Headers')['X-Frame-Options'] ?? 'SAMEORIGIN';
 $iFrameLinks = $ib->pages->getiFrameLinks();
 $AllowList = [];
 if (!empty($iFrameLinks)) {

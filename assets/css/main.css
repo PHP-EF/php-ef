@@ -1207,20 +1207,6 @@ body .bootstrap-table .fixed-table-container .fixed-table-body {
   width:90%;
 }
 
-/* Progress Bar */
-.progress {
-  width: 80%;
-  margin: auto;
-}
-.progress-bar {
-  background: -webkit-linear-gradient(left, #fedd01 0%, #00bd4d 35%, #00bd4d 65%, #00f9ff 100%);
-}
-
-/* Progress Action */
-.progressAction {
-  margin-top: 10px;
-}
-
 /* Additional Modal Sizes */
 .modal-xxl {
   max-width: 1480px;
