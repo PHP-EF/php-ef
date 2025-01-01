@@ -68,6 +68,7 @@ RUN curl -fsSLO "$SUPERCRONIC_URL" \
  && ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
 
 # Configure Crontab
+RUN mkdir /supercronic
 RUN echo '* * * * * /usr/bin/php /var/www/html/inc/scheduler/scheduler.php' > /supercronic/crontab
 RUN chown -R nobody:nogroup /supercronic
 
