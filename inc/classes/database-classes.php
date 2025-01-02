@@ -54,7 +54,7 @@ class dbHelper {
     };
   }
 
-  public function queryDBWithParams($pdo,$table,$params) {
+  public function queryDBWithParams($pdo,$table,$params,$searchColumns) {
     $query = 'SELECT * FROM '.$table.' WHERE 1=1';
     
     // Filtering
@@ -66,7 +66,17 @@ class dbHelper {
 
     // Searching
     if (!empty($params['search'])) {
-        $query .= ' AND (title LIKE :search OR status LIKE :search)';
+        $SearchColumnQuery = '';
+        $ColumnCount = count($searchColumns);
+        $ColumnNo = 0;
+        foreach ($searchColumns as $searchColumn) {
+          $ColumnNo++;
+          $SearchColumnQuery .= $searchColumn . ' LIKE :search';
+          if ($ColumnNo != $ColumnCount) {
+            $SearchColumnQuery .= ' OR ';
+          }
+        }
+        $query .= ' AND '.$SearchColumnQuery;
     }
 
     // Ordering
