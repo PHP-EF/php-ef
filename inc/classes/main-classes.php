@@ -64,13 +64,14 @@ class ib {
             ];
             break;
         case 'test':
+            $Method = $extras['Method'] ?? 'GET';
             $settingMerge = [
                 'type' => 'button',
-                'label' => 'Test Connection',
+                'label' => 'Test',
                 'icon' => 'fa fa-flask',
                 'class' => 'pull-right',
-                'text' => 'Test Connection',
-                'attr' => 'onclick="testAPIConnection(\'' . $name . '\')"',
+                'text' => 'Test',
+                'attr' => 'onclick="testAPI(\'' . $Method . '\',\'' . $name . '\')"',
                 'help' => 'Remember! Please save before using the test button!'
             ];
             break;
@@ -84,9 +85,9 @@ class ib {
             break;
         case 'cron':
             $settingMerge = [
-                'type' => 'cron',
+                'type' => 'input',
                 'label' => 'Cron Schedule',
-                'help' => 'You may use either Cron format or - @hourly, @daily, @monthly',
+                // 'help' => 'You may use either Cron format or - @hourly, @daily, @monthly',
                 'placeholder' => '* * * * *'
             ];
             break;
@@ -167,13 +168,6 @@ class ib {
                             </div>
                         </div>
                     </div>'
-            ];
-            break;
-        case 'title':
-            $settingMerge = [
-                'type' => 'input',
-                'label' => 'Title',
-                'help' => 'Sets the title of this homepage module',
             ];
             break;
         case 'limit':

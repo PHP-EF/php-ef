@@ -87,6 +87,19 @@ function queryAPI(type,path,data=null,contentType="application/json",asyncValue=
 	}
 }
 
+function testAPI(type,path){
+  toast("Info","","Starting..","info","5000");
+  queryAPI(type,path).done(function(data) {
+    if (data["result"] == "Success") {
+      toast(data["result"],"",data["message"],"success","10000");
+    } else {
+      toast("Error", "", data["message"], "danger","30000");
+    }
+  }).fail(function() {
+      toast("Error", "", "API Error", "danger","30000");
+  });
+}
+
 function logConsole(subject,msg,type = 'info'){
 	let color;
 	switch (type){
@@ -883,62 +896,67 @@ function buildFormGroup(array){
         if(typeof v.override !== 'undefined'){
           override = v.override;
         }
-                var arrayMultiple = false;
-                if(typeof v.type !== 'undefined'){
-                    if(v.type == 'arrayMultiple'){
-                        arrayMultiple = true;
-                    }
-                }
-        count++;
-                if (count % 2 !== 0) {
-                    group += '<div class="row start">';
-                }
-                var helpID = '#help-info-'+v.name;
-                var helpTip = (v.help) ? '<sup><a class="help-tip" data-toggle="collapse" href="'+helpID+'" aria-expanded="true"><i class="m-l-5 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>' : '';
-                var builtItems = '';
-                if(arrayMultiple == true){
-                    $.each(v.value, function(index,value){
-                        if (typeof value === 'object'){
-                            builtItems += '<div class="row m-b-40">';
-                            $.each(value, function(number,formItem) {
-                              let clearfix = (formItem.type == 'blank') ? '<div class="clearfix"></div>' : '';
-                                builtItems += `
-                                    <!-- INPUT BOX  Yes Multiple -->
-                                    <div class="col-md-6 p-b-10">
-                                        <div class="form-group">
-                                            <label class="control-label col-md-12"><span lang="en">${formItem.label}</span>${helpTip}</label>
-                                            <div class="col-md-12">${buildFormItem(formItem)}</div> <!-- end div -->
-                                        </div>
-                                    </div>
-                                    ${clearfix}
-                                    <!--/ INPUT BOX -->
-                                `;
-                            });
-                            builtItems += '</div>';
-                        }else{
-                            builtItems += buildFormItem(value);
-                        }
-                    });
 
-                }else{
-                    builtItems = `
-          <!-- INPUT BOX  no Multiple-->
-          <div class="col-md-`+override+` p-b-10">
-            <div class="form-group">
-              <label class="control-label col-md-12"><span lang="en">${v.label}</span>${helpTip}</label>
-              <div class="col-md-12">
-                ${buildFormItem(v)}
+        var arrayMultiple = false;
+        if(typeof v.type !== 'undefined'){
+            if(v.type == 'arrayMultiple'){
+                arrayMultiple = true;
+            }
+        }
+        count++;
+        if (count % 2 !== 0) {
+            group += '<div class="row start">';
+        }
+        var helpID = '#help-info-'+v.name;
+        var helpTip = (v.help) ? '<sup><a class="help-tip" data-toggle="collapse" href="'+helpID+'" aria-expanded="true"><i class="m-l-5 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>' : '';
+        var builtItems = '';
+        if(arrayMultiple == true){
+          $.each(v.value, function(index,value){
+            if (typeof value === 'object'){
+              builtItems += '<div class="row m-b-40">';
+              $.each(value, function(number,formItem) {
+                let clearfix = (formItem.type == 'blank') ? '<div class="clearfix"></div>' : '';
+                  builtItems += `
+                    <!-- INPUT BOX  Yes Multiple -->
+                    <div class="col-md-6 p-b-10">
+                        <div class="form-group">
+                            <label class="control-label col-md-12"><span lang="en">${formItem.label}</span>${helpTip}</label>
+                            <div class="col-md-12">${buildFormItem(formItem)}</div> <!-- end div -->
+                        </div>
+                    </div>
+                    ${clearfix}
+                    <!--/ INPUT BOX -->
+                  `;
+              });
+              builtItems += '</div>';
+            }else{
+                builtItems += buildFormItem(value);
+            }
+          });
+        } else {
+          if (v.type == 'title') {
+            builtItems = `
+              ${buildFormItem(v)}
+            `;
+            count--;
+          } else {
+            builtItems = `
+            <div class="col-md-`+override+` p-b-10">
+              <div class="form-group">
+                <label class="control-label col-md-12"><span lang="en">${v.label}</span>${helpTip}</label>
+                <div class="col-md-12">
+                  ${buildFormItem(v)}
+                </div>
               </div>
             </div>
-          </div>
-          <!--/ INPUT BOX -->
-        `;
-                }
-                group += builtItems;
-                if (count % 2 == 0 || count == total) {
-                    group += '</div><!--end-->';
-                }
-            });
+            `;
+          }
+          group += builtItems;
+          if (count % 2 == 0 || count == total) {
+              group += '</div><!--end-->';
+          }
+        }
+      });
       group += '</div>';
     }
   });
@@ -999,6 +1017,8 @@ function buildFormItem(item){
       return '';
     case 'accordion':
       return '<div class="panel-group'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'  aria-multiselectable="true" role="tablist">'+accordionOptions(item.options, item.id)+'</div>';
+    case 'title':
+      return '<h4>'+text+'</h4>';
     case 'html':
       return item.html;
     default:
