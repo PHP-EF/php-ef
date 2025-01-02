@@ -934,7 +934,7 @@ function buildFormGroup(array){
             }
           });
         } else {
-          if (v.type == 'title') {
+          if (v.type == 'title' || v.type == 'hr') {
             builtItems = `
               ${buildFormItem(v)}
             `;
@@ -1019,6 +1019,8 @@ function buildFormItem(item){
       return '<div class="panel-group'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'  aria-multiselectable="true" role="tablist">'+accordionOptions(item.options, item.id)+'</div>';
     case 'title':
       return '<h4>'+text+'</h4>';
+    case 'hr':
+      return '<hr>';
     case 'html':
       return item.html;
     default:
