@@ -53,6 +53,49 @@ class dbHelper {
       return true;
     };
   }
+
+  public function queryDBWithParams($pdo,$table,$params) {
+    $query = 'SELECT * FROM '.$table.' WHERE 1=1';
+    
+    // Filtering
+    if (!empty($params['filter'])) {
+        foreach ($params['filter'] as $field => $value) {
+            $query .= ' AND ' . $field . ' LIKE :filter_' . $field;
+        }
+    }
+
+    // Searching
+    if (!empty($params['search'])) {
+        $query .= ' AND (title LIKE :search OR status LIKE :search)';
+    }
+
+    // Ordering
+    if (!empty($params['sort']) && !empty($params['order'])) {
+        $query .= ' ORDER BY ' . $params['sort'] . ' ' . $params['order'];
+    }
+
+    // Paging
+    $limit = !empty($params['limit']) ? (int)$params['limit'] : 25;
+    $offset = !empty($params['offset']) ? (int)$params['offset'] : 0;
+    $query .= ' LIMIT :limit OFFSET :offset';
+
+    $stmt = $pdo->prepare($query);
+
+    // Bind parameters
+    if (!empty($params['filter'])) {
+        foreach ($params['filter'] as $field => $value) {
+            $stmt->bindValue(':filter_' . $field, '%' . $value . '%');
+        }
+    }
+    if (!empty($params['search'])) {
+        $stmt->bindValue(':search', '%' . $params['search'] . '%');
+    }
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
     
   public function updateDatabaseSchema($currentVersion, $newVersion) {
     $allUpdates = array_merge(['0.0.0' => []], $this->migrationScripts());
