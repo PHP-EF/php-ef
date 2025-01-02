@@ -991,7 +991,7 @@ function buildFormItem(item){
     case 'text':
       return smallLabel+'<input lang="en" type="text" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' />';
     case 'inputmultiple':
-      return '<div class="container mt-2"><div class="input-group mb-3"><input lang="en" type="text" class="form-control info-field'+extraClass+'" multiple '+placeholder+id+name+disabled+type+label+attr+'/><div class="input-group-append"><button class="btn btn-outline-success addInputEntry" type="button">'+text+'</button></div></div><ul class="list-group mt-3 inputEntries">'+multipleInputArr(item)+'</ul></div>';
+      return '<div class="input-group mb-3"><input lang="en" type="text" class="form-control info-field'+extraClass+'" multiple '+placeholder+id+name+disabled+type+label+attr+'/><div class="input-group-append"><button class="btn btn-outline-success addInputEntry" type="button">'+text+'</button></div></div><ul class="list-group mt-3 inputEntries">'+multipleInputArr(item)+'</ul>';
     case 'number':
       return smallLabel+'<input lang="en" type="number" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'/>';
     case 'textbox':
