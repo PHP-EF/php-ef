@@ -52,6 +52,17 @@ body.dark-theme * label,
 body.dark-theme .nav-link {
   color: #FFF;
 }
+body.dark-theme .table {
+  --bs-table-bg: #212529;
+  --bs-table-striped-bg: #2c3034;
+  --bs-table-striped-color: #fff;
+  --bs-table-active-bg: #373b3e;
+  --bs-table-active-color: #fff;
+  --bs-table-hover-bg: #323539;
+  --bs-table-hover-color: #fff;
+  color: #fff;
+  border-color: #373b3e;
+}
 body.dark-theme .text-muted {
   color: #8d99a4!important;
 }
@@ -243,6 +254,13 @@ p.pNoMargin {
   visibility: hidden;
 }
 
+/* Metric Circle */
+.metric-circle {
+  border: solid 2px;
+  border-radius: 100px;
+  padding: 10px 20px;
+}
+
 /* Popover */
 body .popover {
   display: none;
@@ -324,10 +342,16 @@ body.dark-theme .toast small {
 /*--------------------------------------------------------------
 # Configuration Page
 --------------------------------------------------------------*/
-.urlList > .list-group-item {
+.urlList > .list-group-item,
+.inputEntries > .list-group-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.urlList > .list-group-item.newUrl
+.inputEntries > .list-group-item.inputEntry {
+  background-color: #fffaf0;
 }
 
 /*--------------------------------------------------------------
@@ -1181,20 +1205,6 @@ body .bootstrap-table .fixed-table-container .fixed-table-body {
 .toolsMenu > div > div > input,
 .toolsMenu > div > select { /* Table Select */
   width:90%;
-}
-
-/* Progress Bar */
-.progress {
-  width: 80%;
-  margin: auto;
-}
-.progress-bar {
-  background: -webkit-linear-gradient(left, #fedd01 0%, #00bd4d 35%, #00bd4d 65%, #00f9ff 100%);
-}
-
-/* Progress Action */
-.progressAction {
-  margin-top: 10px;
 }
 
 /* Additional Modal Sizes */

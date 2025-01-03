@@ -82,6 +82,16 @@ return '
                   <input type="password" class="form-control info-field" id="Security[salt]" aria-describedby="Security[salt]Help" name="Security[salt]">
                   <small id="Security[salt]Help" class="form-text text-muted">The salt used to encrypt credentials. <b>WARNING! Changing the Salt will invalidate all client-side stored API Keys</b></small>
                 </div>
+                <div class="form-group">
+                  <label for="Security[Headers][X-Frame-Options]">X-Frame-Options</label>
+                  <input type="text" class="form-control info-field" placeholder="SAMEORIGIN" id="Security[Headers][X-Frame-Options]" aria-describedby="Security[Headers][X-Frame-Options]Help" name="Security[Headers][X-Frame-Options]">
+                  <small id="Security[Headers][X-Frame-Options]Help" class="form-text text-muted">Customise the X-Frame-Options header</b></small>
+                </div>
+                <div class="form-group">
+                  <label for="Security[Headers][Frame-Source]">Content Security Policy: Frame Source</label>
+                  <input type="text" class="form-control info-field" placeholder="self" id="Security[Headers][Frame-Source]" aria-describedby="Security[Headers][Frame-Source]Help" name="Security[Headers][Frame-Source]">
+                  <small id="Security[Headers][Frame-Source]Help" class="form-text text-muted">Customise the frame-src component of the Content Security Policy header. It is strongly advised to leave this alone unless you know what you are doing.</b></small>
+                </div>
               </div>
               <br>
               <div class="card border-secondary">
@@ -420,6 +430,7 @@ return '
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="pluginSettingsModalLabel"></h5>
+        <span id="pluginName" hidden></span>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
           <span aria-hidden="true"></span>
         </button>
@@ -427,7 +438,7 @@ return '
       <div class="modal-body" id="pluginSettingsModalBody">
       </div>
       <div class="modal-footer">
-        <button class="btn btn-primary" id="editPluginSaveButton">Save</button>
+        <button class="btn btn-primary editPluginSaveButton">Save</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
@@ -543,61 +554,94 @@ return '
 
 
   // PLUGINS //
-  function buildPluginSettingsModal(row){
+  function buildPluginSettingsModal(row) {
     try {
-      queryAPI("GET",row.api).done(function(settingsResponse) {
+      queryAPI("GET", row.api).done(function(settingsResponse) {
         $("#pluginSettingsModalBody").html(buildFormGroup(settingsResponse.data));
         initPasswordToggle();
-        $("#pluginSettingsModalLabel").text("Plugin Settings: "+row.name);
+        $("#pluginSettingsModalLabel").text("Plugin Settings: " + row.name);
+        $("#pluginName").text(row.name);
         $(".info-field").change(function(elem) {
-          toast("Configuration","",$(elem.target).data("label")+" has changed.<br><small>Save configuration to apply changes.</small>","warning");
+          toast("Configuration", "", $(elem.target).data("label") + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
           $(this).addClass("changed");
         });
-        $("#editPluginSaveButton").on("click",function(elem) {
-          editPluginSubmit(row);
-        });
         try {
-          queryAPI("GET","/api/config/plugins/"+row.name).done(function(configResponse) {
+          queryAPI("GET", "/api/config/plugins/" + row.name).done(function(configResponse) {
             let data = configResponse.data;
             for (const key in data) {
               if (data.hasOwnProperty(key)) {
-                  const value = data[key];
-                  $(`#pluginSettingsModal [name="${key}"]`).val(value);
+                const value = data[key];
+                const element = $(`#pluginSettingsModal [name="${key}"]`);
+                if (element.attr("type") === "checkbox") {
+                  element.prop("checked", value);
+                } else if (element.is("input[multiple]")) {
+                  console.log(element.data("type"));
+                } else {
+                  element.val(value);
+                }
               }
             }
           }).fail(function(xhr) {
-            logConsole("Error",xhr,"error");
+            logConsole("Error", xhr, "error");
           });
-        } catch(e) {
-          logConsole("Error",e,"error");
+        } catch (e) {
+          logConsole("Error", e, "error");
         }
       }).fail(function(xhr) {
-        logConsole("Error",xhr,"error");
-      });;
-    } catch(e) {
-      logConsole("Error",e,"error");
+        logConsole("Error", xhr, "error");
+      });
+    } catch (e) {
+      logConsole("Error", e, "error");
     }
   }
 
-  function editPluginSubmit(row) {
-    // Serialize the form data into an array
-    var serializedArray = $("#pluginSettingsModal .info-field.changed").serializeArray();
+  $("#pluginSettingsModal").on("click", ".editPluginSaveButton", function(elem) {
+      editPluginSubmit();
+  });
+
+  function editPluginSubmit() {
+    var pluginName = $("#pluginName").text();
+    var serializedArray = $("#pluginSettingsModal .changed[type!=checkbox]").serializeArray();
+    
+    // Include unchecked checkboxes in the formData
+    $("#pluginSettingsModal input.changed[type=checkbox]").each(function() {
+        serializedArray.push({ name: this.name, value: this.checked ? true : false });
+    });
 
     // Convert the array into an object
     var formData = {};
     serializedArray.forEach(function(item) {
-        formData[item.name] = item.value;
+        var element = $(`[name="` + item.name + `"]`);
+        if (formData[item.name]) {
+            if (!Array.isArray(formData[item.name])) {
+                formData[item.name] = [formData[item.name]];
+            }
+            formData[item.name].push(item.value);
+        } else {
+            // Check if the element is a select with the multiple attribute
+            if (element.is("select[multiple]")) {
+              if (item.value !== "") {
+                formData[item.name] = [item.value];
+              } else {
+                formData[item.name] = item.value;
+              }
+            } else if (element.is("input[multiple]")) {
+              formData[item.name] = getInputMultipleEntries(element);
+            } else {
+                formData[item.name] = item.value;
+            }
+        }
     });
 
-    queryAPI("PATCH","/api/config/plugins/"+row.name,formData).done(function(data) {
-      if (data["result"] == "Success") {
-          toast(data["result"],"",data["message"],"success");
-          $("#pluginSettingsModal").modal("hide");
-      } else if (data["result"] == "Error") {
-          toast(data["result"],"",data["message"],"danger");
-      } else {
-          toast("API Error","","Failed to save configuration","danger","30000");
-      }
+    queryAPI("PATCH", "/api/config/plugins/" + pluginName, formData).done(function(data) {
+        if (data["result"] == "Success") {
+            toast(data["result"], "", data["message"], "success");
+            $("#pluginSettingsModal").modal("hide");
+        } else if (data["result"] == "Error") {
+            toast(data["result"], "", data["message"], "danger");
+        } else {
+            toast("API Error", "", "Failed to save configuration", "danger", "30000");
+        }
     });
   }
 
@@ -606,6 +650,8 @@ return '
       return `<span class="badge bg-info">Update Available</span>`;
     } else if (row.source == "Local") {
       return `<span class="badge bg-secondary">Unknown</span>`;
+    } else if (row.status == "Available") {
+      return `<span class="badge bg-primary">Not Installed</span>`;
     } else {
       return `<span class="badge bg-success">Up to date</span>`;
     }
@@ -694,9 +740,6 @@ return '
               urlList.appendChild(listItem);
           });
         }
-        $(".removeUrl").click(function(elem) {
-          $(elem.target).parent().remove();
-        });
       } else if (data["result"] == "Error") {
         toast(data["result"],"",data["message"],"danger","30000");
       } else {
@@ -711,13 +754,18 @@ return '
     const urlList = document.getElementById("urlList");
     const listItems = urlList.getElementsByTagName("li");
     const urls = [];
+    const githubRepoPattern = /^https:\/\/github\.com\/[^\/]+\/[^\/]+$/;
+
     for (let i = 0; i < listItems.length; i++) {
       const listItem = listItems[i];
       const link = listItem.getElementsByTagName("a")[0];
-      if (link) {
-        urls.push(link.href);
+      let url = link ? link.href : listItem.textContent.trim();
+
+      if (githubRepoPattern.test(url)) {
+        urls.push(url);
       } else {
-        urls.push(listItem.textContent.trim());
+        toast("Warning", "", "Invalid Github URL: "+url, "warning");
+        return false;
       }
     }
     return urls;
@@ -726,26 +774,33 @@ return '
   $("#addUrl").click(function() {
     var url = $("#urlInput").val();
     if (url) {
-        $("#urlList").append(`<li class="list-group-item">` + url + `</li>`);
+        $("#urlList").append(`<li class="list-group-item newUrl"><a href="` + url + `">` + url + `</a><i class="fa fa-trash removeUrl"></i></li>`);
         $("#urlInput").val("");
     }
   });
 
+  // Remove URL from the list using event delegation
+  $("#urlList").on("click", ".removeUrl", function(elem) {
+      $(elem.target).parent().remove();
+  });
+
   $("#editOnlinePluginsSaveButton").on("click",function(elem) {
     var list = getAllRepositoryUrls();
-    queryAPI("POST","/api/plugins/repositories",{list: list}).done(function(data) {
-      if (data["result"] == "Success") {
-        toast(data["result"],"",data["message"],"success");
-        $("#pluginsTable").bootstrapTable("refresh");
-        $("#onlinePluginsModal").modal("hide");
-      } else if (data["result"] == "Error") {
-        toast(data["result"],"",data["message"],"danger");
-      } else {
+    if (list) {
+      queryAPI("POST","/api/plugins/repositories",{list: list}).done(function(data) {
+        if (data["result"] == "Success") {
+          toast(data["result"],"",data["message"],"success");
+          $("#pluginsTable").bootstrapTable("refresh");
+          $("#onlinePluginsModal").modal("hide");
+        } else if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger");
+        } else {
+          toast("API Error","","Failed to save repository configuration","danger","30000");
+        }
+      }).fail(function(xhr) {
         toast("API Error","","Failed to save repository configuration","danger","30000");
-      }
-    }).fail(function(xhr) {
-      toast("API Error","","Failed to save repository configuration","danger","30000");
-    });
+      });
+    }
   })
 
   function installPlugin(row){

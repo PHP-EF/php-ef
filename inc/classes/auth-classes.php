@@ -62,8 +62,9 @@ class Auth {
   private $CoreJwt;
   private $sso;
   private $api;
+  private $hooks;
 
-  public function __construct($core,$db,$api) {
+  public function __construct($core,$db,$api,$hooks) {
     // Set Config
     $this->config = $core->config;
     $this->logging = $core->logging;
@@ -82,6 +83,9 @@ class Auth {
 
     // API
     $this->api = $api;
+
+    // Hooks
+    $this->hooks = $hooks;
   }
 
   private function createUsersTable() {
@@ -442,6 +446,8 @@ class Auth {
       $username = $request['un'];
       $password = $request['pw'];
 
+      $this->hooks->executeHook('before_login', [$request]);
+
       // Try LDAP authentication first if enabled
       if ($this->config->get('LDAP','enabled')) {
         $LDAPAuth = $this->ldapAuthenticate($username, $password);
@@ -454,6 +460,7 @@ class Auth {
           $AttributeMap['Email'] = $LDAPAuth['Email'] ?? null;
           $AttributeMap['Groups'] = implode(",",$LDAPAuth['Groups']) ?? null;
           if ($this->createUserIfNotExists($AttributeMap,"LDAP",$this->config->get('LDAP','AutoCreateUsers'))) {
+            $this->hooks->executeHook('after_login', [$request]);
             return true;
           } else {
             return false;
@@ -464,6 +471,7 @@ class Auth {
       // Fallback to local authentication
       $user = $this->getUserByUsernameOrEmail($username, $username, true);
       if ($user && password_verify($user['salt'].$password, $user['password'])) {
+          $this->hooks->executeHook('after_login', [$request]);
           return $this->handleSuccessfulLogin($user);
       } else {
           $this->api->setAPIResponse('Error', 'Invalid Credentials');

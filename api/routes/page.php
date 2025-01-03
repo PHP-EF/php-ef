@@ -7,7 +7,7 @@ $app->get('/page/{category}/{page}', function ($request, $response, $args) {
 		$ib->api->setAPIResponseData(include_once($pagePath));
 		$response->getBody()->write($GLOBALS['api']['data']);
 	} else {
-		$ib->api->setAPIResponse('Error','Page not found');
+		$ib->api->setAPIResponse('Error','Page not found',404);
 		$response->getBody()->write(jsonE($GLOBALS['api']));
 	}
 
@@ -65,7 +65,7 @@ $app->get('/page/plugin/{plugin}/{page}', function ($request, $response, $args) 
 		$ib->api->setAPIResponseData($html);
 		$response->getBody()->write($GLOBALS['api']['data']);
 	} else {
-		$ib->api->setAPIResponse('Error','Page not found');
+		$ib->api->setAPIResponse('Error','Page not found',404);
 		$response->getBody()->write(jsonE($GLOBALS['api']));
 	}
 
