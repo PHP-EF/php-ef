@@ -11,13 +11,10 @@ function checkConfiguration() {
     require_once(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php');
 
     function dependencyCheck($dependencies, $type = 'installation') {
-        $detector = new PlatformDetector();
-        $_SESSION['Environment'] = $detector->detectPlatform();
-        $IgnoreList = $_SESSION['Environment']['IgnoredChecks'];
-
         $output = '';
         $allPassed = true;
-    
+        $IgnoreList = $_SESSION['Environment']['IgnoredChecks'] ?? [];
+
         foreach ($dependencies as $dep => $check) {
             if (!in_array($dep,$IgnoreList)) {
                 $output .= "<tr><td>$dep</td>";
@@ -113,6 +110,8 @@ function checkConfiguration() {
     // Check if dependency results are already stored in the session
     if (!isset($_SESSION['dependency_checks'])) {
         // Run checks
+        $detector = new PlatformDetector();
+        $_SESSION['Environment'] = $detector->detectPlatform();
         list($systemOutput, $systemPassed) = dependencyCheck($systemDependencies);
         list($connectivityOutput, $connectivityPassed) = dependencyCheck($redisConnection, 'connectivity');
         list($phpOutput, $phpPassed) = dependencyCheck($phpDependencies);
@@ -156,7 +155,7 @@ class PlatformDetector {
     }
 
     private function checkIfAzureWebsites() {
-        if (getenv('WEBSITE_SKU') && getenv('WEBSITE_STACK')) {
+        if (getenv("WEBSITE_SKU") && getenv("WEBSITE_STACK")) {
             $this->environment['Platform'] = 'Azure Websites';
             $this->environment['IgnoredChecks'][] = 'composer';
             return true;
@@ -269,7 +268,7 @@ if (!$cc['systemPassed'] || !$cc['connectivityPassed'] || !$cc['phpPassed']) {
                             <h4>System Information</h4>
                             <table class='table table-bordered'>
                                 <tbody>
-                                    <tr><td><span>Platform</span></td><td><span>Windows</span></td></tr>
+                                    <tr><td><span>Platform</span></td><td><span>".$_SESSION['Environment']['Platform']."</span></td></tr>
                                 </tbody>
                             </table>
                         </div>
