@@ -21,9 +21,14 @@ function checkConfiguration() {
             $class = $result ? 'installed' : 'not-installed';
     
             if (!is_bool($result)) {
-                if (strpos($result, "not found") === false && strpos($result, "failed") === false && strpos($result, "error") === false) {
-                    $status = $type === 'connectivity' ? 'Connected' : 'Installed';
-                    $class = 'installed';
+                if (isset($result)) {
+                    if (strpos($result, "not found") === false && strpos($result, "failed") === false && strpos($result, "error") === false) {
+                        $status = $type === 'connectivity' ? 'Connected' : 'Installed';
+                        $class = 'installed';
+                    } else {
+                        $status = $type === 'connectivity' ? 'Not Connected' : 'Not Installed';
+                        $class = 'not-installed';
+                    }
                 } else {
                     $status = $type === 'connectivity' ? 'Not Connected' : 'Not Installed';
                     $class = 'not-installed';
@@ -32,7 +37,6 @@ function checkConfiguration() {
             } else {
                 $message = $result ? 'Success' : 'Failed';
             }
-    
             $output .= "<td><span class='status $class'>$status</span></td><td>$message</td></tr>";
             if (!$result) {
                 $allPassed = false;
