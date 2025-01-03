@@ -76,7 +76,7 @@ function checkConfiguration() {
         'redis' => function() { return shell_exec("redis-cli -v"); },
         'git' => function() { return shell_exec("git --version"); },
         'curl' => function() { return function_exists('curl_version'); },
-        'composer' => function() { return shell_exec("co2mposer --version"); },
+        'composer' => function() { return shell_exec("composer --version"); },
         'nginx' => function() { return shell_exec("nginx -v 2>&1"); }
     ];
 
