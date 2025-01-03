@@ -37,10 +37,6 @@ function checkConfiguration() {
             } else {
                 $message = $result ? 'Success' : 'Failed';
             }
-            if ($dep == 'composer') {
-                var_dump($result);
-                var_dump($status);
-            }
             $output .= "<td><span class='status $class'>$status</span></td><td>$message</td></tr>";
             if (!$result) {
                 $allPassed = false;
@@ -75,7 +71,7 @@ function checkConfiguration() {
         'redis' => function() { return shell_exec("redis-cli -v"); },
         'git' => function() { return shell_exec("git --version"); },
         'curl' => function() { return function_exists('curl_version'); },
-        'composer' => function() { return shell_exec("1composer --version"); },
+        'composer' => function() { return shell_exec("composer --version"); },
         'nginx' => function() { return shell_exec("nginx -v 2>&1"); }
     ];
 
