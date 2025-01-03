@@ -4,6 +4,7 @@ use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 
 class ib {
+  public $hooks;
   private $core;
   public $api;
   public $auth;
@@ -16,11 +17,12 @@ class ib {
   public $plugins;
 
   public function __construct() {
+    $this->hooks = new hooks();
     $this->core = new core(__DIR__.'/../config/config.json',(new api()));
     $this->db = (new db(__DIR__.'/../config/app.db',$this->core,$this->getVersion()[0]))->db;
     $this->dbHelper = new dbHelper($this->db);
     $this->api = new api($this->core);
-    $this->auth = new Auth($this->core,$this->db,$this->api);
+    $this->auth = new Auth($this->core,$this->db,$this->api,$this->hooks);
     $this->config = $this->core->config;
     $this->pages = new Pages($this->db,$this->api,$this->core);
     $this->logging = $this->core->logging;
@@ -30,7 +32,7 @@ class ib {
   }
 
   public function getVersion() {
-    return ['0.7.1'];
+    return ['0.7.2'];
   }
 
   // Initiate Database Migration if required
@@ -38,7 +40,7 @@ class ib {
     $currentVersion = $this->dbHelper->getDatabaseVersion();
     $newVersion = $this->getVersion()[0];
     if ($currentVersion < $newVersion) {
-        $this->dbHelper->updateDatabaseSchema($currentVersion, $newVersion);
+        $this->dbHelper->updateDatabaseSchema($currentVersion, $newVersion, $this->migrationScripts());
     }
   }
 
@@ -62,13 +64,14 @@ class ib {
             ];
             break;
         case 'test':
+            $Method = $extras['Method'] ?? 'GET';
             $settingMerge = [
                 'type' => 'button',
-                'label' => 'Test Connection',
+                'label' => 'Test',
                 'icon' => 'fa fa-flask',
                 'class' => 'pull-right',
-                'text' => 'Test Connection',
-                'attr' => 'onclick="testAPIConnection(\'' . $name . '\')"',
+                'text' => 'Test',
+                'attr' => 'onclick="testAPI(\'' . $Method . '\',\'' . $name . '\')"',
                 'help' => 'Remember! Please save before using the test button!'
             ];
             break;
@@ -82,9 +85,9 @@ class ib {
             break;
         case 'cron':
             $settingMerge = [
-                'type' => 'cron',
+                'type' => 'input',
                 'label' => 'Cron Schedule',
-                'help' => 'You may use either Cron format or - @hourly, @daily, @monthly',
+                // 'help' => 'You may use either Cron format or - @hourly, @daily, @monthly',
                 'placeholder' => '* * * * *'
             ];
             break;
@@ -165,13 +168,6 @@ class ib {
                             </div>
                         </div>
                     </div>'
-            ];
-            break;
-        case 'title':
-            $settingMerge = [
-                'type' => 'input',
-                'label' => 'Title',
-                'help' => 'Sets the title of this homepage module',
             ];
             break;
         case 'limit':
@@ -296,29 +292,30 @@ class Pages {
         Menu TEXT,
         Submenu TEXT,
         Url TEXT,
+        LinkType TEXT,
         Icon TEXT,
         Weight INTEGER
       )");
 
       // Insert default nav links if they don't exist
       $navLinks = [
-        ['Home','Home',null,'Link',null,null,'#page=core/default','fa fa-house',1],
-        ['Admin','Admin',null,'Menu',null,null,null,'fas fa-user-shield',2],
-        ['Reports','Reports',null,'Menu',null,null,null,'fa-solid fa-chart-simple',3],
-        ['Settings','Settings',null,'SubMenu','Admin',null,null,'fa fa-cog',1],
-        ['Logs','Logs',null,'SubMenu','Admin',null,null,'fa-regular fa-file',2],
-        ['Users','Users','ADMIN-USERS','SubMenuLink','Admin','Settings','#page=core/users',null,1],
-        ['Pages','Pages','ADMIN-PAGES','SubMenuLink','Admin','Settings','#page=core/pages',null,2],
-        ['Configuration','Configuration','ADMIN-CONFIG','SubMenuLink','Admin','Settings','#page=core/configuration',null,3],
-        ['Role Based Access','Role Based Access','ADMIN-RBAC','SubMenuLink','Admin','Settings','#page=core/rbac',null,4],
-        ['Portal Logs','Portal Logs','ADMIN-LOGS','SubMenuLink','Admin','Logs','#page=core/logs',null,1],
-        ['Web Tracking','Web Tracking',"REPORT-TRACKING",'MenuLink',"Reports",null,"#page=reports/tracking",'fa-solid fa-bullseye',1]
+        ['Home','Home',null,'Link',null,null,'#page=core/default','Native','fa fa-house',1],
+        ['Admin','Admin',null,'Menu',null,null,null,'Native','fas fa-user-shield',2],
+        ['Reports','Reports',null,'Menu',null,null,null,'Native','fa-solid fa-chart-simple',3],
+        ['Settings','Settings',null,'SubMenu','Admin',null,null,'Native','fa fa-cog',1],
+        ['Logs','Logs',null,'SubMenu','Admin',null,null,'Native','fa-regular fa-file',2],
+        ['Users','Users','ADMIN-USERS','SubMenuLink','Admin','Settings','#page=core/users','Native',null,1],
+        ['Pages','Pages','ADMIN-PAGES','SubMenuLink','Admin','Settings','#page=core/pages','Native',null,2],
+        ['Configuration','Configuration','ADMIN-CONFIG','SubMenuLink','Admin','Settings','#page=core/configuration','Native',null,3],
+        ['Role Based Access','Role Based Access','ADMIN-RBAC','SubMenuLink','Admin','Settings','#page=core/rbac','Native',null,4],
+        ['Portal Logs','Portal Logs','ADMIN-LOGS','SubMenuLink','Admin','Logs','#page=core/logs','Native',null,1],
+        ['Web Tracking','Web Tracking',"REPORT-TRACKING",'MenuLink',"Reports",null,"#page=reports/tracking",'Native','fa-solid fa-bullseye',1]
       ];
 
       foreach ($navLinks as $link) {
         if (!$this->pageExists($link[0])) {
-          $stmt = $this->db->prepare("INSERT INTO pages (Name, Title, ACL, Type, Menu, Submenu, Url, Icon, Weight) VALUES (:Name, :Title, :ACL, :Type, :Menu, :Submenu, :Url, :Icon, :Weight)");
-          $stmt->execute([':Name' => $link[0],':Title' => $link[1], ':ACL' => $link[2], ':Type' => $link[3], ':Menu' => $link[4], ':Submenu' => $link[5], ':Url' => $link[6], ':Icon' => $link[7], ':Weight' => $link[8]]);
+          $stmt = $this->db->prepare("INSERT INTO pages (Name, Title, ACL, Type, Menu, Submenu, Url, LinkType, Icon, Weight) VALUES (:Name, :Title, :ACL, :Type, :Menu, :Submenu, :Url, :LinkType, :Icon, :Weight)");
+          $stmt->execute([':Name' => $link[0],':Title' => $link[1], ':ACL' => $link[2], ':Type' => $link[3], ':Menu' => $link[4], ':Submenu' => $link[5], ':Url' => $link[6], ':LinkType' => $link[7], ':Icon' => $link[8], ':Weight' => $link[9]]);
         }
       }
     }
@@ -334,6 +331,12 @@ class Pages {
   private function getPageById($pageId) {
     $stmt = $this->db->prepare("SELECT * FROM pages WHERE id = :id");
     $stmt->execute([':id' => $pageId]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+  }
+
+  public function getiFrameLinks() {
+    $stmt = $this->db->prepare("SELECT * FROM pages WHERE LinkType = 'iFrame'");
+    $stmt->execute();
     return $stmt->fetch(PDO::FETCH_ASSOC);
   }
 

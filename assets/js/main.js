@@ -87,6 +87,19 @@ function queryAPI(type,path,data=null,contentType="application/json",asyncValue=
 	}
 }
 
+function testAPI(type,path){
+  toast("Info","","Starting..","info","5000");
+  queryAPI(type,path).done(function(data) {
+    if (data["result"] == "Success") {
+      toast(data["result"],"",data["message"],"success","10000");
+    } else {
+      toast("Error", "", data["message"], "danger","30000");
+    }
+  }).fail(function() {
+      toast("Error", "", "API Error", "danger","30000");
+  });
+}
+
 function logConsole(subject,msg,type = 'info'){
 	let color;
 	switch (type){
@@ -274,7 +287,8 @@ function loadMainWindow(element) {
     queryAPI('GET','/api/page/'+hashsplit[1]).done(function(data) {
       $('#mainWindow').html('');
       $('#mainWindow').html(data);
-      $('.dark-theme .table-striped').addClass('table-dark');
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        toast(textStatus,"","Unable to load the requested page.<br>"+jqXHR.status+": "+errorThrown,"danger");
     });
   } else if (window.parent.location.hash) {
     var hashsplit = window.parent.location.hash.split('#page=');
@@ -297,12 +311,14 @@ function loadMainWindow(element) {
     }
     queryAPI('GET','/api/page/'+hashsplit[1]).done(function(data) {
       $('#mainWindow').html(data);
-      $('.dark-theme .table-striped').addClass('table-dark');
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+      toast(textStatus,"","Unable to load the requested page.<br>"+jqXHR.status+": "+errorThrown,"danger");
     });
   } else {
     queryAPI('GET','/api/page/core/default').done(function(data) {
       $('#mainWindow').html(data);
-      $('.dark-theme .table-striped').addClass('table-dark');
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+      toast(textStatus,"","Unable to load the requested page.<br>"+jqXHR.status+": "+errorThrown,"danger");
     });
   }
 }
@@ -773,8 +789,19 @@ document.addEventListener('DOMContentLoaded', function() {
   $('.preventDefault').click(function(event){
     event.preventDefault();
   });
+
+  $("#mainWindow").on("click", ".addInputEntry", function(elem) {
+    var input = $(elem.target).parent().prev();
+    if (input.val()) {
+        $(".inputEntries").append(`<li class="list-group-item inputEntry">` + input.val() + `<i class="fa fa-trash removeInputEntry"></i></li>`);
+        input.val("");
+    }
+  });
   
-  $('.dark-theme .table-striped').addClass('table-dark');
+  $("#mainWindow").on("click", ".removeInputEntry", function(elem) {
+    $(elem.target).parent().parent().prev().children(':first').addClass('changed');
+    $(elem.target).parent().remove();
+  });
 
   // Initialize tracking
   userTracking.init(trackingConfig);
@@ -823,12 +850,34 @@ function selectOptions(options, active){
 	return selectOptions;
 }
 
+function multipleInputArr(item) {
+  var valueArr = item.values;
+  var multipleInputArr = '';
+  var disabled = (item.disabled) ? ' disabled' : '';
+  $.each(valueArr, function(index, value) {
+    multipleInputArr += '<li class="list-group-item inputEntry"' + disabled + '>' + value + '<i class="fa fa-trash removeInputEntry"></i></li>';
+  });
+  return multipleInputArr;
+}
+
+function getInputMultipleEntries(elem) {
+  const entryList = elem.parent().next();
+  const listItems = entryList.find("li");
+  const values = [];
+
+  for (let i = 0; i < listItems.length; i++) {
+    const listItem = listItems[i];
+    const value = $(listItem).text();
+    values.push(value);
+  }
+  return values;
+}
+
 function buildFormGroup(array){
   var mainCount = 0;
   var group = '<div id="tabsJustifiedContent" class="tab-content">';
   var uList = '<ul id="tabsJustified" class="nav nav-tabs info-nav">';
   $.each(array, function(i,v) {
-    console.log
     mainCount++;
     var count = 0;
     var total = v.length;
@@ -847,62 +896,67 @@ function buildFormGroup(array){
         if(typeof v.override !== 'undefined'){
           override = v.override;
         }
-                var arrayMultiple = false;
-                if(typeof v.type !== 'undefined'){
-                    if(v.type == 'arrayMultiple'){
-                        arrayMultiple = true;
-                    }
-                }
-        count++;
-                if (count % 2 !== 0) {
-                    group += '<div class="row start">';
-                }
-                var helpID = '#help-info-'+v.name;
-                var helpTip = (v.help) ? '<sup><a class="help-tip" data-toggle="collapse" href="'+helpID+'" aria-expanded="true"><i class="m-l-5 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>' : '';
-                var builtItems = '';
-                if(arrayMultiple == true){
-                    $.each(v.value, function(index,value){
-                        if (typeof value === 'object'){
-                            builtItems += '<div class="row m-b-40">';
-                            $.each(value, function(number,formItem) {
-                              let clearfix = (formItem.type == 'blank') ? '<div class="clearfix"></div>' : '';
-                                builtItems += `
-                                    <!-- INPUT BOX  Yes Multiple -->
-                                    <div class="col-md-6 p-b-10">
-                                        <div class="form-group">
-                                            <label class="control-label col-md-12"><span lang="en">${formItem.label}</span>${helpTip}</label>
-                                            <div class="col-md-12">${buildFormItem(formItem)}</div> <!-- end div -->
-                                        </div>
-                                    </div>
-                                    ${clearfix}
-                                    <!--/ INPUT BOX -->
-                                `;
-                            });
-                            builtItems += '</div>';
-                        }else{
-                            builtItems += buildFormItem(value);
-                        }
-                    });
 
-                }else{
-                    builtItems = `
-          <!-- INPUT BOX  no Multiple-->
-          <div class="col-md-`+override+` p-b-10">
-            <div class="form-group">
-              <label class="control-label col-md-12"><span lang="en">${v.label}</span>${helpTip}</label>
-              <div class="col-md-12">
-                ${buildFormItem(v)}
+        var arrayMultiple = false;
+        if(typeof v.type !== 'undefined'){
+            if(v.type == 'arrayMultiple'){
+                arrayMultiple = true;
+            }
+        }
+        count++;
+        if (count % 2 !== 0) {
+            group += '<div class="row start">';
+        }
+        var helpID = '#help-info-'+v.name;
+        var helpTip = (v.help) ? '<sup><a class="help-tip" data-toggle="collapse" href="'+helpID+'" aria-expanded="true"><i class="m-l-5 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>' : '';
+        var builtItems = '';
+        if(arrayMultiple == true){
+          $.each(v.value, function(index,value){
+            if (typeof value === 'object'){
+              builtItems += '<div class="row m-b-40">';
+              $.each(value, function(number,formItem) {
+                let clearfix = (formItem.type == 'blank') ? '<div class="clearfix"></div>' : '';
+                  builtItems += `
+                    <!-- INPUT BOX  Yes Multiple -->
+                    <div class="col-md-6 p-b-10">
+                        <div class="form-group">
+                            <label class="control-label col-md-12"><span lang="en">${formItem.label}</span>${helpTip}</label>
+                            <div class="col-md-12">${buildFormItem(formItem)}</div> <!-- end div -->
+                        </div>
+                    </div>
+                    ${clearfix}
+                    <!--/ INPUT BOX -->
+                  `;
+              });
+              builtItems += '</div>';
+            }else{
+                builtItems += buildFormItem(value);
+            }
+          });
+        } else {
+          if (v.type == 'title' || v.type == 'hr') {
+            builtItems = `
+              ${buildFormItem(v)}
+            `;
+            count--;
+          } else {
+            builtItems = `
+            <div class="col-md-`+override+` p-b-10">
+              <div class="form-group">
+                <label class="control-label col-md-12"><span lang="en">${v.label}</span>${helpTip}</label>
+                <div class="col-md-12">
+                  ${buildFormItem(v)}
+                </div>
               </div>
             </div>
-          </div>
-          <!--/ INPUT BOX -->
-        `;
-                }
-                group += builtItems;
-                if (count % 2 == 0 || count == total) {
-                    group += '</div><!--end-->';
-                }
-            });
+            `;
+          }
+          group += builtItems;
+          if (count % 2 == 0 || count == total) {
+              group += '</div><!--end-->';
+          }
+        }
+      });
       group += '</div>';
     }
   });
@@ -932,44 +986,45 @@ function buildFormItem(item){
   //+tof(item.value,'c')+`
   switch (item.type) {
     case 'select-input':
-      return smallLabel + '<input list="'+item.name+'Options" lang="en" type="text" class="form-control info-field' + extraClass + '"' + placeholder + value + id + name + disabled + type + label + attr + ' autocomplete="new-password" /><datalist id="'+item.name+'Options">' + selectOptions(item.options, item.value) + '</datalist>';
+      return smallLabel + '<input list="'+item.name+'Options" lang="en" type="text" class="form-control info-field' + extraClass + '"' + placeholder + value + id + name + disabled + type + label + attr + '/><datalist id="'+item.name+'Options">' + selectOptions(item.options, item.value) + '</datalist>';
     case 'input':
     case 'text':
-      return smallLabel+'<input lang="en" type="text" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" />';
+      return smallLabel+'<input lang="en" type="text" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' />';
+    case 'inputmultiple':
+      return '<div class="input-group mb-3"><input lang="en" type="text" class="form-control info-field'+extraClass+'" multiple '+placeholder+id+name+disabled+type+label+attr+'/><div class="input-group-append"><button class="btn btn-outline-success addInputEntry" type="button">'+text+'</button></div></div><ul class="list-group mt-3 inputEntries">'+multipleInputArr(item)+'</ul>';
     case 'number':
-      return smallLabel+'<input lang="en" type="number" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" />';
+      return smallLabel+'<input lang="en" type="number" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'/>';
     case 'textbox':
       return smallLabel+'<textarea class="form-control info-field'+extraClass+'"'+placeholder+id+name+disabled+type+label+attr+' autocomplete="new-password">'+textarea+'</textarea>';
     case 'password':
-      return smallLabel+'<input lang="en" type="password" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" />';
+      return smallLabel+'<input lang="en" type="password" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'/>';
     case 'password-alt':
-      return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" /><span class="input-group-btn"> <button class="btn btn-default showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
+      return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'/><span class="input-group-btn"> <button class="btn btn-default showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
     case 'password-alt-copy':
-      return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' autocomplete="new-password" /><span class="input-group-btn"> <button class="btn btn-primary clipboard" type="button" data-clipboard-text="'+item.value+'"><i class="fa icon-docs"></i></button></span><span class="input-group-btn"> <button class="btn btn-inverse showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
+      return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'/><span class="input-group-btn"> <button class="btn btn-primary clipboard" type="button" data-clipboard-text="'+item.value+'"><i class="fa icon-docs"></i></button></span><span class="input-group-btn"> <button class="btn btn-inverse showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
     case 'hidden':
-      return '<input lang="en" type="hidden" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' />';
+      return '<input lang="en" type="hidden" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'/>';
     case 'select':
       return smallLabel+'<select class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'>'+selectOptions(item.options, item.value)+'</select>';
-    case 'select2':
-      var select2ID = (item.id) ? '#'+item.id : '.'+item.name;
-      let settings = (item.settings) ? item.settings : '{}';
-      return smallLabel+'<select class="m-b-10 info-field '+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' multiple="multiple" data-placeholder="">'+selectOptions(item.options, item.value)+'</select><script>$("'+select2ID+'").select2('+settings+').on("select2:unselecting", function() { $(this).data("unselecting", true); }).on("select2:opening", function(e) { if ($(this).data("unselecting")) { $(this).removeData("unselecting");  e.preventDefault(); } });</script>';
+    case 'selectmultiple':
+      return smallLabel+'<select class="form-control info-field'+extraClass+'" multiple '+placeholder+value+id+name+disabled+type+label+attr+'>'+selectOptions(item.options, item.value)+'</select>';
     case 'switch':
     case 'checkbox':
-      return smallLabel+'<input type="checkbox" class="js-switch info-field'+extraClass+'" data-size="medium" data-color="#99d683" data-secondary-color="#f96262"'+name+value+tof(item.value,'c')+id+disabled+type+label+attr+' /><input type="hidden"'+name+'value="false">';
+      return smallLabel+'<div class="form-check form-switch"><input class="form-check-input info-field'+extraClass+'" type="checkbox"'+name+value+id+disabled+type+label+attr+'/></div>';
     case 'button':
       return smallLabel+'<button class="btn btn-sm btn-success btn-rounded waves-effect waves-light b-none'+extraClass+'" '+href+attr+' type="button"><span class="btn-label"><i class="'+icon+'"></i></span><span lang="en">'+text+'</span></button>';
     case 'blank':
       return '';
     case 'accordion':
       return '<div class="panel-group'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'  aria-multiselectable="true" role="tablist">'+accordionOptions(item.options, item.id)+'</div>';
+    case 'title':
+      return '<h4>'+text+'</h4>';
+    case 'hr':
+      return '<hr>';
     case 'html':
       return item.html;
-    case 'arrayMultiple':
-      return '<span class="text-danger">BuildFormItem Class not setup...';
-    case 'folder':
-      return `${smallLabel}<div class="input-group"><input class="form-control ${extraClass}" ${placeholder} ${value} ${id} ${name} ${disabled} ${type} ${label} ${attr} autocomplete="new-password"><span class="input-group-btn"><button class="btn btn-info test-folder" type="button"><i class="fa fa-flask"></i></button></span></div>`;
     default:
       return '<span class="text-danger">BuildFormItem Class not setup...';
   }
+
 }

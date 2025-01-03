@@ -380,9 +380,7 @@ return '
   }
   
   function createTableHtml(index, prefix) {
-  console.log(index,prefix);
-      let theme = getCookie("theme") == "dark" ? "table-dark" : "";
-      return `<table class="table table-striped `+theme+`" id="`+prefix+`-table-` + index +`"></table>`;
+      return `<table class="table table-striped" id="`+prefix+`-table-` + index +`"></table>`;
   }
 
   function detailFormatter(index, row, prefix) {
@@ -393,7 +391,6 @@ return '
 
   function initializeMenuTable(index, row, detail) {
       const childTableId = `#menu-table-${index}`;
-      console.log(row);
       $(childTableId).bootstrapTable({
           url: "/api/pages?menu="+row.Name,
           dataField: "data",
@@ -439,7 +436,6 @@ return '
 
   function initializeSubMenuTable(index, row, detail) {
       const childTableId = `#submenu-table-${index}`;
-      console.log("/api/pages?submenu="+row.Name+"&menu="+row.Menu);
       $(childTableId).bootstrapTable({
           url: "/api/pages?submenu="+row.Name+"&menu="+row.Menu,
           dataField: "data",

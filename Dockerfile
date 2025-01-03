@@ -36,7 +36,8 @@ RUN apk add --no-cache \
   php83-posix \
   supervisor \
   redis \
-  git
+  git \
+  busybox-suid
 
 # Configure nginx - http
 COPY Docker/config/nginx.conf /etc/nginx/nginx.conf
@@ -55,7 +56,21 @@ COPY Docker/config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN chown -R nobody:nobody /var/www/html /run /var/lib/nginx /var/log/nginx /var/log/redis
 
 # Configure Cron
-RUN echo '* * * * * /usr/local/bin/php /var/www/html/inc/scheduler/scheduler.php' > /etc/crontabs/root
+# Install Supercronic
+ENV SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.2.33/supercronic-linux-amd64 \
+    SUPERCRONIC_SHA1SUM=71b0d58cc53f6bd72cf2f293e09e294b79c666d8 \
+    SUPERCRONIC=supercronic-linux-amd64
+
+RUN curl -fsSLO "$SUPERCRONIC_URL" \
+ && echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - \
+ && chmod +x "$SUPERCRONIC" \
+ && mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" \
+ && ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
+
+# Configure Crontab
+RUN mkdir /supercronic
+RUN echo '* * * * * /usr/bin/php /var/www/html/inc/scheduler/scheduler.php' > /supercronic/crontab
+RUN chown -R nobody:nogroup /supercronic /usr/local/bin/supercronic
 
 # Switch to use a non-root user from here on
 USER nobody
