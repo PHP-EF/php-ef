@@ -1,6 +1,8 @@
 ## v0.7.2
 - Minor updates to prep for iFrame support
 - Bugfixes & cleanup
+- Fix cron in Docker deployments
+- Add initial hooks support
 
 ## v0.7.1
 - Add plugin management

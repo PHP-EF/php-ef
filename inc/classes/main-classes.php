@@ -40,7 +40,7 @@ class ib {
     $currentVersion = $this->dbHelper->getDatabaseVersion();
     $newVersion = $this->getVersion()[0];
     if ($currentVersion < $newVersion) {
-        $this->dbHelper->updateDatabaseSchema($currentVersion, $newVersion);
+        $this->dbHelper->updateDatabaseSchema($currentVersion, $newVersion, $this->migrationScripts());
     }
   }
 

@@ -54,7 +54,7 @@ class dbHelper {
     };
   }
 
-  public function queryDBWithParams($pdo,$table,$params,$searchColumns) {
+  public function queryDBWithParams($table,$params,$searchColumns) {
     $query = 'SELECT * FROM '.$table.' WHERE 1=1';
     
     // Filtering
@@ -89,7 +89,7 @@ class dbHelper {
     $offset = !empty($params['offset']) ? (int)$params['offset'] : 0;
     $query .= ' LIMIT :limit OFFSET :offset';
 
-    $stmt = $pdo->prepare($query);
+    $stmt = $this->pdo->prepare($query);
 
     // Bind parameters
     if (!empty($params['filter'])) {
@@ -107,8 +107,8 @@ class dbHelper {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
     
-  public function updateDatabaseSchema($currentVersion, $newVersion) {
-    $allUpdates = array_merge(['0.0.0' => []], $this->migrationScripts());
+  public function updateDatabaseSchema($currentVersion, $newVersion, $schema) {
+    $allUpdates = array_merge(['0.0.0' => []], $schema);
 
     // Add the new version if it's not already in the updates list
     if (!array_key_exists($newVersion, $allUpdates)) {
@@ -154,7 +154,7 @@ class dbHelper {
     }
   }
 
-  private function migrationScripts() {
+  public function migrationScripts() {
     return [
       '0.7.0' => [
         "ALTER TABLE pages ADD COLUMN Weight INTEGER", // Add Weight Column to Pages
