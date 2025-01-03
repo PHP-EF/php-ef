@@ -156,7 +156,7 @@ class PlatformDetector {
     }
 
     private function checkIfAzureWebsites() {
-        if (getenv('WEBSITE_SKU') && getenv('WEBSITE_SCM_SEPARATE_STATUS')) {
+        if (getenv('WEBSITE_SKU') && getenv('WEBSITE_STACK')) {
             $this->environment['Platform'] = 'Azure Websites';
             $this->environment['IgnoredChecks'][] = 'composer';
             return true;
