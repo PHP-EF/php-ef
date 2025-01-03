@@ -21,9 +21,14 @@ function checkConfiguration() {
             $class = $result ? 'installed' : 'not-installed';
     
             if (!is_bool($result)) {
-                if (strpos($result, "not found") === false && strpos($result, "failed") === false && strpos($result, "error") === false) {
-                    $status = $type === 'connectivity' ? 'Connected' : 'Installed';
-                    $class = 'installed';
+                if (isset($result)) {
+                    if (strpos($result, "not found") === false && strpos($result, "failed") === false && strpos($result, "error") === false) {
+                        $status = $type === 'connectivity' ? 'Connected' : 'Installed';
+                        $class = 'installed';
+                    } else {
+                        $status = $type === 'connectivity' ? 'Not Connected' : 'Not Installed';
+                        $class = 'not-installed';
+                    }
                 } else {
                     $status = $type === 'connectivity' ? 'Not Connected' : 'Not Installed';
                     $class = 'not-installed';
@@ -32,7 +37,10 @@ function checkConfiguration() {
             } else {
                 $message = $result ? 'Success' : 'Failed';
             }
-    
+            if ($dep == 'composer') {
+                var_dump($result);
+                var_dump($status);
+            }
             $output .= "<td><span class='status $class'>$status</span></td><td>$message</td></tr>";
             if (!$result) {
                 $allPassed = false;
@@ -67,7 +75,7 @@ function checkConfiguration() {
         'redis' => function() { return shell_exec("redis-cli -v"); },
         'git' => function() { return shell_exec("git --version"); },
         'curl' => function() { return function_exists('curl_version'); },
-        'composer' => function() { return shell_exec("composer --version"); },
+        'composer' => function() { return shell_exec("1composer --version"); },
         'nginx' => function() { return shell_exec("nginx -v 2>&1"); }
     ];
 
