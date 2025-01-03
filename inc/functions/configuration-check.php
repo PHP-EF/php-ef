@@ -1,5 +1,7 @@
 <?php
 // Handle refresh request
+session_start(); // Start a PHP session
+
 if (isset($_GET['refresh'])) {
     unset($_SESSION['dependency_checks']);
     header("Location: " . strtok($_SERVER["REQUEST_URI"], '?'));
@@ -306,4 +308,6 @@ if (!$cc['systemPassed'] || !$cc['connectivityPassed'] || !$cc['phpPassed']) {
 }
 
 // Continue with normal flow if all checks pass
+
+session_write_close(); // Save PHP Session
 ?>

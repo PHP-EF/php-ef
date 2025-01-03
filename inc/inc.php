@@ -1,6 +1,4 @@
 <?php
-session_start(); // Start a PHP session
-
 // Set error log for background tasks
 ini_set('error_log',__DIR__.'/logs/php.error.log');
 
