@@ -76,7 +76,7 @@ function checkConfiguration() {
         'redis' => function() { return shell_exec("redis-cli -v"); },
         'git' => function() { return shell_exec("git --version"); },
         'curl' => function() { return function_exists('curl_version'); },
-        'composer' => function() { return shell_exec("composer --version"); },
+        'composer' => function() { return shell_exec("co2mposer --version"); },
         'nginx' => function() { return shell_exec("nginx -v 2>&1"); }
     ];
 
@@ -149,7 +149,7 @@ class PlatformDetector {
     }
 
     public function detectPlatform() {
-        if ($this->checkIfAzureWebsites() || $this->checkIfHeroku() || $this->checkIfAWS() || $this->checkIfWindows() || $this->checkIfMac() || $this->checkIfLinux() || $this->checkIfDocker() || $this->checkLinuxDistro()) {
+        if ($this->checkLinuxDistro() || $this->checkIfLinux() || $this->checkIfDocker() || $this->checkIfAzureWebsites() || $this->checkIfWindows() || $this->checkIfMac() || $this->checkIfHeroku() || $this->checkIfAWS() ) {
             return $this->environment;
         }
         return null;
@@ -264,6 +264,14 @@ if (!$cc['systemPassed'] || !$cc['connectivityPassed'] || !$cc['phpPassed']) {
                         <div class='card-header'>
                             <div class='alert alert-info'>You must use the Refresh Checks button to re-check, as results are cached in your session.</div>
                             <h3 class='card-title mt-1'>Dependency Checks<button onclick=window.location.href='?refresh=true' class='btn btn-success float-end'>Refresh Checks</button></h3>
+                        </div>
+                        <div class='card-body col-md-6'>
+                            <h4>System Information</h4>
+                            <table class='table table-bordered'>
+                                <tbody>
+                                    <tr><td><span>Platform</span></td><td><span>Windows</span></td></tr>
+                                </tbody>
+                            </table>
                         </div>
                         <div class='card-body'>
                             <h4>System Dependencies</h4>
