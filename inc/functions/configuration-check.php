@@ -11,38 +11,43 @@ function checkConfiguration() {
     require_once(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php');
 
     function dependencyCheck($dependencies, $type = 'installation') {
+        $detector = new PlatformDetector();
+        $_SESSION['Environment'] = $detector->detectPlatform();
+        $IgnoreList = $_SESSION['Environment']['IgnoredChecks'];
+
         $output = '';
         $allPassed = true;
     
         foreach ($dependencies as $dep => $check) {
-            $output .= "<tr><td>$dep</td>";
-            $result = $check();
-            $status = $result ? ($type === 'connectivity' ? 'Connected' : 'Installed') : ($type === 'connectivity' ? 'Not Connected' : 'Not Installed');
-            $class = $result ? 'installed' : 'not-installed';
-    
-            if (!is_bool($result)) {
-                if (isset($result)) {
-                    if (strpos($result, "not found") === false && strpos($result, "failed") === false && strpos($result, "error") === false) {
-                        $status = $type === 'connectivity' ? 'Connected' : 'Installed';
-                        $class = 'installed';
+            if (!in_array($dep,$IgnoreList)) {
+                $output .= "<tr><td>$dep</td>";
+                $result = $check();
+                $status = $result ? ($type === 'connectivity' ? 'Connected' : 'Installed') : ($type === 'connectivity' ? 'Not Connected' : 'Not Installed');
+                $class = $result ? 'installed' : 'not-installed';
+        
+                if (!is_bool($result)) {
+                    if (isset($result)) {
+                        if (strpos($result, "not found") === false && strpos($result, "failed") === false && strpos($result, "error") === false) {
+                            $status = $type === 'connectivity' ? 'Connected' : 'Installed';
+                            $class = 'installed';
+                        } else {
+                            $status = $type === 'connectivity' ? 'Not Connected' : 'Not Installed';
+                            $class = 'not-installed';
+                        }
                     } else {
                         $status = $type === 'connectivity' ? 'Not Connected' : 'Not Installed';
                         $class = 'not-installed';
                     }
+                    $message = $result;
                 } else {
-                    $status = $type === 'connectivity' ? 'Not Connected' : 'Not Installed';
-                    $class = 'not-installed';
+                    $message = $result ? 'Success' : 'Failed';
                 }
-                $message = $result;
-            } else {
-                $message = $result ? 'Success' : 'Failed';
-            }
-            $output .= "<td><span class='status $class'>$status</span></td><td>$message</td></tr>";
-            if (!$result) {
-                $allPassed = false;
+                $output .= "<td><span class='status $class'>$status</span></td><td>$message</td></tr>";
+                if (!$result) {
+                    $allPassed = false;
+                }
             }
         }
-    
         return [$output, $allPassed];
     }
 
@@ -132,6 +137,99 @@ function checkConfiguration() {
         "phpPassed" => $_SESSION['dependency_checks']['phpPassed'],
     );
 }
+
+class PlatformDetector {
+    private $environment;
+
+    public function __construct() {
+        $this->environment = [
+            'Platform' => 'Unknown',
+            'IgnoredChecks' => []
+        ];
+    }
+
+    public function detectPlatform() {
+        if ($this->checkIfAzureWebsites() || $this->checkIfHeroku() || $this->checkIfAWS() || $this->checkIfWindows() || $this->checkIfMac() || $this->checkIfLinux() || $this->checkIfDocker() || $this->checkLinuxDistro()) {
+            return $this->environment;
+        }
+        return null;
+    }
+
+    private function checkIfAzureWebsites() {
+        if (getenv('WEBSITE_SKU') && getenv('WEBSITE_SCM_SEPARATE_STATUS')) {
+            $this->environment['Platform'] = 'Azure Websites';
+            $this->environment['IgnoredChecks'][] = 'composer';
+            return true;
+        }
+        return false;
+    }
+
+    private function checkIfHeroku() {
+        if (getenv('DYNO')) {
+            $this->environment['Platform'] = 'Heroku';
+            return true;
+        }
+        return false;
+    }
+
+    private function checkIfAWS() {
+        if (getenv('AWS_EXECUTION_ENV')) {
+            $this->environment['Platform'] = 'AWS';
+            return true;
+        }
+        return false;
+    }
+
+    private function checkIfWindows() {
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            $this->environment['Platform'] = 'Windows';
+            return true;
+        }
+        return false;
+    }
+
+    private function checkIfMac() {
+        if (strtoupper(substr(PHP_OS, 0, 6)) === 'DARWIN') {
+            $this->environment['Platform'] = 'Mac';
+            return true;
+        }
+        return false;
+    }
+
+    private function checkIfLinux() {
+        if (strtoupper(substr(PHP_OS, 0, 5)) === 'LINUX') {
+            $this->environment['Platform'] = 'Linux';
+            return true;
+        }
+        return false;
+    }
+
+    private function checkIfDocker() {
+        if (file_exists('/.dockerenv')) {
+            $this->environment['Platform'] = 'Docker';
+            return true;
+        }
+        return false;
+    }
+
+    private function checkLinuxDistro() {
+        if (file_exists('/etc/os-release')) {
+            $osRelease = parse_ini_file('/etc/os-release');
+            if (isset($osRelease['NAME'])) {
+                $this->environment['Platform'] = $osRelease['NAME'];
+                return true;
+            }
+        } elseif (file_exists('/etc/lsb-release')) {
+            $lsbRelease = parse_ini_file('/etc/lsb-release');
+            if (isset($lsbRelease['DISTRIB_ID'])) {
+                $this->environment['Platform'] = $lsbRelease['DISTRIB_ID'];
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
 
 $cc = checkConfiguration();
 
