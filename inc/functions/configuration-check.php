@@ -148,7 +148,7 @@ class PlatformDetector {
     }
 
     public function detectPlatform() {
-        if ($this->checkLinuxDistro() || $this->checkIfLinux() || $this->checkIfDocker() || $this->checkIfAzureWebsites() || $this->checkIfWindows() || $this->checkIfMac() || $this->checkIfHeroku() || $this->checkIfAWS() ) {
+        if ($this->checkIfAzureWebsites() || $this->checkIfDocker() || $this->checkIfWindows() || $this->checkIfMac() || $this->checkLinuxDistro() || $this->checkIfLinux() || $this->checkIfHeroku() || $this->checkIfAWS()) {
             return $this->environment;
         }
         return null;
