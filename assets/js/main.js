@@ -873,94 +873,70 @@ function getInputMultipleEntries(elem) {
   return values;
 }
 
-function buildFormGroup(array){
+function buildFormGroup(array) {
   var mainCount = 0;
   var group = '<div id="tabsJustifiedContent" class="tab-content">';
   var uList = '<ul id="tabsJustified" class="nav nav-tabs info-nav">';
-  $.each(array, function(i,v) {
+  
+  $.each(array, function(i, v) {
     mainCount++;
     var count = 0;
     var total = v.length;
     var active = (mainCount == 1) ? 'active' : '';
     var customID = createRandomString(10);
-    if(i == 'custom'){
+    
+    if (i == 'custom') {
       group += v;
-    }else{
-        uList += `<li role="presentation" class="nav-item `+active+`"><a href="" data-bs-target="#`+customID+cleanClass(i)+`" data-bs-toggle="tab" class="nav-link small text-uppercase"><span lang="en">`+i+`</span></a></li>`;
+    } else {
+      uList += `<li role="presentation" class="nav-item ${active}"><a href="" data-bs-target="#${customID}${cleanClass(i)}" data-bs-toggle="tab" class="nav-link small text-uppercase"><span lang="en">${i}</span></a></li>`;
       group += `
         <!-- FORM GROUP -->
-        <div class="tab-pane `+active+`" id="`+customID+cleanClass(i)+`">
+        <div class="tab-pane ${active}" id="${customID}${cleanClass(i)}">
       `;
-      $.each(v, function(i,v) {
-        var override = '6';
-        if(typeof v.override !== 'undefined'){
-          override = v.override;
-        }
-
-        var arrayMultiple = false;
-        if(typeof v.type !== 'undefined'){
-            if(v.type == 'arrayMultiple'){
-                arrayMultiple = true;
-            }
-        }
+      
+      var sectionCount = 0;
+      $.each(v, function(j, item) {
+        var override = item.override || '6';
+        sectionCount++;
         count++;
+        
         if (count % 2 !== 0) {
-            group += '<div class="row start">';
+          group += '<div class="row start">';
         }
-        var helpID = '#help-info-'+v.name;
-        var helpTip = (v.help) ? '<sup><a class="help-tip" data-toggle="collapse" href="'+helpID+'" aria-expanded="true"><i class="m-l-5 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>' : '';
+        
+        var helpID = `#help-info-${item.name}`;
+        var helpTip = item.help ? `<sup><a class="help-tip" data-toggle="collapse" href="${helpID}" aria-expanded="true"><i class="m-l-5 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>` : '';
         var builtItems = '';
-        if(arrayMultiple == true){
-          $.each(v.value, function(index,value){
-            if (typeof value === 'object'){
-              builtItems += '<div class="row m-b-40">';
-              $.each(value, function(number,formItem) {
-                let clearfix = (formItem.type == 'blank') ? '<div class="clearfix"></div>' : '';
-                  builtItems += `
-                    <!-- INPUT BOX  Yes Multiple -->
-                    <div class="col-md-6 p-b-10">
-                        <div class="form-group">
-                            <label class="control-label col-md-12"><span lang="en">${formItem.label}</span>${helpTip}</label>
-                            <div class="col-md-12">${buildFormItem(formItem)}</div> <!-- end div -->
-                        </div>
-                    </div>
-                    ${clearfix}
-                    <!--/ INPUT BOX -->
-                  `;
-              });
-              builtItems += '</div>';
-            }else{
-                builtItems += buildFormItem(value);
-            }
-          });
+        
+        if (item.type == 'title' || item.type == 'hr') {
+          builtItems = `${buildFormItem(item)}`;
+          count = 0; // Reset count
+          group += '</div><!--end--><div class="row start">'; // Close current row and start a new one
         } else {
-          if (v.type == 'title' || v.type == 'hr') {
-            builtItems = `
-              ${buildFormItem(v)}
-            `;
-            count--;
-          } else {
-            builtItems = `
-            <div class="col-md-`+override+` p-b-10">
+          builtItems = `
+            <div class="col-md-${override} p-b-10">
               <div class="form-group">
-                <label class="control-label col-md-12"><span lang="en">${v.label}</span>${helpTip}</label>
+                <label class="control-label col-md-12"><span lang="en">${item.label}</span>${helpTip}</label>
                 <div class="col-md-12">
-                  ${buildFormItem(v)}
+                  ${buildFormItem(item)}
                 </div>
               </div>
             </div>
-            `;
-          }
-          group += builtItems;
-          if (count % 2 == 0 || count == total) {
-              group += '</div><!--end-->';
-          }
+          `;
+        }
+        
+        group += builtItems;
+        
+        if (count % 2 === 0 || sectionCount === total) {
+          group += '</div><!--end-->';
         }
       });
+      
       group += '</div>';
     }
   });
-  return uList+'</ul>'+group+'</div>';
+  
+  return uList + '</ul>' + group + '</div>';
 }
 
 function buildFormItem(item){
@@ -1020,7 +996,7 @@ function buildFormItem(item){
     case 'title':
       return '<h4>'+text+'</h4>';
     case 'hr':
-      return '<hr>';
+      return '<hr class="mt-3">';
     case 'html':
       return item.html;
     default:

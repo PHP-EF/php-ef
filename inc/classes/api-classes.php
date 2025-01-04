@@ -102,12 +102,14 @@ class query {
 		return $Data;
 	}
 
-	private function decodeResponse($response,$raw) {
+	public function decodeResponse($response,$raw = false) {
 		if ($raw) {
 			return $response;
 		}
-		if ($response->status_code >= 400 && $response->status_code < 600) {
-			return $response;
+		if (isset($response->status_code)) {
+			if ($response->status_code >= 400 && $response->status_code < 600) {
+				return $response;
+			}
 		}
 		$contentType = $response->headers['content-type'] ?? '';
 		if (strpos($contentType, 'application/json') !== false || strpos($contentType, 'text/plain') !== false) {
@@ -138,7 +140,7 @@ class query {
 		$OptionsArr = $this->buildOptions($Options);
 		$HeadersArr = $this->buildHeaders($Headers);
 		$Data = $this->prepareData($Data, $HeadersArr);
-		$Result = WpOrg\Requests\Requests::put($Url, $HeadersArr, $OptionsArr);
+		$Result = WpOrg\Requests\Requests::put($Url, $HeadersArr, $Data, $OptionsArr);
 		return $this->decodeResponse($Result,$raw);
 	}
 
@@ -146,7 +148,7 @@ class query {
 		$OptionsArr = $this->buildOptions($Options);
 		$HeadersArr = $this->buildHeaders($Headers);
 		$Data = $this->prepareData($Data, $HeadersArr);
-		$Result = WpOrg\Requests\Requests::patch($Url, $HeadersArr, $OptionsArr);
+		$Result = WpOrg\Requests\Requests::patch($Url, $HeadersArr, $Data, $OptionsArr);
 		return $this->decodeResponse($Result,$raw);
 	}
 

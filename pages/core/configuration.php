@@ -23,7 +23,7 @@ return '
         <li class="nav-item">
           <a class="nav-link" id="customisation-tab" data-toggle="tab" href="#customisation" role="tab" aria-controls="customisation" aria-selected="false">Customisation</a>
         </li>
-                <li class="nav-item">
+          <li class="nav-item">
           <a class="nav-link" id="plugins-tab" data-toggle="tab" href="#plugins" role="tab" aria-controls="plugins" aria-selected="false">Plugins</a>
         </li>
       </ul>
@@ -677,6 +677,7 @@ return '
 
   window.pluginActionEvents = {
     "click .edit": function (e, value, row, index) {
+      $("#pluginSettingsModalBody").html("");
       buildPluginSettingsModal(row);
       $("#pluginSettingsModal").modal("show");
     },
