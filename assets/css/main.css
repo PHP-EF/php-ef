@@ -7,6 +7,60 @@
   font-family: 'Poppins', sans-serif;
 }
 
+/* Form Control */
+.form-control {
+  -webkit-text-size-adjust: 100%;
+  box-sizing: border-box;
+  outline: 0 !important;
+  margin: 0;
+  font: inherit;
+  text-transform: none;
+  font-family: inherit;
+  display: block;
+  width: 100%;
+  font-size: 1rem;
+  line-height: 1.42857143;
+  transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+  border-radius: 4px;
+  box-shadow: none;
+  height: 43px;
+  max-width: 100%;
+  padding: 7px 12px;
+  color: #000000;
+  background: #FFF;
+  border: 1px solid rgba(201, 204, 208, 0.2);
+  -webkit-tap-highlight-color: rgba(205, 205, 205, 0);
+}
+
+.form-select,
+.flatpickr-input {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  box-sizing: border-box;
+  outline: 0 !important;
+  margin: 0;
+  font: inherit;
+  text-transform: none;
+  font-family: inherit;
+  display: block;
+  width: 100%;
+  font-size: 1rem;
+  line-height: 1.42857143;
+  transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+  border: 1px solid rgba(120,130,140,0.2);
+  border-radius: 4px;
+  box-shadow: none;
+  height: 43px;
+  max-width: 100%;
+  padding: 7px 12px;
+  color: #000000;
+  background: #ffffff;
+}
+
+textarea.form-control {
+  height: 200px;
+}
+
 /* Dark Mode */
 body.dark-theme .pagination-info,
 body.dark-theme .page-list {
@@ -89,11 +143,14 @@ body.dark-theme .list-group-item {
   background: #36393e;
   color: #FFF;
 }
-body.dark-theme .form-control.search-input,
-body.dark-theme select[class^="form-control bootstrap-table-filter-control"],
-body.dark-theme select[class^="form-select bootstrap-table-filter-control"] {
-  background-color:#2b2e34;
-  color:#FFF;
+/* Form */
+body.dark-theme .form-control,
+body.dark-theme .form-select,
+body.dark-theme .flatpickr-input {
+  color: #ffffff;
+  background: #1b1a1a;
+  border: 1px solid rgba(120,130,140,0.2);
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 body.dark-theme .modal-content,
 body.dark-theme .modal-body {
@@ -177,6 +234,15 @@ body.light-theme .ib-green {
 }
 body.light-theme .ib-black {
   color: #11101d;
+}
+/* Light Mode Form Control */
+body.light-theme .form-control,
+body.light-theme .form-select,
+body.light-theme .flatpickr-input {
+  color: #000000;
+  background: #FFF;
+  border: 1px solid rgba(201, 204, 208, 0.2);
+  -webkit-tap-highlight-color: rgba(205, 205, 205, 0);
 }
 
 /* Body */
