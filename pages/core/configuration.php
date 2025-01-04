@@ -29,7 +29,7 @@ return '
             <div class="my-4">
               <h5 class="mb-0 mt-5">Configuration</h5>
               <p>Use the fields below to modify the configuration for '.$ib->config->get('Styling')['websiteTitle'].'.</p>
-              <div class="card border-secondary">
+              <div class="card border-secondary p-3">
                 <div class="card-title">
                   <h5>System</h5>
                 </div>
@@ -69,7 +69,7 @@ return '
                 </div>
               </div>
               <br>
-              <div class="card border-secondary">
+              <div class="card border-secondary p-3">
                 <div class="card-title">
                   <h5>Security</h5>
                 </div>
@@ -90,7 +90,7 @@ return '
                 </div>
               </div>
               <br>
-              <div class="card border-secondary">
+              <div class="card border-secondary p-3">
                 <div class="card-title">
                   <h5>Authentication</h5>
                 </div>
@@ -103,7 +103,7 @@ return '
                     </h2>
                     <div id="ldapConfig" class="accordion-collapse collapse" aria-labelledby="ldapConfigAccordianHeading" data-bs-parent="#ldapConfigAccordian">
                       <div class="accordion-body">
-                        <div class="card border-secondary">
+                        <div class="card border-secondary p-3">
                           <div class="card-title">
                             <h5>LDAP Configuration</h5>
                           </div>
@@ -194,7 +194,7 @@ return '
                     </h2>
                     <div id="samlConfig" class="accordion-collapse collapse" aria-labelledby="samlConfigAccordianHeading" data-bs-parent="#samlConfigAccordian">
                       <div class="accordion-body">
-                        <div class="card border-secondary">
+                        <div class="card border-secondary p-3">
                           <div class="card-title">
                             <h5>SAML Configuration</h5>
                           </div>
@@ -310,7 +310,7 @@ return '
             <div class="my-4">
               <h5 class="mb-0 mt-5">Customisation</h5>
               <p>Use the fields below to customize the style and logos for '.$ib->config->get('Styling')['websiteTitle'].'.</p>
-              <div class="card border-secondary">
+              <div class="card border-secondary p-3">
                 <div class="card-title">
                   <h5>General</h5>
                 </div>
@@ -352,7 +352,7 @@ return '
                 </div>
               </div>
               <br>
-              <div class="card border-secondary">
+              <div class="card border-secondary p-3">
                 <div class="card-title">
                   <h5>Content</h5>
                 </div>
