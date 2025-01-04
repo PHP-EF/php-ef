@@ -6,10 +6,6 @@
 
 return '
 
-<style>
-.card {
-  padding: 10px;
-}
 </style>
 
 <div class="container">
@@ -381,40 +377,36 @@ return '
             <h5 class="mb-0 mt-5">Plugins</h5>
             <p>Use the following to configure Plugins installed on '.$ib->config->get('Styling')['websiteTitle'].'.</p>
           </div>
-          <div class="card">
-            <div class="container">
-              <table data-url="/api/plugins/available"
-                data-data-field="data"
-                data-toggle="table"
-                data-search="true"
-                data-filter-control="true"
-                data-show-refresh="true"
-                data-pagination="true"
-                data-toolbar="#toolbar"
-                data-sort-name="Name"
-                data-sort-order="asc"
-                data-page-size="25"
-                data-buttons="pluginsButtons"
-                data-response-handler="responseHandler"
-                class="table table-striped" id="pluginsTable">
+          <table data-url="/api/plugins/available"
+            data-data-field="data"
+            data-toggle="table"
+            data-search="true"
+            data-filter-control="true"
+            data-show-refresh="true"
+            data-pagination="true"
+            data-toolbar="#toolbar"
+            data-sort-name="Name"
+            data-sort-order="asc"
+            data-page-size="25"
+            data-buttons="pluginsButtons"
+            data-response-handler="responseHandler"
+            class="table table-striped" id="pluginsTable">
 
-                <thead>
-                  <tr>
-                    <th data-field="state" data-checkbox="true"></th>
-                    <th data-field="name" data-sortable="true">Plugin Name</th>
-                    <th data-field="author" data-sortable="true">Author</th>
-                    <th data-field="category" data-sortable="true">Category</th>
-                    <th data-field="version" data-sortable="true">Version</th>
-                    <th data-field="link" data-sortable="true">URL</th>
-                    <th data-field="status" data-sortable="true">Status</th>
-                    <th data-field="source" data-sortable="true">Source</th>
-                    <th data-field="update" data-sortable="true" data-formatter="pluginUpdatesFormatter">Updates</th>
-                    <th data-formatter="pluginActionFormatter" data-events="pluginActionEvents">Actions</th>
-                  </tr>
-                </thead>
-              </table>
-            </div>
-          </div>
+            <thead>
+              <tr>
+                <th data-field="state" data-checkbox="true"></th>
+                <th data-field="name" data-sortable="true">Plugin Name</th>
+                <th data-field="author" data-sortable="true">Author</th>
+                <th data-field="category" data-sortable="true">Category</th>
+                <th data-field="version" data-sortable="true">Version</th>
+                <th data-field="link" data-sortable="true">URL</th>
+                <th data-field="status" data-sortable="true">Status</th>
+                <th data-field="source" data-sortable="true">Source</th>
+                <th data-field="update" data-sortable="true" data-formatter="pluginUpdatesFormatter">Updates</th>
+                <th data-formatter="pluginActionFormatter" data-events="pluginActionEvents">Actions</th>
+              </tr>
+            </thead>
+          </table>
         </div>
       </div>
       <br>
@@ -426,7 +418,7 @@ return '
 
 <!-- Plugin Settings Modal -->
 <div class="modal fade" id="pluginSettingsModal" tabindex="-1" role="dialog" aria-labelledby="pluginSettingsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
+  <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="pluginSettingsModalLabel"></h5>

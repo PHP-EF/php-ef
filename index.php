@@ -119,6 +119,8 @@ foreach ($navLinks as $navLink) {
                   <ul class="sub-menu">
               EOD;
 
+              $MenuItem .= "<a class='link_name preventDefault' href='#'>{$navLink['Name']}</a>";
+
               // Create Nav Menu Links
               foreach ($filteredMenuLinks as $filteredMenuLink) {
                   if ($ib->auth->checkAccess($filteredMenuLink['ACL'])) {
@@ -136,7 +138,6 @@ foreach ($navLinks as $navLink) {
               // Create Nav Menu Submenus
               foreach ($filteredSubMenuLinks as $filteredSubMenuLink) {
                   $Submenu = <<<EOD
-                  <a class="link_name preventDefault" href="#">{$navLink['Name']}</a>
                   <li class="sub-menu-item">
                       <div class="icon-link menu-item-dropdown">
                           <a href="#" class="preventDefault">

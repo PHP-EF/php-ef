@@ -876,7 +876,7 @@ function getInputMultipleEntries(elem) {
 function buildFormGroup(array) {
   var mainCount = 0;
   var group = '<div id="tabsJustifiedContent" class="tab-content">';
-  var uList = '<ul id="tabsJustified" class="nav nav-tabs info-nav">';
+  var uList = '<ul id="tabsJustified" class="nav flex-column nav-tabs info-nav">'; // Changed to flex-column for vertical alignment
   
   $.each(array, function(i, v) {
     mainCount++;
@@ -888,7 +888,7 @@ function buildFormGroup(array) {
     if (i == 'custom') {
       group += v;
     } else {
-      uList += `<li role="presentation" class="nav-item ${active}"><a href="" data-bs-target="#${customID}${cleanClass(i)}" data-bs-toggle="tab" class="nav-link small text-uppercase"><span lang="en">${i}</span></a></li>`;
+      uList += `<li role="presentation" class="nav-item"><a href="" data-bs-target="#${customID}${cleanClass(i)}" data-bs-toggle="tab" class="nav-link small text-uppercase ${active}"><span lang="en">${i}</span></a></li>`;
       group += `
         <!-- FORM GROUP -->
         <div class="tab-pane ${active}" id="${customID}${cleanClass(i)}">
@@ -936,7 +936,7 @@ function buildFormGroup(array) {
     }
   });
   
-  return uList + '</ul>' + group + '</div>';
+  return '<div class="d-flex">' + uList + '</ul>' + group + '</div>'; // Wrapped in a flex container for alignment
 }
 
 function buildFormItem(item){
@@ -1002,5 +1002,9 @@ function buildFormItem(item){
     default:
       return '<span class="text-danger">BuildFormItem Class not setup...';
   }
-
 }
+
+// Modal Backdrop Z-Index Fix
+$(document).on('shown.bs.modal', '.modal', function () {
+  $('.modal-backdrop').before($(this));
+});
