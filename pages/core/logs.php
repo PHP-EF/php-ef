@@ -1,7 +1,7 @@
 <?php
-  require_once(__DIR__."/../../inc/inc.php");
   if ($ib->auth->checkAccess("ADMIN-LOGS") == false) {
-    die();
+    $ib->api->setAPIResponse('Error','Unauthorized',401);
+    return false;
   }
 
   $LogFiles = array_reverse($ib->logging->getLogFiles());

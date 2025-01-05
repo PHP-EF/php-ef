@@ -1,7 +1,7 @@
 <?php
-  require_once(__DIR__."/../../inc/inc.php");
   if ($ib->auth->checkAccess("ADMIN-CONFIG") == false) {
-    die();
+    $ib->api->setAPIResponse('Error','Unauthorized',401);
+    return false;
   }
 
 return '
@@ -660,7 +660,7 @@ return '
       buttons.push(`<a class="uninstall" title="Uninstall"><i class="fa-solid fa-trash-can"></i></a>&nbsp;`);
       if (row.version < row.online_version) {
         buttons.push(`<a class="update" title="Update"><i class="fa-solid fa-upload"></i></a>&nbsp;`);      
-      } else {
+      } else if (row.source == "Online") {
         buttons.push(`<a class="reinstall" title="Reinstall"><i class="fa-solid fa-arrow-rotate-right"></i></a>&nbsp;`);
       }
     }

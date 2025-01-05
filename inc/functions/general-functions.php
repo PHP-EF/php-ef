@@ -235,3 +235,7 @@ function sanitizeInput($input) {
     
     return $input;
 }
+
+function sanitizePage($input) {
+    return htmlspecialchars(strip_tags($input));
+}

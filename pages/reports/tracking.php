@@ -1,7 +1,7 @@
 <?php
-$ib = new ib();
 if ($ib->auth->checkAccess("REPORT-TRACKING") == false) {
-  die();
+  $ib->api->setAPIResponse('Error','Unauthorized',401);
+  return false;
 }
 return '
 <main id="main" class="main">

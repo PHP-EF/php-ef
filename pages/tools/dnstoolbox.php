@@ -1,14 +1,14 @@
 <?php
+if ($ib->auth->checkAccess("DNS-TOOLBOX") == false) {
+  $ib->api->setAPIResponse('Error','Unauthorized',401);
+  return false;
+}
+$return = '
+
 header("Cache-control: no-cache, max-age=0");
 header("Expires: 0");
 header("Expires: Tue, 01 Jan 1980 1:00:00 GMT");
 header("Pragma: no-cache");
-
-require_once(__DIR__.'/../../inc/inc.php');
-if ($ib->auth->checkAccess("DNS-TOOLBOX") == false) {
-  die();
-}
-$return = '
 
 <link href="/assets/css/dnstoolbox-0.3.css" rel="stylesheet">
 
