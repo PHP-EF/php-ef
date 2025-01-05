@@ -307,7 +307,7 @@ foreach ($navLinks as $navLink) {
                   </div>
                   <div class="tab-pane fade text-center" id="support">
                     <br>
-                    <p>Issues and Feature Requests can be raised via Github issues page by clicking <a href="https://github.com/TehMuffinMoo/php-ef/issues" target="_blank">here</a>.</p>
+                    <p>Issues and Feature Requests can be raised via Github issues page by clicking <a href="https://github.com/php-ef/php-ef/issues" target="_blank">here</a>.</p>
                   </div>
                   <div class="tab-pane fade text-center" id="license">
                     <p>MIT License</p>
