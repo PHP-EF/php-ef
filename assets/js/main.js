@@ -728,6 +728,10 @@ const userTracking = {
   }
 };
 
+function isMobile() {
+  return /Mobi|Android/i.test(navigator.userAgent);
+}
+
 // Destroy any existing charts
 function clearAllApexCharts() {
   for (let chart in window.charts) {
@@ -802,6 +806,11 @@ document.addEventListener('DOMContentLoaded', function() {
     $(elem.target).parent().parent().prev().children(':first').addClass('changed');
     $(elem.target).parent().remove();
   });
+
+  // Set Sidebar State for Mobile
+    if (isMobile()) {
+      document.querySelector(".sidebar").classList.add("close");
+    }
 
   // Initialize tracking
   userTracking.init(trackingConfig);
