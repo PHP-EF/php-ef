@@ -32,10 +32,12 @@ $app->get('/page/plugin/{plugin}/js', function ($request, $response, $args) {
 	if (file_exists($pluginDir.'/main.js')) {
 		$jsContent = file_get_contents($pluginDir.'/main.js');
 		$ib->api->setAPIResponseData($jsContent);
+		$response->getBody()->write($GLOBALS['api']['data']);
+	} else {
+		$response->getBody()->write(jsonE($GLOBALS['api']));
 	}
 
 	// Return the response
-	$response->getBody()->write($GLOBALS['api']['data']);
 	return $response
 		->withHeader('Content-Type', 'text/javascript')
 		->withStatus($GLOBALS['responseCode']);
@@ -46,14 +48,16 @@ $app->get('/page/plugin/{plugin}/css', function ($request, $response, $args) {
 	$plugin = sanitizePage($args['plugin']);
 	$pluginDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $plugin;
 
-	// Get Custom CSS
+	// Get Custom JS
 	if (file_exists($pluginDir.'/styles.css')) {
 		$cssContent = file_get_contents($pluginDir.'/styles.css');
 		$ib->api->setAPIResponseData($cssContent);
+		$response->getBody()->write($GLOBALS['api']['data']);
+	} else {
+		$response->getBody()->write(jsonE($GLOBALS['api']));
 	}
 
 	// Return the response
-	$response->getBody()->write($GLOBALS['api']['data']);
 	return $response
 		->withHeader('Content-Type', 'text/css')
 		->withStatus($GLOBALS['responseCode']);

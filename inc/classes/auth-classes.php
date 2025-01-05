@@ -163,7 +163,7 @@ class Auth {
 
   public function newUser($username, $password, $firstname = '', $surname = '', $email = '', $groups = '', $type = 'Local', $expire = 'false') {
     // Set random password for SSO accounts
-    if ($type == 'SSO' | $type == 'LDAP') {
+    if ($password == '') {
       $password = $this->random_password(32);
     }
     if ($this->isPasswordComplex($password)) {
@@ -570,7 +570,7 @@ class Auth {
     return true;
   }
 
-  private function createUserIfNotExists($AttributeMap,$Source,$AutoCreate = false) {
+  public function createUserIfNotExists($AttributeMap,$Source,$AutoCreate = false,$UpdateGroups = true) {
     // Check if matching user exists
     $user = $this->getUserByUsernameOrEmail($AttributeMap['Username'],$AttributeMap['Email']);
 
@@ -578,8 +578,13 @@ class Auth {
       // Update last login
       $this->updateLastLogin($user['id']);
       // Update user info from External Auth Source
-      $stmt = $this->db->prepare("UPDATE users SET username = :username, firstname = :firstname, surname = :surname, email = :email, groups = :groups WHERE id = :id");
-      $stmt->execute([':id' => $user['id'], ':username' => $AttributeMap['Username'], ':firstname' => $AttributeMap['FirstName'], ':surname' => $AttributeMap['LastName'], ':email' => $AttributeMap['Email'], ':groups' => $AttributeMap['Groups']]);
+      if ($UpdateGroups) {
+        $stmt = $this->db->prepare("UPDATE users SET username = :username, firstname = :firstname, surname = :surname, email = :email, groups = :groups WHERE id = :id");
+        $stmt->execute([':id' => $user['id'], ':username' => $AttributeMap['Username'], ':firstname' => $AttributeMap['FirstName'], ':surname' => $AttributeMap['LastName'], ':email' => $AttributeMap['Email'], ':groups' => $AttributeMap['Groups']]);
+      } else {
+        $stmt = $this->db->prepare("UPDATE users SET username = :username, firstname = :firstname, surname = :surname, email = :email WHERE id = :id");
+        $stmt->execute([':id' => $user['id'], ':username' => $AttributeMap['Username'], ':firstname' => $AttributeMap['FirstName'], ':surname' => $AttributeMap['LastName'], ':email' => $AttributeMap['Email']]);
+      }
       // Set Login to True
       $Login = true;
       $this->logging->writeLog("Authentication",$AttributeMap['Username']." successfully logged in with ".$Source,"info");
@@ -594,7 +599,7 @@ class Auth {
         $this->logging->writeLog("Authentication",$AttributeMap['Username']." successfully logged in with ".$Source." and new user was created","info");
       } else {
         $this->logging->writeLog("Authentication","Failed to create new user: ".$AttributeMap['Username']." from ".$Source.".","info");
-        $this->api->setAPIResponse('Error','Failed to create new user');
+        $this->api->setAPIResponse('Error','Failed to create new user',null,$AttributeMap);
         return false;
       }
     } else {

@@ -40,7 +40,7 @@ if (!empty($iFrameLinks)) {
 }
 $FrameSource = $ib->config->get('Security', 'Headers')['Frame-Source'] ?? implode(' ',$AllowList);
 header('X-Frame-Options: ' . $XFrameOptions);
-header("Content-Security-Policy:  default-src 'self'; script-src 'self' https://code.jquery.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rawgit.com https://code.jquery.com https://unpkg.com 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self'; object-src 'none'; frame-ancestors 'self'; frame-src 'self' $FrameSource; base-uri 'self'; form-action 'self';");
+header("Content-Security-Policy:  default-src 'self'; script-src 'self' https://code.jquery.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rawgit.com https://code.jquery.com https://unpkg.com 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self' https://plex.tv; object-src 'none'; frame-ancestors 'self'; frame-src 'self' $FrameSource; base-uri 'self'; form-action 'self';");
 
 if (!(isset($SkipCSS))) {
   $faviconPath = $ib->config->get('Styling', 'favicon')['Image'];

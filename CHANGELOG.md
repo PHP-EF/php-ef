@@ -1,3 +1,6 @@
+## v0.7.3
+- Various style changes & improvements
+
 ## v0.7.2
 - Minor updates to prep for iFrame support
 - Bugfixes & cleanup
