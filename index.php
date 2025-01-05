@@ -119,6 +119,8 @@ foreach ($navLinks as $navLink) {
                   <ul class="sub-menu">
               EOD;
 
+              $MenuItem .= "<a class='link_name preventDefault' href='#'>{$navLink['Name']}</a>";
+
               // Create Nav Menu Links
               foreach ($filteredMenuLinks as $filteredMenuLink) {
                   if ($ib->auth->checkAccess($filteredMenuLink['ACL'])) {
@@ -136,7 +138,6 @@ foreach ($navLinks as $navLink) {
               // Create Nav Menu Submenus
               foreach ($filteredSubMenuLinks as $filteredSubMenuLink) {
                   $Submenu = <<<EOD
-                  <a class="link_name preventDefault" href="#">{$navLink['Name']}</a>
                   <li class="sub-menu-item">
                       <div class="icon-link menu-item-dropdown">
                           <a href="#" class="preventDefault">
@@ -273,73 +274,75 @@ foreach ($navLinks as $navLink) {
         <div class="lg-12 col-sm-12 pb-6">
           <div class="card h-100">
             <div class="card-block">
-              <!--tabs-->
-              <ul id="tabsJustified" class="nav nav-tabs info-nav">
-                <li class="nav-item">
-                  <a href="" data-bs-target="#about" data-bs-toggle="tab" class="nav-link small text-uppercase active">About</a>
-                </li>
-                <li class="nav-item">
-                  <a href="" data-bs-target="#support" data-bs-toggle="tab" class="nav-link small text-uppercase">Support</a>
-                </li>
-                <li class="nav-item">
-                  <a href="" data-bs-target="#license" data-bs-toggle="tab" class="nav-link small text-uppercase">License</a>
-		            </li>
-                <li class="nav-item">
-                  <a href="" data-bs-target="#debugger" data-bs-toggle="tab" class="nav-link small text-uppercase">Debugger</a>
-                </li>
-                <li class="nav-item">
-                  <a href="" data-bs-target="#changelog" data-bs-toggle="tab" class="nav-link small text-uppercase">Change Log</a>
-                </li>
-              </ul>
-              <!--/tabs-->
-              <div id="tabsJustifiedContent" class="tab-content">
-                <div class="tab-pane fade active show p-1" id="about">
-                  <?php echo $ib->config->get('Styling')['html']['about']; ?>
-                  <p>Designed by <i class="fa fa-code" style="color:red"></i> by - <a target="_blank" rel="noopener noreferrer" href="https://github.com/TehMuffinMoo">Mat Cox</a></p>
-                  <hr>
-                  <small>
-                    <?php echo '<span class="fa-solid fa-code-compare"></span> PHP-EF: v'.$ib->getVersion()[0].' | <span class="fa-solid fa-database"></span> Database: v'.$ib->dbHelper->getDatabaseVersion(); ?>
-                    </a>
-                  </small>
-                  <br>
-                </div>
-                <div class="tab-pane fade" id="support">
-                  <br>
-                  <p>Issues and Feature Requests can be raised via Github issues page by clicking <a href="https://github.com/TehMuffinMoo/ib-sa-report/issues" target="_blank">here</a>.</p>
-                </div>
-                <div class="tab-pane fade" id="license">
-                  <p>MIT License</p>
-                  <p>Copyright &copy; 2021-2024 <a target="_blank" rel="noopener noreferrer" href="https://github.com/TehMuffinMoo">Mat Cox</a></p>
-                  <p>
-                    Permission is hereby granted, free of charge, to any person obtaining a copy
-                    of this software and associated documentation files (the "Software"), to deal
-                    in the Software without restriction, including without limitation the rights
-                    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-                    copies of the Software, and to permit persons to whom the Software is
-                    furnished to do so, subject to the following conditions:
-                  </p><p>
-                    The above copyright notice and this permission notice shall be included in all
-                    copies or substantial portions of the Software.
-                  </p><p>
-                    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-                    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-                    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-                    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-                    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-                    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-                    SOFTWARE.
-                  </p>
-                </div>
-                <div class="tab-pane fade" id="debugger">
-                  <br>
-		              <pre><code id="whoami"></code></pre>
-                </div>
-                <div class="tab-pane fade" id="changelog">
-                  <div>
-                    <iframe class="changeLogFrame" src="/api/changelog"></iframe>
+              <div class="d-flex">
+                <!--tabs-->
+                <ul id="tabsJustified" class="nav nav-tabs flex-column info-nav">
+                  <li class="nav-item">
+                    <a href="" data-bs-target="#about" data-bs-toggle="tab" class="nav-link small text-uppercase active">About</a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="" data-bs-target="#support" data-bs-toggle="tab" class="nav-link small text-uppercase">Support</a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="" data-bs-target="#license" data-bs-toggle="tab" class="nav-link small text-uppercase">License</a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="" data-bs-target="#debugger" data-bs-toggle="tab" class="nav-link small text-uppercase">Debugger</a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="" data-bs-target="#changelog" data-bs-toggle="tab" class="nav-link small text-uppercase">Change Log</a>
+                  </li>
+                </ul>
+                <!--/tabs-->
+                <div class="tab-content">
+                  <div class="tab-pane fade text-center active show p-1" id="about">
+                    <?php echo $ib->config->get('Styling')['html']['about']; ?>
+                    <p>Designed by <i class="fa fa-code" style="color:red"></i> by - <a target="_blank" rel="noopener noreferrer" href="https://github.com/TehMuffinMoo">Mat Cox</a></p>
+                    <hr>
+                    <small>
+                      <?php echo '<span class="fa-solid fa-code-compare"></span> PHP-EF: v'.$ib->getVersion()[0].' | <span class="fa-solid fa-database"></span> Database: v'.$ib->dbHelper->getDatabaseVersion(); ?>
+                      </a>
+                    </small>
+                    <br>
                   </div>
+                  <div class="tab-pane fade text-center" id="support">
+                    <br>
+                    <p>Issues and Feature Requests can be raised via Github issues page by clicking <a href="https://github.com/TehMuffinMoo/php-ef/issues" target="_blank">here</a>.</p>
+                  </div>
+                  <div class="tab-pane fade text-center" id="license">
+                    <p>MIT License</p>
+                    <p>Copyright &copy; 2021-2024 <a target="_blank" rel="noopener noreferrer" href="https://github.com/TehMuffinMoo">Mat Cox</a></p>
+                    <p>
+                      Permission is hereby granted, free of charge, to any person obtaining a copy
+                      of this software and associated documentation files (the "Software"), to deal
+                      in the Software without restriction, including without limitation the rights
+                      to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+                      copies of the Software, and to permit persons to whom the Software is
+                      furnished to do so, subject to the following conditions:
+                    </p><p>
+                      The above copyright notice and this permission notice shall be included in all
+                      copies or substantial portions of the Software.
+                    </p><p>
+                      THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+                      IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+                      FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+                      AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+                      LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+                      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+                      SOFTWARE.
+                    </p>
+                  </div>
+                  <div class="tab-pane fade" id="debugger">
+                    <br>
+                    <pre><code id="whoami"></code></pre>
+                  </div>
+                  <div class="tab-pane fade text-center" id="changelog">
+                    <div>
+                      <iframe class="changeLogFrame" src="/api/changelog"></iframe>
+                    </div>
+                  </div>
+                  <!--/tabs content-->
                 </div>
-                <!--/tabs content-->
               </div>
             </div>
           </div>

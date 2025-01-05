@@ -175,7 +175,7 @@ $('#copyLink').on('click',function(elem) {
   var file = $('#file').val();
   var source = $('#source').val();
 
-  var text = "https://ib-sa-report.azurewebsites.net/pages/tools/dnstoolbox.php?domain="+domain+"&type="+file+"&location="+source;
+  var text = window.location.origin+"/pages/tools/dnstoolbox.php?domain="+domain+"&type="+file+"&location="+source;
 
    // Copy the text inside the text field
   navigator.clipboard.writeText(text);

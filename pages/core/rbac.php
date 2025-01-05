@@ -1,7 +1,7 @@
 <?php
-  require_once(__DIR__."/../../inc/inc.php");
   if ($ib->auth->checkAccess("ADMIN-RBAC") == false) {
-    die();
+    $ib->api->setAPIResponse('Error','Unauthorized',401);
+    return false;
   }
 return '
 <style>
@@ -117,11 +117,7 @@ return '
           <input type="text" class="form-control" id="editGroupID" aria-describedby="editGroupIDHelp" hidden>
           <div class="input-group mb-1">
             <input type="text" class="form-control" id="editGroupDescription" aria-describedby="editGroupDescriptionHelp">
-            <div class="input-group-append">
-	            <span class="input-group-text">
-                <button class="btn btn-primary" id="editGroupDescriptionSaveButton">Save</button>
-	            </span>
-            </div>
+            <button class="btn btn-primary" id="editGroupDescriptionSaveButton">Save</button>
 	        </div>
           <small id="editGroupDescriptionHelp" class="form-text text-muted">The group description.</small>
 	      </div>
