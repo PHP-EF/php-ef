@@ -116,6 +116,20 @@ function logConsole(subject,msg,type = 'info'){
 	console.info("%c "+subject+" %c ".concat(msg, " "), "color: white; background: "+color+"; font-weight: 700;", "color: "+color+"; background: white; font-weight: 700;");
 }
 
+function newPopup(url, title, w, h) {
+  var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : window.screenX;
+  var dualScreenTop = window.screenTop != undefined ? window.screenTop : window.screenY;
+  var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+  var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+  var left = ((width / 2) - (w / 2)) + dualScreenLeft;
+  var top = ((height / 2) - (h / 2)) + dualScreenTop;
+  var newWindow = window.open(url, title, 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+  if (window.focus) {
+      newWindow.focus();
+  }
+  return newWindow;
+}
+
 function setCookie(cName, cValue, expDays) {
         let date = new Date();
         date.setTime(date.getTime() + (expDays * 24 * 60 * 60 * 1000));
@@ -917,7 +931,7 @@ function buildFormGroup(array) {
         var helpTip = item.help ? `<sup><a class="help-tip" data-toggle="collapse" href="${helpID}" aria-expanded="true"><i class="m-l-5 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>` : '';
         var builtItems = '';
         
-        if (item.type == 'title' || item.type == 'hr') {
+        if (item.type == 'title' || item.type == 'hr' || item.type == 'js') {
           builtItems = `${buildFormItem(item)}`;
           count = 0; // Reset count
           group += '</div><!--end--><div class="row start">'; // Close current row and start a new one
@@ -1008,6 +1022,19 @@ function buildFormItem(item){
       return '<hr class="mt-3">';
     case 'html':
       return item.html;
+    case 'js':
+      if (item.src) {
+        if (!document.querySelector(`script[src="${item.src}"]`)) {
+          var script = document.createElement('script');
+          script.src = item.src;
+          document.head.appendChild(script);
+        }
+      } else if (item.script) {
+        var script = document.createElement('script');
+        script.innerHTML = item.script;
+        document.head.appendChild(script);
+      }
+      return ''; // Return an empty string as the script is already added
     default:
       return '<span class="text-danger">BuildFormItem Class not setup...';
   }

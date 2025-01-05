@@ -144,10 +144,18 @@ html {
     <?php if ($ib->config->get('SAML','enabled')) {
       echo '<button id="sso" class="sso"> Single Sign On </button>';
     }?>
+    <?php
+      $ib->hooks->executeHook('login_page_buttons');
+    ?>
   </div>
 </div>
 
 <script>
+
+<?php
+  $ib->hooks->executeHook('login_page_js');
+?>
+
 function login() {
   queryAPI("POST", "/api/auth/login", {
       un: $('#un').val(),

@@ -113,9 +113,11 @@ class query {
 		}
 		$contentType = $response->headers['content-type'] ?? '';
 		if (strpos($contentType, 'application/json') !== false || strpos($contentType, 'text/plain') !== false) {
-			$decoded = json_decode($response->body, true);
-			if (json_last_error() === JSON_ERROR_NONE) {
-				return $decoded;
+			if ($response->success) {
+				$decoded = json_decode($response->body, true);
+				if (json_last_error() === JSON_ERROR_NONE) {
+					return $decoded;
+				}
 			}
 		}
 		return $response;

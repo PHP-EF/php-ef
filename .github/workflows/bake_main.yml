@@ -35,8 +35,8 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ghcr.io/tehmuffinmoo/php-ef:latest
-            ghcr.io/tehmuffinmoo/php-ef:main
+            ghcr.io/php-ef/php-ef:latest
+            ghcr.io/php-ef/php-ef:main
           # outputs: type=docker,dest=/tmp/php-ef.tar
           build-args: |
             BUILD_COMMIT=${{ github.sha }}
