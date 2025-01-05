@@ -116,6 +116,20 @@ function logConsole(subject,msg,type = 'info'){
 	console.info("%c "+subject+" %c ".concat(msg, " "), "color: white; background: "+color+"; font-weight: 700;", "color: "+color+"; background: white; font-weight: 700;");
 }
 
+function newPopup(url, title, w, h) {
+  var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : window.screenX;
+  var dualScreenTop = window.screenTop != undefined ? window.screenTop : window.screenY;
+  var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+  var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+  var left = ((width / 2) - (w / 2)) + dualScreenLeft;
+  var top = ((height / 2) - (h / 2)) + dualScreenTop;
+  var newWindow = window.open(url, title, 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+  if (window.focus) {
+      newWindow.focus();
+  }
+  return newWindow;
+}
+
 function setCookie(cName, cValue, expDays) {
         let date = new Date();
         date.setTime(date.getTime() + (expDays * 24 * 60 * 60 * 1000));
