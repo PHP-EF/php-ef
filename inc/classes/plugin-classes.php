@@ -30,9 +30,9 @@ class Plugins {
             $stub = $branchArr[0];
             $url = 'https://raw.githubusercontent.com/' . $stub . '/refs/heads/' . $branch . '/plugin.json';
             $response = $this->api->query->get($url);
-            if ($response === false || !is_array($response)) {
+            if ($response === false) {
                 $warnings[] = 'Plugin.json invalid or not found<hr><small>'.$url.'</small>';
-            } else {
+            } else if (is_array($response)) {
                 $response[0]['branch'] = $branch;
                 $results[] = $response;
             }
