@@ -1,7 +1,8 @@
 <?php
   $examplePlugin = new examplePlugin();
   if ($examplePlugin->auth->checkAccess($examplePlugin->auth->checkAccess('Plugins','Example')['ACL-READ'] ?? null) == false) {
-    die();
+    $ib->api->setAPIResponse('Error','Unauthorized',401);
+    return false;
   }
   return <<<EOF
   <section class="section">

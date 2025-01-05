@@ -1,7 +1,7 @@
 <?php
-  require_once(__DIR__."/../../inc/inc.php");
   if ($ib->auth->checkAccess("ADMIN-PAGES") == false) {
-    die();
+    $ib->api->setAPIResponse('Error','Unauthorized',401);
+    return false;
   }
 return '
 <style>

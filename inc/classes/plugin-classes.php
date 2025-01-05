@@ -20,16 +20,20 @@ class Plugins {
 
     public function getOnlinePlugins() {
         $installedPlugins = $this->getInstalledPlugins();
-        $list = $this->core->config->get('PluginRepositories');
+        $list = $this->getPluginRepositories();
         $results = [];
         $warnings = [];
         foreach ($list as $l) {
-            $ls = explode('https://github.com/', $l);
-            $url = 'https://raw.githubusercontent.com/' . $ls[1] . '/refs/heads/main/plugin.json';
+            $stubArr = explode('https://github.com/', $l);
+            $branchArr = explode(':',$stubArr[1]);
+            $branch = $branchArr[1] ?? "main";
+            $stub = $branchArr[0];
+            $url = 'https://raw.githubusercontent.com/' . $stub . '/refs/heads/' . $branch . '/plugin.json';
             $response = $this->api->query->get($url);
             if ($response === false) {
                 $warnings[] = 'Plugin.json invalid or not found<hr><small>'.$url.'</small>';
-            } else {
+            } else if (is_array($response)) {
+                $response[0]['branch'] = $branch;
                 $results[] = $response;
             }
         }
@@ -105,7 +109,8 @@ class Plugins {
             $dir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $data['name'];
             if (!file_exists($dir)) {
                 try {
-                    $repo = $git->cloneRepository($data['repo'], $dir);
+                    $branch = $data['branch'] ?? 'main';
+                    $repo = $git->cloneRepository($data['repo'], $dir, ['--branch' => $branch]);
                     if ($repo === false) {
                         $this->api->setAPIResponse('Error', 'Failed to clone repository: ' . $data['repo']);
                     } else {
