@@ -29,6 +29,7 @@ class ib {
     $this->reporting = new Reporting($this->core,$this->db);
     $this->plugins = new Plugins($this->api,$this->core,$this->db);
     $this->checkDB();
+    $this->checkUUID();
   }
 
   public function getVersion() {
@@ -41,6 +42,18 @@ class ib {
     $newVersion = $this->getVersion()[0];
     if ($currentVersion < $newVersion) {
         $this->dbHelper->updateDatabaseSchema($currentVersion, $newVersion, $this->dbHelper->migrationScripts());
+    }
+  }
+
+  private function checkUUID() {
+    if (!$this->config->get('System','uuid')) {
+      $config = $this->config->get();
+      $uuid = array(
+        'System' => array(
+          'uuid' => \Ramsey\Uuid\Uuid::uuid4()
+        )
+      );
+      $this->config->set($config,$uuid);
     }
   }
 
