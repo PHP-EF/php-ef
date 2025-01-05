@@ -450,7 +450,7 @@ return '
       <div class="modal-body" id="onlinePluginsModalBody">
         <div class="container mt-2">
           <div class="input-group mb-3">
-            <input id="urlInput" type="text" class="form-control" placeholder="https://github.com/TehMuffinMoo/example" aria-label="Github Repository URL">
+            <input id="urlInput" type="text" class="form-control" placeholder="https://github.com/php-ef/plugin-example" aria-label="Github Repository URL">
             <div class="input-group-append">
               <button class="btn btn-outline-success" type="button" id="addUrl">Add URL</button>
             </div>
