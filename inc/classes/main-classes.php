@@ -315,10 +315,10 @@ class Pages {
       // Insert default nav links if they don't exist
       $navLinks = [
         ['Home','Home',null,'Link',null,null,'#page=core/default','Native','fa fa-house',1],
-        ['Admin','Admin',null,'Menu',null,null,null,'Native','fas fa-user-shield',2],
-        ['Reports','Reports',null,'Menu',null,null,null,'Native','fa-solid fa-chart-simple',3],
-        ['Settings','Settings',null,'SubMenu','Admin',null,null,'Native','fa fa-cog',1],
-        ['Logs','Logs',null,'SubMenu','Admin',null,null,'Native','fa-regular fa-file',2],
+        ['Admin','Admin',null,'Menu',null,null,null,null,'fas fa-user-shield',2],
+        ['Reports','Reports',null,'Menu',null,null,null,null,'fa-solid fa-chart-simple',3],
+        ['Settings','Settings',null,'SubMenu','Admin',null,null,null,'fa fa-cog',1],
+        ['Logs','Logs',null,'SubMenu','Admin',null,null,null,'fa-regular fa-file',2],
         ['Users','Users','ADMIN-USERS','SubMenuLink','Admin','Settings','#page=core/users','Native',null,1],
         ['Pages','Pages','ADMIN-PAGES','SubMenuLink','Admin','Settings','#page=core/pages','Native',null,2],
         ['Configuration','Configuration','ADMIN-CONFIG','SubMenuLink','Admin','Settings','#page=core/configuration','Native',null,3],
@@ -352,7 +352,7 @@ class Pages {
   public function getiFrameLinks() {
     $stmt = $this->db->prepare("SELECT * FROM pages WHERE LinkType = 'iFrame'");
     $stmt->execute();
-    return $stmt->fetch(PDO::FETCH_ASSOC);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
   public function get() {
@@ -364,7 +364,7 @@ class Pages {
     return $users; 
   }
 
-  public function new($Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon) {
+  public function new($Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon,$LinkType) {
     $prepare = [];
     $execute = [];
     if (!empty($Name)) {
@@ -399,6 +399,10 @@ class Pages {
       $prepare[] = 'Icon';
       $execute[':Icon'] = $Icon;
     }
+    if (!empty($LinkType)) {
+      $prepare[] = 'LinkType';
+      $execute[':LinkType'] = $LinkType;
+    }
     $valueArray = array_map(function($value) {
       return ':' . $value;
     }, $prepare);
@@ -407,12 +411,12 @@ class Pages {
     $this->api->setAPIResponseMessage('Created new page successfully.');
   }
 
-  public function set($ID,$Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon) {
+  public function set($ID,$Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon,$LinkType) {
     if ($this->getPageById($ID)) {
       $prepare = [];
       $execute = [];
-      $stmt = $this->db->prepare('UPDATE pages SET Name = :Name, Title = :Title, Type = :Type, Url = :Url, Menu = :Menu, Submenu = :Submenu, ACL = :ACL, Icon = :Icon WHERE id = :id');
-      $stmt->execute([':id' => $ID,':Name' => $Name,':Title' => $Title,':Type' => $Type,':Url' => $Url,':Menu' => $Menu,':Submenu' => $Submenu,':ACL' => $ACL,':Icon' => $Icon]);
+      $stmt = $this->db->prepare('UPDATE pages SET Name = :Name, Title = :Title, Type = :Type, Url = :Url, Menu = :Menu, Submenu = :Submenu, ACL = :ACL, Icon = :Icon, LinkType = :LinkType WHERE id = :id');
+      $stmt->execute([':id' => $ID,':Name' => $Name,':Title' => $Title,':Type' => $Type,':Url' => $Url,':Menu' => $Menu,':Submenu' => $Submenu,':ACL' => $ACL,':Icon' => $Icon, ':LinkType' => $LinkType]);
       $this->api->setAPIResponseMessage('Page updated successfully');
     } else {
       $this->api->setAPIResponse('Error','Page does not exist');

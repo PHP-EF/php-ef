@@ -129,7 +129,8 @@ $app->post('/pages', function ($request, $response, $args) {
         $Submenu = $data['submenu'] ?? null;
 		$ACL = $data['acl'] ?? null;
 		$Icon = $data['icon'] ?? null;
-		$ib->pages->new($Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon);
+		$LinkType = $data['linktype'] ?? null;
+		$ib->pages->new($Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon,$LinkType);
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
@@ -150,7 +151,8 @@ $app->patch('/page/{id}', function ($request, $response, $args) {
 			$Submenu = $data['submenu'] ?? null;
 			$ACL = $data['acl'] ?? null;
 			$Icon = $data['icon'] ?? null;
-			$ib->pages->set($args['id'],$Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon);
+			$LinkType = $data['linktype'] ?? null;
+			$ib->pages->set($args['id'],$Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon,$LinkType);
         } else {
             $ib->api->setAPIResponse('Error','id missing from request',400);
         }

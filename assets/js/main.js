@@ -242,44 +242,9 @@ function stringValidate(element, min, max, type) {
   }
 }
 
-function loadiFrame(element = null) {
-  if (element != null) {
-    var hashsplit = element.split('#page=');
-    var linkElem = $('a[href="#page='+hashsplit[1]+'"]');
-    $('.toggleFrame').removeClass('active');
-    linkElem.addClass('active');
-    if (hashsplit[1].startsWith('prx')) {
-      var prxsplit = hashsplit[1].split('prx');
-      window.parent.document.getElementById('mainFrame').src = prxsplit[1];
-    } else {
-      window.parent.document.getElementById('mainFrame').src = '/pages/'+hashsplit[1]+".php";
-    }
-  } else if (window.parent.location.hash) {
-    var hashsplit = window.parent.location.hash.split('#page=');
-    // Auto-expand and set navbar to active
-    var linkElem = $('a[href="'+window.parent.location.hash+'"]');
-    linkElem.addClass('active');
-    $('.title-text').text(linkElem.data('pageName'));
-    var doubleParent = $('.icon-link > .toggleFrame.active, .sub-sub-menu .toggleFrame.active, .icon-link > .toggleFrame.active, .sub-menu .toggleFrame.active').parent().parent();
-    if (doubleParent.hasClass('sub-sub-menu')) {
-      if (!doubleParent.parent().hasClass('showMenu')) {
-        doubleParent.parent().addClass('showMenu');
-      }
-      if (!doubleParent.parent().parent().parent().hasClass('showMenu')) {
-          doubleParent.parent().parent().parent().addClass('showMenu');
-      }
-    } else if (doubleParent.hasClass('sub-menu') && doubleParent.not('.blank')) {
-      if (!doubleParent.parent().hasClass('showMenu')) {
-        doubleParent.parent().addClass('showMenu');
-      }
-    }
-
-    if (hashsplit[1].startsWith('prx')) {
-      var prxsplit = hashsplit[1].split('prx');
-      window.parent.document.getElementById('mainFrame').src = prxsplit[1];
-    } else {
-      window.parent.document.getElementById('mainFrame').src = '/pages/'+hashsplit[1]+".php";
-    }
+function loadiFrame(src = null) {
+  if (src != null) {
+      window.parent.document.getElementById('mainFrame').src = src;
   }
 }
 

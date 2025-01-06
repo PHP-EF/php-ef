@@ -10,7 +10,7 @@ return '
 }
 </style>
 
-<div class="section">
+<div class="container-fluid">
   <div class="row">
     <div class="col-lg-12">
       <div class="card">
@@ -37,6 +37,7 @@ return '
                       <th data-field="Title">Title</th>
                       <th data-field="Url">URL</th>
                       <th data-field="ACL">ACL</th>
+                      <th data-field="LinkType">Source</th>
                       <th data-formatter="pageActionFormatter" data-events="pageActionEvents">Actions</th>
                   </tr>
               </thead>
@@ -80,9 +81,19 @@ return '
           <small id="pageTitleHelp" class="form-text text-muted">The title of the page shown in the top navigation bar.</small>
         </div>
         <div class="form-group">
+          <label for="pageLinkType">Link Type</label>
+          <select class="form-select dynamic" id="pageLinkType" aria-describedby="pageLinkTypeHelp"></select>
+          <small id="pageLinkTypeHelp" class="form-text text-muted">The type of link (Native/iFrame).</small>
+        </div>
+        <div class="form-group">
           <label for="pageUrl">Page</label>
           <select class="form-select dynamic" id="pageUrl" aria-describedby="pageUrlHelp"></select>
           <small id="pageUrlHelp" class="form-text text-muted">The page to to display when this link is clicked.</small>
+        </div>
+        <div class="form-group">
+          <label for="pageiFrameUrl">URL</label>
+          <input class="form-control" id="pageiFrameUrl" aria-describedby="pageiFrameUrlHelp">
+          <small id="pageiFrameUrlHelp" class="form-text text-muted">The URL of the page to display in the iFrame when this link is clicked.</small>
         </div>
         <div class="form-group">
           <label for="pageACL">Role</label>
@@ -135,13 +146,20 @@ return '
     var postData = {
       name: $("#pageName").val(),
       title: $("#pageTitle").val(),
-      url: $("#pageUrl").val(),
+      linktype: $("#pageLinkType").val(),
       acl: $("#pageACL").val(),
       icon: $("#pageIcon").val(),
       menu: $("#pageMenu").val(),
       submenu: $("#pageSubMenu").val(),
-      type: null
+      type: null,
+      url: null // Initialize the url property
     };
+
+    if (postData.linktype == "Native") {
+      postData.url = $("#pageUrl").val();
+    } else {
+      postData.url = $("#pageiFrameUrl").val();
+    }
 
     switch($("#pageType").val()) {
       case "Link":
@@ -255,8 +273,16 @@ return '
     $("#pageName").val(row.Name);
     $("#pageTitle").val(row.Title);
     $("#pageMenu").val(row.Menu);
-    $("#pageUrl").val(row.Url);
     $("#pageIcon").val(row.Icon);
+
+    switch (row.LinkType) {
+      case "Native":
+        $("#pageUrl").val(row.Url);
+        break;
+      case "iFrame":
+        $("#pageiFrameUrl").val(row.Url);
+        break;
+    }
 
     var isMenu = row.Type == "Menu";
     if (isMenu) {
@@ -272,9 +298,10 @@ return '
   function hideUnneccessaryInputs() {
     var type = $("#pageType").val();
     var submenu = $("#pageSubMenu").val();
+    var linktype = $("#pageLinkType").val();
     switch(type) {
       case "Link":
-        $("#pageUrl,#pageTitle,#pageUrl,#pageSubMenu,#pageACL").parent().attr("hidden",false);
+        $("#pageUrl,#pageTitle,#pageUrl,#pageSubMenu,#pageACL,#pageLinkType").parent().attr("hidden",false);
         if (submenu) {
           $("#pageIcon").parent().attr("hidden",true);
           $("#pageIcon").val("")
@@ -283,12 +310,22 @@ return '
         }
         break;
       case "Menu":
-        $("#pageUrl,#pageTitle,#pageUrl,#pageSubMenu,#pageACL").parent().attr("hidden",true).val("");
+        $("#pageUrl,#pageTitle,#pageUrl,#pageSubMenu,#pageACL,#pageLinkType").parent().attr("hidden",true).val("");
+        break;
+    }
+    switch(linktype) {
+      case "Native":
+        $("#pageUrl").parent().attr("hidden",false).val("");
+        $("#pageiFrameUrl").parent().attr("hidden",true).val("");
+        break;
+      case "iFrame":
+        $("#pageUrl").parent().attr("hidden",true).val("");
+        $("#pageiFrameUrl").parent().attr("hidden",false).val("");
         break;
     }
   }
 
-  $("#pageSubMenu").on("change", function(elem) {
+  $("#pageSubMenu, #pageLinkType").on("change", function(elem) {
     hideUnneccessaryInputs();
   });
 
@@ -342,6 +379,12 @@ return '
       row.Url ? pageUrlContainer.val(row.Url) : pageUrlContainer.val("");
     })
     
+    const pageLinkTypeContainer = $("#pageLinkType");
+    pageLinkTypeContainer.html(`
+    <option value="Native">Native</option>
+    <option value="iFrame">iFrame</option>`);
+    $("#pageLinkType").val(row.LinkType ? row.LinkType : "");
+
     updateSubMenus(row);
   }
 
@@ -427,6 +470,10 @@ return '
             title: "ACL",
             sortable: true
           },{
+            field: "LinkType",
+            title: "Source",
+            sortable: true
+          },{
             title: "Actions",
             formatter: "pageActionFormatter",
             events: "pageActionEvents"
@@ -462,6 +509,10 @@ return '
           },{
             field: "ACL",
             title: "ACL",
+            sortable: true
+          },{
+            field: "LinkType",
+            title: "Source",
             sortable: true
           },{
             title: "Actions",

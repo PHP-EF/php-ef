@@ -259,7 +259,7 @@ function getSecureHeaders() {
     $iFrameLinks = $ib->pages->getiFrameLinks();
     $AllowList = [];
     if (!empty($iFrameLinks)) {
-        $AllowList = array_column($iFrameLinks,'Name');
+        $AllowList = array_column($iFrameLinks,'Url');
     }
     header('X-Frame-Options: ' . $XFrameOptions);
 

@@ -65,15 +65,16 @@ foreach ($navLinks as $navLink) {
       case 'Link':
           // Create Nav Link
           if (!$navLink['ACL'] || $ib->auth->checkAccess($navLink['ACL'])) {
+              $functionToCall = ($navLink['LinkType'] == 'Native') ? 'loadMainWindow' : 'loadiFrame';
               $MenuItem .= <<<EOD
               <li class="menu-item">
                   <div class="icon-link">
-                      <a href="{$navLink['Url']}" class="toggleFrame" data-page-name="{$navLink['Title']}">
+                      <a href="{$navLink['Url']}" class="toggleFrame" data-page-name="{$navLink['Title']}" data-function="{$functionToCall}">
                           <i class="{$navLink['Icon']}"></i>
                           <span class="link_name">{$navLink['Name']}</span>
                       </a>
                       <ul class="sub-menu blank">
-                          <li><a class="link_name toggleFrame" href="{$navLink['Url']}" data-page-name="{$navLink['Title']}">{$navLink['Name']}</a></li>
+                          <li><a class="link_name toggleFrame" href="{$navLink['Url']}" data-page-name="{$navLink['Title']}" data-function="{$functionToCall}">{$navLink['Name']}</a></li>
                       </ul>
                   </div>
               </li>
@@ -124,9 +125,10 @@ foreach ($navLinks as $navLink) {
               // Create Nav Menu Links
               foreach ($filteredMenuLinks as $filteredMenuLink) {
                   if ($ib->auth->checkAccess($filteredMenuLink['ACL'])) {
+                      $functionToCall = ($filteredMenuLink['LinkType'] == 'Native') ? 'loadMainWindow' : 'loadiFrame';
                       $MenuItem .= <<<EOD
                       <li>
-                          <a href="{$filteredMenuLink['Url']}" class="toggleFrame" data-page-name="{$filteredMenuLink['Title']}">
+                          <a href="{$filteredMenuLink['Url']}" class="toggleFrame" data-page-name="{$filteredMenuLink['Title']}" data-function="{$functionToCall}">
                               <i class="{$filteredMenuLink['Icon']}"></i>
                               <span>{$filteredMenuLink['Name']}</span>
                           </a>
@@ -155,8 +157,9 @@ foreach ($navLinks as $navLink) {
                   $filteredSubMenuNavLinks = filterNavLinksBySubMenu($navLinks, $filteredSubMenuLink['Name']);
                   foreach ($filteredSubMenuNavLinks as $filteredSubMenuNavLink) {
                       if ($ib->auth->checkAccess($filteredSubMenuNavLink['ACL'])) {
+                          $functionToCall = ($filteredSubMenuNavLink['LinkType'] == 'Native') ? 'loadMainWindow' : 'loadiFrame';
                           $SubmenuLinks .= <<<EOD
-                          <a href="{$filteredSubMenuNavLink['Url']}" class="toggleFrame" data-page-name="{$filteredSubMenuNavLink['Title']}">{$filteredSubMenuNavLink['Name']}</a>
+                          <a href="{$filteredSubMenuNavLink['Url']}" class="toggleFrame" data-page-name="{$filteredSubMenuNavLink['Title']}" data-function="{$functionToCall}">{$filteredSubMenuNavLink['Name']}</a>
                           EOD;
                       }
                   }
@@ -251,9 +254,9 @@ foreach ($navLinks as $navLink) {
       </div>
     </div>
     <main class="page-content" id="page-content">
-      <div class="container-fluid">
-        <div id="mainWindow" name="mainWindow"></div>
-        <iframe id="mainFrame" name="mainFrame"></iframe>
+      <div class="container-fluid p-0">
+        <div id="mainWindow" name="mainWindow" class="mainWindow"></div>
+        <iframe id="mainFrame" name="mainFrame" class="mainFrame"></iframe>
       </div>
     </main>
   </section>
@@ -613,8 +616,18 @@ foreach ($navLinks as $navLink) {
     });
 
     $('.toggleFrame').click(function(element) {
-      // loadiFrame(element.currentTarget.href);
-      loadMainWindow(element.currentTarget.href);
+      var functionToCall = $(element.currentTarget).data('function');
+      var url = element.currentTarget.href;
+      if (functionToCall === 'loadMainWindow') {
+        $('#mainFrame').attr('src', '').attr('hidden',true);
+        $('#mainWindow').attr('hidden',false);
+        loadMainWindow(url);
+      } else if (functionToCall === 'loadiFrame') {
+        element.preventDefault();
+        $('#mainWindow').html('').attr('hidden',true);
+        $('#mainFrame').attr('hidden',false);
+        loadiFrame(url);
+      }
       $('.title-text').text($(element.currentTarget).data('pageName'));
     });
   });

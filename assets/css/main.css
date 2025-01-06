@@ -638,14 +638,21 @@ body.dark-theme .toast small {
   display: inline-block;
   width: 100%;
   height: 100%;
-  padding-left: 0px;
-  padding-top: 20px;
   overflow-x: hidden;
 }
 
 /* Page Content - Container Fluid */
 .page-content .container-fluid {
   height:100%;
+}
+
+/* Main Window / Frame */
+.mainWindow {
+  padding-top: 20px;
+}
+.mainFrame {
+  width: 100%;
+  height: 100%;
 }
 
 /* Sidebar */
