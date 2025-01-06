@@ -628,7 +628,7 @@ return '
     queryAPI("PATCH", "/api/config/plugins/" + pluginName, formData).done(function(data) {
         if (data["result"] == "Success") {
             toast(data["result"], "", data["message"], "success");
-            $("#pluginSettingsModal").modal("hide");
+            $("#pluginSettingsModal .changed").removeClass("changed");
         } else if (data["result"] == "Error") {
             toast(data["result"], "", data["message"], "danger");
         } else {
