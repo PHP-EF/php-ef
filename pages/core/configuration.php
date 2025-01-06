@@ -84,9 +84,14 @@ return '
                   <small id="Security[Headers][X-Frame-Options]Help" class="form-text text-muted">Customise the X-Frame-Options header</b></small>
                 </div>
                 <div class="form-group">
-                  <label for="Security[Headers][Frame-Source]">Content Security Policy: Frame Source</label>
-                  <input type="text" class="form-control info-field" placeholder="self" id="Security[Headers][Frame-Source]" aria-describedby="Security[Headers][Frame-Source]Help" name="Security[Headers][Frame-Source]">
-                  <small id="Security[Headers][Frame-Source]Help" class="form-text text-muted">Customise the frame-src component of the Content Security Policy header. It is strongly advised to leave this alone unless you know what you are doing.</b></small>
+                  <label for="Security[Headers][CSP][Frame-Source]">Content Security Policy: Frame Source</label>
+                  <input type="text" class="form-control info-field" placeholder="self" id="Security[Headers][CSP][Frame-Source]" aria-describedby="Security[Headers][CSP][Frame-Source]Help" name="Security[Headers][CSP][Frame-Source]">
+                  <small id="Security[Headers][CSP][Frame-Source]Help" class="form-text text-muted">Customise the frame-src component of the Content Security Policy header. It is strongly advised to leave this alone unless you know what you are doing.</b></small>
+                </div>
+                <div class="form-group">
+                  <label for="Security[Headers][CSP][Connect-Source]">Content Security Policy: Connect Source</label>
+                  <input type="text" class="form-control info-field" placeholder="self" id="Security[Headers][CSP][Connect-Source]" aria-describedby="Security[Headers][CSP][Connect-Source]Help" name="Security[Headers][CSP][Connect-Source]">
+                  <small id="Security[Headers][CSP][Connect-Source]Help" class="form-text text-muted">Customise the connect-src component of the Content Security Policy header. It is strongly advised to leave this alone unless you know what you are doing.</b></small>
                 </div>
               </div>
               <br>

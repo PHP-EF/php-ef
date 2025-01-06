@@ -239,3 +239,58 @@ function sanitizeInput($input) {
 function sanitizePage($input) {
     return htmlspecialchars(strip_tags($input));
 }
+
+function getSecureHeaders() {
+    global $ib;
+
+    // X-Frame-Options - Add any iFrame Pages to this to ensure they are permitted
+    $XFrameOptions = $ib->config->get('Security', 'Headers')['X-Frame-Options'] ?? 'SAMEORIGIN';
+    $iFrameLinks = $ib->pages->getiFrameLinks();
+    $AllowList = [];
+    if (!empty($iFrameLinks)) {
+        $AllowList = array_column($iFrameLinks,'Name');
+    }
+    header('X-Frame-Options: ' . $XFrameOptions);
+
+    // ** Content Security Policy ** //
+    
+    // Script Sources
+    $ScriptSources = implode(' ',[
+        "https://code.jquery.com",
+        "https://cdn.jsdelivr.net",
+        "https://cdnjs.cloudflare.com",
+        "https://unpkg.com"
+    ]);
+
+    // Style Sources
+    $StyleSources = implode(' ',[
+        "https://fonts.googleapis.com",
+        "https://cdn.jsdelivr.net",
+        "https://cdnjs.cloudflare.com",
+        "https://rawgit.com",
+        "https://code.jquery.com",
+        "https://unpkg.com"
+    ]);
+
+    // Font Sources
+    $FontSources = implode(' ',[
+        "https://cdn.jsdelivr.net",
+        "https://cdnjs.cloudflare.com",
+        "https://unpkg.com",
+        "https://fonts.googleapis.com",
+        "https://fonts.gstatic.com"
+    ]);
+
+    $FrameSource = $ib->config->get('Security', 'Headers')['CSP']['Frame-Source'] ?? implode(' ',$AllowList);
+    
+    $ConnectSourceFromConfig = $ib->config->get('Security', 'Headers')['CSP']['Connect-Source'] ?? '';
+
+    if (isset($GLOBALS['Headers']['CSP']['Connect-Source'])) {
+        $ConnectSource = implode(' ',$GLOBALS['Headers']['CSP']['Connect-Source']) . ' ' . $ConnectSourceFromConfig;
+    } else {
+        $ConnectSource = $ConnectSourceFromConfig;
+    };
+
+    header('X-Frame-Options: ' . $XFrameOptions);
+    header("Content-Security-Policy:  default-src 'self'; script-src 'self' $ScriptSources 'unsafe-inline' 'unsafe-eval'; style-src 'self' $StyleSources 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' $FontSources; connect-src 'self' $ConnectSource; object-src 'none'; frame-ancestors 'self'; frame-src 'self' $FrameSource; base-uri 'self'; form-action 'self';");
+}
