@@ -609,7 +609,9 @@ return '
                   console.log(element.data("type"));
                 } else {
                   if (element.hasClass("encrypted")) {
-                    element.val("*********");
+                    if (value != "") {
+                      element.val("*********");
+                    }
                   } else {
                     element.val(value);
                   }
