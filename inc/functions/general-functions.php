@@ -204,21 +204,32 @@ function encrypt($data, $password){
 }
 
 
-function decrypt($msg_encrypted_bundle, $password){
+function decrypt($msg_encrypted_bundle, $password = null){
+    global $ib;
+
+    if (!isset($password)) {
+        $password = $ib->config->get('Security','salt');
+    }
+
 	$password = sha1($password);
 
 	$components = explode( ':', $msg_encrypted_bundle );
-	$iv            = $components[0];
-	$salt          = hash('sha256', $password.$components[1]);
-	$encrypted_msg = $components[2];
+	$iv            = $components[0] ?? null;
+    $saltToUse = $components[1] ?? null;
+	$salt          = hash('sha256', $password . $saltToUse);
+	$encrypted_msg = $components[2] ?? null;
 
-	$decrypted_msg = openssl_decrypt(
-	  $encrypted_msg, 'aes-256-cbc', $salt, 0, $iv
-	);
-
-	if ( $decrypted_msg === false )
-		return false;
-	return $decrypted_msg;
+    if (isset($iv) && isset($saltToUse) && isset($salt) && isset($encrypted_msg)) {
+        $decrypted_msg = openssl_decrypt(
+            $encrypted_msg, 'aes-256-cbc', $salt, 0, $iv
+        );
+      
+        if ( $decrypted_msg === false )
+            return false;
+        return $decrypted_msg;
+    } else {
+        throw new Exception('Unable to decrypt');
+    }
 }
 
 function isValidFileType($fileName, $validExtensions) {

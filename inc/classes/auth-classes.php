@@ -492,7 +492,13 @@ class Auth {
         ldap_set_option($ldapconn, LDAP_OPT_REFERRALS, 0);
 
         // Authenticate as service account
-        $service_bind = @ldap_bind($ldapconn, $config['service_dn'], $config['service_password']);
+        try {
+          $service_password = decrypt($config['service_password'],$this->config->get("Security","salt")); 
+        } catch (Exception $e) {
+          $this->logging->writeLog('LDAP','Failed to decrypt LDAP Service Password','error');
+          return false;
+        }
+        $service_bind = @ldap_bind($ldapconn, $config['service_dn'], $service_password);
         if (!$service_bind) {
             ldap_unbind($ldapconn);
             return false;

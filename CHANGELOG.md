@@ -1,3 +1,6 @@
+## v0.7.4
+- Move password inputs to encrypted fields
+
 ## v0.7.3
 - Various style changes & improvements
 

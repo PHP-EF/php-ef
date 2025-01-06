@@ -980,7 +980,7 @@ function buildFormItem(item){
   var pwd2 = createRandomString(6);
   var pwd3 = createRandomString(6);
   var helpInfo = (item.help) ? '<div class="collapse" id="help-info-'+item.name+'"><blockquote lang="en">'+item.help+'</blockquote></div>' : '';
-    var smallLabel = (item.smallLabel) ? '<label><span lang="en">'+item.smallLabel+'</span></label>'+helpInfo : ''+helpInfo;
+  var smallLabel = (item.smallLabel) ? '<label><span lang="en">'+item.smallLabel+'</span></label>'+helpInfo : ''+helpInfo;
 
   //+tof(item.value,'c')+`
   switch (item.type) {

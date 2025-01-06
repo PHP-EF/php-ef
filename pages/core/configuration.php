@@ -78,20 +78,38 @@ return '
                   <input type="password" class="form-control info-field" id="Security[salt]" aria-describedby="Security[salt]Help" name="Security[salt]">
                   <small id="Security[salt]Help" class="form-text text-muted">The salt used to encrypt credentials. <b>WARNING! Changing the Salt will invalidate all client-side stored API Keys</b></small>
                 </div>
-                <div class="form-group">
-                  <label for="Security[Headers][X-Frame-Options]">X-Frame-Options</label>
-                  <input type="text" class="form-control info-field" placeholder="SAMEORIGIN" id="Security[Headers][X-Frame-Options]" aria-describedby="Security[Headers][X-Frame-Options]Help" name="Security[Headers][X-Frame-Options]">
-                  <small id="Security[Headers][X-Frame-Options]Help" class="form-text text-muted">Customise the X-Frame-Options header</b></small>
-                </div>
-                <div class="form-group">
-                  <label for="Security[Headers][CSP][Frame-Source]">Content Security Policy: Frame Source</label>
-                  <input type="text" class="form-control info-field" placeholder="self" id="Security[Headers][CSP][Frame-Source]" aria-describedby="Security[Headers][CSP][Frame-Source]Help" name="Security[Headers][CSP][Frame-Source]">
-                  <small id="Security[Headers][CSP][Frame-Source]Help" class="form-text text-muted">Customise the frame-src component of the Content Security Policy header. It is strongly advised to leave this alone unless you know what you are doing.</b></small>
-                </div>
-                <div class="form-group">
-                  <label for="Security[Headers][CSP][Connect-Source]">Content Security Policy: Connect Source</label>
-                  <input type="text" class="form-control info-field" placeholder="self" id="Security[Headers][CSP][Connect-Source]" aria-describedby="Security[Headers][CSP][Connect-Source]Help" name="Security[Headers][CSP][Connect-Source]">
-                  <small id="Security[Headers][CSP][Connect-Source]Help" class="form-text text-muted">Customise the connect-src component of the Content Security Policy header. It is strongly advised to leave this alone unless you know what you are doing.</b></small>
+                <div class="accordion" id="headerConfigAccordian">
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="headerConfigAccordianHeading">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#headerConfig" aria-expanded="true" aria-controls="headerConfig">
+                      Header Customisation
+                      </button>
+                    </h2>
+                    <div id="headerConfig" class="accordion-collapse collapse" aria-labelledby="headerConfigAccordianHeading" data-bs-parent="#headerConfigAccordian">
+                      <div class="accordion-body">
+                        <div class="card border-secondary p-3">
+                          <div class="card-title">
+                            <h5>Content Security Policy</h5>
+                          </div>
+                          <div class="form-group">
+                            <label for="Security[Headers][X-Frame-Options]">X-Frame-Options</label>
+                            <input type="text" class="form-control info-field" placeholder="SAMEORIGIN" id="Security[Headers][X-Frame-Options]" aria-describedby="Security[Headers][X-Frame-Options]Help" name="Security[Headers][X-Frame-Options]">
+                            <small id="Security[Headers][X-Frame-Options]Help" class="form-text text-muted">Customise the X-Frame-Options header</b></small>
+                          </div>
+                          <div class="form-group">
+                            <label for="Security[Headers][CSP][Frame-Source]">Content Security Policy: Frame Source</label>
+                            <input type="text" class="form-control info-field" placeholder="self" id="Security[Headers][CSP][Frame-Source]" aria-describedby="Security[Headers][CSP][Frame-Source]Help" name="Security[Headers][CSP][Frame-Source]">
+                            <small id="Security[Headers][CSP][Frame-Source]Help" class="form-text text-muted">Customise the frame-src component of the Content Security Policy header. It is strongly advised to leave this alone unless you know what you are doing.</b></small>
+                          </div>
+                          <div class="form-group">
+                            <label for="Security[Headers][CSP][Connect-Source]">Content Security Policy: Connect Source</label>
+                            <input type="text" class="form-control info-field" placeholder="self" id="Security[Headers][CSP][Connect-Source]" aria-describedby="Security[Headers][CSP][Connect-Source]Help" name="Security[Headers][CSP][Connect-Source]">
+                            <small id="Security[Headers][CSP][Connect-Source]Help" class="form-text text-muted">Customise the connect-src component of the Content Security Policy header. It is strongly advised to leave this alone unless you know what you are doing.</b></small>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <br>
@@ -102,7 +120,7 @@ return '
                 <div class="accordion" id="ldapConfigAccordian">
                   <div class="accordion-item">
                     <h2 class="accordion-header" id="ldapConfigAccordianHeading">
-                      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#ldapConfig" aria-expanded="true" aria-controls="ldapConfig">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ldapConfig" aria-expanded="true" aria-controls="ldapConfig">
                       LDAP Configuration
                       </button>
                     </h2>
@@ -123,8 +141,8 @@ return '
                                   <input type="text" class="form-control info-field" id="LDAP[service_dn]" name="LDAP[service_dn]" placeholder="cn=read-only-admin,dc=example,dc=com">
                               </div>
                               <div class="form-group">
-                                  <label for="LDAP[service_dn]">LDAP Bind Password</label>
-                                  <input type="password" class="form-control info-field" id="LDAP[service_password]" name="LDAP[service_password]" placeholder="*********">
+                                  <label for="LDAP[service_password]">LDAP Bind Password</label>
+                                  <input type="password" class="form-control info-field encrypted" id="LDAP[service_password]" name="LDAP[service_password]" placeholder="*********">
                               </div>
                             </div>
                             <div class="col-lg-6 col-12">
@@ -193,7 +211,7 @@ return '
                 <div class="accordion" id="samlConfigAccordian">
                   <div class="accordion-item">
                     <h2 class="accordion-header" id="samlConfigAccordianHeading">
-                      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#samlConfig" aria-expanded="true" aria-controls="samlConfig">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#samlConfig" aria-expanded="true" aria-controls="samlConfig">
                       SAML Configuration
                       </button>
                     </h2>
@@ -503,24 +521,39 @@ return '
     $(this).addClass("changed");
   });
 
+  function encryptData(key, value) {
+    return $.post("/api/auth/crypt", { key: value });
+  }
+
   $("#submitConfig").click(function(event) {
     event.preventDefault();
     var formData = $("#configurationForm .changed,#customisationForm .changed").serializeArray();
     
     // Include unchecked checkboxes in the formData
     $("#configurationForm input.changed[type=checkbox]").each(function() {
-        formData.push({ name: this.name, value: this.checked ? true : false });
+        formData.push({ name: this.name, value: this.checked });
     });
 
     var configData = {};
+    var encryptionPromises = [];
+
     formData.forEach(function(item) { 
         var keys = item.name.split("[").map(function(key) {
-            return key.replace("]","");
+            return key.replace("]", "");
         });
         var temp = configData;
         keys.forEach(function(key, index) {
             if (index === keys.length - 1) {
-                temp[key] = item.value;
+                var inputElement = $("[name=\'" + item.name + "\']");
+                if (inputElement.hasClass("encrypted") && item.value !== "") {
+                    // Encrypt sensitive data
+                    var promise = encryptData(item.name, item.value).done(function(encryptedValue) {
+                        temp[key] = encryptedValue.data;
+                    });
+                    encryptionPromises.push(promise);
+                } else {
+                    temp[key] = item.value;
+                }
             } else {
                 temp[key] = temp[key] || {};
                 temp = temp[key];
@@ -528,14 +561,17 @@ return '
         });
     });
 
-    queryAPI("PATCH","/api/config",configData).done(function(data) {
-        if (data["result"] == "Success") {
-            toast("Success","","Successfully saved configuration","success");
-        } else if (data["result"] == "Error") {
-            toast("Error","","Failed to save configuration","danger");
-        } else {
-            toast("API Error","","Failed to save configuration","danger","30000");
-        }
+    // Wait for all encryption promises to resolve
+    $.when.apply($, encryptionPromises).done(function() {
+        queryAPI("PATCH", "/api/config", configData).done(function(data) {
+            if (data.result === "Success") {
+                toast("Success", "", "Successfully saved configuration", "success");
+            } else if (data.result === "Error") {
+                toast("Error", "", "Failed to save configuration", "danger");
+            } else {
+                toast("API Error", "", "Failed to save configuration", "danger", "30000");
+            }
+        });
     });
   });
 
@@ -549,8 +585,6 @@ return '
     switchTab($(elem.target).attr("href"));
   });
 
-
-  // PLUGINS //
   function buildPluginSettingsModal(row) {
     try {
       queryAPI("GET", row.api).done(function(settingsResponse) {
@@ -574,7 +608,11 @@ return '
                 } else if (element.is("input[multiple]")) {
                   console.log(element.data("type"));
                 } else {
-                  element.val(value);
+                  if (element.hasClass("encrypted")) {
+                    element.val("*********");
+                  } else {
+                    element.val(value);
+                  }
                 }
               }
             }
@@ -607,6 +645,8 @@ return '
 
     // Convert the array into an object
     var formData = {};
+    var encryptionPromises = [];
+
     serializedArray.forEach(function(item) {
         var element = $(`[name="` + item.name + `"]`);
         if (formData[item.name]) {
@@ -617,28 +657,37 @@ return '
         } else {
             // Check if the element is a select with the multiple attribute
             if (element.is("select[multiple]")) {
-              if (item.value !== "") {
-                formData[item.name] = [item.value];
-              } else {
-                formData[item.name] = item.value;
-              }
+                if (item.value !== "") {
+                    formData[item.name] = [item.value];
+                } else {
+                    formData[item.name] = item.value;
+                }
             } else if (element.is("input[multiple]")) {
-              formData[item.name] = getInputMultipleEntries(element);
+                formData[item.name] = getInputMultipleEntries(element);
+            } else if (element.hasClass("encrypted") && item.value !== "") {
+                // Encrypt sensitive data
+                var promise = encryptData(item.name, item.value).done(function(encryptedValue) {
+                    formData[item.name] = encryptedValue.data;
+                });
+                encryptionPromises.push(promise);
             } else {
                 formData[item.name] = item.value;
             }
         }
     });
 
-    queryAPI("PATCH", "/api/config/plugins/" + pluginName, formData).done(function(data) {
-        if (data["result"] == "Success") {
-            toast(data["result"], "", data["message"], "success");
-            $("#pluginSettingsModal .changed").removeClass("changed");
-        } else if (data["result"] == "Error") {
-            toast(data["result"], "", data["message"], "danger");
-        } else {
-            toast("API Error", "", "Failed to save configuration", "danger", "30000");
-        }
+    // Wait for all encryption promises to resolve
+    $.when.apply($, encryptionPromises).done(function() {
+        queryAPI("PATCH", "/api/config/plugins/" + pluginName, formData).done(function(data) {
+            if (data["result"] == "Success") {
+                toast(data["result"], "", data["message"], "success");
+                $("#pluginSettingsModal .changed").removeClass("changed");
+            } else if (data["result"] == "Error") {
+                toast(data["result"], "", data["message"], "danger");
+            } else {
+                toast("API Error", "", "Failed to save configuration", "danger", "30000");
+            }
+        });
     });
   }
 

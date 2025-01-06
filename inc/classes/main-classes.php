@@ -33,7 +33,7 @@ class ib {
   }
 
   public function getVersion() {
-    return ['0.7.3'];
+    return ['0.7.4'];
   }
 
   // Initiate Database Migration if required
@@ -122,6 +122,7 @@ class ib {
             $settingMerge = [
                 'type' => 'password',
                 'label' => 'Password',
+                'class' => 'encrypted'
             ];
             break;
         case 'passwordalt':
@@ -131,16 +132,17 @@ class ib {
             ];
             break;
         case 'passwordaltcopy':
-            $settingMerge = [
-                'type' => 'password-alt-copy',
-                'label' => 'Password',
-            ];
-            break;
+          $settingMerge = [
+              'type' => 'password-alt-copy',
+              'label' => 'Password',
+          ];
+          break;
         case 'apikey':
         case 'token':
             $settingMerge = [
-                'type' => 'password-alt',
+                'type' => 'password',
                 'label' => 'API Key/Token',
+                'class' => 'encrypted'
             ];
             break;
         case 'notice':

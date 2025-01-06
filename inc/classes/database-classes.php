@@ -169,7 +169,9 @@ class dbHelper {
       '0.7.2' => [
         "ALTER TABLE pages ADD COLUMN LinkType INTEGER", // Add Weight Column to Pages
         "UPDATE pages SET LinkType = 'Native'"
-      ]
+      ],
+      '0.7.3' => [],
+      '0.7.4' => []
     ];
   }
 }
