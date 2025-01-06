@@ -33,10 +33,13 @@ class Plugins {
             if ($response === false) {
                 $warnings[] = 'Plugin.json invalid or not found<hr><small>'.$url.'</small>';
             } else if (is_array($response)) {
-                $response[0]['branch'] = $branch;
-                $results[] = $response;
+                foreach ($response as $r) {
+                    $r['branch'] = $branch;
+                    $results[] = $r;
+                }
             }
         }
+
         return array(
             "results" => $results,
             "warnings" => $warnings
@@ -52,7 +55,6 @@ class Plugins {
         $onlinePluginsData = $this->getOnlinePlugins();
         $onlinePlugins = $onlinePluginsData['results'];
         $onlinePluginsWarnings = $onlinePluginsData['warnings'];
-
         $allPlugins = array_merge($onlinePlugins, $installedPlugins);
 
         // Flatten the array if there are nested arrays
@@ -60,15 +62,15 @@ class Plugins {
         foreach ($allPlugins as $plugin) {
             if (is_array($plugin) && isset($plugin['name'])) {
                 $flattenedPlugins[] = $plugin;
-            } elseif (is_array($plugin) && isset($plugin[0]['name'])) {
-                $flattenedPlugins[] = $plugin[0];
+            } elseif (is_array($plugin) && isset($plugin['name'])) {
+                $flattenedPlugins[] = $plugin;
             }
         }
     
         // Remove duplicates based on 'name' and mark status, source, and version
         $uniquePlugins = [];
         $installedPluginNames = array_column($installedPlugins, 'name');
-        $onlinePluginNames = array_column(array_merge(...$onlinePlugins), 'name'); // Flatten online plugins
+        $onlinePluginNames = array_column(array_merge($onlinePlugins), 'name'); // Flatten online plugins
     
         foreach ($flattenedPlugins as $plugin) {
             if (!isset($uniquePlugins[$plugin['name']])) {
@@ -77,10 +79,10 @@ class Plugins {
                     $plugin['source'] = 'Online';
                     // Merge online and local plugin details
                     $onlinePlugin = current(array_filter($onlinePlugins, function($p) use ($plugin) {
-                        return isset($p[0]['name']) && $p[0]['name'] === $plugin['name'];
+                        return isset($p['name']) && $p['name'] === $plugin['name'];
                     }));
-                    $plugin = array_merge($plugin, $onlinePlugin[0]);
-                    $plugin['online_version'] = $onlinePlugin[0]['version'];
+                    $plugin = array_merge($plugin, $onlinePlugin);
+                    $plugin['online_version'] = $onlinePlugin['version'];
                 } elseif (in_array($plugin['name'], $installedPluginNames)) {
                     $plugin['source'] = 'Local';
                 } else {
