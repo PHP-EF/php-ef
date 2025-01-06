@@ -10,6 +10,12 @@ class Plugins {
         $this->db = $db;
     }
 
+    public function getMarketplacePlugins() {
+        $url = 'https://raw.githubusercontent.com/PHP-EF/plugin-marketplace/refs/heads/main/plugin.json';
+        $response = $this->api->query->get($url);
+        return $response;
+    }
+
     public function getInstalledPlugins() {
         $list = [];
         foreach ($GLOBALS['plugins'] as $key => $value) {
@@ -19,19 +25,27 @@ class Plugins {
     }
 
     public function getOnlinePlugins() {
-        $installedPlugins = $this->getInstalledPlugins();
-        $list = $this->getPluginRepositories();
+        $marketplacePlugins = $this->getMarketplacePlugins();
+        $nonMarketplacePlugins = $this->getPluginRepositories();
+        $allPlugins = array_merge($marketplacePlugins, $nonMarketplacePlugins);
         $results = [];
         $warnings = [];
-        foreach ($list as $l) {
-            $stubArr = explode('https://github.com/', $l);
-            $branchArr = explode(':',$stubArr[1]);
-            $branch = $branchArr[1] ?? "main";
-            $stub = $branchArr[0];
+    
+        foreach ($allPlugins as $plugin) {
+            if (is_array($plugin)) {
+                $repoUrl = $plugin['repo'];
+            } else {
+                $repoUrl = $plugin;
+            }
+    
+            $stubArr = explode('https://github.com/', $repoUrl);
+            $branch = "main";
+            $stub = $stubArr[1];
             $url = 'https://raw.githubusercontent.com/' . $stub . '/refs/heads/' . $branch . '/plugin.json';
             $response = $this->api->query->get($url);
+    
             if ($response === false) {
-                $warnings[] = 'Plugin.json invalid or not found<hr><small>'.$url.'</small>';
+                $warnings[] = 'Plugin.json invalid or not found<hr><small>' . $url . '</small>';
             } else if (is_array($response)) {
                 foreach ($response as $r) {
                     $r['branch'] = $branch;
@@ -39,11 +53,11 @@ class Plugins {
                 }
             }
         }
-
-        return array(
+    
+        return [
             "results" => $results,
             "warnings" => $warnings
-        );
+        ];
     }
 
     public function getPluginRepositories() {

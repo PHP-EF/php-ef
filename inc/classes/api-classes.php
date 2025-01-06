@@ -115,8 +115,12 @@ class query {
 		if (strpos($contentType, 'application/json') !== false || strpos($contentType, 'text/plain') !== false) {
 			if ($response->success) {
 				$decoded = json_decode($response->body, true);
-				if (json_last_error() === JSON_ERROR_NONE) {
-					return $decoded;
+				if (isset($response->body)) {
+					if (json_last_error() === JSON_ERROR_NONE) {
+						return $decoded;
+					} else {
+						return $response->body;
+					}
 				}
 			}
 		}
