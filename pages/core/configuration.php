@@ -33,39 +33,57 @@ return '
                 <div class="card-title">
                   <h5>System</h5>
                 </div>
-                <div class="form-group">
-                  <label for="System[logfilename]">Log File Name</label>
-                  <input type="text" class="form-control info-field" id="System[logfilename]" aria-describedby="System[logfilename]Help" name="System[logfilename]">
-                  <small id="System[logfilename]Help" class="form-text text-muted">The name of the log file <b>without</b> the file extension.</small>
+                <div class="row">
+                  <div class="form-group col-md-6">
+                    <label for="System[websiteDomain]">Website Domain</label>
+                    <input type="text" class="form-control info-field" id="System[websiteDomain]" aria-describedby="System[websiteDomain]Help" name="System[websiteDomain]">
+                    <small id="System[websiteDomain]Help" class="form-text text-muted">The domain to use for this website.</small>
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label for="System[cookieDomain]">Cookie Domain</label>
+                    <input type="text" class="form-control info-field" id="System[cookieDomain]" aria-describedby="System[cookieDomain]Help" name="System[cookieDomain]">
+                    <small id="System[cookieDomain]Help" class="form-text text-muted">The cookie domain to use. This defaults to the website domain.</small>
+                  </div>
                 </div>
-                <div class="form-group">
-                  <label for="System[logdirectory]">Log Directory</label>
-                  <input type="text" class="form-control info-field" id="System[logdirectory]" aria-describedby="System[logdirectory]Help" name="System[logdirectory]">
-                  <small id="System[logdirectory]Help" class="form-text text-muted">The full path of the log directory including the trailing slash.</small>
+                <div class="row">
+                  <div class="form-group col-md-6">
+                    <label for="System[logfilename]">Log File Name</label>
+                    <input type="text" class="form-control info-field" id="System[logfilename]" aria-describedby="System[logfilename]Help" name="System[logfilename]">
+                    <small id="System[logfilename]Help" class="form-text text-muted">The name of the log file <b>without</b> the file extension.</small>
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label for="System[logdirectory]">Log Directory</label>
+                    <input type="text" class="form-control info-field" id="System[logdirectory]" aria-describedby="System[logdirectory]Help" name="System[logdirectory]">
+                    <small id="System[logdirectory]Help" class="form-text text-muted">The full path of the log directory including the trailing slash.</small>
+                  </div>
                 </div>
-                <div class="form-group">
-                  <label for="System[loglevel]">Log Level</label>
-                  <select type="select" class="form-select info-field" id="System[loglevel]" aria-describedby="System[loglevel]Help" name="System[loglevel]">
-                    <option>Debug</option>
-                    <option>Info</option>
-                    <option>Warning</option>
-                  </select>
-                  <small id="System[loglevel]Help" class="form-text text-muted">Specify which log level you would like to use. Enabling <b>Debug</b> logs will generate lots of data.</small>
+                <div class="row">
+                  <div class="form-group col-md-6">
+                    <label for="System[loglevel]">Log Level</label>
+                    <select type="select" class="form-select info-field" id="System[loglevel]" aria-describedby="System[loglevel]Help" name="System[loglevel]">
+                      <option>Debug</option>
+                      <option>Info</option>
+                      <option>Warning</option>
+                    </select>
+                    <small id="System[loglevel]Help" class="form-text text-muted">Specify which log level you would like to use. Enabling <b>Debug</b> logs will generate lots of data.</small>
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label for="System[logretention]">Log Retention</label>
+                    <input type="text" class="form-control info-field" id="System[logretention]" aria-describedby="System[logretention]Help" name="System[logretention]">
+                    <small id="System[logretention]Help" class="form-text text-muted">How many days to keep system logs before they are purged.</small>
+                  </div>
                 </div>
-                <div class="form-group">
-                  <label for="System[logretention]">Log Retention</label>
-                  <input type="text" class="form-control info-field" id="System[logretention]" aria-describedby="System[logretention]Help" name="System[logretention]">
-                  <small id="System[logretention]Help" class="form-text text-muted">How many days to keep system logs before they are purged.</small>
-                </div>
-                <div class="form-group">
-                  <label for="System[CURL-Timeout]">CURL Timeout</label>
-                  <input type="text" class="form-control info-field" id="System[CURL-Timeout]" aria-describedby="System[CURL-Timeout]Help" name="System[CURL-Timeout]">
-                  <small id="System[CURL-Timeout]Help" class="form-text text-muted">Specify the timeout used for CURL requests. (Can be increased if long running outbound API calls time out)</small>
-                </div>
-                <div class="form-group">
-                  <label for="System[CURL-ConnectTimeout]">CURL Timeout on Connect</label>
-                  <input type="text" class="form-control info-field" id="System[CURL-ConnectTimeout]" aria-describedby="System[CURL-ConnectTimeout]Help" name="System[CURL-ConnectTimeout]">
-                  <small id="System[CURL-ConnectTimeout]Help" class="form-text text-muted">Specify the timeout used for CURL requests on connect. (Shouldn"t need to be increased)</small>
+                <div class="row">
+                  <div class="form-group col-md-6">
+                    <label for="System[CURL-Timeout]">CURL Timeout</label>
+                    <input type="text" class="form-control info-field" id="System[CURL-Timeout]" aria-describedby="System[CURL-Timeout]Help" name="System[CURL-Timeout]">
+                    <small id="System[CURL-Timeout]Help" class="form-text text-muted">Specify the timeout used for CURL requests. (Can be increased if long running outbound API calls time out)</small>
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label for="System[CURL-ConnectTimeout]">CURL Timeout on Connect</label>
+                    <input type="text" class="form-control info-field" id="System[CURL-ConnectTimeout]" aria-describedby="System[CURL-ConnectTimeout]Help" name="System[CURL-ConnectTimeout]">
+                    <small id="System[CURL-ConnectTimeout]Help" class="form-text text-muted">Specify the timeout used for CURL requests on connect. (Shouldn"t need to be increased)</small>
+                  </div>
                 </div>
               </div>
               <br>
