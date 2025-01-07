@@ -1,4 +1,6 @@
 <?php
+session_start(); // Start a PHP session
+
 // Set error log for background tasks
 ini_set('error_log',__DIR__.'/logs/php.error.log');
 
@@ -32,6 +34,8 @@ if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'plugins')) {
 		}
 	}
 }
+
+session_write_close(); // Save PHP Session
 
 // ** Set CSP / Frame Headers ** //
 getSecureHeaders();

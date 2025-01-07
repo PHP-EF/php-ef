@@ -4,6 +4,8 @@ use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 
 class ib {
+  private $configFilePath;
+  private $dbPath;
   public $hooks;
   private $core;
   public $api;
@@ -17,9 +19,11 @@ class ib {
   public $plugins;
 
   public function __construct() {
+    $this->configFilePath = dirname(__DIR__, 1) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.json';
+    $this->dbPath = dirname(__DIR__, 1) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'app.db';
     $this->hooks = new hooks();
-    $this->core = new core(__DIR__.'/../config/config.json',(new api()));
-    $this->db = (new db(__DIR__.'/../config/app.db',$this->core,$this->getVersion()[0]))->db;
+    $this->core = new core($this->configFilePath,(new api()));
+    $this->db = (new db($this->dbPath,$this->core,$this->getVersion()[0]))->db;
     $this->dbHelper = new dbHelper($this->db);
     $this->api = new api($this->core);
     $this->auth = new Auth($this->core,$this->db,$this->api,$this->hooks);
@@ -56,6 +60,41 @@ class ib {
       $this->config->set($config,$uuid);
     }
   }
+
+	public function checkConfiguration() {
+		$status = array();
+
+    $PHPExtensions = checkPHPExtensions();
+    $PHPFunctions = checkPHPFunctions();
+
+		if (!file_exists($this->configFilePath)) {
+			$status['status'] = 'wizard';
+		}
+		if (count($PHPExtensions['inactive']) > 0 || !is_writable(dirname(__DIR__, 2))) {
+			$status['status'] = 'dependencies';
+		}
+		$status['status'] = ($status['status']) ?? 'OK';
+    $status['version'] = $this->getVersion();
+		$status['configWritable'] = is_writable($this->configFilePath) ? true : false;
+    $status['dbWritable'] = is_writable($this->dbPath) ? true : false;
+		$status['PHP'] = [
+      "Version" => phpversion(),
+      "User" => get_current_user(),
+      "Extensions" => [
+        "Active" => $PHPExtensions['active'],
+        "Inactive" => $PHPExtensions['inactive']
+      ],
+      "Functions" => [
+        "Active" => $PHPFunctions['active'],
+        "Inactive" => $PHPFunctions['inactive']
+      ]
+    ];
+    $status['environment'] = [
+      "OS" => $_SESSION['Environment']
+    ];
+		$status['configFile'] = $this->configFilePath;
+		return $status;
+	}
 
   public function settingsOption($type, $name = null, $extras = null) {
     $type = strtolower(str_replace('-', '', $type));

@@ -1,6 +1,8 @@
 <?php
+// Load Composer
+require_once(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php');
+
 // Handle refresh request
-session_start(); // Start a PHP session
 
 if (isset($_GET['refresh'])) {
     unset($_SESSION['dependency_checks']);
@@ -8,49 +10,222 @@ if (isset($_GET['refresh'])) {
     exit;
 }
 
-function checkConfiguration() {
-    // Include Composer
-    require_once(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php');
+class configurationCheck {
+    private $configChecks;
 
-    function dependencyCheck($dependencies, $type = 'installation') {
+    public function __construct() {
+        $this->configChecks = $this->getConfiguration();
+    }
+
+    function checkAllPassed() {
+        foreach ($this->configChecks as $key => $value) {
+            if (is_array($value)) {
+                if (isset($value['allPassed']) && !$value['allPassed']) {
+                    echo "Error on check: $key => $value";
+                    return false;
+                }
+                if (!$this->checkAllPassed($value)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public function getConfiguration() {
+        if (isset($_SESSION['configChecks'])) {
+            return $_SESSION['configChecks'];
+        } else {
+            $_SESSION['configChecks'] = $this->checkConfiguration();
+            return $_SESSION['configChecks'];
+        }
+    }
+
+    public function checkConfiguration() {
+        return array(
+            'PHP' => array(
+                'Extensions' => $this->checkPHPExtensions(),
+                'Functions' => $this->checkPHPFunctions()
+            ),
+            'System' => $this->checkSystemDependencies()
+        );
+    }
+
+    public function buildChecks() {
+        $Config = $this->checkConfiguration();
         $output = '';
+    
+        // Function to generate table rows
+        function generateRows($checks) {
+            $rows = '';
+            foreach ($checks as $Check) {
+                $Class = $Check['status'] ? 'installed' : 'not-installed';
+                $Status = $Check['status'] ? 'Active' : 'Failed';
+                $Message = $Check['message'] ?? '';
+                $rows .= "<tr><td>{$Check['name']}</td><td><span class='status $Class'>$Status</span></td><td>$Message</td></tr>";
+            }
+            return $rows;
+        }
+    
+        // Function to generate tables
+        function generateTable($category, $checks) {
+            return "
+            <div class='card-body col-md-12'>
+                <h4>$category</h4>
+                <table class='table table-bordered'>
+                    <tbody>
+                        <th>Dependency</th><th>Status</th><th>Message</th>
+                        " . generateRows($checks) . "
+                    </tbody>
+                </table>
+            </div>";
+        }
+    
+        // System Checks
+        foreach ($Config['System'] as $SystemCheckCategory => $SystemCheck) {
+            $output .= generateTable($SystemCheckCategory, $SystemCheck['checks']);
+        }
+    
+        // PHP Checks
+        foreach ($Config['PHP'] as $PHPCheckCategory => $PHPChecks) {
+            $output .= generateTable($PHPCheckCategory, $PHPChecks['checks']);
+        }
+    
+        return $output;
+    }
+
+    private function dependencyCheck($dependencies, $type = 'installation') {
+        $Checks = [];
         $allPassed = true;
         $IgnoreList = $_SESSION['Environment']['IgnoredChecks'] ?? [];
-
         foreach ($dependencies as $dep => $check) {
             if (!in_array($dep,$IgnoreList)) {
-                $output .= "<tr><td>$dep</td>";
                 $result = $check();
-                $status = $result ? ($type === 'connectivity' ? 'Connected' : 'Installed') : ($type === 'connectivity' ? 'Not Connected' : 'Not Installed');
-                $class = $result ? 'installed' : 'not-installed';
-        
+                $status = $result ? true : false;
+
                 if (!is_bool($result)) {
                     if (isset($result)) {
                         if (strpos($result, "not found") === false && strpos($result, "failed") === false && strpos($result, "error") === false) {
-                            $status = $type === 'connectivity' ? 'Connected' : 'Installed';
-                            $class = 'installed';
+                            $status = true;
                         } else {
-                            $status = $type === 'connectivity' ? 'Not Connected' : 'Not Installed';
-                            $class = 'not-installed';
+                            $status = false;
                         }
-                    } else {
-                        $status = $type === 'connectivity' ? 'Not Connected' : 'Not Installed';
-                        $class = 'not-installed';
+                        $message = $result;
                     }
-                    $message = $result;
-                } else {
-                    $message = $result ? 'Success' : 'Failed';
                 }
-                $output .= "<td><span class='status $class'>$status</span></td><td>$message</td></tr>";
-                if (!$result) {
+    
+                $Checks[] = array(
+                    'name' => $dep,
+                    'status' => $status,
+                    'message' => $message
+                );
+                
+                if (!$status) {
                     $allPassed = false;
                 }
             }
         }
-        return [$output, $allPassed];
+        return [$Checks, $allPassed];
+    }
+    
+    private function checkPHPExtensions() {
+        $checks = [];
+        $allPassed = true;
+        $extensions = array("pdo","pdo_sqlite","sqlite3","curl","dom","fileinfo","gd","intl","mbstring","Zend OPcache","openssl","phar","session","tokenizer","xml","xmlreader","xmlwriter","simplexml","posix","ldap","ctype");
+        foreach ($extensions as $check) {
+            if (extension_loaded($check)) {
+                $checks[] = array(
+                    'name' => $check,
+                    'status' => true,
+                    'message' => 'Installed'
+                );
+            } else {
+                $checks[] = array(
+                    'name' => $check,
+                    'status' => false,
+                    'message' => 'Not Installed'
+                );
+                $allPassed = false;
+            }
+        }
+        return array(
+            'allPassed' => $allPassed,
+            'checks' => $checks
+        );
+    }
+    
+    private function checkPHPFunctions() {
+        $checks = [];
+        $allPassed = true;
+        $functions = array('hash', 'fopen', 'fsockopen', 'fwrite', 'fclose', 'readfile', 'curl_version');
+        foreach ($functions as $check) {
+            if (function_exists($check)) {
+                $checks[] = array(
+                    'name' => $check,
+                    'status' => true,
+                    'message' => 'Exists'
+                );
+            } else {
+                $checks[] = array(
+                    'name' => $check,
+                    'status' => false,
+                    'message' => 'Does Not Exist'
+                );
+                $allPassed = false;
+            }
+        }
+        return array(
+            'allPassed' => $allPassed,
+            'checks' => $checks
+        );
+    }
+    
+    private function checkSystemDependencies() {
+        // Define dependencies
+        $systemDependencies = [
+            // 'supervisor' => function() { return shell_exec("supervisord -v 2>&1"); },
+            'redis' => function() { return shell_exec("redi1s-cli -v"); },
+            'git' => function() { return shell_exec("git --version"); },
+            'curl' => function() { return function_exists('curl_version'); },
+            'composer' => function() { return shell_exec("composer --version"); },
+            'nginx' => function() { return shell_exec("nginx -v 2>&1"); }
+        ];
+        $Dependencies = $this->dependencyCheck($systemDependencies);
+        $Connectivity = $this->checkConnectivity();
+        return array(
+            'System' => [
+                'allPassed' => $Dependencies[1],
+                'checks' => $Dependencies[0]
+            ],
+            'Connectivity' => [
+                'allPassed' => $Connectivity[1],
+                'checks' => $Connectivity[0]
+            ]
+        );
+    }
+    
+    private function checkConnectivity() {
+        $allPassed = false;
+        $Checks = [];
+        $redis = $this->checkRedisConnectivity();
+        $db = $this->checkDBConnectivity();
+        if ($redis && $db) {
+            $allPassed = true;
+        }
+        $Checks[] = array(
+            "name" => 'Redis',
+            "status" => $redis ? true : false,
+            "message" => $redis
+        );
+        $Checks[] = array(
+            "name" => 'Database',
+            "status" => $db ? true : false,
+            "message" => $db
+        );
+        return [$Checks,$allPassed];
     }
 
-    function redisConnectivityTest() {
+    private function checkRedisConnectivity() {
         try {
             $redis = new Predis\Client;
             return $redis->ping() == "PONG" ? 'PONG' : false;
@@ -58,8 +233,8 @@ function checkConfiguration() {
             return false;
         }
     }
-
-    function dbConnectivityTest() {
+    
+    private function checkDBConnectivity() {
         try {
             $appDb = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'app.db';
             $db = new PDO("sqlite:$appDb");
@@ -69,74 +244,10 @@ function checkConfiguration() {
         }
     }
 
-    // Define dependencies
-    $systemDependencies = [
-        // 'supervisor' => function() { return shell_exec("supervisord -v 2>&1"); },
-        'redis' => function() { return shell_exec("redis-cli -v"); },
-        'git' => function() { return shell_exec("git --version"); },
-        'curl' => function() { return function_exists('curl_version'); },
-        'composer' => function() { return shell_exec("composer --version"); },
-        'nginx' => function() { return shell_exec("nginx -v 2>&1"); }
-    ];
-
-    $redisConnection = [
-        'Database Connectivity' => 'dbConnectivityTest',
-        'Redis Cache Connectivity' => 'redisConnectivityTest'
-    ];
-
-    $phpDependencies = [
-        'php' => function() { return phpversion(); },
-        'php-ldap' => function() { return extension_loaded("ldap"); },
-        'php-ctype' => function() { return extension_loaded("ctype"); },
-        'php-sqlite3' => function() { return extension_loaded("sqlite3"); },
-        'php-pdo' => function() { return extension_loaded("pdo"); },
-        'php-pdo_sqlite' => function() { return extension_loaded("pdo_sqlite"); },
-        'php-curl' => function() { return extension_loaded("curl"); },
-        'php-dom' => function() { return extension_loaded("dom"); },
-        'php-fileinfo' => function() { return extension_loaded("fileinfo"); },
-        'php-gd' => function() { return extension_loaded("gd"); },
-        'php-intl' => function() { return extension_loaded("intl"); },
-        'php-mbstring' => function() { return extension_loaded("mbstring"); },
-        'php-opcache' => function() { return extension_loaded("Zend OPcache"); },
-        'php-openssl' => function() { return extension_loaded("openssl"); },
-        'php-phar' => function() { return extension_loaded("phar"); },
-        'php-session' => function() { return extension_loaded("session"); },
-        'php-tokenizer' => function() { return extension_loaded("tokenizer"); },
-        'php-xml' => function() { return extension_loaded("xml"); },
-        'php-xmlreader' => function() { return extension_loaded("xmlreader"); },
-        'php-xmlwriter' => function() { return extension_loaded("xmlwriter"); },
-        'php-simplexml' => function() { return extension_loaded("simplexml"); },
-        'php-posix' => function() { return extension_loaded("posix"); }
-    ];
-
-    // Check if dependency results are already stored in the session
-    if (!isset($_SESSION['dependency_checks'])) {
-        // Run checks
+    private function checkPlatform() {
         $detector = new PlatformDetector();
-        $_SESSION['Environment'] = $detector->detectPlatform();
-        list($systemOutput, $systemPassed) = dependencyCheck($systemDependencies);
-        list($connectivityOutput, $connectivityPassed) = dependencyCheck($redisConnection, 'connectivity');
-        list($phpOutput, $phpPassed) = dependencyCheck($phpDependencies);
-
-        // Store results in session
-        $_SESSION['dependency_checks'] = [
-            'systemOutput' => $systemOutput,
-            'systemPassed' => $systemPassed,
-            'connectivityOutput' => $connectivityOutput,
-            'connectivityPassed' => $connectivityPassed,
-            'phpOutput' => $phpOutput,
-            'phpPassed' => $phpPassed
-        ];
+        return $detector->detectPlatform();
     }
-    // Retrieve results from session
-    return array(
-        "systemOutput" => $_SESSION['dependency_checks']['systemOutput'],
-        "systemPassed" => $_SESSION['dependency_checks']['systemPassed'],
-        "connectivityOutput" => $_SESSION['dependency_checks']['connectivityOutput'],
-        "connectivityPassed" => $_SESSION['dependency_checks']['connectivityPassed'],
-        "phpOutput" => $_SESSION['dependency_checks']['phpOutput'],
-        "phpPassed" => $_SESSION['dependency_checks']['phpPassed'],
-    );
 }
 
 class PlatformDetector {
@@ -144,8 +255,7 @@ class PlatformDetector {
 
     public function __construct() {
         $this->environment = [
-            'Platform' => 'Unknown',
-            'IgnoredChecks' => []
+            'OS' => 'Unknown'
         ];
     }
 
@@ -158,8 +268,7 @@ class PlatformDetector {
 
     private function checkIfAzureWebsites() {
         if (getenv("WEBSITE_SKU") && getenv("WEBSITE_STACK")) {
-            $this->environment['Platform'] = 'Azure Websites';
-            $this->environment['IgnoredChecks'][] = 'composer';
+            $this->environment['OS'] = 'Azure Websites';
             return true;
         }
         return false;
@@ -167,7 +276,7 @@ class PlatformDetector {
 
     private function checkIfHeroku() {
         if (getenv('DYNO')) {
-            $this->environment['Platform'] = 'Heroku';
+            $this->environment['OS'] = 'Heroku';
             return true;
         }
         return false;
@@ -175,7 +284,7 @@ class PlatformDetector {
 
     private function checkIfAWS() {
         if (getenv('AWS_EXECUTION_ENV')) {
-            $this->environment['Platform'] = 'AWS';
+            $this->environment['OS'] = 'AWS';
             return true;
         }
         return false;
@@ -183,7 +292,7 @@ class PlatformDetector {
 
     private function checkIfWindows() {
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            $this->environment['Platform'] = 'Windows';
+            $this->environment['OS'] = 'Windows';
             return true;
         }
         return false;
@@ -191,7 +300,7 @@ class PlatformDetector {
 
     private function checkIfMac() {
         if (strtoupper(substr(PHP_OS, 0, 6)) === 'DARWIN') {
-            $this->environment['Platform'] = 'Mac';
+            $this->environment['OS'] = 'Mac';
             return true;
         }
         return false;
@@ -199,7 +308,7 @@ class PlatformDetector {
 
     private function checkIfLinux() {
         if (strtoupper(substr(PHP_OS, 0, 5)) === 'LINUX') {
-            $this->environment['Platform'] = 'Linux';
+            $this->environment['OS'] = 'Linux';
             return true;
         }
         return false;
@@ -207,7 +316,7 @@ class PlatformDetector {
 
     private function checkIfDocker() {
         if (file_exists('/.dockerenv')) {
-            $this->environment['Platform'] = 'Docker';
+            $this->environment['OS'] = 'Docker';
             return true;
         }
         return false;
@@ -217,13 +326,13 @@ class PlatformDetector {
         if (file_exists('/etc/os-release')) {
             $osRelease = parse_ini_file('/etc/os-release');
             if (isset($osRelease['NAME'])) {
-                $this->environment['Platform'] = $osRelease['NAME'];
+                $this->environment['OS'] = $osRelease['NAME'];
                 return true;
             }
         } elseif (file_exists('/etc/lsb-release')) {
             $lsbRelease = parse_ini_file('/etc/lsb-release');
             if (isset($lsbRelease['DISTRIB_ID'])) {
-                $this->environment['Platform'] = $lsbRelease['DISTRIB_ID'];
+                $this->environment['OS'] = $lsbRelease['DISTRIB_ID'];
                 return true;
             }
         }
@@ -231,11 +340,11 @@ class PlatformDetector {
     }
 }
 
-
-$cc = checkConfiguration();
+$configChecker = new configurationCheck();
 
 // If any check fails, show the dependency check page
-if (!$cc['systemPassed'] || !$cc['connectivityPassed'] || !$cc['phpPassed']) {
+
+if ($configChecker->checkAllPassed()) {
     echo "<head>
         <meta charset='utf-8'>
         <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>
@@ -266,39 +375,7 @@ if (!$cc['systemPassed'] || !$cc['connectivityPassed'] || !$cc['phpPassed']) {
                             <div class='alert alert-info'>You must use the Refresh Checks button to re-check, as results are cached in your session.</div>
                             <h3 class='card-title mt-1'>Dependency Checks<button onclick=window.location.href='?refresh=true' class='btn btn-success float-end'>Refresh Checks</button></h3>
                         </div>
-                        <div class='card-body col-md-6'>
-                            <h4>System Information</h4>
-                            <table class='table table-bordered'>
-                                <tbody>
-                                    <tr><td><span>Platform</span></td><td><span>".$_SESSION['Environment']['Platform']."</span></td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class='card-body'>
-                            <h4>System Dependencies</h4>
-                            <table class='table table-bordered'>
-                                <thead>
-                                    <tr><th>Dependency</th><th>Status</th><th>Message</th></tr>
-                                </thead>
-                                <tbody>".$cc['systemOutput']."</tbody>
-                            </table>
-                            <hr>
-                            <h4>Connectivity Tests</h4>
-                            <table class='table table-bordered'>
-                                <thead>
-                                    <tr><th>Dependency</th><th>Status</th><th>Message</th></tr>
-                                </thead>
-                                <tbody>".$cc['connectivityOutput']."</tbody>
-                            </table>
-                            <hr>
-                            <h4>PHP Dependencies</h4>
-                            <table class='table table-bordered'>
-                                <thead>
-                                    <tr><th>Dependency</th><th>Status</th><th>Message</th></tr>
-                                </thead>
-                                <tbody>".$cc['phpOutput']."</tbody>
-                            </table>
-                        </div>
+                        ".$configChecker->buildChecks()."
                     </div>
                 </div>
             </div>
@@ -308,6 +385,4 @@ if (!$cc['systemPassed'] || !$cc['connectivityPassed'] || !$cc['phpPassed']) {
 }
 
 // Continue with normal flow if all checks pass
-
-session_write_close(); // Save PHP Session
 ?>
