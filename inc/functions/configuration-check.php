@@ -24,9 +24,6 @@ class configurationCheck {
                     echo "Error on check: $key => $value";
                     return false;
                 }
-                if (!$this->checkAllPassed($value)) {
-                    return false;
-                }
             }
         }
         return true;
@@ -102,7 +99,7 @@ class configurationCheck {
             if (!in_array($dep,$IgnoreList)) {
                 $result = $check();
                 $status = $result ? true : false;
-
+                $message = null;
                 if (!is_bool($result)) {
                     if (isset($result)) {
                         if (strpos($result, "not found") === false && strpos($result, "failed") === false && strpos($result, "error") === false) {
@@ -184,7 +181,7 @@ class configurationCheck {
         // Define dependencies
         $systemDependencies = [
             // 'supervisor' => function() { return shell_exec("supervisord -v 2>&1"); },
-            'redis' => function() { return shell_exec("redi1s-cli -v"); },
+            'redis' => function() { return shell_exec("redis-cli -v"); },
             'git' => function() { return shell_exec("git --version"); },
             'curl' => function() { return function_exists('curl_version'); },
             'composer' => function() { return shell_exec("composer --version"); },
@@ -344,7 +341,7 @@ $configChecker = new configurationCheck();
 
 // If any check fails, show the dependency check page
 
-if ($configChecker->checkAllPassed()) {
+if (!$configChecker->checkAllPassed()) {
     echo "<head>
         <meta charset='utf-8'>
         <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>
