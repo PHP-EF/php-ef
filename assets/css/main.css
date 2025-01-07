@@ -637,13 +637,12 @@ body.dark-theme .toast small {
   transition: all 0.3s ease;
   display: inline-block;
   width: 100%;
-  height: 100%;
   overflow-x: hidden;
 }
 
 /* Page Content - Container Fluid */
 .page-content .container-fluid {
-  height:100%;
+  height:calc(100% - 60px);
 }
 
 /* Main Window / Frame */
@@ -652,7 +651,6 @@ body.dark-theme .toast small {
 }
 .mainFrame {
   width: 100%;
-  height: calc(100% - 60px);
 }
 
 /* Sidebar */
