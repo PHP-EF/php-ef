@@ -107,11 +107,12 @@ foreach ($navLinks as $navLink) {
 
           // Create Nav Menu Dropdown only if there are valid links
           if ($hasValidLinks) {
+            $MenuIconElem = $phpef->getImageOrIcon($navLink['Icon']);
               $MenuItem .= <<<EOD
               <li class="menu-item">
                   <div class="icon-link menu-item-dropdown">
                       <a href="#" class="preventDefault">
-                          <i class="{$navLink['Icon']}"></i>
+                          {$MenuIconElem}
                           <span class="link_name">{$navLink['Name']}</span>
                       </a>
                       <i class="bx bxs-chevron-down arrow"></i>
@@ -124,10 +125,11 @@ foreach ($navLinks as $navLink) {
               // Create Nav Menu Links
               foreach ($filteredMenuLinks as $filteredMenuLink) {
                   if ($phpef->auth->checkAccess($filteredMenuLink['ACL'])) {
+                    $IconElem = $phpef->getImageOrIcon($filteredMenuLink['Icon']);
                       $MenuItem .= <<<EOD
                       <li>
                           <a href="#page={$filteredMenuLink['Title']}" class="toggleFrame" data-page-url="{$filteredMenuLink['Url']}" data-page-type="{$filteredMenuLink['LinkType']}">
-                              <i class="{$filteredMenuLink['Icon']}"></i>
+                              {$IconElem}
                               <span>{$filteredMenuLink['Name']}</span>
                           </a>
                       </li>
@@ -137,11 +139,12 @@ foreach ($navLinks as $navLink) {
 
               // Create Nav Menu Submenus
               foreach ($filteredSubMenuLinks as $filteredSubMenuLink) {
+                  $IconElem = $phpef->getImageOrIcon($filteredSubMenuLink['Icon']);
                   $Submenu = <<<EOD
                   <li class="sub-menu-item">
                       <div class="icon-link menu-item-dropdown">
                           <a href="#" class="preventDefault">
-                              <i class="{$filteredSubMenuLink['Icon']}"></i>
+                              {$IconElem}
                               <span>{$filteredSubMenuLink['Name']}</span>
                           </a>
                           <i class="bx bxs-chevron-down arrow"></i>

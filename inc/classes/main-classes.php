@@ -1,7 +1,8 @@
 <?php
 class phpef {
     // Traits //
-    Use Common;
+    Use Common,
+    Images;
 
     private $configFilePath;
     private $dbPath;

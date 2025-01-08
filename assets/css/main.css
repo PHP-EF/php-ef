@@ -654,6 +654,19 @@ body.dark-theme .toast small {
   height: 100%;
 }
 
+/* Custom Images */
+.image-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; /* Adjust the gap between images as needed */
+}
+
+.custom-image {
+  width: 128px;
+  height: 128px;
+  object-fit: cover; /* Ensures the image fits within the specified dimensions */
+}
+
 /* Sidebar */
 .sidebar{
   position: fixed;
@@ -779,6 +792,11 @@ body.dark-theme .toast small {
 .sidebar .nav-links li ul.sub-menu a,
 .sidebar .nav-links li ul.sub-menu i{
   font-size: 16px;
+}
+.sidebar .nav-links li ul.sub-menu img {
+  height: 30px;
+  width: 30px;
+  margin: 10px 24px;
 }
 .sidebar.close .nav-links li a .link_name{
   opacity: 0;

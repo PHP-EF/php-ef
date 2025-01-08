@@ -22,6 +22,10 @@ return '
           <li class="nav-item">
           <a class="nav-link" id="plugins-tab" data-toggle="tab" href="#plugins" role="tab" aria-controls="plugins" aria-selected="false">Plugins</a>
         </li>
+        </li>
+          <li class="nav-item">
+          <a class="nav-link" id="images-tab" data-toggle="tab" href="#images" role="tab" aria-controls="images" aria-selected="false">Images</a>
+        </li>
       </ul>
       <div class="tab-content" id="tabContent">
         <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
@@ -449,6 +453,13 @@ return '
             </thead>
           </table>
         </div>
+        <div class="tab-pane fade" id="images" role="tabpanel" aria-labelledby="images-tab">
+          <div class="my-4">
+            <h5 class="mb-0 mt-5">Images</h5>
+            <p>Use the following to configure Custom Images on '.$phpef->config->get('Styling')['websiteTitle'].'.</p>
+            <div class="image-gallery" id="imageGallery"></div>
+          </div>
+        </div>
       </div>
       <br>
       <button class="btn btn-success float-end ms-1" id="submitConfig">Save Configuration</button>&nbsp;
@@ -508,6 +519,27 @@ return '
 </div>
 
 <script>
+  var imagesLoaded = false;
+  function loadImageGallery() {
+    if (imagesLoaded == false) {
+      queryAPI("GET", "/api/images").done(function(images) {
+        const imageGallery = $("#imageGallery");
+        images.data.forEach(image => {
+          const imgElement = document.createElement("img");
+          imgElement.src = image;
+          imgElement.alt = "Custom Image";
+          imgElement.width = 64;
+          imgElement.height = 64;
+          imgElement.classList.add("custom-image");
+          imageGallery.append(imgElement);
+        });
+        imagesLoaded = true;
+      }).fail(function(xhr) {
+        toast("Error", "", xhr, "danger", 30000);
+      });
+    }
+  }
+
   function getConfig() {
     $.getJSON("/api/config", function(data) {
       let config = data.data;
@@ -600,6 +632,10 @@ return '
   // Listener for tab changes
   $("#myTab .nav-link").on("click", function(elem) {
     elem.preventDefault();
+    var href = $(elem.target).attr("href");
+    if (href == "#images") {
+      loadImageGallery();
+    }
     switchTab($(elem.target).attr("href"));
   });
 
