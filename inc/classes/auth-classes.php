@@ -56,6 +56,9 @@ class CoreJwt {
 }
 
 class Auth {
+  // Traits //
+  Use Common;
+
   private $db;
   private $config;
   private $logging;
@@ -569,7 +572,7 @@ class Auth {
     // Generate JWT token
     $jwt = $this->CoreJwt->generateToken($user['username'], $user['firstname'], $user['surname'], $user['email'], explode(',', $user['groups']), $user['type']);
     // Set JWT as a cookie
-    setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
+    $this->cookie('set','jwt', $jwt, 30); // 30 days
 
     $this->logging->writeLog("Authentication", $user['username']." successfully logged in", "info");
     $this->api->setAPIResponseMessage('Successfully logged in');
@@ -637,7 +640,7 @@ class Auth {
       // Generate JWT token
       $jwt = $this->CoreJwt->generateToken($LoginArr['Username'],$LoginArr['FirstName'],$LoginArr['LastName'],$LoginArr['Email'],$LoginArr['Groups'],$LoginArr['Type']);
       // Set JWT as a cookie
-      setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
+      $this->cookie('set','jwt', $jwt, 30); // 30 days
       $this->api->setAPIResponseMessage('Successfully logged in');
       return true;
     }

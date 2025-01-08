@@ -1,10 +1,10 @@
 <?php
 $app->get('/logs', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->auth->checkAccess("ADMIN-LOGS")) {
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-LOGS")) {
         $data = $request->getQueryParams();
         $Date = $data['date'] ?? null;
-        $ib->api->setAPIResponseData($ib->logging->getLog($Date));
+        $phpef->api->setAPIResponseData($phpef->logging->getLog($Date));
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response

@@ -1,9 +1,9 @@
 <?php
 $app->get('/config', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
 
-    if ($ib->auth->checkAccess("ADMIN-CONFIG")) {
-        $config = $ib->config->get();
+    if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
+        $config = $phpef->config->get();
         if (!empty($config['Security']['salt'])) {
             $config['Security']['salt'] = "********";
         }
@@ -14,8 +14,8 @@ $app->get('/config', function ($request, $response, $args) {
             $config['SAML']['sp']['privateKey'] = "********";
         }
         $config['SAML']['idp']['x509cert'] = substr($config['SAML']['idp']['x509cert'],0,24).'...';
-        $ib->api->setAPIResponseData($config);
-        $ib->logging->writeLog("Config","Queried Configuration","info",$_REQUEST);
+        $phpef->api->setAPIResponseData($config);
+        $phpef->logging->writeLog("Config","Queried Configuration","info",$_REQUEST);
     }
 
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -25,12 +25,12 @@ $app->get('/config', function ($request, $response, $args) {
 });
 
 $app->patch('/config', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->auth->checkAccess("ADMIN-CONFIG")) {
-        $data = $ib->api->getAPIRequestData($request);
-        $config = $ib->config->get();
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
+        $data = $phpef->api->getAPIRequestData($request);
+        $config = $phpef->config->get();
         // Update the config values with the submitted data
-        $ib->config->set($config, $data);
+        $phpef->config->set($config, $data);
     }
 
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -40,9 +40,9 @@ $app->patch('/config', function ($request, $response, $args) {
 });
 
 $app->get('/config/plugins', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->auth->checkAccess("ADMIN-CONFIG")) {
-        $ib->api->setAPIResponseData($ib->plugins->getInstalledPlugins());
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
+        $phpef->api->setAPIResponseData($phpef->plugins->getInstalledPlugins());
     }
 	// Return the response
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -52,9 +52,9 @@ $app->get('/config/plugins', function ($request, $response, $args) {
 });
 
 $app->get('/config/plugins/{plugin}', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->auth->checkAccess("ADMIN-CONFIG")) {
-        $ib->api->setAPIResponseData($ib->config->get('Plugins',$args['plugin']));
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
+        $phpef->api->setAPIResponseData($phpef->config->get('Plugins',$args['plugin']));
     }
 	// Return the response
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -64,12 +64,12 @@ $app->get('/config/plugins/{plugin}', function ($request, $response, $args) {
 });
 
 $app->patch('/config/plugins/{plugin}', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->auth->checkAccess("ADMIN-CONFIG")) {
-        $data = $ib->api->getAPIRequestData($request);
-        $config = $ib->config->get();
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
+        $data = $phpef->api->getAPIRequestData($request);
+        $config = $phpef->config->get();
         // Update the config values with the submitted data
-        $ib->config->setPlugin($config, $data, $args['plugin']);
+        $phpef->config->setPlugin($config, $data, $args['plugin']);
     }
 
 	$response->getBody()->write(jsonE($GLOBALS['api']));

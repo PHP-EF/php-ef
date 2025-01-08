@@ -1,6 +1,6 @@
 <?php
-  if ($ib->auth->checkAccess("ADMIN-CONFIG") == false) {
-    $ib->api->setAPIResponse('Error','Unauthorized',401);
+  if ($phpef->auth->checkAccess("ADMIN-CONFIG") == false) {
+    $phpef->api->setAPIResponse('Error','Unauthorized',401);
     return false;
   }
 
@@ -28,7 +28,7 @@ return '
           <form id="configurationForm">
             <div class="my-4">
               <h5 class="mb-0 mt-5">Configuration</h5>
-              <p>Use the fields below to modify the configuration for '.$ib->config->get('Styling')['websiteTitle'].'.</p>
+              <p>Use the fields below to modify the configuration for '.$phpef->config->get('Styling')['websiteTitle'].'.</p>
               <div class="card border-secondary p-3">
                 <div class="card-title">
                   <h5>System</h5>
@@ -350,7 +350,7 @@ return '
           <form id="customisationForm">
             <div class="my-4">
               <h5 class="mb-0 mt-5">Customisation</h5>
-              <p>Use the fields below to customize the style and logos for '.$ib->config->get('Styling')['websiteTitle'].'.</p>
+              <p>Use the fields below to customize the style and logos for '.$phpef->config->get('Styling')['websiteTitle'].'.</p>
               <div class="card border-secondary p-3">
                 <div class="card-title">
                   <h5>General</h5>
@@ -416,7 +416,7 @@ return '
         <div class="tab-pane fade" id="plugins" role="tabpanel" aria-labelledby="plugins-tab">
           <div class="my-4">
             <h5 class="mb-0 mt-5">Plugins</h5>
-            <p>Use the following to configure Plugins installed on '.$ib->config->get('Styling')['websiteTitle'].'.</p>
+            <p>Use the following to configure Plugins installed on '.$phpef->config->get('Styling')['websiteTitle'].'.</p>
           </div>
           <table data-url="/api/plugins/available"
             data-data-field="data"

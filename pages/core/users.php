@@ -1,6 +1,6 @@
 <?php
-  if ($ib->auth->checkAccess("ADMIN-USERS") == false) {
-    $ib->api->setAPIResponse('Error','Unauthorized',401);
+  if ($phpef->auth->checkAccess("ADMIN-USERS") == false) {
+    $phpef->api->setAPIResponse('Error','Unauthorized',401);
     return false;
   }
 return '
@@ -10,7 +10,7 @@ return '
     <div class="col-12 col-lg-12 mx-auto">
       <div class="my-4">
         <h5 class="mb-0 mt-5">User/Group Configuration</h5>
-        <p>Use the following to configure Users & Groups within '.$ib->config->get('Styling')['websiteTitle'].'.</p>
+        <p>Use the following to configure Users & Groups within '.$phpef->config->get('Styling')['websiteTitle'].'.</p>
         <table id="userTable" class="table table-striped"></table>
       </div>
     </div>
@@ -109,7 +109,7 @@ return '
           <p>At least one special character</p>
         </div>
         <h4>Groups</h4>
-        <p>Enable or Disable the following groups to provide granular control to specific areas of '.$ib->config->get('Styling')['websiteTitle'].'.</p>
+        <p>Enable or Disable the following groups to provide granular control to specific areas of '.$phpef->config->get('Styling')['websiteTitle'].'.</p>
 	      <div class="list-group mb-5 shadow" id="modalListGroup"></div>
       </div>
       <div class="modal-footer">

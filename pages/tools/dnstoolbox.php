@@ -1,6 +1,6 @@
 <?php
-if ($ib->auth->checkAccess("DNS-TOOLBOX") == false) {
-  $ib->api->setAPIResponse('Error','Unauthorized',401);
+if ($phpef->auth->checkAccess("DNS-TOOLBOX") == false) {
+  $phpef->api->setAPIResponse('Error','Unauthorized',401);
   return false;
 }
 $return = '

@@ -22,10 +22,10 @@ $app->addErrorMiddleware(true, true, true);
 $app->setBasePath(getBasePath());
 $app->add(function ($request, $handler) {
 	// inject the ib class into the request
-	$ib = new ib();
-	$request = $request->withAttribute('ib', $ib);
+	$phpef = new phpef();
+	$request = $request->withAttribute('ib', $phpef);
 	// set custom error handler
-	// set_error_handler([$ib, 'setAPIErrorResponse']);
+	// set_error_handler([$phpef, 'setAPIErrorResponse']);
 	return $handler->handle($request);
 });
 

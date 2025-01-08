@@ -9,13 +9,13 @@
   require_once(__DIR__.'/inc/inc.php');
   require_once(__DIR__.'/inc/me.php');
 
-  if ($ib->auth->getAuth()['Authenticated'] == true) {
+  if ($phpef->auth->getAuth()['Authenticated'] == true) {
     $isAuth = true;
   } else {
     $isAuth = false;
   }
 
-  $navLinks = $ib->pages->get();
+  $navLinks = $phpef->pages->get();
 
   function filterNavLinksByMenu($navLinks, $menuName) {
     return array_filter($navLinks, function($link) use ($menuName) {
@@ -39,20 +39,20 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8">
-    <title> <?php echo $ib->config->get('Styling')['websiteTitle']; ?> </title>
+    <title> <?php echo $phpef->config->get('Styling')['websiteTitle']; ?> </title>
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
   </head>
 <body>
   <div class="sidebar">
     <div class="logo-details">
       <?php
-      $smLogoPath = $ib->config->get('Styling', 'logo-sm')['Image'];
-      $smLogoCSS = $ib->config->get('Styling', 'logo-sm')['CSS'];
+      $smLogoPath = $phpef->config->get('Styling', 'logo-sm')['Image'];
+      $smLogoCSS = $phpef->config->get('Styling', 'logo-sm')['CSS'];
       $smLogoPath = $smLogoPath ? $smLogoPath : '/assets/images/php-ef-icon.png';
       echo '<img class="logo-sm" src="' . (file_exists(__DIR__ . $smLogoPath) ? $smLogoPath : '/assets/images/php-ef-icon.png') . '" style="'.$smLogoCSS.'"></img>';
 
-      $lgLogoPath = $ib->config->get('Styling', 'logo-lg')['Image'];
-      $lgLogoCSS = $ib->config->get('Styling', 'logo-lg')['CSS'];
+      $lgLogoPath = $phpef->config->get('Styling', 'logo-lg')['Image'];
+      $lgLogoCSS = $phpef->config->get('Styling', 'logo-lg')['CSS'];
       $lgLogoPath = $lgLogoPath ? $lgLogoPath : '/assets/images/php-ef-icon-text.png';
       echo '<img class="logo-lg" src="' . (file_exists(__DIR__ . $lgLogoPath) ? $lgLogoPath : '/assets/images/php-ef-icon-text.png') . '" style="'.$lgLogoCSS.'"></img>';
       ?>
@@ -64,7 +64,7 @@ foreach ($navLinks as $navLink) {
   switch($navLink['Type']) {
       case 'Link':
           // Create Nav Link
-          if (!$navLink['ACL'] || $ib->auth->checkAccess($navLink['ACL'])) {
+          if (!$navLink['ACL'] || $phpef->auth->checkAccess($navLink['ACL'])) {
               $MenuItem .= <<<EOD
               <li class="menu-item">
                   <div class="icon-link">
@@ -88,7 +88,7 @@ foreach ($navLinks as $navLink) {
           // Check if there are any valid links or submenus
           $hasValidLinks = false;
           foreach ($filteredMenuLinks as $filteredMenuLink) {
-              if ($ib->auth->checkAccess($filteredMenuLink['ACL'])) {
+              if ($phpef->auth->checkAccess($filteredMenuLink['ACL'])) {
                   $hasValidLinks = true;
                   break;
               }
@@ -97,7 +97,7 @@ foreach ($navLinks as $navLink) {
               foreach ($filteredSubMenuLinks as $filteredSubMenuLink) {
                   $filteredSubMenuNavLinks = filterNavLinksBySubMenu($navLinks, $filteredSubMenuLink['Name']);
                   foreach ($filteredSubMenuNavLinks as $filteredSubMenuNavLink) {
-                      if ($ib->auth->checkAccess($filteredSubMenuNavLink['ACL'])) {
+                      if ($phpef->auth->checkAccess($filteredSubMenuNavLink['ACL'])) {
                           $hasValidLinks = true;
                           break 2;
                       }
@@ -123,7 +123,7 @@ foreach ($navLinks as $navLink) {
 
               // Create Nav Menu Links
               foreach ($filteredMenuLinks as $filteredMenuLink) {
-                  if ($ib->auth->checkAccess($filteredMenuLink['ACL'])) {
+                  if ($phpef->auth->checkAccess($filteredMenuLink['ACL'])) {
                       $MenuItem .= <<<EOD
                       <li>
                           <a href="#page={$filteredMenuLink['Title']}" class="toggleFrame" data-page-url="{$filteredMenuLink['Url']}" data-page-type="{$filteredMenuLink['LinkType']}">
@@ -154,7 +154,7 @@ foreach ($navLinks as $navLink) {
                   $SubmenuLinks = '';
                   $filteredSubMenuNavLinks = filterNavLinksBySubMenu($navLinks, $filteredSubMenuLink['Name']);
                   foreach ($filteredSubMenuNavLinks as $filteredSubMenuNavLink) {
-                      if ($ib->auth->checkAccess($filteredSubMenuNavLink['ACL'])) {
+                      if ($phpef->auth->checkAccess($filteredSubMenuNavLink['ACL'])) {
                           $SubmenuLinks .= <<<EOD
                           <a href="#page={$filteredSubMenuNavLink['Title']}" class="toggleFrame" data-page-url="{$filteredSubMenuNavLink['Url']}" data-page-type="{$filteredSubMenuNavLink['LinkType']}">{$filteredSubMenuNavLink['Name']}</a>
                           EOD;
@@ -211,16 +211,16 @@ foreach ($navLinks as $navLink) {
       <i class='bx bx-menu' ></i>
       <span class="title-text"></span>
       <div class="profile-name-user ms-auto me-3">
-        <?php if ($ib->auth->getAuth()['Authenticated']) { echo '
+        <?php if ($phpef->auth->getAuth()['Authenticated']) { echo '
         <div class="dropdown">
-          <button class="dropbtn">'; echo $ib->auth->getAuth()['Username']. '
+          <button class="dropbtn">'; echo $phpef->auth->getAuth()['Username']. '
             <i class="bx bxs-chevron-down arrow" ></i>
           </button>
           <div class="dropdown-content">
             <ul>
               <li class="dropdown-header">
-                <h6>'; echo $ib->auth->getAuth()['DisplayName'].'</h6>
-                <small>'; echo $ib->auth->getAuth()['Email'].'</small>
+                <h6>'; echo $phpef->auth->getAuth()['DisplayName'].'</h6>
+                <small>'; echo $phpef->auth->getAuth()['Email'].'</small>
               </li>
               <li>
                 <hr class="dropdown-divider">
@@ -296,11 +296,11 @@ foreach ($navLinks as $navLink) {
                 <!--/tabs-->
                 <div class="tab-content">
                   <div class="tab-pane fade text-center active show p-1" id="about">
-                    <?php echo $ib->config->get('Styling')['html']['about']; ?>
+                    <?php echo $phpef->config->get('Styling')['html']['about']; ?>
                     <p>Designed by <i class="fa fa-code" style="color:red"></i> by - <a target="_blank" rel="noopener noreferrer" href="https://github.com/TehMuffinMoo">Mat Cox</a></p>
                     <hr>
                     <small>
-                      <?php echo '<span class="fa-solid fa-code-compare"></span> PHP-EF: v'.$ib->getVersion()[0].' | <span class="fa-solid fa-database"></span> Database: v'.$ib->dbHelper->getDatabaseVersion(); ?>
+                      <?php echo '<span class="fa-solid fa-code-compare"></span> PHP-EF: v'.$phpef->getVersion()[0].' | <span class="fa-solid fa-database"></span> Database: v'.$phpef->dbHelper->getDatabaseVersion(); ?>
                       </a>
                     </small>
                     <br>
@@ -413,7 +413,7 @@ foreach ($navLinks as $navLink) {
                 <div id="resetPassword" class="accordion-collapse collapse" aria-labelledby="resetPasswordHeading" data-bs-parent="#resetPasswordAccordion">
                   <div class="accordion-body">
                     <div class="card-body">
-                      <?php if ($ib->auth->getAuth()['Authenticated'] && $ib->auth->getAuth()['Type'] == 'SSO') { echo '
+                      <?php if ($phpef->auth->getAuth()['Authenticated'] && $phpef->auth->getAuth()['Type'] == 'SSO') { echo '
                         <div class="alert alert-warning" role="alert">
                         <center>You must reset your password via the Single Sign On provider.</center>
                         </div>';}
@@ -421,12 +421,12 @@ foreach ($navLinks as $navLink) {
                       <div class="form-group">
                         <label for="userPassword">Password</label>
                         <i class="fa fa-info-circle hover-target" aria-hidden="true"></i>
-                        <input type="password" class="form-control" id="userPassword" aria-describedby="userPasswordHelp" <?php if ($ib->auth->getAuth()['Authenticated'] && $ib->auth->getAuth()['Type'] == 'SSO') { echo 'disabled'; } ?> >
+                        <input type="password" class="form-control" id="userPassword" aria-describedby="userPasswordHelp" <?php if ($phpef->auth->getAuth()['Authenticated'] && $phpef->auth->getAuth()['Type'] == 'SSO') { echo 'disabled'; } ?> >
                         <small id="userPasswordHelp" class="form-text text-muted">Enter the updated password.</small>
                       </div>
                       <div class="form-group">
                         <label for="userPassword2">Verify Password</label>
-                        <input type="password" class="form-control" id="userPassword2" aria-describedby="userPassword2Help" <?php if ($ib->auth->getAuth()['Authenticated'] && $ib->auth->getAuth()['Type'] == 'SSO') { echo 'disabled'; } ?> >
+                        <input type="password" class="form-control" id="userPassword2" aria-describedby="userPassword2Help" <?php if ($phpef->auth->getAuth()['Authenticated'] && $phpef->auth->getAuth()['Type'] == 'SSO') { echo 'disabled'; } ?> >
                         <small id="userPassword2Help" class="form-text text-muted">Enter the updated password again.</small>
                       </div>
                       <div id="popover" class="popover" role="alert">

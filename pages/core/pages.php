@@ -1,6 +1,6 @@
 <?php
-  if ($ib->auth->checkAccess("ADMIN-PAGES") == false) {
-    $ib->api->setAPIResponse('Error','Unauthorized',401);
+  if ($phpef->auth->checkAccess("ADMIN-PAGES") == false) {
+    $phpef->api->setAPIResponse('Error','Unauthorized',401);
     return false;
   }
 return '

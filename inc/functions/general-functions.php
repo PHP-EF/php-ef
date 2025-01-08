@@ -205,10 +205,10 @@ function encrypt($data, $password){
 
 
 function decrypt($msg_encrypted_bundle, $password = null){
-    global $ib;
+    global $phpef;
 
     if (!isset($password)) {
-        $password = $ib->config->get('Security','salt');
+        $password = $phpef->config->get('Security','salt');
     }
 
 	$password = sha1($password);
@@ -252,11 +252,11 @@ function sanitizePage($input) {
 }
 
 function getSecureHeaders() {
-    global $ib;
+    global $phpef;
 
     // X-Frame-Options - Add any iFrame Pages to this to ensure they are permitted
-    $XFrameOptions = $ib->config->get('Security', 'Headers')['X-Frame-Options'] ?? 'SAMEORIGIN';
-    $iFrameLinks = $ib->pages->getiFrameLinks();
+    $XFrameOptions = $phpef->config->get('Security', 'Headers')['X-Frame-Options'] ?? 'SAMEORIGIN';
+    $iFrameLinks = $phpef->pages->getiFrameLinks();
     $AllowList = [];
     if (!empty($iFrameLinks)) {
         $AllowList = array_column($iFrameLinks,'Url');
@@ -292,9 +292,9 @@ function getSecureHeaders() {
         "https://fonts.gstatic.com"
     ]);
 
-    $FrameSource = $ib->config->get('Security', 'Headers')['CSP']['Frame-Source'] ?? implode(' ',$AllowList);
+    $FrameSource = $phpef->config->get('Security', 'Headers')['CSP']['Frame-Source'] ?? implode(' ',$AllowList);
     
-    $ConnectSourceFromConfig = $ib->config->get('Security', 'Headers')['CSP']['Connect-Source'] ?? '';
+    $ConnectSourceFromConfig = $phpef->config->get('Security', 'Headers')['CSP']['Connect-Source'] ?? '';
 
     if (isset($GLOBALS['Headers']['CSP']['Connect-Source'])) {
         $ConnectSource = implode(' ',$GLOBALS['Headers']['CSP']['Connect-Source']) . ' ' . $ConnectSourceFromConfig;

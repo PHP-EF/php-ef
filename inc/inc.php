@@ -21,7 +21,7 @@ foreach (glob(__DIR__.'/classes/*.php') as $class) {
 }
 
 // Instantiate Class Builder
-$ib = new ib();
+$phpef = new phpef();
 
 // Include all Plugin Classes
 if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'plugins')) {
@@ -41,7 +41,7 @@ session_write_close(); // Save PHP Session
 getSecureHeaders();
 
 if (!(isset($SkipCSS))) {
-  $faviconPath = $ib->config->get('Styling', 'favicon')['Image'];
+  $faviconPath = $phpef->config->get('Styling', 'favicon')['Image'];
   $faviconPath = $faviconPath ? $faviconPath : '/assets/images/favicon.ico';
     echo '
     <head>
@@ -91,8 +91,8 @@ if (!(isset($SkipCSS))) {
       <script src="/assets/js/apexcharts.min.js"></script>
 
       <!-- Main -->
-      <script src="/assets/js/main.js?v'.$ib->getVersion()[0].'"></script>
-      <link href="/assets/css/main.css?v'.$ib->getVersion()[0].'" rel="stylesheet">
+      <script src="/assets/js/main.js?v'.$phpef->getVersion()[0].'"></script>
+      <link href="/assets/css/main.css?v'.$phpef->getVersion()[0].'" rel="stylesheet">
 
     </head>
     ';

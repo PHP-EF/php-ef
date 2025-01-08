@@ -141,11 +141,11 @@ html {
     <input type="text" placeholder="Username" name="un" id="un"/>
     <input type="password" placeholder="Password" name="pw" id="pw"/>
     <button id="login" class="login"> Sign in </button>
-    <?php if ($ib->config->get('SAML','enabled')) {
+    <?php if ($phpef->config->get('SAML','enabled')) {
       echo '<button id="sso" class="sso"> Single Sign On </button>';
     }?>
     <?php
-      $ib->hooks->executeHook('login_page_buttons');
+      $phpef->hooks->executeHook('login_page_buttons');
     ?>
   </div>
 </div>
@@ -153,7 +153,7 @@ html {
 <script>
 
 <?php
-  $ib->hooks->executeHook('login_page_js');
+  $phpef->hooks->executeHook('login_page_js');
 ?>
 
 function login() {
@@ -209,7 +209,7 @@ function reset() {
         <input type="text" placeholder="Username" name="un" id="un"/>
         <input type="password" placeholder="Password" name="pw" id="pw"/>
         <button id="login" class="login"> Sign in </button>
-        <?php if ($ib->config->get('SAML','enabled')) {
+        <?php if ($phpef->config->get('SAML','enabled')) {
           echo '<button id="sso" class="sso"> Single Sign On </button>';
         }?>
       </div>`);

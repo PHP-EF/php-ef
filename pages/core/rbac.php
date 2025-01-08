@@ -1,6 +1,6 @@
 <?php
-  if ($ib->auth->checkAccess("ADMIN-RBAC") == false) {
-    $ib->api->setAPIResponse('Error','Unauthorized',401);
+  if ($phpef->auth->checkAccess("ADMIN-RBAC") == false) {
+    $phpef->api->setAPIResponse('Error','Unauthorized',401);
     return false;
   }
 return '
@@ -17,7 +17,7 @@ return '
         <div class="card-body">
           <center>
             <h4>Role Based Access</h4>
-            <p>Use the following to configure Role Based Access. This allows providing granular control over which areas of '.$ib->config->get('Styling')['websiteTitle'].' that users have access to.</p>
+            <p>Use the following to configure Role Based Access. This allows providing granular control over which areas of '.$phpef->config->get('Styling')['websiteTitle'].' that users have access to.</p>
           </center>
         </div>
       </div>
@@ -123,7 +123,7 @@ return '
 	      </div>
 	      <hr>
         <h4>Group Roles</h4>
-        <p>Enable or Disable the following roles to provide granular control to specific areas of '.$ib->config->get('Styling')['websiteTitle'].'.</p>
+        <p>Enable or Disable the following roles to provide granular control to specific areas of '.$phpef->config->get('Styling')['websiteTitle'].'.</p>
 	      <div class="list-group mb-5 shadow" id="modalListGroup"></div>
       </div>
       <div class="modal-footer">

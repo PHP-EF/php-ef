@@ -1,6 +1,6 @@
 <?php
-if ($ib->auth->checkAccess("REPORT-TRACKING") == false) {
-  $ib->api->setAPIResponse('Error','Unauthorized',401);
+if ($phpef->auth->checkAccess("REPORT-TRACKING") == false) {
+  $phpef->api->setAPIResponse('Error','Unauthorized',401);
   return false;
 }
 return '

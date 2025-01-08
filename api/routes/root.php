@@ -1,7 +1,7 @@
 <?php
 $app->get('/launch[/]', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-	$GLOBALS['api']['response']['data']['status'] = $ib->launch();
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$GLOBALS['api']['response']['data']['status'] = $phpef->launch();
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
 		->withHeader('Content-Type', 'application/json;charset=UTF-8')
@@ -9,14 +9,14 @@ $app->get('/launch[/]', function ($request, $response, $args) {
 });
 
 $app->get('/checkAccess[/]', function ($request, $response, $args) {
-    $ib = ($request->getAttribute('ib')) ?? new ib();
+    $phpef = ($request->getAttribute('ib')) ?? new phpef();
     $data = $request->getQueryParams();
-    $currentUser = $ib->auth->getAuth();
+    $currentUser = $phpef->auth->getAuth();
     if (isset($data['node'])) {
         $Result = array(
             "node" => $data['node']
         );
-        if ($ib->auth->checkAccess($data['node'])) {
+        if ($phpef->auth->checkAccess($data['node'])) {
             $Result['permitted'] = true;
             header("X-PHPEF-User: " . $currentUser['Username']);
             header("X-PHPEF-Email: " . $currentUser['Email']);
@@ -25,14 +25,14 @@ $app->get('/checkAccess[/]', function ($request, $response, $args) {
             header("X-PHPEF-DisplayName: " . $currentUser['DisplayName']);
             header("X-PHPEF-Groups: " . implode(',', $currentUser['Groups']));
             header("X-PHPEF-IP: " . $currentUser['IPAddress']);
-            $ib->api->setAPIResponse('Success', null, 200, $Result);
+            $phpef->api->setAPIResponse('Success', null, 200, $Result);
         } else {
             $Result['permitted'] = false;
-            $ib->api->setAPIResponse('Error', 'Unauthorized', 401, $Result);
+            $phpef->api->setAPIResponse('Error', 'Unauthorized', 401, $Result);
         }
-        $ib->api->setAPIResponseData($Result);
+        $phpef->api->setAPIResponseData($Result);
     } else {
-		$ib->api->setAPIResponse('Error', 'Node empty', 422);
+		$phpef->api->setAPIResponse('Error', 'Node empty', 422);
 	}
 
     $response->getBody()->write(json_encode($GLOBALS['api']));

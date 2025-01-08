@@ -1,8 +1,8 @@
 <?php
 $app->post('/t', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    $ib->reporting->track($ib->api->getAPIRequestData($request),$ib->auth->getAuth());
-	$ib->api->setAPIResponseCode(201);
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+    $phpef->reporting->track($phpef->api->getAPIRequestData($request),$phpef->auth->getAuth());
+	$phpef->api->setAPIResponseCode(201);
 
 	// Return the response
 	$response->getBody()->write(jsonE($GLOBALS['api']));

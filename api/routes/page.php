@@ -1,19 +1,19 @@
 <?php
 $app->get('/page/{category}/{page}', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
 	$category = sanitizePage($args['category']);
 	$page = sanitizePage($args['page']);
 	$pagePath = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'pages' . DIRECTORY_SEPARATOR . $category . DIRECTORY_SEPARATOR . $page . '.php';
 	if (file_exists($pagePath)) {
 		$Include = include_once($pagePath);
 		if (!$Include === false) {
-			$ib->api->setAPIResponseData($Include);
+			$phpef->api->setAPIResponseData($Include);
 			$response->getBody()->write($GLOBALS['api']['data']);
 		} else {
 			$response->getBody()->write(jsonE($GLOBALS['api']));
 		}
 	} else {
-		$ib->api->setAPIResponse('Error','Page not found',404);
+		$phpef->api->setAPIResponse('Error','Page not found',404);
 		$response->getBody()->write(jsonE($GLOBALS['api']));
 	}
 
@@ -24,14 +24,14 @@ $app->get('/page/{category}/{page}', function ($request, $response, $args) {
 });
 
 $app->get('/page/plugin/{plugin}/js', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
 	$plugin = sanitizePage($args['plugin']);
 	$pluginDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $plugin;
 
 	// Get Custom JS
 	if (file_exists($pluginDir.'/main.js')) {
 		$jsContent = file_get_contents($pluginDir.'/main.js');
-		$ib->api->setAPIResponseData($jsContent);
+		$phpef->api->setAPIResponseData($jsContent);
 		$response->getBody()->write($GLOBALS['api']['data']);
 	} else {
 		$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -44,14 +44,14 @@ $app->get('/page/plugin/{plugin}/js', function ($request, $response, $args) {
 });
 
 $app->get('/page/plugin/{plugin}/css', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
 	$plugin = sanitizePage($args['plugin']);
 	$pluginDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $plugin;
 
 	// Get Custom JS
 	if (file_exists($pluginDir.'/styles.css')) {
 		$cssContent = file_get_contents($pluginDir.'/styles.css');
-		$ib->api->setAPIResponseData($cssContent);
+		$phpef->api->setAPIResponseData($cssContent);
 		$response->getBody()->write($GLOBALS['api']['data']);
 	} else {
 		$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -64,7 +64,7 @@ $app->get('/page/plugin/{plugin}/css', function ($request, $response, $args) {
 });
 
 $app->get('/page/plugin/{plugin}/{page}', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
 
 	$plugin = sanitizePage($args['plugin']);
 	$page = sanitizePage($args['page']);
@@ -84,10 +84,10 @@ $app->get('/page/plugin/{plugin}/{page}', function ($request, $response, $args) 
 		}
 
 		$html .= '<script src="/api/page/plugin/'.$plugin.'/js" crossorigin="anonymous"></script>';
-		$ib->api->setAPIResponseData($html);
+		$phpef->api->setAPIResponseData($html);
 		$response->getBody()->write($GLOBALS['api']['data']);
 	} else {
-		$ib->api->setAPIResponse('Error','Page not found',404);
+		$phpef->api->setAPIResponse('Error','Page not found',404);
 		$response->getBody()->write(jsonE($GLOBALS['api']));
 	}
 
@@ -98,15 +98,15 @@ $app->get('/page/plugin/{plugin}/{page}', function ($request, $response, $args) 
 });
 
 $app->get('/pages', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
 	$data = $request->getQueryParams();
-    if ($ib->auth->checkAccess("ADMIN-PAGES")) {
+    if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
 		$Menu = $data['menu'] ?? null;
 		$SubMenu = $data['submenu'] ?? null;
 		if ($Menu || $SubMenu) {
-			$ib->api->setAPIResponseData($ib->pages->getByMenu($Menu,$SubMenu));
+			$phpef->api->setAPIResponseData($phpef->pages->getByMenu($Menu,$SubMenu));
 		} else {
-			$ib->api->setAPIResponseData($ib->pages->get());	
+			$phpef->api->setAPIResponseData($phpef->pages->get());	
 		}
 	}
 
@@ -118,10 +118,10 @@ $app->get('/pages', function ($request, $response, $args) {
 });
 
 $app->post('/pages', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->auth->checkAccess("ADMIN-PAGES")) {
-        $data = $ib->api->getAPIRequestData($request);
-        $Name = $data['name'] ?? exit($ib->api->setAPIResponse('Error','Name missing from request'));
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
+        $data = $phpef->api->getAPIRequestData($request);
+        $Name = $data['name'] ?? exit($phpef->api->setAPIResponse('Error','Name missing from request'));
         $Title = $data['title'] ?? null;
         $Type = $data['type'] ?? null;
 		$Url = $data['url'] ?? null;
@@ -130,7 +130,7 @@ $app->post('/pages', function ($request, $response, $args) {
 		$ACL = $data['acl'] ?? null;
 		$Icon = $data['icon'] ?? null;
 		$LinkType = $data['linktype'] ?? null;
-		$ib->pages->new($Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon,$LinkType);
+		$phpef->pages->new($Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon,$LinkType);
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
@@ -139,10 +139,10 @@ $app->post('/pages', function ($request, $response, $args) {
 });
 
 $app->patch('/page/{id}', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->auth->checkAccess("ADMIN-PAGES")) {
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
         if (isset($args['id'])) {
-			$data = $ib->api->getAPIRequestData($request);
+			$data = $phpef->api->getAPIRequestData($request);
 			$Name = $data['name'] ?? null;
 			$Title = $data['title'] ?? null;
 			$Type = $data['type'] ?? null;
@@ -152,9 +152,9 @@ $app->patch('/page/{id}', function ($request, $response, $args) {
 			$ACL = $data['acl'] ?? null;
 			$Icon = $data['icon'] ?? null;
 			$LinkType = $data['linktype'] ?? null;
-			$ib->pages->set($args['id'],$Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon,$LinkType);
+			$phpef->pages->set($args['id'],$Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon,$LinkType);
         } else {
-            $ib->api->setAPIResponse('Error','id missing from request',400);
+            $phpef->api->setAPIResponse('Error','id missing from request',400);
         }
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -165,13 +165,13 @@ $app->patch('/page/{id}', function ($request, $response, $args) {
 
 // Update CMDB Column Weight
 $app->patch('/page/{id}/weight', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->auth->checkAccess("ADMIN-PAGES")) {
-		$data = $ib->api->getAPIRequestData($request);
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
+		$data = $phpef->api->getAPIRequestData($request);
 		if (isset($data['weight'])) {
-			$ib->pages->updatePageWeight($args['id'],$data['weight']);
+			$phpef->pages->updatePageWeight($args['id'],$data['weight']);
 		} else {
-			$ib->api->setAPIResponse('Error','Weight missing from request');
+			$phpef->api->setAPIResponse('Error','Weight missing from request');
 		}        
 	}
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -182,12 +182,12 @@ $app->patch('/page/{id}/weight', function ($request, $response, $args) {
 
 
 $app->delete('/page/{id}', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->auth->checkAccess("ADMIN-PAGES")) {
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
         if (isset($args['id'])) {
-            $ib->pages->delete($args['id']);
+            $phpef->pages->delete($args['id']);
         } else {
-            $ib->api->setAPIResponse('Error','id missing from request',400);
+            $phpef->api->setAPIResponse('Error','id missing from request',400);
         }
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -197,9 +197,9 @@ $app->delete('/page/{id}', function ($request, $response, $args) {
 });
 
 $app->get('/pages/hierarchy', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-	if ($ib->auth->checkAccess("ADMIN-PAGES")) {
-		$config = $ib->pages->get();
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
+		$config = $phpef->pages->get();
 		$navigation = [];
 
 		// First pass: Process Menus and Submenus
@@ -232,7 +232,7 @@ $app->get('/pages/hierarchy', function ($request, $response, $args) {
 		}
 	}
 
-	$ib->api->setAPIResponseData($navigation);
+	$phpef->api->setAPIResponseData($navigation);
 
 	// Return the response
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -242,9 +242,9 @@ $app->get('/pages/hierarchy', function ($request, $response, $args) {
 });
 
 $app->get('/pages/list', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-	if ($ib->auth->checkAccess("ADMIN-PAGES")) {
-		$ib->api->setAPIResponseData($ib->pages->getAllAvailablePages());
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
+		$phpef->api->setAPIResponseData($phpef->pages->getAllAvailablePages());
 	}
 
 	// Return the response
@@ -255,9 +255,9 @@ $app->get('/pages/list', function ($request, $response, $args) {
 });
 
 $app->get('/pages/root', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->auth->checkAccess("ADMIN-PAGES")) {
-		$ib->api->setAPIResponseData($ib->pages->getMainLinksAndMenus());	
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
+		$phpef->api->setAPIResponseData($phpef->pages->getMainLinksAndMenus());	
 	}
 
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -267,9 +267,9 @@ $app->get('/pages/root', function ($request, $response, $args) {
 });
 
 $app->get('/pages/menus', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->auth->checkAccess("ADMIN-PAGES")) {
-		$ib->api->setAPIResponseData($ib->pages->getByType('Menu'));	
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
+		$phpef->api->setAPIResponseData($phpef->pages->getByType('Menu'));	
 	}
 
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -279,11 +279,11 @@ $app->get('/pages/menus', function ($request, $response, $args) {
 });
 
 $app->get('/pages/submenus', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
 	$data = $request->getQueryParams();
-    if ($ib->auth->checkAccess("ADMIN-PAGES")) {
+    if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
 		$Menu = $data['menu'] ?? null;
-		$ib->api->setAPIResponseData($ib->pages->getByType('SubMenu',$Menu));	
+		$phpef->api->setAPIResponseData($phpef->pages->getByType('SubMenu',$Menu));	
 	}
 
 	$response->getBody()->write(jsonE($GLOBALS['api']));

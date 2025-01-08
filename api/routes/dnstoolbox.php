@@ -1,17 +1,17 @@
 <?php
 $app->get('/dnstoolbox', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->auth->checkAccess("DNS-TOOLBOX")) {
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+    if ($phpef->auth->checkAccess("DNS-TOOLBOX")) {
         $data = $request->getQueryParams();
         if (isset($data['request']) && isset($data['domain'])) {
 
             $domain = $data['domain'];
             if ($domain == '.') {
-                $ib->api->setAPIResponse('Error','Domain Name or IP missing from request',400);
+                $phpef->api->setAPIResponse('Error','Domain Name or IP missing from request',400);
             }
             if ($data['request'] != 'port') {
                 if (!isset($data['source']) || $data['source'] == 'null') {
-                    $ib->api->setAPIResponse('Error','DNS Server missing from request',400);
+                    $phpef->api->setAPIResponse('Error','DNS Server missing from request',400);
                     return false;
                 } else {
                     $source = $data['source'];
@@ -34,7 +34,7 @@ $app->get('/dnstoolbox', function ($request, $response, $args) {
 
             $DNSToolbox = new DNSToolbox();
 
-            $ib->logging->writeLog("DNSToolbox","A query was performed using type: ".$data['request'],"debug",$data);
+            $phpef->logging->writeLog("DNSToolbox","A query was performed using type: ".$data['request'],"debug",$data);
             $methods = [
                 'a' => 'a',
                 'aaaa' => 'aaaa',
@@ -51,12 +51,12 @@ $app->get('/dnstoolbox', function ($request, $response, $args) {
             if (array_key_exists($data['request'], $methods)) {
                 $method = $methods[$data['request']];
                 if ($method === 'port') {
-                    $ib->api->setAPIResponseData($DNSToolbox->$method($domain, $port));
+                    $phpef->api->setAPIResponseData($DNSToolbox->$method($domain, $port));
                 } else {
-                    $ib->api->setAPIResponseData($DNSToolbox->$method($domain, $sourceserver));
+                    $phpef->api->setAPIResponseData($DNSToolbox->$method($domain, $sourceserver));
                 }
             } else {
-                $ib->api->setAPIResponse('Error','Invalid Request Type',400);
+                $phpef->api->setAPIResponse('Error','Invalid Request Type',400);
             }
         }
     }

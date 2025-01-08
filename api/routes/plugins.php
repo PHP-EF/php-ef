@@ -1,8 +1,8 @@
 <?php
 $app->get('/plugins/installed', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
 
-	$ib->api->setAPIResponseData($ib->plugins->getInstalledPlugins());
+	$phpef->api->setAPIResponseData($phpef->plugins->getInstalledPlugins());
 
     $response->getBody()->write(jsonE($GLOBALS['api']));
 	// Return the response
@@ -12,13 +12,13 @@ $app->get('/plugins/installed', function ($request, $response, $args) {
 });
 
 $app->get('/plugins/available', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
 
-	$results = $ib->plugins->getAvailablePlugins();
+	$results = $phpef->plugins->getAvailablePlugins();
 	if (empty($results['warnings'])) {
-		$ib->api->setAPIResponseData($results['results']);
+		$phpef->api->setAPIResponseData($results['results']);
 	} else {
-		$ib->api->setAPIResponse('Warning',$results['warnings'],200,$results['results']);
+		$phpef->api->setAPIResponse('Warning',$results['warnings'],200,$results['results']);
 	}
 
     $response->getBody()->write(jsonE($GLOBALS['api']));
@@ -29,10 +29,10 @@ $app->get('/plugins/available', function ($request, $response, $args) {
 });
 
 $app->post('/plugins/install', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-	$data = $ib->api->getAPIRequestData($request);
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$data = $phpef->api->getAPIRequestData($request);
 
-	$ib->plugins->install($data);
+	$phpef->plugins->install($data);
 
     $response->getBody()->write(jsonE($GLOBALS['api']));
 	// Return the response
@@ -42,10 +42,10 @@ $app->post('/plugins/install', function ($request, $response, $args) {
 });
 
 $app->post('/plugins/uninstall', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-	$data = $ib->api->getAPIRequestData($request);
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$data = $phpef->api->getAPIRequestData($request);
 
-	$ib->plugins->uninstall($data);
+	$phpef->plugins->uninstall($data);
 
     $response->getBody()->write(jsonE($GLOBALS['api']));
 	// Return the response
@@ -55,10 +55,10 @@ $app->post('/plugins/uninstall', function ($request, $response, $args) {
 });
 
 $app->post('/plugins/reinstall', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-	$data = $ib->api->getAPIRequestData($request);
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$data = $phpef->api->getAPIRequestData($request);
 
-	$ib->plugins->reinstall($data);
+	$phpef->plugins->reinstall($data);
 
     $response->getBody()->write(jsonE($GLOBALS['api']));
 	// Return the response
@@ -68,9 +68,9 @@ $app->post('/plugins/reinstall', function ($request, $response, $args) {
 });
 
 $app->get('/plugins/repositories', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
 
-	$ib->api->setAPIResponseData($ib->plugins->getPluginRepositories());
+	$phpef->api->setAPIResponseData($phpef->plugins->getPluginRepositories());
 
     $response->getBody()->write(jsonE($GLOBALS['api']));
 	// Return the response
@@ -80,13 +80,13 @@ $app->get('/plugins/repositories', function ($request, $response, $args) {
 });
 
 $app->post('/plugins/repositories', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-	$data = $ib->api->getAPIRequestData($request);
+	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$data = $phpef->api->getAPIRequestData($request);
 	if (isset($data['list'])) {
-		$config = $ib->config->get();
-		$ib->api->setAPIResponseData($ib->config->setRepositories($config,$data['list']));
+		$config = $phpef->config->get();
+		$phpef->api->setAPIResponseData($phpef->config->setRepositories($config,$data['list']));
 	} else {
-		$ib->api->setAPIResponse('Error','List missing from request');
+		$phpef->api->setAPIResponse('Error','List missing from request');
 	}
 
     $response->getBody()->write(jsonE($GLOBALS['api']));
