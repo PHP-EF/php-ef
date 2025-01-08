@@ -246,6 +246,85 @@ class ib {
     }
     return $setting;
   }
+
+  public function cookie($type, $name, $value = '', $days = -1, $http = true, $path = '/') {
+		$days = ($days > 365) ? 365 : $days;
+		if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == "https") {
+			$Secure = true;
+			$HTTPOnly = true;
+		} elseif (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' && $_SERVER['HTTPS'] !== '') {
+			$Secure = true;
+			$HTTPOnly = true;
+		} else {
+			$Secure = false;
+			$HTTPOnly = false;
+		}
+		if (!$http) {
+			$HTTPOnly = false;
+		}
+		$_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? '';
+		$Domain = $this->parseDomain($_SERVER['HTTP_HOST']);
+		$DomainTest = $this->parseDomain($_SERVER['HTTP_HOST'], true);
+		if ($type == 'set') {
+			$_COOKIE[$name] = $value;
+			header('Set-Cookie: ' . rawurlencode($name) . '=' . rawurlencode($value)
+				. (empty($days) ? '' : '; expires=' . gmdate('D, d-M-Y H:i:s', time() + (86400 * $days)) . ' GMT')
+				. (empty($path) ? '' : '; path=' . $path)
+				. (empty($Domain) ? '' : '; domain=' . $Domain)
+				. (!$Secure ? '' : '; SameSite=None; Secure')
+				. (!$HTTPOnly ? '' : '; HttpOnly'), false);
+			header('Set-Cookie: ' . rawurlencode($name) . '=' . rawurlencode($value)
+				. (empty($days) ? '' : '; expires=' . gmdate('D, d-M-Y H:i:s', time() + (86400 * $days)) . ' GMT')
+				. (empty($path) ? '' : '; path=' . $path)
+				. (empty($Domain) ? '' : '; domain=' . $DomainTest)
+				. (!$Secure ? '' : '; SameSite=None; Secure')
+				. (!$HTTPOnly ? '' : '; HttpOnly'), false);
+		} elseif ($type == 'delete') {
+			unset($_COOKIE[$name]);
+			header('Set-Cookie: ' . rawurlencode($name) . '=' . rawurlencode($value)
+				. (empty($days) ? '' : '; expires=' . gmdate('D, d-M-Y H:i:s', time() - 3600) . ' GMT')
+				. (empty($path) ? '' : '; path=' . $path)
+				. (empty($Domain) ? '' : '; domain=' . $Domain)
+				. (!$Secure ? '' : '; SameSite=None; Secure')
+				. (!$HTTPOnly ? '' : '; HttpOnly'), false);
+			header('Set-Cookie: ' . rawurlencode($name) . '=' . rawurlencode($value)
+				. (empty($days) ? '' : '; expires=' . gmdate('D, d-M-Y H:i:s', time() - 3600) . ' GMT')
+				. (empty($path) ? '' : '; path=' . $path)
+				. (empty($Domain) ? '' : '; domain=' . $DomainTest)
+				. (!$Secure ? '' : '; SameSite=None; Secure')
+				. (!$HTTPOnly ? '' : '; HttpOnly'), false);
+		}
+	}
+
+  public function parseDomain($value, $force = false) {
+    $Domain = $value;
+    $Port = strpos($Domain, ':');
+    if ($Port !== false) {
+        $Domain = substr($Domain, 0, $Port);
+        $value = $Domain;
+    }
+    $check = substr_count($Domain, '.');
+    if ($check >= 3) {
+        if (is_numeric($Domain[0])) {
+            $Domain = '';
+        } else {
+            $Domain = '.' . explode('.', $Domain)[1] . '.' . explode('.', $Domain)[2] . '.' . explode('.', $Domain)[3];
+        }
+    } elseif ($check == 2) {
+        if (explode('.', $Domain)[0] == 'www') {
+            $Domain = '.' . explode('.', $Domain)[1] . '.' . explode('.', $Domain)[2];
+        } elseif (explode('.', $Domain)[1] == 'co') {
+            $Domain = '.' . explode('.', $Domain)[0] . '.' . explode('.', $Domain)[1] . '.' . explode('.', $Domain)[2];
+        } else {
+            $Domain = '.' . explode('.', $Domain)[1] . '.' . explode('.', $Domain)[2];
+        }
+    } elseif ($check == 1) {
+        $Domain = '.' . $Domain;
+    } else {
+        $Domain = '';
+    }
+    return ($force) ? $value : $Domain;
+  }
 }
 
 class core {
