@@ -301,7 +301,7 @@ return '
     var linktype = $("#pageLinkType").val();
     switch(type) {
       case "Link":
-        $("#pageUrl,#pageTitle,#pageUrl,#pageSubMenu,#pageACL,#pageLinkType").parent().attr("hidden",false);
+        $("#pageUrl,#pageTitle,#pageUrl,#pageSubMenu,#pageACL,#pageLinkType,#pageiFrameUrl").parent().attr("hidden",false);
         if (submenu) {
           $("#pageIcon").parent().attr("hidden",true);
           $("#pageIcon").val("")
@@ -310,7 +310,7 @@ return '
         }
         break;
       case "Menu":
-        $("#pageUrl,#pageTitle,#pageUrl,#pageSubMenu,#pageACL,#pageLinkType").parent().attr("hidden",true).val("");
+        $("#pageUrl,#pageTitle,#pageUrl,#pageSubMenu,#pageACL,#pageLinkType,#pageiFrameUrl").parent().attr("hidden",true).val("");
         break;
     }
     switch(linktype) {
@@ -368,10 +368,10 @@ return '
       $.each(menuData.data, function(index, item) {
           if (item.plugin) {
             var name = "Plugin: "+item.plugin+" / "+item.filename;
-            var val = "#page=plugin/"+item.plugin+"/"+item.filename;
+            var val = "plugin/"+item.plugin+"/"+item.filename;
           } else {
             var name = item.directory+" / "+item.filename;
-            var val = "#page="+item.directory+"/"+item.filename;
+            var val = item.directory+"/"+item.filename;
           }
           const option = $("<option></option>").val(val).text(name);
           pageUrlContainer.append(option);

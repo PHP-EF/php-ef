@@ -171,7 +171,10 @@ class dbHelper {
         "UPDATE pages SET LinkType = 'Native'"
       ],
       '0.7.3' => [],
-      '0.7.4' => []
+      '0.7.4' => [],
+      '0.7.5' => [
+        "UPDATE pages SET Url = SUBSTR(url, 7) WHERE Url LIKE '#page=%';"
+      ]
     ];
   }
 }

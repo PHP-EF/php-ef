@@ -37,7 +37,7 @@ class ib {
   }
 
   public function getVersion() {
-    return ['0.7.4'];
+    return ['0.7.5'];
   }
 
   // Initiate Database Migration if required
@@ -61,34 +61,22 @@ class ib {
     }
   }
 
-	public function checkConfiguration() {
-		$status = array();
+	public function launch() {
+    $ConfigCheck = new configurationCheck();
 
-    $PHPExtensions = checkPHPExtensions();
-    $PHPFunctions = checkPHPFunctions();
+		$status = array();
 
 		if (!file_exists($this->configFilePath)) {
 			$status['status'] = 'wizard';
 		}
-		if (count($PHPExtensions['inactive']) > 0 || !is_writable(dirname(__DIR__, 2))) {
+		if (!$ConfigCheck->checkAllPassed()) {
 			$status['status'] = 'dependencies';
 		}
 		$status['status'] = ($status['status']) ?? 'OK';
     $status['version'] = $this->getVersion();
 		$status['configWritable'] = is_writable($this->configFilePath) ? true : false;
     $status['dbWritable'] = is_writable($this->dbPath) ? true : false;
-		$status['PHP'] = [
-      "Version" => phpversion(),
-      "User" => get_current_user(),
-      "Extensions" => [
-        "Active" => $PHPExtensions['active'],
-        "Inactive" => $PHPExtensions['inactive']
-      ],
-      "Functions" => [
-        "Active" => $PHPFunctions['active'],
-        "Inactive" => $PHPFunctions['inactive']
-      ]
-    ];
+		$status['checks'] = $ConfigCheck->configChecks;
     $status['environment'] = [
       "OS" => $_SESSION['Environment']
     ];
@@ -353,17 +341,17 @@ class Pages {
 
       // Insert default nav links if they don't exist
       $navLinks = [
-        ['Home','Home',null,'Link',null,null,'#page=core/default','Native','fa fa-house',1],
+        ['Home','Home',null,'Link',null,null,'core/default','Native','fa fa-house',1],
         ['Admin','Admin',null,'Menu',null,null,null,null,'fas fa-user-shield',2],
         ['Reports','Reports',null,'Menu',null,null,null,null,'fa-solid fa-chart-simple',3],
         ['Settings','Settings',null,'SubMenu','Admin',null,null,null,'fa fa-cog',1],
         ['Logs','Logs',null,'SubMenu','Admin',null,null,null,'fa-regular fa-file',2],
-        ['Users','Users','ADMIN-USERS','SubMenuLink','Admin','Settings','#page=core/users','Native',null,1],
-        ['Pages','Pages','ADMIN-PAGES','SubMenuLink','Admin','Settings','#page=core/pages','Native',null,2],
-        ['Configuration','Configuration','ADMIN-CONFIG','SubMenuLink','Admin','Settings','#page=core/configuration','Native',null,3],
-        ['Role Based Access','Role Based Access','ADMIN-RBAC','SubMenuLink','Admin','Settings','#page=core/rbac','Native',null,4],
-        ['Portal Logs','Portal Logs','ADMIN-LOGS','SubMenuLink','Admin','Logs','#page=core/logs','Native',null,1],
-        ['Web Tracking','Web Tracking',"REPORT-TRACKING",'MenuLink',"Reports",null,"#page=reports/tracking",'Native','fa-solid fa-bullseye',1]
+        ['Users','Users','ADMIN-USERS','SubMenuLink','Admin','Settings','core/users','Native',null,1],
+        ['Pages','Pages','ADMIN-PAGES','SubMenuLink','Admin','Settings','core/pages','Native',null,2],
+        ['Configuration','Configuration','ADMIN-CONFIG','SubMenuLink','Admin','Settings','core/configuration','Native',null,3],
+        ['Role Based Access','Role Based Access','ADMIN-RBAC','SubMenuLink','Admin','Settings','core/rbac','Native',null,4],
+        ['Portal Logs','Portal Logs','ADMIN-LOGS','SubMenuLink','Admin','Logs','core/logs','Native',null,1],
+        ['Web Tracking','Web Tracking',"REPORT-TRACKING",'MenuLink',"Reports",null,"reports/tracking",'Native','fa-solid fa-bullseye',1]
       ];
 
       foreach ($navLinks as $link) {

@@ -5,13 +5,13 @@ require_once(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SE
 // Handle refresh request
 
 if (isset($_GET['refresh'])) {
-    unset($_SESSION['dependency_checks']);
+    unset($_SESSION['configChecks']);
     header("Location: " . strtok($_SERVER["REQUEST_URI"], '?'));
     exit;
 }
 
 class configurationCheck {
-    private $configChecks;
+    public $configChecks;
 
     public function __construct() {
         $this->configChecks = $this->getConfiguration();
@@ -41,10 +41,13 @@ class configurationCheck {
     public function checkConfiguration() {
         return array(
             'PHP' => array(
+                'Version' => phpversion(),
+                'User' => get_current_user(),
                 'Extensions' => $this->checkPHPExtensions(),
                 'Functions' => $this->checkPHPFunctions()
             ),
-            'System' => $this->checkSystemDependencies()
+            'System' => $this->checkSystemDependencies(),
+            'Platform' => $this->checkPlatform()
         );
     }
 
@@ -183,7 +186,7 @@ class configurationCheck {
             // 'supervisor' => function() { return shell_exec("supervisord -v 2>&1"); },
             'redis' => function() { return shell_exec("redis-cli -v"); },
             'git' => function() { return shell_exec("git --version"); },
-            'curl' => function() { return function_exists('curl_version'); },
+            'curl' => function() { return preg_match('/curl (\d+\.\d+\.\d+)/', shell_exec('curl --version'), $matches) ? $matches[1] : false; },
             'composer' => function() { return shell_exec("composer --version"); },
             'nginx' => function() { return shell_exec("nginx -v 2>&1"); }
         ];

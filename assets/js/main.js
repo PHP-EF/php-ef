@@ -242,40 +242,29 @@ function stringValidate(element, min, max, type) {
   }
 }
 
-function loadiFrame(src = null) {
-  if (src != null) {
-      window.parent.document.getElementById('mainFrame').src = src;
-  }
-}
-
-function loadMainWindow(element) {
-  $('#mainWindow').html('');
-  clearAllApexCharts();
+function loadContent(element = null) {
+  var expandNav = false;
   if (element != null) {
-    var hashsplit = element.split('#page=');
-    var linkElem = $('a[href="#page='+hashsplit[1]+'"]');
-    $('.toggleFrame').removeClass('active');
-    linkElem.addClass('active');
-    // Remove proxy support for now
-    // if (hashsplit[1].startsWith('prx')) {
-    //   var prxsplit = hashsplit[1].split('prx');
-    //   window.parent.document.getElementById('mainFrame').src = prxsplit[1];
-    // } else {
-    //   window.parent.document.getElementById('mainFrame').src = '/pages/'+hashsplit[1]+".php";
-    // }
-    queryAPI('GET','/api/page/'+hashsplit[1]).done(function(data) {
-      $('#mainWindow').html('');
-      $('#mainWindow').html(data);
-    }).fail(function(jqXHR, textStatus, errorThrown) {
-        toast(textStatus,"","Unable to load the requested page.<br>"+jqXHR.status+": "+errorThrown,"danger");
-    });
-  } else if (window.parent.location.hash) {
+    element = $(element.currentTarget);
+  } else {
     var hashsplit = window.parent.location.hash.split('#page=');
-    // Auto-expand and set navbar to active
-    var linkElem = $('a[href="'+window.parent.location.hash+'"]');
-    linkElem.addClass('active');
-    $('.title-text').text(linkElem.data('pageName'));
-    var doubleParent = $('.icon-link > .toggleFrame.active, .sub-sub-menu .toggleFrame.active, .icon-link > .toggleFrame.active, .sub-menu .toggleFrame.active').parent().parent();
+    var element = $('a[href="#page='+decodeURI(hashsplit[1])+'"]');
+    expandNav = true;
+  }
+  $('.toggleFrame').removeClass('active');
+  element.addClass('active');
+  switch (element.data('pageType')) {
+    case 'Native':
+      loadMainWindow(element);
+      break;
+    case 'iFrame':
+      loadiFrame(element);
+      break;
+  }
+  $('.title-text').text(element.data('pageName'));
+  if (expandNav) {
+    var doubleParent = element.parent().parent();
+    console.log(doubleParent);
     if (doubleParent.hasClass('sub-sub-menu')) {
       if (!doubleParent.parent().hasClass('showMenu')) {
         doubleParent.parent().addClass('showMenu');
@@ -288,10 +277,32 @@ function loadMainWindow(element) {
         doubleParent.parent().addClass('showMenu');
       }
     }
-    queryAPI('GET','/api/page/'+hashsplit[1]).done(function(data) {
+  }
+}
+
+function loadiFrame(element) {
+  if (element != null) {
+    $('#mainWindow').html('').attr('hidden',true);
+    $('#mainFrame').attr('hidden',false);
+    var pageUrl = element.data('pageUrl');
+    window.parent.document.getElementById('mainFrame').src = pageUrl;
+  } else {
+    toast("Error","","Unable to load the requested iFrame.","danger");
+  }
+}
+
+function loadMainWindow(element) {
+  $('#mainFrame').attr('src', '').attr('hidden',true);
+  $('#mainWindow').attr('hidden',false).html('');
+  clearAllApexCharts();
+  if (element != null) {
+    var pageUrl = element.data('pageUrl');
+    console.log('element',pageUrl);
+    queryAPI('GET','/api/page/'+pageUrl).done(function(data) {
+      $('#mainWindow').html('');
       $('#mainWindow').html(data);
     }).fail(function(jqXHR, textStatus, errorThrown) {
-      toast(textStatus,"","Unable to load the requested page.<br>"+jqXHR.status+": "+errorThrown,"danger");
+        toast(textStatus,"","Unable to load the requested page.<br>"+jqXHR.status+": "+errorThrown,"danger");
     });
   } else {
     queryAPI('GET','/api/page/core/default').done(function(data) {
