@@ -2,7 +2,7 @@
 // Define the method (get/post/put/patch/delete/etc.)
 $app->get('/helloworld', function ($request, $response, $args) {
 	// Instantiate ib Class
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 
 	// API Endpoint Code
 	$result = 'Success';

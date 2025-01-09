@@ -1,6 +1,6 @@
 <?php
 $app->get('/auth/heartbeat', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 	if ($phpef->auth->getAuth()['Authenticated'] == true) {
 		$phpef->api->setAPIResponseCode(200);
 	} else {
@@ -13,7 +13,7 @@ $app->get('/auth/heartbeat', function ($request, $response, $args) {
 });
 
 $app->get('/auth/whoami', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if (null !== $phpef->auth->getAuth()) {
         $AuthContent = $phpef->auth->getAuth();
         $AuthContent['headers'] = getallheaders();
@@ -35,7 +35,7 @@ $app->get('/auth/whoami', function ($request, $response, $args) {
 });
 
 $app->post('/auth/login', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     $phpef->auth->login($phpef->api->getAPIRequestData($request));
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
@@ -44,7 +44,7 @@ $app->post('/auth/login', function ($request, $response, $args) {
 });
 
 $app->get('/auth/logout', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     $phpef->auth->logout();
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
@@ -54,7 +54,7 @@ $app->get('/auth/logout', function ($request, $response, $args) {
 
 // Administrative Password Reset
 $app->post('/auth/password/reset', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     $data = $phpef->api->getAPIRequestData($request);
 	if (isset($data['pw'])) {
 		$phpef->auth->resetPassword($data['pw']);
@@ -69,7 +69,7 @@ $app->post('/auth/password/reset', function ($request, $response, $args) {
 
 // User Expired Password Reset
 $app->post('/auth/password/expired', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     $data = $phpef->api->getAPIRequestData($request);
 	if (isset($data['un']) && isset($data['cpw']) && isset($data['pw'])) {
 		$phpef->auth->resetExpiredPassword($data['un'],$data['cpw'],$data['pw']);
@@ -84,7 +84,7 @@ $app->post('/auth/password/expired', function ($request, $response, $args) {
 
 // Crypt - Used for returning encrypted strings for saving API Keys locally within the browser
 $app->post('/auth/crypt', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     $data = $phpef->api->getAPIRequestData($request);
 	if (isset($data['key'])) {
 		$phpef->api->setAPIResponseData(encrypt($data['key'],$phpef->config->get("Security","salt")));
@@ -99,7 +99,7 @@ $app->post('/auth/crypt', function ($request, $response, $args) {
 
 // SAML SSO
 $app->get('/auth/sso', function ($request, $response, $args) {
-    $phpef = ($request->getAttribute('ib')) ?? new phpef();
+    $phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->config->get('SAML', 'enabled')) {
         $phpef->auth->sso();
     } else {
@@ -112,7 +112,7 @@ $app->get('/auth/sso', function ($request, $response, $args) {
 });
 
 $app->get('/auth/slo', function ($request, $response, $args) {
-    $phpef = ($request->getAttribute('ib')) ?? new phpef();
+    $phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->config->get('SAML', 'enabled')) {
         $phpef->auth->slo();
     } else {
@@ -125,7 +125,7 @@ $app->get('/auth/slo', function ($request, $response, $args) {
 });
 
 $app->post('/auth/acs', function ($request, $response, $args) {
-    $phpef = ($request->getAttribute('ib')) ?? new phpef();
+    $phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->config->get('SAML', 'enabled')) {
         if (isset($phpef->api->getAPIRequestData($request)['SAMLResponse'])) {
             $phpef->auth->acs();
@@ -141,7 +141,7 @@ $app->post('/auth/acs', function ($request, $response, $args) {
 });
 
 $app->get('/auth/samlMetadata', function ($request, $response, $args) {
-    $phpef = ($request->getAttribute('ib')) ?? new phpef();
+    $phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->config->get('SAML', 'enabled')) {
         $response->getBody()->write($phpef->auth->getSamlMetadata());
 		return $response

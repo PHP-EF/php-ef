@@ -1,6 +1,6 @@
 <?php
 $app->get('/page/{category}/{page}', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 	$category = sanitizePage($args['category']);
 	$page = sanitizePage($args['page']);
 	$pagePath = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'pages' . DIRECTORY_SEPARATOR . $category . DIRECTORY_SEPARATOR . $page . '.php';
@@ -24,7 +24,7 @@ $app->get('/page/{category}/{page}', function ($request, $response, $args) {
 });
 
 $app->get('/page/plugin/{plugin}/js', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 	$plugin = sanitizePage($args['plugin']);
 	$pluginDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $plugin;
 
@@ -44,7 +44,7 @@ $app->get('/page/plugin/{plugin}/js', function ($request, $response, $args) {
 });
 
 $app->get('/page/plugin/{plugin}/css', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 	$plugin = sanitizePage($args['plugin']);
 	$pluginDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $plugin;
 
@@ -64,7 +64,7 @@ $app->get('/page/plugin/{plugin}/css', function ($request, $response, $args) {
 });
 
 $app->get('/page/plugin/{plugin}/{page}', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 
 	$plugin = sanitizePage($args['plugin']);
 	$page = sanitizePage($args['page']);
@@ -98,7 +98,7 @@ $app->get('/page/plugin/{plugin}/{page}', function ($request, $response, $args) 
 });
 
 $app->get('/pages', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 	$data = $request->getQueryParams();
     if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
 		$Menu = $data['menu'] ?? null;
@@ -118,7 +118,7 @@ $app->get('/pages', function ($request, $response, $args) {
 });
 
 $app->post('/pages', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
         $data = $phpef->api->getAPIRequestData($request);
         $Name = $data['name'] ?? exit($phpef->api->setAPIResponse('Error','Name missing from request'));
@@ -139,7 +139,7 @@ $app->post('/pages', function ($request, $response, $args) {
 });
 
 $app->patch('/page/{id}', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
         if (isset($args['id'])) {
 			$data = $phpef->api->getAPIRequestData($request);
@@ -165,7 +165,7 @@ $app->patch('/page/{id}', function ($request, $response, $args) {
 
 // Update CMDB Column Weight
 $app->patch('/page/{id}/weight', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
 		$data = $phpef->api->getAPIRequestData($request);
 		if (isset($data['weight'])) {
@@ -182,7 +182,7 @@ $app->patch('/page/{id}/weight', function ($request, $response, $args) {
 
 
 $app->delete('/page/{id}', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
         if (isset($args['id'])) {
             $phpef->pages->delete($args['id']);
@@ -197,7 +197,7 @@ $app->delete('/page/{id}', function ($request, $response, $args) {
 });
 
 $app->get('/pages/hierarchy', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 	if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
 		$config = $phpef->pages->get();
 		$navigation = [];
@@ -242,7 +242,7 @@ $app->get('/pages/hierarchy', function ($request, $response, $args) {
 });
 
 $app->get('/pages/list', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 	if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
 		$phpef->api->setAPIResponseData($phpef->pages->getAllAvailablePages());
 	}
@@ -255,7 +255,7 @@ $app->get('/pages/list', function ($request, $response, $args) {
 });
 
 $app->get('/pages/root', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
 		$phpef->api->setAPIResponseData($phpef->pages->getMainLinksAndMenus());	
 	}
@@ -267,7 +267,7 @@ $app->get('/pages/root', function ($request, $response, $args) {
 });
 
 $app->get('/pages/menus', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
 		$phpef->api->setAPIResponseData($phpef->pages->getByType('Menu'));	
 	}
@@ -279,7 +279,7 @@ $app->get('/pages/menus', function ($request, $response, $args) {
 });
 
 $app->get('/pages/submenus', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 	$data = $request->getQueryParams();
     if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
 		$Menu = $data['menu'] ?? null;

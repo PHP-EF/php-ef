@@ -1,6 +1,6 @@
 <?php
 $app->get('/plugins/installed', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 
 	$phpef->api->setAPIResponseData($phpef->plugins->getInstalledPlugins());
 
@@ -12,7 +12,7 @@ $app->get('/plugins/installed', function ($request, $response, $args) {
 });
 
 $app->get('/plugins/available', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 
 	$results = $phpef->plugins->getAvailablePlugins();
 	if (empty($results['warnings'])) {
@@ -29,7 +29,7 @@ $app->get('/plugins/available', function ($request, $response, $args) {
 });
 
 $app->post('/plugins/install', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 	$data = $phpef->api->getAPIRequestData($request);
 
 	$phpef->plugins->install($data);
@@ -42,7 +42,7 @@ $app->post('/plugins/install', function ($request, $response, $args) {
 });
 
 $app->post('/plugins/uninstall', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 	$data = $phpef->api->getAPIRequestData($request);
 
 	$phpef->plugins->uninstall($data);
@@ -55,7 +55,7 @@ $app->post('/plugins/uninstall', function ($request, $response, $args) {
 });
 
 $app->post('/plugins/reinstall', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 	$data = $phpef->api->getAPIRequestData($request);
 
 	$phpef->plugins->reinstall($data);
@@ -68,7 +68,7 @@ $app->post('/plugins/reinstall', function ($request, $response, $args) {
 });
 
 $app->get('/plugins/repositories', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 
 	$phpef->api->setAPIResponseData($phpef->plugins->getPluginRepositories());
 
@@ -80,7 +80,7 @@ $app->get('/plugins/repositories', function ($request, $response, $args) {
 });
 
 $app->post('/plugins/repositories', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 	$data = $phpef->api->getAPIRequestData($request);
 	if (isset($data['list'])) {
 		$config = $phpef->config->get();

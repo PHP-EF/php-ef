@@ -1,6 +1,6 @@
 <?php
 $app->get('/launch[/]', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 	$GLOBALS['api']['response']['data']['status'] = $phpef->launch();
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
@@ -9,7 +9,7 @@ $app->get('/launch[/]', function ($request, $response, $args) {
 });
 
 $app->get('/checkAccess[/]', function ($request, $response, $args) {
-    $phpef = ($request->getAttribute('ib')) ?? new phpef();
+    $phpef = ($request->getAttribute('phpef')) ?? new phpef();
     $data = $request->getQueryParams();
     $currentUser = $phpef->auth->getAuth();
     if (isset($data['node'])) {

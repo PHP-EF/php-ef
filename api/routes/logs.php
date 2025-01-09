@@ -1,6 +1,6 @@
 <?php
 $app->get('/logs', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-LOGS")) {
         $data = $request->getQueryParams();
         $Date = $data['date'] ?? null;

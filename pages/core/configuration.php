@@ -457,7 +457,7 @@ return '
           <div class="my-4">
             <h5 class="mb-0 mt-5">Images</h5>
             <p>Use the following to configure Custom Images on '.$phpef->config->get('Styling')['websiteTitle'].'.</p>
-            <div class="image-gallery" id="imageGallery"></div>
+            <div class="image-gallery dropzone" id="imageGallery"></div>
           </div>
         </div>
       </div>
@@ -525,20 +525,42 @@ return '
       queryAPI("GET", "/api/images").done(function(images) {
         const imageGallery = $("#imageGallery");
         images.data.forEach(image => {
-          const imgElement = document.createElement("img");
-          imgElement.src = image;
-          imgElement.alt = "Custom Image";
-          imgElement.width = 64;
-          imgElement.height = 64;
-          imgElement.classList.add("custom-image");
-          imageGallery.append(imgElement);
+          var imageName = image.split("assets/images/custom/")[1];
+          imageGallery.append(`<img src="`+image+`" data-bs-toggle="tooltip" data-bs-title="`+imageName+`" class="custom-image"></img>`);
         });
         imagesLoaded = true;
+        var tooltipTriggerList = document.querySelectorAll(`[data-bs-toggle="tooltip"]`)
+        var tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
       }).fail(function(xhr) {
         toast("Error", "", xhr, "danger", 30000);
       });
     }
   }
+
+  var imageGalleryDropzone = new Dropzone("#imageGallery", {
+    url: "/api/images",
+    paramName: "file", // The name that will be used to transfer the file
+    maxFilesize: 5, // MB
+    acceptedFiles: "image/*",
+    disablePreviews: true,
+    init: function() {
+      this.on("sending", function(file, xhr, formData) {
+        // Append additional data if needed
+        formData.append("fileName", file.name);
+      });
+      this.on("success", function(file, response) {
+        // Add the uploaded image to the gallery
+        var imageGallery = $("#imageGallery");
+        imageGallery.append(`<img src="/assets/images/custom/`+file.name+`" data-bs-toggle="tooltip" data-bs-title="`+file.name+`" class="custom-image"></img>`);
+        var newImage = imageGallery.find("img.custom-image").last();
+        newImage.tooltip();
+        toast ("Success","","Successfully uploaded image","success");
+      });
+      this.on("error", function(file, response) {
+        toast ("Error","","Failed to upload image","danger", 30000);
+      });
+    }
+  });
 
   function getConfig() {
     $.getJSON("/api/config", function(data) {

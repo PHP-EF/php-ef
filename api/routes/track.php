@@ -1,6 +1,6 @@
 <?php
 $app->post('/t', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     $phpef->reporting->track($phpef->api->getAPIRequestData($request),$phpef->auth->getAuth());
 	$phpef->api->setAPIResponseCode(201);
 

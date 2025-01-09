@@ -1,6 +1,6 @@
 <?php
 $app->get('/changelog', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 
     $MD = '<link href="/assets/css/changelog.css" rel="stylesheet">';
     $MD .= '<h1><center>Change Log</center></h1>';

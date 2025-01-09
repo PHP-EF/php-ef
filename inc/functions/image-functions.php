@@ -1,12 +1,19 @@
 <?php
 trait Images {
+    public function getImagesDir() {
+        return dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR . 'custom' . DIRECTORY_SEPARATOR;
+    }
+    
+    public function getImageUrlPath() {
+        return DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR . 'custom' . DIRECTORY_SEPARATOR;
+    }
+
     public function getImages() {
         $allIconsPrep = array();
         $allIcons = array();
         $ignore = array(".", "..", "._.DS_Store", ".DS_Store", "index.php");
-        $customImagesPath = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR . 'custom' . DIRECTORY_SEPARATOR;
-        $path = 'assets' . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR . 'custom' . DIRECTORY_SEPARATOR;
-        $images = scandir($customImagesPath);
+        $path = $this->getImageUrlPath();
+        $images = scandir($this->getImagesDir());
         foreach ($images as $image) {
             if (!in_array($image, $ignore)) {
                 $allIconsPrep[$image] = array(

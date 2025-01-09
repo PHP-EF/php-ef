@@ -1,6 +1,6 @@
 <?php
 $app->get('/rbac/group/{id}', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-RBAC")) {
         if (isset($args['id'])) {
             $phpef->api->setAPIResponseData($phpef->auth->getRBACGroupById($args['id']));
@@ -15,7 +15,7 @@ $app->get('/rbac/group/{id}', function ($request, $response, $args) {
 });
 
 $app->get('/rbac/groups', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-RBAC")) {
         $phpef->api->setAPIResponseData($phpef->auth->getRBACGroups());
     }
@@ -26,7 +26,7 @@ $app->get('/rbac/groups', function ($request, $response, $args) {
 });
 
 $app->get('/rbac/groups/protected', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-RBAC")) {
         $phpef->api->setAPIResponseData($phpef->auth->getRBACGroups(true));
     }
@@ -37,7 +37,7 @@ $app->get('/rbac/groups/protected', function ($request, $response, $args) {
 });
 
 $app->get('/rbac/groups/configurable', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-RBAC")) {
         $phpef->api->setAPIResponseData($phpef->auth->getRBACGroups(null,true));
     }
@@ -48,7 +48,7 @@ $app->get('/rbac/groups/configurable', function ($request, $response, $args) {
 });
 
 $app->post('/rbac/groups', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-RBAC")) {
         $data = $phpef->api->getAPIRequestData($request);
         if (isset($data['name'])) {
@@ -63,7 +63,7 @@ $app->post('/rbac/groups', function ($request, $response, $args) {
 });
 
 $app->patch('/rbac/group/{id}', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     $data = $phpef->api->getAPIRequestData($request);
     if ($phpef->auth->checkAccess("ADMIN-RBAC")) {
         if (isset($args['id'])) {
@@ -87,7 +87,7 @@ $app->patch('/rbac/group/{id}', function ($request, $response, $args) {
 });
 
 $app->delete('/rbac/group/{id}', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-RBAC")) {
         if (isset($args['id'])) {
             $phpef->auth->deleteRBACGroup($args['id']);
@@ -102,7 +102,7 @@ $app->delete('/rbac/group/{id}', function ($request, $response, $args) {
 });
 
 $app->get('/rbac/roles', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-RBAC")) {
         $phpef->api->setAPIResponseData($phpef->auth->getRBACRoles());
     }
@@ -113,7 +113,7 @@ $app->get('/rbac/roles', function ($request, $response, $args) {
 });
 
 $app->post('/rbac/roles', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-RBAC")) {
         $data = $phpef->api->getAPIRequestData($request);
         if (isset($data['name'])) {
@@ -128,7 +128,7 @@ $app->post('/rbac/roles', function ($request, $response, $args) {
 });
 
 $app->patch('/rbac/role/{id}', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-RBAC")) {
         $data = $phpef->api->getAPIRequestData($request);
         if (isset($args['id'])) {
@@ -146,7 +146,7 @@ $app->patch('/rbac/role/{id}', function ($request, $response, $args) {
 });
 
 $app->delete('/rbac/role/{id}', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-RBAC")) {
         if (isset($args['id'])) {
             $phpef->auth->deleteRBACRole($args['id']);
@@ -161,7 +161,7 @@ $app->delete('/rbac/role/{id}', function ($request, $response, $args) {
 });
 
 $app->get('/rbac/checkAccess', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     $data = $request->getQueryParams();
     if (isset($data['node'])) {
         $Result = array(

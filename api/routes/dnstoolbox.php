@@ -1,6 +1,6 @@
 <?php
 $app->get('/dnstoolbox', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("DNS-TOOLBOX")) {
         $data = $request->getQueryParams();
         if (isset($data['request']) && isset($data['domain'])) {

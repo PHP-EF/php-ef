@@ -23,7 +23,7 @@ $app->setBasePath(getBasePath());
 $app->add(function ($request, $handler) {
 	// inject the ib class into the request
 	$phpef = new phpef();
-	$request = $request->withAttribute('ib', $phpef);
+	$request = $request->withAttribute('phpef', $phpef);
 	// set custom error handler
 	// set_error_handler([$phpef, 'setAPIErrorResponse']);
 	return $handler->handle($request);

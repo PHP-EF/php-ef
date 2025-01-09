@@ -1,6 +1,6 @@
 <?php
 $app->get('/users', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-USERS")) {
         $phpef->api->setAPIResponseData($phpef->auth->getAllUsers());
     }
@@ -11,7 +11,7 @@ $app->get('/users', function ($request, $response, $args) {
 });
 
 $app->post('/users', function ($request, $response, $args) {
-    $phpef = ($request->getAttribute('ib')) ?? new phpef();
+    $phpef = ($request->getAttribute('phpef')) ?? new phpef();
     $data = $phpef->api->getAPIRequestData($request);
     if ($phpef->auth->checkAccess("ADMIN-USERS")) {
         $UN = $data['un'] ?? exit($phpef->api->setAPIResponse('Error','Username missing from request'));
@@ -30,7 +30,7 @@ $app->post('/users', function ($request, $response, $args) {
 });
 
 $app->patch('/user/{id}', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     $data = $phpef->api->getAPIRequestData($request);
     if ($phpef->auth->checkAccess("ADMIN-USERS")) {
         if (isset($args['id'])) {
@@ -56,7 +56,7 @@ $app->patch('/user/{id}', function ($request, $response, $args) {
 });
 
 $app->delete('/user/{id}', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-USERS")) {
         if (isset($args['id'])) {
             $phpef->auth->removeUser($args['id']);

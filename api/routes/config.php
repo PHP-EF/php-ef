@@ -1,6 +1,6 @@
 <?php
 $app->get('/config', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 
     if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
         $config = $phpef->config->get();
@@ -25,7 +25,7 @@ $app->get('/config', function ($request, $response, $args) {
 });
 
 $app->patch('/config', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
         $data = $phpef->api->getAPIRequestData($request);
         $config = $phpef->config->get();
@@ -40,7 +40,7 @@ $app->patch('/config', function ($request, $response, $args) {
 });
 
 $app->get('/config/plugins', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
         $phpef->api->setAPIResponseData($phpef->plugins->getInstalledPlugins());
     }
@@ -52,7 +52,7 @@ $app->get('/config/plugins', function ($request, $response, $args) {
 });
 
 $app->get('/config/plugins/{plugin}', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
         $phpef->api->setAPIResponseData($phpef->config->get('Plugins',$args['plugin']));
     }
@@ -64,7 +64,7 @@ $app->get('/config/plugins/{plugin}', function ($request, $response, $args) {
 });
 
 $app->patch('/config/plugins/{plugin}', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
         $data = $phpef->api->getAPIRequestData($request);
         $config = $phpef->config->get();

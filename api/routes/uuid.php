@@ -1,6 +1,6 @@
 <?php
 $app->get('/uuid/generate', function ($request, $response, $args) {
-	$phpef = ($request->getAttribute('ib')) ?? new phpef(); 
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef(); 
     $phpef->api->setAPIResponseData(\Ramsey\Uuid\Uuid::uuid4());
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
