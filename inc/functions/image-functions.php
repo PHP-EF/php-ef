@@ -59,11 +59,34 @@ trait Images {
         return $result;
     }
 
+    public function getImagesForSelect() {
+        $allIconsPrep = array();
+        $allIcons = array();
+        $ignore = array(".", "..", "._.DS_Store", ".DS_Store", "index.php");
+        $path = $this->getImageUrlPath();
+        $images = scandir($this->getImagesDir());
+        foreach ($images as $image) {
+            if (!in_array($image, $ignore)) {
+                $allIconsPrep[$image] = array(
+                    'val' => $path.$image,
+                    'name' => $image
+                );
+            }
+        }
+        uksort($allIconsPrep, 'strcasecmp');
+        $options = '';
+        $options .= '<option value="">None</option>';
+        foreach ($allIconsPrep as $image) {
+            $options .= '<option value="' . htmlspecialchars($image['val']) . '">' . htmlspecialchars($image['name']) . '</option>';
+        }
+        return $options;
+    }
+
     public function getImageOrIcon($stub) {
-        if (strpos($stub,"fa fa-") !== false || strpos($stub,"fa-") !== false) {
-            return '<i class="'.$stub.'"></i>';
-        } elseif (strpos($stub,"/assets/images") !== false) {
+        if (strpos($stub,"/assets/images") !== false) {
             return '<img src="'.$stub.'"></img>';
+        } else {
+            return '<i class="'.$stub.'"></i>';
         }
     }
 }

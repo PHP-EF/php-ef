@@ -39,18 +39,6 @@ return '
                 </div>
                 <div class="row">
                   <div class="form-group col-md-6">
-                    <label for="System[websiteDomain]">Website Domain</label>
-                    <input type="text" class="form-control info-field" id="System[websiteDomain]" aria-describedby="System[websiteDomain]Help" name="System[websiteDomain]">
-                    <small id="System[websiteDomain]Help" class="form-text text-muted">The domain to use for this website.</small>
-                  </div>
-                  <div class="form-group col-md-6">
-                    <label for="System[cookieDomain]">Cookie Domain</label>
-                    <input type="text" class="form-control info-field" id="System[cookieDomain]" aria-describedby="System[cookieDomain]Help" name="System[cookieDomain]">
-                    <small id="System[cookieDomain]Help" class="form-text text-muted">The cookie domain to use. This defaults to the website domain.</small>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="form-group col-md-6">
                     <label for="System[logfilename]">Log File Name</label>
                     <input type="text" class="form-control info-field" id="System[logfilename]" aria-describedby="System[logfilename]Help" name="System[logfilename]">
                     <small id="System[logfilename]Help" class="form-text text-muted">The name of the log file <b>without</b> the file extension.</small>

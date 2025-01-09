@@ -203,7 +203,8 @@ body.light-theme .flatpickr-input {
   border: 1px solid rgb(206 206 206);
   -webkit-tap-highlight-color: rgba(205, 205, 205, 0);
 }
-body.light-theme input:disabled {
+body.light-theme input:disabled,
+body.light-theme select:disabled {
   background-color: #d7d7d7;
 }
 body.light-theme .saveBtn,
@@ -654,7 +655,7 @@ body.dark-theme .toast small {
   height: 100%;
 }
 
-/* Custom Images */
+/* Custom Image Gallery */
 body.light-theme .image-gallery {
   background-color: #faf9f6;
 }
@@ -869,7 +870,7 @@ body.dark-theme .image-gallery {
 .sidebar .nav-links li ul.sub-menu i{
   font-size: 16px;
 }
-.sidebar .nav-links li ul.sub-menu img {
+.sidebar .nav-links li img {
   height: 30px;
   width: 30px;
   margin: 10px 24px;

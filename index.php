@@ -65,11 +65,12 @@ foreach ($navLinks as $navLink) {
       case 'Link':
           // Create Nav Link
           if (!$navLink['ACL'] || $phpef->auth->checkAccess($navLink['ACL'])) {
+              $LinkElem = $phpef->getImageOrIcon($navLink['Icon']);
               $MenuItem .= <<<EOD
               <li class="menu-item">
                   <div class="icon-link">
                       <a href="#page={$navLink['Title']}" class="toggleFrame" data-page-url="{$navLink['Url']}" data-page-type="{$navLink['LinkType']}">
-                          <i class="{$navLink['Icon']}"></i>
+                          {$LinkElem}
                           <span class="link_name">{$navLink['Name']}</span>
                       </a>
                       <ul class="sub-menu blank">
@@ -125,11 +126,11 @@ foreach ($navLinks as $navLink) {
               // Create Nav Menu Links
               foreach ($filteredMenuLinks as $filteredMenuLink) {
                   if ($phpef->auth->checkAccess($filteredMenuLink['ACL'])) {
-                    $IconElem = $phpef->getImageOrIcon($filteredMenuLink['Icon']);
+                    $filteredMenuLinkIcon = $phpef->getImageOrIcon($filteredMenuLink['Icon']);
                       $MenuItem .= <<<EOD
                       <li>
                           <a href="#page={$filteredMenuLink['Title']}" class="toggleFrame" data-page-url="{$filteredMenuLink['Url']}" data-page-type="{$filteredMenuLink['LinkType']}">
-                              {$IconElem}
+                              {$filteredMenuLinkIcon}
                               <span>{$filteredMenuLink['Name']}</span>
                           </a>
                       </li>
@@ -139,12 +140,12 @@ foreach ($navLinks as $navLink) {
 
               // Create Nav Menu Submenus
               foreach ($filteredSubMenuLinks as $filteredSubMenuLink) {
-                  $IconElem = $phpef->getImageOrIcon($filteredSubMenuLink['Icon']);
+                  $filteredSubMenuLinkIcon = $phpef->getImageOrIcon($filteredSubMenuLink['Icon']);
                   $Submenu = <<<EOD
                   <li class="sub-menu-item">
                       <div class="icon-link menu-item-dropdown">
                           <a href="#" class="preventDefault">
-                              {$IconElem}
+                              {$filteredSubMenuLinkIcon}
                               <span>{$filteredSubMenuLink['Name']}</span>
                           </a>
                           <i class="bx bxs-chevron-down arrow"></i>

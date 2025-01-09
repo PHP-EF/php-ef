@@ -115,6 +115,13 @@ return '
           <input type="text" class="form-control" id="pageIcon" aria-describedby="pageIconHelp">
           <small id="pageIconHelp" class="form-text text-muted">The Fontawesome Icon to use.</small>
         </div>
+        <div class="form-group">
+          <label for="pageImage">Image</label>
+          <select class="form-select" id="pageImage" aria-describedby="pageImageHelp">
+          '.$phpef->getImagesForSelect().'
+          </select>
+          <small id="pageImageHelp" class="form-text text-muted">The Custom Image to use.</small>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -125,6 +132,23 @@ return '
 </div>
 
 <script>
+  var pageIcon = $("#pageIcon");
+  var pageImage = $("#pageImage");
+  pageIcon.on("input", function() {
+    if (this.value !== "") {
+      pageImage.attr("disabled",true).val("");
+    } else {
+      pageImage.attr("disabled",false)
+    }
+  });
+  pageImage.on("change", function() {
+    if (this.value !== "") {
+      pageIcon.attr("disabled",true).val("");
+    } else {
+      pageIcon.attr("disabled",false)
+    }
+  });
+
   function pagesButtons() {
     return {
       btnAddGroup: {
@@ -143,12 +167,14 @@ return '
   }
 
   function getPOSTData() {
+    var pageIcon = $("#pageIcon").val();
+    var pageImage = $("#pageImage").val();
     var postData = {
       name: $("#pageName").val(),
       title: $("#pageTitle").val(),
       linktype: $("#pageLinkType").val(),
       acl: $("#pageACL").val(),
-      icon: $("#pageIcon").val(),
+      icon: pageIcon || pageImage,
       menu: $("#pageMenu").val(),
       submenu: $("#pageSubMenu").val(),
       type: null,
@@ -250,7 +276,7 @@ return '
   }
 
   function newPage() {
-    $("#pageModal input").val("");
+    $("#pageModal input,#pageModal select").val("").attr("disabled",false);
     $("#pageModal select.dynamic").html("");
     updateDropDowns();
     $("#pageModal").modal("show");
@@ -273,7 +299,14 @@ return '
     $("#pageName").val(row.Name);
     $("#pageTitle").val(row.Title);
     $("#pageMenu").val(row.Menu);
-    $("#pageIcon").val(row.Icon);
+
+    if (row.Icon.startsWith("/assets/images/custom")) {
+      $("#pageImage").val(row.Icon);
+      $("#pageIcon").val("").attr("disabled",true);
+    } else {
+      $("#pageIcon").val(row.Icon);
+      $("#pageImage").val("").attr("disabled",true);
+    }
 
     switch (row.LinkType) {
       case "Native":
@@ -303,10 +336,10 @@ return '
       case "Link":
         $("#pageUrl,#pageTitle,#pageUrl,#pageSubMenu,#pageACL,#pageLinkType,#pageiFrameUrl").parent().attr("hidden",false);
         if (submenu) {
-          $("#pageIcon").parent().attr("hidden",true);
-          $("#pageIcon").val("")
+          $("#pageIcon, #pageImage").parent().attr("hidden",true);
+          $("#pageIcon, #pageImage").val("")
         } else {
-          $("#pageIcon").parent().attr("hidden",false)
+          $("#pageIcon, #pageImage").parent().attr("hidden",false)
         }
         break;
       case "Menu":
@@ -401,7 +434,7 @@ return '
           pageSubMenuContainer.append(option);
       });
       row.Submenu ? pageSubMenuContainer.val(row.Submenu) : pageSubMenuContainer.val("");
-      row.Submenu ? $("#pageIcon").parent().attr("hidden",true) : $("#pageIcon").parent().attr("hidden",false);
+      row.Submenu ? $("#pageIcon,#pageImage").parent().attr("hidden",true) : $("#pageIcon,#pageImage").parent().attr("hidden",false);
     })
     hideUnneccessaryInputs();
   }
