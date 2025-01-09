@@ -526,7 +526,7 @@ return '
         const imageGallery = $("#imageGallery");
         images.data.forEach(image => {
           var imageName = image.split("assets/images/custom/")[1];
-          imageGallery.append(`<img src="`+image+`" data-bs-toggle="tooltip" data-bs-title="`+imageName+`" class="custom-image"></img>`);
+          imageGallery.append(`<div class="image-container"><img src="`+image+`" data-bs-toggle="tooltip" data-bs-title="`+imageName+`" class="custom-image"></img><span class="fa fa-trash" onclick="deleteImage(this)"></span></div>`);
         });
         imagesLoaded = true;
         var tooltipTriggerList = document.querySelectorAll(`[data-bs-toggle="tooltip"]`)
@@ -551,7 +551,7 @@ return '
       this.on("success", function(file, response) {
         // Add the uploaded image to the gallery
         var imageGallery = $("#imageGallery");
-        imageGallery.append(`<img src="/assets/images/custom/`+file.name+`" data-bs-toggle="tooltip" data-bs-title="`+file.name+`" class="custom-image"></img>`);
+        imageGallery.append(`<div class="image-container"><img src="/assets/images/custom/`+file.name+`" data-bs-toggle="tooltip" data-bs-title="`+file.name+`" class="custom-image"></img><span class="fa fa-trash" onclick="deleteImage(this)"></span></div>`);
         var newImage = imageGallery.find("img.custom-image").last();
         newImage.tooltip();
         toast ("Success","","Successfully uploaded image","success");
@@ -561,6 +561,26 @@ return '
       });
     }
   });
+
+  function deleteImage(elem) {
+    // Get the parent element of the trash icon, which is the image container
+    var imageContainer = elem.parentElement;
+
+    // Find the image element within the image container
+    var imageElement = imageContainer.querySelector("img");
+
+    queryAPI("DELETE","/api/images?fileName="+$(imageElement).attr("data-bs-title")).done(function(data) {
+      if (data["result"] == "Success") {
+        toast(data["result"],"",data["message"],"success");
+      } else if (data["result"] == "Error") {
+        toast(data["result"],"",data["message"],"danger","30000");
+      } else {
+        toast("Error", "", "Failed to delete image", "danger");
+      }
+    }).fail(function() {
+        toast("Error", "", "Failed to delete image", "danger");
+    });
+  }
 
   function getConfig() {
     $.getJSON("/api/config", function(data) {
