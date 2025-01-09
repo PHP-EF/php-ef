@@ -655,10 +655,17 @@ body.dark-theme .toast small {
 }
 
 /* Custom Images */
+body.light-theme .image-gallery {
+  background-color: #faf9f6;
+}
+body.dark-theme .image-gallery {
+  background-color: #3e4147;
+}
 .image-gallery {
   position: relative;
   display: flex;
   flex-wrap: wrap;
+  border-radius: 20px;
   gap: 10px; /* Adjust the gap between images as needed */
 }
 
