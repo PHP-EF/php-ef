@@ -681,6 +681,8 @@ body.dark-theme .image-gallery {
   width: 100%;
   height: 15%;
   background-color: rgba(0, 0, 0, 0.5); /* Grey out background */
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 18px;
   z-index: 1;
 }
 
