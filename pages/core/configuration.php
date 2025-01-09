@@ -569,17 +569,22 @@ return '
     // Find the image element within the image container
     var imageElement = imageContainer.querySelector("img");
 
-    queryAPI("DELETE","/api/images?fileName="+$(imageElement).attr("data-bs-title")).done(function(data) {
-      if (data["result"] == "Success") {
-        toast(data["result"],"",data["message"],"success");
-      } else if (data["result"] == "Error") {
-        toast(data["result"],"",data["message"],"danger","30000");
-      } else {
-        toast("Error", "", "Failed to delete image", "danger");
-      }
-    }).fail(function() {
-        toast("Error", "", "Failed to delete image", "danger");
-    });
+    var bsTitle = $(imageElement).attr("data-bs-title");
+
+    if(confirm("Are you sure you want to delete "+bsTitle+" from the list of Images? This is irriversible.") == true) {
+      queryAPI("DELETE","/api/images?fileName="+bsTitle).done(function(data) {
+        if (data["result"] == "Success") {
+          imageElement.remove();
+          toast(data["result"],"",data["message"],"success");
+        } else if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger","30000");
+        } else {
+          toast("Error", "", "Failed to delete image", "danger");
+        }
+      }).fail(function() {
+          toast("Error", "", "Failed to delete image", "danger");
+      });
+    };
   }
 
   function getConfig() {
