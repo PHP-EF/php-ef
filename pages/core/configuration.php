@@ -526,7 +526,7 @@ return '
         const imageGallery = $("#imageGallery");
         images.data.forEach(image => {
           var imageName = image.split("assets/images/custom/")[1];
-          imageGallery.append(`<div class="image-container"><img src="`+image+`" data-bs-toggle="tooltip" data-bs-title="`+imageName+`" class="custom-image"></img><span class="fa fa-trash" onclick="deleteImage(this)"></span></div>`);
+          imageGallery.append(`<div class="image-container" data-bs-toggle="tooltip" data-bs-title="`+imageName+`"><img src="`+image+`" class="custom-image" data-image-name="`+imageName+`"></img><span class="fa fa-trash" onclick="deleteImage(this)"></span></div>`);
         });
         imagesLoaded = true;
         var tooltipTriggerList = document.querySelectorAll(`[data-bs-toggle="tooltip"]`)
@@ -551,7 +551,7 @@ return '
       this.on("success", function(file, response) {
         // Add the uploaded image to the gallery
         var imageGallery = $("#imageGallery");
-        imageGallery.append(`<div class="image-container"><img src="/assets/images/custom/`+file.name+`" data-bs-toggle="tooltip" data-bs-title="`+file.name+`" class="custom-image"></img><span class="fa fa-trash" onclick="deleteImage(this)"></span></div>`);
+        imageGallery.append(`<div class="image-container" data-bs-toggle="tooltip" data-bs-title="`+file.name+`"><img src="/assets/images/custom/`+file.name+`" data-image-name="`+file.name+`" class="custom-image"></img><span class="fa fa-trash" onclick="deleteImage(this)"></span></div>`);
         var newImage = imageGallery.find("img.custom-image").last();
         newImage.tooltip();
         toast ("Success","","Successfully uploaded image","success");
@@ -569,10 +569,10 @@ return '
     // Find the image element within the image container
     var imageElement = imageContainer.querySelector("img");
 
-    var bsTitle = $(imageElement).attr("data-bs-title");
+    var imgName = $(imageElement).attr("data-image-name");
 
-    if(confirm("Are you sure you want to delete "+bsTitle+" from the list of Images? This is irriversible.") == true) {
-      queryAPI("DELETE","/api/images?fileName="+bsTitle).done(function(data) {
+    if(confirm("Are you sure you want to delete "+imgName+" from the list of Images? This is irriversible.") == true) {
+      queryAPI("DELETE","/api/images?fileName="+imgName).done(function(data) {
         if (data["result"] == "Success") {
           imageElement.remove();
           toast(data["result"],"",data["message"],"success");
