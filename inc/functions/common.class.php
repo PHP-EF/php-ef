@@ -13,6 +13,12 @@ trait Common {
                     'options' => $this->auth->getRBACRolesForMenu()
                 ];
                 break;
+            case 'authgroup':
+                $settingMerge = [
+                    'type' => 'select',
+                    'options' => $this->auth->getRBACGroupsForMenu(false,true)
+                ];
+                break;
             case 'enable':
                 $settingMerge = [
                     'type' => 'switch',

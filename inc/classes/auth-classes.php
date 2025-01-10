@@ -1191,4 +1191,20 @@ class Auth {
     }, $roles));
     return $roleKeyValuePairs;
   }
+
+  public function getRBACGroupsForMenu($protected = false,$configurable = false) {
+    $groups = array_column($this->getRBACGroups($protected,$configurable),'Name');
+    $groupKeyValuePairs = [];
+    $groupKeyValuePairs[] = [
+      "name" => "None",
+      "value" => ""
+    ];
+    $groupKeyValuePairs = array_merge($groupKeyValuePairs,array_map(function($item) {
+      return [
+        "name" => $item,
+        "value" => $item
+      ];
+    }, $groups));
+    return $groupKeyValuePairs;
+  }
 }
