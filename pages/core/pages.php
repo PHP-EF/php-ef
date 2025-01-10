@@ -110,17 +110,20 @@ return '
           <select class="form-select dynamic" id="pageSubMenu" aria-describedby="pageSubMenuHelp"></select>
           <small id="pageSubMenuHelp" class="form-text text-muted">The Sub Menu where this link will be placed in.</small>
         </div>
-        <div class="form-group">
-          <label for="pageIcon">Icon</label>
-          <input type="text" class="form-control" id="pageIcon" aria-describedby="pageIconHelp">
-          <small id="pageIconHelp" class="form-text text-muted">The Fontawesome Icon to use.</small>
-        </div>
-        <div class="form-group">
-          <label for="pageImage">Image</label>
-          <select class="form-select" id="pageImage" aria-describedby="pageImageHelp">
-          '.$phpef->getImagesForSelect().'
-          </select>
-          <small id="pageImageHelp" class="form-text text-muted">The Custom Image to use.</small>
+        <hr>
+        <div class="card">
+          <div class="form-group">
+            <label for="pageIcon">Icon</label>
+            <input type="text" class="form-control" id="pageIcon" aria-describedby="pageIconHelp">
+            <small id="pageIconHelp" class="form-text text-muted">The Fontawesome Icon to use.</small>
+          </div>
+          <div class="form-group">
+            <label for="pageImage">Image</label>
+            <select class="form-select" id="pageImage" aria-describedby="pageImageHelp">
+            '.$phpef->getImagesForSelect().'
+            </select>
+            <small id="pageImageHelp" class="form-text text-muted">The Custom Image to use.</small>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
@@ -224,12 +227,13 @@ return '
     });
   };
 
-  function editPageSubmit() {
+  function editPageSubmit(tableId) {
     var id = $("#pageID").val();
     queryAPI("PATCH", "/api/page/"+id, getPOSTData()).done(function(data) {
       if (data["result"] == "Success") {
         toast(data["result"], "", data["message"], "success");
-        buildPagesTable();
+        // buildPagesTable();
+        $(tableId).bootstrapTable("refresh");
         $("#pageModal").modal("hide");
       } else if (data["result"] == "Error") {
         toast(data["result"],"",data["message"],"danger","30000");
@@ -253,7 +257,8 @@ return '
     "click .edit": function (e, value, row, index) {
       $("#pageModal input").val("");
       $("#pageModal select.dynamic").html("");
-      $("#pageSubmit").attr("onclick","editPageSubmit()");
+      var tableId = `#${$(e.currentTarget).closest("table").attr("id")}`;
+      $("#pageSubmit").attr("onclick", `editPageSubmit("${tableId}")`);
       editPage(row);
       $("#pageModal").modal("show");
     },
@@ -300,11 +305,11 @@ return '
     $("#pageTitle").val(row.Title);
     $("#pageMenu").val(row.Menu);
 
-    if (row.Icon.startsWith("/assets/images/custom")) {
-      $("#pageImage").val(row.Icon);
+    if (row.Icon && row.Icon.startsWith("/assets/images/custom")) {
+      $("#pageImage").val(row.Icon).attr("disabled",false);
       $("#pageIcon").val("").attr("disabled",true);
     } else {
-      $("#pageIcon").val(row.Icon);
+      $("#pageIcon").val(row.Icon).attr("disabled",false);
       $("#pageImage").val("").attr("disabled",true);
     }
 
@@ -444,7 +449,11 @@ return '
   }
 
   function pageIconFormatter(value, row, index) {
+    if (row.Icon && row.Icon.startsWith("/assets/images/custom")) {
+      return `<img src="`+value+`" class="navIcon"></img>`
+    } else {
       return `<i class="navIcon `+value+`"></i>`
+    }
   }
 
   function menuDetailFormatter(index,row) {
@@ -461,7 +470,9 @@ return '
 
   function detailFormatter(index, row, prefix) {
       let html = [];
-      html.push(createTableHtml(index,prefix));
+      if (row.Type === "Menu" || row.Type === "SubMenu") {
+          html.push(createTableHtml(index, prefix));
+      }
       return html.join("");
   }
 
@@ -474,7 +485,8 @@ return '
           detailFormatter: submenuDetailFormatter,
           onExpandRow: initializeSubMenuTable,
           reorderableRows: true,
-          rowAttributes: "rowAttributes",
+          rowAttributes: rowAttributes,
+          rowStyle: rowStyle,
           onReorderRow: onReorderRow,
           columns: [{
             field: "Icon",
@@ -520,7 +532,8 @@ return '
           url: "/api/pages?submenu="+row.Name+"&menu="+row.Menu,
           dataField: "data",
           reorderableRows: true,
-          rowAttributes: "rowAttributes",
+          rowAttributes: rowAttributes,
+          rowStyle: rowStyle,
           onReorderRow: onReorderRow,
           columns: [{
             field: "Type",
@@ -564,15 +577,26 @@ return '
         detailFormatter: menuDetailFormatter,
         onExpandRow: initializeMenuTable,
         reorderableRows: true,
-        rowAttributes: "rowAttributes",
+        rowAttributes: rowAttributes,
+        rowStyle: rowStyle,
         onReorderRow: onReorderRow
     });
   }
 
   function rowAttributes(row, index) {
     return {
-      "id": "row-"+row.id
+      "id": "row-"+row.id,
+      "data-detail-view": row.Type === "Menu" || row.Type === "SubMenu"
     }
+  }
+
+  function rowStyle(row, index) {
+    if (row.Type !== "Menu" && row.Type !== "SubMenu") {
+        return {
+            classes: "no-expand"
+        };
+    }
+    return {};
   }
 
   function onReorderRow(data,row,oldrow,table) {

@@ -264,7 +264,6 @@ function loadContent(element = null) {
   $('.title-text').text(element.data('pageName'));
   if (expandNav) {
     var doubleParent = element.parent().parent();
-    console.log(doubleParent);
     if (doubleParent.hasClass('sub-sub-menu')) {
       if (!doubleParent.parent().hasClass('showMenu')) {
         doubleParent.parent().addClass('showMenu');
@@ -297,7 +296,6 @@ function loadMainWindow(element) {
   clearAllApexCharts();
   if (element != null) {
     var pageUrl = element.data('pageUrl');
-    console.log('element',pageUrl);
     queryAPI('GET','/api/page/'+pageUrl).done(function(data) {
       $('#mainWindow').html('');
       $('#mainWindow').html(data);
