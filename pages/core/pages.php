@@ -119,8 +119,8 @@ return '
           </div>
           <div class="form-group">
             <label for="pageImage">Image</label>
-            <select class="form-select" id="pageImage" aria-describedby="pageImageHelp">
-            '.$phpef->getImagesForSelect().'
+            <select class="form-select" id="pageImage" aria-describedby="pageImageHelp" data-dynamic-select>
+              '.$phpef->getAllImagesForSelect().'
             </select>
             <small id="pageImageHelp" class="form-text text-muted">The Custom Image to use.</small>
           </div>
@@ -135,23 +135,6 @@ return '
 </div>
 
 <script>
-  var pageIcon = $("#pageIcon");
-  var pageImage = $("#pageImage");
-  pageIcon.on("input", function() {
-    if (this.value !== "") {
-      pageImage.attr("disabled",true).val("");
-    } else {
-      pageImage.attr("disabled",false)
-    }
-  });
-  pageImage.on("change", function() {
-    if (this.value !== "") {
-      pageIcon.attr("disabled",true).val("");
-    } else {
-      pageIcon.attr("disabled",false)
-    }
-  });
-
   function pagesButtons() {
     return {
       btnAddGroup: {
@@ -171,7 +154,7 @@ return '
 
   function getPOSTData() {
     var pageIcon = $("#pageIcon").val();
-    var pageImage = $("#pageImage").val();
+    var pageImage = pageImageDynamicSelect.selectedValue;
     var postData = {
       name: $("#pageName").val(),
       title: $("#pageTitle").val(),
@@ -304,13 +287,17 @@ return '
     $("#pageName").val(row.Name);
     $("#pageTitle").val(row.Title);
     $("#pageMenu").val(row.Menu);
-
-    if (row.Icon && row.Icon.startsWith("/assets/images/custom")) {
-      $("#pageImage").val(row.Icon).attr("disabled",false);
+    if (row.Icon && (row.Icon.startsWith("/assets/images/custom") || row.Icon.startsWith("/api/image/plugin"))) {
+      pageImageDynamicSelect.setDisabled(false);
+      pageImageDynamicSelect.setSelectedValue(row.Icon);
       $("#pageIcon").val("").attr("disabled",true);
+    } else if (row.Icon == "") {
+      pageImageDynamicSelect.setDisabled(false)
+      $("#pageIcon").attr("disabled",false);
     } else {
       $("#pageIcon").val(row.Icon).attr("disabled",false);
-      $("#pageImage").val("").attr("disabled",true);
+      pageImageDynamicSelect.setSelectedValue("");
+      pageImageDynamicSelect.setDisabled(true)
     }
 
     switch (row.LinkType) {
@@ -449,7 +436,7 @@ return '
   }
 
   function pageIconFormatter(value, row, index) {
-    if (row.Icon && row.Icon.startsWith("/assets/images/custom")) {
+    if (row.Icon && (row.Icon.startsWith("/assets/images/custom") || row.Icon.startsWith("/api/image/plugin"))) {
       return `<img src="`+value+`" class="navIcon"></img>`
     } else {
       return `<i class="navIcon `+value+`"></i>`
@@ -615,5 +602,32 @@ return '
   }
   
   buildPagesTable();
+
+  var pageIcon = $("#pageIcon");
+  var pageImage = $("#pageImage");
+  pageIcon.on("input", function() {
+    if (this.value !== "") {
+      pageImageDynamicSelect.setDisabled(true)
+      console.log("Disabled Page Image");
+    } else {
+      pageImageDynamicSelect.setDisabled(false)
+      console.log("Enabled Page Image");
+    }
+  });
+
+  // Setup Dynamic Image Select
+  var pageImageDynamicSelect = new DynamicSelect(document.getElementById("pageImage"), {
+    onChange: (value, text, option) => {
+        pageImageOnChange(value, text, option);
+    }
+  });
+  function pageImageOnChange(value, text, option) {
+    console.log("Custom function triggered with:", value, text, option);
+    if (value !== "") {
+      pageIcon.attr("disabled",true)
+    } else {
+      pageIcon.attr("disabled",false)
+    }
+  }
 </script>
 ';

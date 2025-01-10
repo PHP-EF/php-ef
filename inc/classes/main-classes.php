@@ -21,6 +21,7 @@ class phpef {
     public function __construct() {
         $this->configFilePath = dirname(__DIR__, 1) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.json';
         $this->dbPath = dirname(__DIR__, 1) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'app.db';
+        $this->logPath = dirname(__DIR__, 1) . DIRECTORY_SEPARATOR . 'logs';
         $this->hooks = new hooks();
         $this->core = new core($this->configFilePath,(new api()));
         $this->db = (new db($this->dbPath,$this->core,$this->getVersion()[0]))->db;
@@ -76,6 +77,7 @@ class phpef {
         $status['version'] = $this->getVersion();
 		$status['configWritable'] = is_writable($this->configFilePath) ? true : false;
         $status['dbWritable'] = is_writable($this->dbPath) ? true : false;
+        $status['logsWritable'] = is_writable($this->logPath) ? true : false;
 		$status['checks'] = $ConfigCheck->configChecks;
         $status['environment'] = [
             "OS" => $_SESSION['Environment']

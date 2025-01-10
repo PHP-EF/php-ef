@@ -9,24 +9,16 @@ trait Images {
     }
 
     public function getImages() {
-        $allIconsPrep = array();
-        $allIcons = array();
         $ignore = array(".", "..", "._.DS_Store", ".DS_Store", "index.php");
         $path = $this->getImageUrlPath();
         $images = scandir($this->getImagesDir());
+        $result = [];
         foreach ($images as $image) {
             if (!in_array($image, $ignore)) {
-                $allIconsPrep[$image] = array(
-                    'path' => $path,
-                    'name' => $image
-                );
+                $result[] = $path . $image;
             }
         }
-        uksort($allIconsPrep, 'strcasecmp');
-        foreach ($allIconsPrep as $item) {
-            $allIcons[] = $item['path'] . $item['name'];
-        }
-        return $allIcons;
+        return $result;
     }
 
     public function getPluginImages() {
@@ -59,25 +51,61 @@ trait Images {
         return $result;
     }
 
-    public function getImagesForSelect() {
+    public function getAllImages() {
+        $images = $this->getImages();
+        $pluginImages = $this->getPluginImages();
+        foreach ($pluginImages as $pluginImageKey => $pluginImageVal) {
+            $imageName = basename($pluginImageVal);
+            $imageNameWithoutExtension = pathinfo($imageName, PATHINFO_FILENAME);
+            $imageExtension = pathinfo($imageName, PATHINFO_EXTENSION);
+            $pluginName = basename(dirname(dirname($pluginImageVal))); // Assuming plugin directory structure
+            $pluginImages[$pluginImageKey] = "/api/image/plugin/{$pluginName}/{$imageNameWithoutExtension}/{$imageExtension}";
+        }
+        return array_merge($images,$pluginImages);
+    }
+
+    public function getAllImagesForSelect() {
         $allIconsPrep = array();
-        $allIcons = array();
         $ignore = array(".", "..", "._.DS_Store", ".DS_Store", "index.php");
         $path = $this->getImageUrlPath();
+        
+        // Get core images
         $images = scandir($this->getImagesDir());
         foreach ($images as $image) {
             if (!in_array($image, $ignore)) {
                 $allIconsPrep[$image] = array(
-                    'val' => $path.$image,
-                    'name' => $image
+                    'val' => $path . $image,
+                    'name' => $image,
+                    'type' => 'native'
                 );
             }
         }
-        uksort($allIconsPrep, 'strcasecmp');
-        $options = '';
-        $options .= '<option value="">None</option>';
+    
+        // Get plugin images
+        $pluginImages = $this->getPluginImages();
+        foreach ($pluginImages as $pluginImage) {
+            $imageName = basename($pluginImage);
+            $imageNameWithoutExtension = pathinfo($imageName, PATHINFO_FILENAME);
+            $imageExtension = pathinfo($imageName, PATHINFO_EXTENSION);
+            $pluginName = basename(dirname(dirname($pluginImage))); // Assuming plugin directory structure
+    
+            if (!in_array($imageName, $ignore)) {
+                $allIconsPrep[$pluginImage] = array(
+                    'val' => "/api/image/plugin/{$pluginName}/{$imageNameWithoutExtension}/{$imageExtension}",
+                    'name' => $imageName,
+                    'type' => $pluginName
+                );
+            }
+        }
+       
+        // Generate HTML options
+        $options = '<option value="">None</option>';
         foreach ($allIconsPrep as $image) {
-            $options .= '<option value="' . htmlspecialchars($image['val']) . '">' . htmlspecialchars($image['name']) . '</option>';
+            if ($image['type'] == 'native') {
+                $options .= '<option value="' . htmlspecialchars($image['val']) . '" data-img="' . $image['val'] . '" data-type="native">' . htmlspecialchars($image['name']) . '</option>';
+            } else {
+                $options .= '<option value="' . htmlspecialchars($image['val']) . '" data-img="' . $image['val'] . '" data-type="'.$image['type'].'"> ' . htmlspecialchars($image['name']) . '</option>';
+            }
         }
         return $options;
     }

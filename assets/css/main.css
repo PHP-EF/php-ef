@@ -121,14 +121,16 @@ body.dark-theme .list-group-item {
 /* Form */
 body.dark-theme .form-control,
 body.dark-theme .form-select,
-body.dark-theme .flatpickr-input {
+body.dark-theme .flatpickr-input,
+body.dark-theme .dynamic-select .dynamic-select-header {
   color: #FFF;
   background: #1b1a1a;
   border: 1px solid rgba(120,130,140,0.2);
   -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 body.dark-theme input:disabled,
-body.dark-theme select:disabled {
+body.dark-theme select:disabled,
+body.dark-theme .dynamic-select-disabled .dynamic-select-header {
   background-color: #434343;
   color: #FFF;
 }
@@ -198,14 +200,16 @@ body.light-theme .home-section {
 /* Light Mode Inputs */
 body.light-theme .form-control,
 body.light-theme .form-select,
-body.light-theme .flatpickr-input {
+body.light-theme .flatpickr-input,
+body.light-theme .dynamic-select .dynamic-select-header {
   color: #000000;
   background: #FFF;
   border: 1px solid rgb(206 206 206);
   -webkit-tap-highlight-color: rgba(205, 205, 205, 0);
 }
 body.light-theme input:disabled,
-body.light-theme select:disabled {
+body.light-theme select:disabled,
+body.light-theme .dynamic-select-disabled .dynamic-select-header {
   background-color: #d7d7d7;
 }
 body.light-theme .saveBtn,

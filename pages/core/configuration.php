@@ -508,13 +508,38 @@ return '
 
 <script>
   var imagesLoaded = false;
+
+  function extractImageName(url) {
+    let imageName = "";
+
+    if (url.includes("/assets/images/custom/")) {
+        imageName = url.split("/assets/images/custom/")[1];
+        imageType = "native";
+    } else if (url.includes("/api/image/plugin/")) {
+        const parts = url.split("/");
+        imageName = parts[parts.length - 2] + "." + parts[parts.length - 1];
+        imageType = parts[parts.length - 3];
+    }
+
+    return {
+      "name": imageName,
+      "type": imageType
+    }
+  }
+
   function loadImageGallery() {
     if (imagesLoaded == false) {
       queryAPI("GET", "/api/images").done(function(images) {
         const imageGallery = $("#imageGallery");
         images.data.forEach(image => {
-          var imageName = image.split("assets/images/custom/")[1];
-          imageGallery.append(`<div class="image-container" data-bs-toggle="tooltip" data-bs-title="`+imageName+`"><img src="`+image+`" class="custom-image" data-image-name="`+imageName+`"></img><span class="fa fa-trash" onclick="deleteImage(this)"></span></div>`);
+          var imageExtract = extractImageName(image);
+          var imageName = imageExtract["name"];
+          var imageType = imageExtract["type"];
+          if (imageType == "native") {
+            imageGallery.append(`<div class="image-container" data-bs-toggle="tooltip" data-bs-title="`+imageName+`"><img src="`+image+`" class="custom-image" data-image-name="`+imageName+`"></img><span class="fa fa-trash" onclick="deleteImage(this)"></span></div>`);
+          } else {
+           imageGallery.append(`<div class="image-container" data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="Plugin: `+imageType+`<br>`+imageName+`"><img src="`+image+`" class="custom-image" data-image-name="`+imageName+`"></img></div>`);
+          }
         });
         imagesLoaded = true;
         var tooltipTriggerList = document.querySelectorAll(`[data-bs-toggle="tooltip"]`)

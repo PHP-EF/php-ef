@@ -71,6 +71,10 @@ if (!(isset($SkipCSS))) {
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css">
       <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"></script>
 
+      <!-- Dynamic Select -->
+      <link rel="stylesheet" href="/assets/css/dynamic-select.css">
+      <script src="/assets/js/dynamic-select.js"></script>
+
       <!-- Bootstrap-Table -->
       <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.24.0/dist/bootstrap-table.min.js"></script>
       <script type="text/javascript" src="https://unpkg.com/bootstrap-table@1.24.0/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
