@@ -984,6 +984,7 @@ body.dark-theme .image-gallery {
   font-size: 18px;
   opacity: 1;
   display: block;
+  margin-left: -15px;
 }
 .sidebar .nav-links li .sub-menu.blank,
 .sidebar .nav-links li .sub-menu .sub-sub-menu.blank{
@@ -1004,6 +1005,15 @@ body.dark-theme .image-gallery {
   /* background-color: #04AA6D; */
   color: #30d22a;
 }
+.sidebar.close .nav-links .sub-menu > li,
+.sidebar.close .nav-links .sub-menu-item {
+  margin-left: -20px;
+}
+.sidebar.close .nav-links .sub-menu.blank > li {
+  margin-left: 15px;
+}  
+
+
 .sidebar .sidebar-footer{
   position: fixed;
   bottom: 0;
