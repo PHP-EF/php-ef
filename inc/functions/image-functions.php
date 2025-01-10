@@ -111,7 +111,7 @@ trait Images {
     }
 
     public function getImageOrIcon($stub) {
-        if (strpos($stub,"/assets/images") !== false) {
+        if (strpos($stub,"/assets/images") !== false || strpos($stub,"/api/image/plugin") !== false) {
             return '<img src="'.$stub.'"></img>';
         } else {
             return '<i class="'.$stub.'"></i>';
