@@ -130,28 +130,41 @@ class DynamicSelect {
     }
 
     setSelectedValue(value) {
-        // Update the selected value in the data array
-        this.data.forEach(option => {
-            option.selected = (option.value === value);
-        });
-
-        // Update the hidden input value
-        this.element.querySelector('input').value = value;
-
-        // Update the selected option in the UI
-        this.element.querySelectorAll('.dynamic-select-option').forEach(option => {
-            if (option.getAttribute('data-value') === value) {
-                option.classList.add('dynamic-select-selected');
-                this.element.querySelector('.dynamic-select-header').innerHTML = option.innerHTML;
-            } else {
-                option.classList.remove('dynamic-select-selected');
-            }
-        });
-
-        // Trigger the onChange callback
+        // Find the option with the specified value
         const selectedOption = this.data.find(option => option.value === value);
+
         if (selectedOption) {
+            // Update the selected value in the data array
+            this.data.forEach(option => {
+                option.selected = (option.value === value);
+            });
+
+            // Update the hidden input value
+            this.element.querySelector('input').value = value;
+
+            // Update the selected option in the UI
+            this.element.querySelectorAll('.dynamic-select-option').forEach(option => {
+                if (option.getAttribute('data-value') === value) {
+                    option.classList.add('dynamic-select-selected');
+                    this.element.querySelector('.dynamic-select-header').innerHTML = option.innerHTML;
+                } else {
+                    option.classList.remove('dynamic-select-selected');
+                }
+            });
+
+            // Trigger the onChange callback
             this.options.onChange(value, selectedOption.text, selectedOption);
+        } else {
+            // Clear the current value and image if the specified value doesn't exist
+            this.data.forEach(option => option.selected = false);
+            this.element.querySelector('input').value = '';
+            this.element.querySelector('.dynamic-select-header').innerHTML = `<span class="dynamic-select-header-placeholder">${this.placeholder}</span>`;
+            this.element.querySelectorAll('.dynamic-select-option').forEach(option => {
+                option.classList.remove('dynamic-select-selected');
+            });
+
+            // Trigger the onChange callback with empty values
+            this.options.onChange('', '', null);
         }
     }
 
