@@ -293,7 +293,8 @@ return '
       $("#pageIcon").val("").attr("disabled",true);
     } else if (row.Icon == "") {
       pageImageDynamicSelect.setDisabled(false)
-      $("#pageIcon").attr("disabled",false);
+      $("#pageIcon").attr("disabled",false).val("");
+      pageImageDynamicSelect.setSelectedValue("");
     } else {
       $("#pageIcon").val(row.Icon).attr("disabled",false);
       pageImageDynamicSelect.setSelectedValue("");
