@@ -37,7 +37,6 @@ class DynamicSelect {
         this.selectElement.replaceWith(this.element);
         this._updateSelected();
         this._eventHandlers();
-        console.log(this.selectElement);
         this.isDisabled = this.selectElement.disabled;
         this._updateDisabledState();
     }
@@ -61,7 +60,7 @@ class DynamicSelect {
                     ${optionContent}
                 </div>
             `;
-            console.log(this.data[i]);
+
         }
         let template = `
             <div class="dynamic-select ${this.name}${this.isDisabled ? ' dynamic-select-disabled' : ''}"${this.selectElement.id ? ' id="' + this.selectElement.id + '"' : ''} style="${this.width ? 'width:' + this.width + ';' : ''}${this.height ? 'height:' + this.height + ';' : ''}">

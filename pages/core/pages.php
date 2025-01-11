@@ -50,7 +50,7 @@ return '
 </div>
 
 <div class="modal fade" id="pageModal" tabindex="-1" role="dialog" aria-labelledby="pageModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="pageModalLabel">Page Information</h5>
@@ -62,67 +62,71 @@ return '
         <div class="form-group" hidden>
           <input type="text" class="form-control" id="pageID">
         </div>
-        <div class="form-group">
-          <label for="pageType">Type</label>
-          <select class="form-select" id="pageType" aria-describedby="pageTypeHelp">
-            <option value="Link">Link</option>
-            <option value="Menu">Menu</option>
-          </select>
-          <small id="pageTypeHelp" class="form-text text-muted">The type of navigation item.</small>
-        </div>
-        <div class="form-group">
-          <label for="pageName">Name</label>
-          <input type="text" class="form-control" id="pageName" aria-describedby="pageNameHelp">
-          <small id="pageNameHelp" class="form-text text-muted">The Name for this page displayed in the navigation menu.</small>
-        </div>
-        <div class="form-group">
-          <label for="pageTitle">Title</label>
-          <input type="text" class="form-control" id="pageTitle" aria-describedby="pageTitleHelp">
-          <small id="pageTitleHelp" class="form-text text-muted">The title of the page shown in the top navigation bar.</small>
-        </div>
-        <div class="form-group">
-          <label for="pageLinkType">Link Type</label>
-          <select class="form-select dynamic" id="pageLinkType" aria-describedby="pageLinkTypeHelp"></select>
-          <small id="pageLinkTypeHelp" class="form-text text-muted">The type of link (Native/iFrame).</small>
-        </div>
-        <div class="form-group">
-          <label for="pageUrl">Page</label>
-          <select class="form-select dynamic" id="pageUrl" aria-describedby="pageUrlHelp"></select>
-          <small id="pageUrlHelp" class="form-text text-muted">The page to to display when this link is clicked.</small>
-        </div>
-        <div class="form-group">
-          <label for="pageiFrameUrl">URL</label>
-          <input class="form-control" id="pageiFrameUrl" aria-describedby="pageiFrameUrlHelp">
-          <small id="pageiFrameUrlHelp" class="form-text text-muted">The URL of the page to display in the iFrame when this link is clicked.</small>
-        </div>
-        <div class="form-group">
-          <label for="pageACL">Role</label>
-          <select class="form-select dynamic" id="pageACL" aria-describedby="pageACLHelp"></select>
-          <small id="pageACLHelp" class="form-text text-muted">The role required for this navigation link to be visible.</small>
-        </div>
-        <div class="form-group">
-          <label for="pageMenu">Parent Menu</label>
-          <select class="form-select dynamic" id="pageMenu" aria-describedby="pageMenuHelp"></select>
-          <small id="pageMenuHelp" class="form-text text-muted">The Menu where this link will be placed in.</small>
-        </div>
-        <div class="form-group">
-          <label for="pageSubMenu">Submenu</label>
-          <select class="form-select dynamic" id="pageSubMenu" aria-describedby="pageSubMenuHelp"></select>
-          <small id="pageSubMenuHelp" class="form-text text-muted">The Sub Menu where this link will be placed in.</small>
+        <div class="row">
+          <div class="form-group col-md-6">
+            <label for="pageType">Type</label>
+            <select class="form-select" id="pageType" aria-describedby="pageTypeHelp">
+              <option value="Link">Link</option>
+              <option value="Menu">Menu</option>
+            </select>
+            <small id="pageTypeHelp" class="form-text text-muted">The type of navigation item.</small>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="pageName">Name</label>
+            <input type="text" class="form-control" id="pageName" aria-describedby="pageNameHelp">
+            <small id="pageNameHelp" class="form-text text-muted">The Name for this page displayed in the navigation menu.</small>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="pageTitle">Title</label>
+            <input type="text" class="form-control" id="pageTitle" aria-describedby="pageTitleHelp">
+            <small id="pageTitleHelp" class="form-text text-muted">The title of the page shown in the top navigation bar.</small>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="pageLinkType">Link Type</label>
+            <select class="form-select dynamic" id="pageLinkType" aria-describedby="pageLinkTypeHelp"></select>
+            <small id="pageLinkTypeHelp" class="form-text text-muted">The type of link (Native/iFrame).</small>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="pageUrl">Page</label>
+            <select class="form-select dynamic" id="pageUrl" aria-describedby="pageUrlHelp"></select>
+            <small id="pageUrlHelp" class="form-text text-muted">The page to to display when this link is clicked.</small>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="pageiFrameUrl">URL</label>
+            <input class="form-control" id="pageiFrameUrl" aria-describedby="pageiFrameUrlHelp">
+            <small id="pageiFrameUrlHelp" class="form-text text-muted">The URL of the page to display in the iFrame when this link is clicked.</small>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="pageACL">Role</label>
+            <select class="form-select dynamic" id="pageACL" aria-describedby="pageACLHelp"></select>
+            <small id="pageACLHelp" class="form-text text-muted">The role required for this navigation link to be visible.</small>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="pageMenu">Parent Menu</label>
+            <select class="form-select dynamic" id="pageMenu" aria-describedby="pageMenuHelp"></select>
+            <small id="pageMenuHelp" class="form-text text-muted">The Menu where this link or menu will be placed in.</small>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="pageSubMenu">Submenu</label>
+            <select class="form-select dynamic" id="pageSubMenu" aria-describedby="pageSubMenuHelp"></select>
+            <small id="pageSubMenuHelp" class="form-text text-muted">The Sub Menu where this link will be placed in.</small>
+          </div>
         </div>
         <hr>
         <div class="card">
-          <div class="form-group">
-            <label for="pageIcon">Icon</label>
-            <input type="text" class="form-control" id="pageIcon" aria-describedby="pageIconHelp">
-            <small id="pageIconHelp" class="form-text text-muted">The Fontawesome Icon to use.</small>
-          </div>
-          <div class="form-group">
-            <label for="pageImage">Image</label>
-            <select class="form-select" id="pageImage" aria-describedby="pageImageHelp" data-dynamic-select>
-              '.$phpef->getAllImagesForSelect().'
-            </select>
-            <small id="pageImageHelp" class="form-text text-muted">The Custom Image to use.</small>
+          <div class="row">
+            <div class="form-group col-md-6">
+              <label for="pageIcon">Icon</label>
+              <input type="text" class="form-control" id="pageIcon" aria-describedby="pageIconHelp">
+              <small id="pageIconHelp" class="form-text text-muted">The Fontawesome Icon to use.</small>
+            </div>
+            <div class="form-group col-md-6">
+              <label for="pageImage">Image</label>
+              <select class="form-select" id="pageImage" aria-describedby="pageImageHelp" data-dynamic-select>
+                '.$phpef->getAllImagesForSelect().'
+              </select>
+              <small id="pageImageHelp" class="form-text text-muted">The Custom Image to use.</small>
+            </div>
           </div>
         </div>
       </div>
@@ -334,19 +338,19 @@ return '
         } else {
           $("#pageIcon, #pageImage").parent().attr("hidden",false)
         }
+        switch(linktype) {
+          case "Native":
+            $("#pageUrl").parent().attr("hidden",false).val("");
+            $("#pageiFrameUrl").parent().attr("hidden",true).val("");
+            break;
+          case "iFrame":
+            $("#pageUrl").parent().attr("hidden",true).val("");
+            $("#pageiFrameUrl").parent().attr("hidden",false).val("");
+            break;
+        }
         break;
       case "Menu":
         $("#pageUrl,#pageTitle,#pageUrl,#pageSubMenu,#pageACL,#pageLinkType,#pageiFrameUrl").parent().attr("hidden",true).val("");
-        break;
-    }
-    switch(linktype) {
-      case "Native":
-        $("#pageUrl").parent().attr("hidden",false).val("");
-        $("#pageiFrameUrl").parent().attr("hidden",true).val("");
-        break;
-      case "iFrame":
-        $("#pageUrl").parent().attr("hidden",true).val("");
-        $("#pageiFrameUrl").parent().attr("hidden",false).val("");
         break;
     }
   }
@@ -609,10 +613,8 @@ return '
   pageIcon.on("input", function() {
     if (this.value !== "") {
       pageImageDynamicSelect.setDisabled(true)
-      console.log("Disabled Page Image");
     } else {
       pageImageDynamicSelect.setDisabled(false)
-      console.log("Enabled Page Image");
     }
   });
 
@@ -623,7 +625,6 @@ return '
     }
   });
   function pageImageOnChange(value, text, option) {
-    console.log("Custom function triggered with:", value, text, option);
     if (value !== "") {
       pageIcon.attr("disabled",true)
     } else {
