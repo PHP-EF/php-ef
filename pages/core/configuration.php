@@ -77,6 +77,15 @@ return '
                     <small id="System[CURL-ConnectTimeout]Help" class="form-text text-muted">Specify the timeout used for CURL requests on connect. (Shouldn"t need to be increased)</small>
                   </div>
                 </div>
+                <br>
+                <div class="row">
+                  <div class="form-group">
+                    <div class="form-check form-switch">
+                      <label class="form-check-label" for="PluginMarketplaceEnabled">Enable Plugin Marketplace</label>
+                      <input class="form-check-input info-field" type="checkbox" id="PluginMarketplaceEnabled" name="PluginMarketplaceEnabled">
+                    </div>
+                  </div>
+                </div>
               </div>
               <br>
               <div class="card border-secondary p-3">
@@ -420,6 +429,7 @@ return '
             data-toolbar="#toolbar"
             data-sort-name="Name"
             data-sort-order="asc"
+            data-show-columns="true"
             data-page-size="25"
             data-buttons="pluginsButtons"
             data-response-handler="responseHandler"
@@ -430,11 +440,17 @@ return '
                 <th data-field="state" data-checkbox="true"></th>
                 <th data-field="name" data-sortable="true">Plugin Name</th>
                 <th data-field="author" data-sortable="true">Author</th>
+                <th data-field="description" data-sortable="true">Description</th>
                 <th data-field="category" data-sortable="true">Category</th>
                 <th data-field="version" data-sortable="true">Version</th>
+                <th data-field="online_version" data-sortable="true" data-visible="false">Online Version</th>
                 <th data-field="link" data-sortable="true">URL</th>
                 <th data-field="status" data-sortable="true">Status</th>
                 <th data-field="source" data-sortable="true">Source</th>
+                <th data-field="branch" data-sortable="true" data-visible="false">Branch</th>
+                <th data-field="contact" data-sortable="true" data-visible="false">Contact</th>
+                <th data-field="last_updated" data-sortable="true" data-visible="false">Last Updated</th>
+                <th data-field="release_date" data-sortable="true" data-visible="false">Release Date</th>
                 <th data-field="update" data-sortable="true" data-formatter="pluginUpdatesFormatter">Updates</th>
                 <th data-formatter="pluginActionFormatter" data-events="pluginActionEvents">Actions</th>
               </tr>
@@ -606,20 +622,20 @@ return '
 
       const updateConfigValues = (config, parentKey = "") => {
         for (const section in config) {
-          for (const key in config[section]) {
-            const value = config[section][key];
-            const fullKey = parentKey ? `${parentKey}[${section}][${key}]` : `${section}[${key}]`;
-            const selector = `#${$.escapeSelector(fullKey)}`;
-            if (typeof value === "object" && !Array.isArray(value) && value !== null) {
-              updateConfigValues({ [fullKey]: value });
-            } else if (typeof value === "boolean") {
-              $(selector).prop("checked", value);
-            } else {
-              $(selector).val(value);
-            }
+          const value = config[section];
+          const fullKey = parentKey ? `${parentKey}[${section}]` : section;
+          const selector = `#${$.escapeSelector(fullKey)}`;
+
+          if (typeof value === "object" && !Array.isArray(value) && value !== null) {
+            updateConfigValues(value, fullKey);
+          } else if (typeof value === "boolean") {
+            $(selector).prop("checked", value);
+          } else {
+            $(selector).val(value);
           }
         }
       };
+
       updateConfigValues(config);
     });
   }

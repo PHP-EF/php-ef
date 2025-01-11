@@ -25,9 +25,15 @@ class Plugins {
     }
 
     public function getOnlinePlugins() {
-        $marketplacePlugins = $this->getMarketplacePlugins();
+        $marketplaceEnabled = $this->core->config->get('PluginMarketplaceEnabled') ?? false;
         $nonMarketplacePlugins = $this->getPluginRepositories();
-        $allPlugins = array_merge($marketplacePlugins, $nonMarketplacePlugins);
+        if ($marketplaceEnabled) {
+            $marketplacePlugins = $this->getMarketplacePlugins();
+            $allPlugins = array_merge($marketplacePlugins, $nonMarketplacePlugins);
+        } else {
+            $allPlugins = $nonMarketplacePlugins;
+        }
+
         $results = [];
         $warnings = [];
     
@@ -37,10 +43,10 @@ class Plugins {
             } else {
                 $repoUrl = $plugin;
             }
-    
             $stubArr = explode('https://github.com/', $repoUrl);
-            $branch = "main";
-            $stub = $stubArr[1];
+            $branchArr = explode(':',$stubArr[1]);
+            $branch = $branchArr[1] ?? "main";
+            $stub = $branchArr[0];
             $url = 'https://raw.githubusercontent.com/' . $stub . '/refs/heads/' . $branch . '/plugin.json';
             $response = $this->api->query->get($url);
     
@@ -70,13 +76,11 @@ class Plugins {
         $onlinePlugins = $onlinePluginsData['results'];
         $onlinePluginsWarnings = $onlinePluginsData['warnings'];
         $allPlugins = array_merge($onlinePlugins, $installedPlugins);
-
+    
         // Flatten the array if there are nested arrays
         $flattenedPlugins = [];
         foreach ($allPlugins as $plugin) {
             if (is_array($plugin) && isset($plugin['name'])) {
-                $flattenedPlugins[] = $plugin;
-            } elseif (is_array($plugin) && isset($plugin['name'])) {
                 $flattenedPlugins[] = $plugin;
             }
         }
@@ -84,7 +88,7 @@ class Plugins {
         // Remove duplicates based on 'name' and mark status, source, and version
         $uniquePlugins = [];
         $installedPluginNames = array_column($installedPlugins, 'name');
-        $onlinePluginNames = array_column(array_merge($onlinePlugins), 'name'); // Flatten online plugins
+        $onlinePluginNames = array_column($onlinePlugins, 'name');
     
         foreach ($flattenedPlugins as $plugin) {
             if (!isset($uniquePlugins[$plugin['name']])) {
@@ -105,18 +109,23 @@ class Plugins {
                 }
                 $uniquePlugins[$plugin['name']] = $plugin;
             } else {
-                // Merge details if the plugin is already in the uniquePlugins array
-                $uniquePlugins[$plugin['name']] = array_merge($uniquePlugins[$plugin['name']], $plugin);
+                // Prioritize the specified repository branch over the marketplace branch
+                if (isset($plugin['branch']) && $plugin['branch'] !== 'main') {
+                    $uniquePlugins[$plugin['name']] = array_merge($uniquePlugins[$plugin['name']], $plugin);
+                    $uniquePlugins[$plugin['name']]['online_version'] = $plugin['version'];
+                } else {
+                    $uniquePlugins[$plugin['name']] = array_merge($uniquePlugins[$plugin['name']], $plugin);
+                }
             }
         }
     
         // Convert back to a list
         $result = array_values($uniquePlugins);
     
-        return array(
+        return [
             "results" => $result,
             "warnings" => $onlinePluginsWarnings
-        );
+        ];
     }
 
     public function install($data) {
