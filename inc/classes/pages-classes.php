@@ -256,7 +256,7 @@ class Pages {
       return $result;
     }
   
-      // Function to manage updating weights of Pages/Menus/Submenus
+    // Function to manage updating weights of Pages/Menus/Submenus
     public function updatePageWeight($id, $Weight) {
       $Page = $this->getPageById($id);
   
@@ -276,18 +276,21 @@ class Pages {
               }
   
               $StrictWeights = '';
+              $StrictExecute = [];
   
               if ($Page['Type'] == "Menu" || $Page['Type'] == "Link") {
                   $Prepare .= ' AND Type IN (\'Menu\',\'Link\')';
                   $StrictWeights = ' WHERE Type IN (\'Menu\',\'Link\')';
               } elseif ($Page['Type'] == "SubMenu" || $Page['Type'] == "MenuLink") {
                   $Prepare .= ' AND Type IN (\'SubMenu\',\'MenuLink\') AND Menu = :Menu';
-                  $StrictWeights = ' WHERE Type IN (\'SubMenu\',\'MenuLink\')';
+                  $StrictWeights = ' WHERE Type IN (\'SubMenu\',\'MenuLink\') AND Menu = :Menu';
                   $execute[':Menu'] = $Page['Menu'];
+                  $strictExecute[':Menu'] = $Page['Menu'];
               } elseif ($Page['Type'] == "SubMenuLink") {
                   $Prepare .= ' AND Type = "SubMenuLink" AND Submenu = :SubMenu';
-                  $StrictWeights = ' WHERE Type IN (\'SubMenuLink\')';
+                  $StrictWeights = ' WHERE Type IN (\'SubMenuLink\') AND Submenu = :SubMenu';
                   $execute[':SubMenu'] = $Page['Submenu'];
+                  $strictExecute[':SubMenu'] = $Page['Submenu'];
               }
   
               $execute[':originalWeight'] = $originalWeight;
@@ -309,7 +312,7 @@ class Pages {
                       ' . $StrictWeights . ';
                   ');
   
-                  if ($enforceConsecutiveWeights->execute()) {
+                  if ($enforceConsecutiveWeights->execute($strictExecute)) {
                       $this->api->setAPIResponseMessage('Successfully updated position');
                       return true;
                   }
