@@ -254,7 +254,8 @@ return '
         queryAPI("DELETE","/api/page/"+row.id).done(function(data) {
           if (data["result"] == "Success") {
             toast("Success","","Successfully deleted "+row.Name+" from Pages","success");
-            buildPagesTable();
+            var tableId = `#${$(e.currentTarget).closest("table").attr("id")}`;
+            $(tableId).bootstrapTable("refresh");
           } else if (data["result"] == "Error") {
             toast(data["result"],"",data["message"],"danger","30000");
           } else {
