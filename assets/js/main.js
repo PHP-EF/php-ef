@@ -261,6 +261,9 @@ function loadContent(element = null) {
       loadiFrame(element);
       break;
   }
+  if (hashsplit == '') {
+    loadMainWindow();
+  }
   $('.title-text').text(element.data('pageName'));
   if (expandNav) {
     var doubleParent = element.parent().parent();

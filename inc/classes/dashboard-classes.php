@@ -13,10 +13,13 @@ class Dashboard {
 
     public function render($widgetList = []) {
         $output = '';
-        foreach ($this->getWidgets() as $widgetName => $widget) {
-            if (empty($widgetList) || in_array($widgetName,$widgetList)) {
-                $output .= $widget->render();
-                $output .= '<div class="m-1"></div>';
+        foreach ($widgetList as $widgetName => $options) {
+            if (isset($this->widgets[$widgetName])) {
+                $size = $options['size'] ?? 'col-12'; // Default size
+                $class = $options['class'] ?? ''; // Additional classes
+                $output .= '<div class="' . $size . ' ' . $class . '">';
+                $output .= $this->widgets[$widgetName]->render();
+                $output .= '</div>';
             }
         }
         return $output;

@@ -1,11 +1,20 @@
 <?php
-  $dashboard = $phpef->dashboard;
-  return '
-  <div class="container">
+// Load Class for Simplification
+$dashboard = $phpef->dashboard;
+
+// Dashboard Name to load from Configuration
+$dashboardName = 'Test';
+
+// Grab Dashboard Configuration
+$configuration = $phpef->config->get('Dashboards','Configured')[$dashboardName] ?? [];
+
+// Return dashboard & configured widgets
+return '
+<div class="container">
     <div class="row">
-        '.$dashboard->render(['customHTML','customWidget']).'
+        '.$dashboard->render($configuration['Widgets']).'
     </div>
-  </div>
+</div>
 </body>
 </html>
 ';
