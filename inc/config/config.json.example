@@ -83,6 +83,22 @@
             "Groups": "groups"
         }
     },
+    "Dashboards": {
+        "Configured": {
+            "Test": {
+                "Widgets": {
+                    "customHTML": {
+                        "size": "col-md-12",
+                        "class": ""
+                    }
+                }
+            }
+        },
+        "Widgets": {
+            "CustomHTML": "<h2>PHP Extensible Framework</h2>\r\n<hr>\r\n<div class=\"row\">\r\n  <div class=\"form-group col-md-12\">\r\n    <p>Welcome to the PHP-EF Homepage.</p>\r\n    <p>You can use this to build your own custom web applications through the use of plugins.</p>\r\n  </div>\r\n</div>"
+        }
+    },
     "Plugins": {},
-    "PluginRepositories": []
+    "PluginRepositories": [],
+    "PluginMarketplaceEnabled": true
 }

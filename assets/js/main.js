@@ -243,28 +243,46 @@ function stringValidate(element, min, max, type) {
 }
 
 function loadContent(element = null) {
+  $('.toggleFrame').removeClass('active');
   var expandNav = false;
+  var type = 'page';
+  var loadType = 'Native';
   if (element != null) {
     element = $(element.currentTarget);
+    element.addClass('active');
+    loadType = element.data('pageType');
   } else {
-    var hashsplit = window.parent.location.hash.split('#page=');
-    var element = $('a[href="#page='+decodeURI(hashsplit[1])+'"]');
-    expandNav = true;
+    var hashsplit = window.parent.location.hash.split('#');
+    if (hashsplit[1]) {
+      var qualifierSplit = hashsplit[1].split('=');
+      type = qualifierSplit[0];
+      switch (qualifierSplit[0]) {
+        case 'dashboard':
+          element = hashsplit[1].split('=')[1];
+          break;
+        case 'page':
+          element = $('a[href="#page='+decodeURI(hashsplit[1].split('=')[1])+'"]');
+          element.addClass('active');
+          loadType = element.data('pageType');
+          $('.title-text').text(element.data('pageName'));
+          expandNav = true;
+          break;
+      }
+    } else {
+      loadMainWindow();
+      return;
+    }
   }
-  $('.toggleFrame').removeClass('active');
-  element.addClass('active');
-  switch (element.data('pageType')) {
+
+  switch (loadType) {
     case 'Native':
-      loadMainWindow(element);
+      loadMainWindow(element,type);
       break;
     case 'iFrame':
       loadiFrame(element);
       break;
   }
-  if (hashsplit == '') {
-    loadMainWindow();
-  }
-  $('.title-text').text(element.data('pageName'));
+
   if (expandNav) {
     var doubleParent = element.parent().parent();
     if (doubleParent.hasClass('sub-sub-menu')) {
@@ -293,24 +311,36 @@ function loadiFrame(element) {
   }
 }
 
-function loadMainWindow(element) {
+function loadMainWindow(element,type = "page") {
   $('#mainFrame').attr('src', '').attr('hidden',true);
   $('#mainWindow').attr('hidden',false).html('');
   clearAllApexCharts();
-  if (element != null) {
-    var pageUrl = element.data('pageUrl');
-    queryAPI('GET','/api/page/'+pageUrl).done(function(data) {
+  var endpoint = null;
+  var pageUrl = '';
+  switch(type) {
+    case 'page':
+      endpoint = '/api/page/';
+      break;
+    case 'dashboard':
+      endpoint = '/api/dashboards/page/';
+      break;
+  }
+  if (endpoint != null) {
+    if (type == "dashboard") {
+      pageUrl = element;
+    } else if (element != null) {
+      pageUrl = element.data('pageUrl');
+    } else {
+      pageUrl = 'core/default';
+    }
+    queryAPI('GET',endpoint+pageUrl).done(function(data) {
       $('#mainWindow').html('');
       $('#mainWindow').html(data);
     }).fail(function(jqXHR, textStatus, errorThrown) {
         toast(textStatus,"","Unable to load the requested page.<br>"+jqXHR.status+": "+errorThrown,"danger");
     });
   } else {
-    queryAPI('GET','/api/page/core/default').done(function(data) {
-      $('#mainWindow').html(data);
-    }).fail(function(jqXHR, textStatus, errorThrown) {
-      toast(textStatus,"","Unable to load the requested page.<br>"+jqXHR.status+": "+errorThrown,"danger");
-    });
+    toast("Error","","Unable to load the requested page.<br>Invalid Type","danger");
   }
 }
 

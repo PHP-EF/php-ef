@@ -1,10 +1,20 @@
 <?php
-// ** Define Native Widgets ** //
+// Define Custom HTML Widgets
 class CustomHTML implements WidgetInterface {
+    protected $Instance;
+
+    public function __construct($Instance) {
+        $this->Instance = $Instance;
+    }
+
     public function render() {
         global $phpef;
-        $HTML = $phpef->config->get('Dashboards','Widgets')['CustomHTML'] ?? '';
-        return $HTML;
+        return $phpef->config->get('Dashboards', 'Widgets')[$this->Instance] ?? '';
     }
 }
-$phpef->dashboard->registerWidget('customHTML',new CustomHTML());
+
+// Register Custom HTML Widgets
+$widgetNames = ['customHTML1', 'customHTML2', 'customHTML3', 'customHTML4', 'customHTML5'];
+foreach ($widgetNames as $name) {
+    $phpef->dashboard->registerWidget($name, new CustomHTML($name));
+}

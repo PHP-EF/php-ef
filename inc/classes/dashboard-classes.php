@@ -7,8 +7,10 @@ interface WidgetInterface {
 // Define Dashboard Class
 class Dashboard {
     protected $widgets = [];
+    private $config;
 
-    public function __construct() {
+    public function __construct($core) {
+        $this->config = $core->config;
     }
 
     public function render($widgetList = []) {
@@ -33,7 +35,26 @@ class Dashboard {
         return $this->widgets;
     }
 
-    public function getWidgetsByName($name) {
+    public function getWidgetByName($name) {
         return $this->widgets[$name] ?? [];
+    }
+
+    public function getDashboards() {
+        return $this->config->get('Dashboards','Configured') ?? [];
+    }
+
+    public function buildDashboard($name) {
+        $widgets = $this->config->get('Dashboards','Configured')[$name]['Widgets'] ?? [];
+      
+        // Return dashboard & configured widgets
+        return '
+        <div class="container">
+            <div class="row">
+                '.$this->render($widgets).'
+            </div>
+        </div>
+        </body>
+        </html>
+        ';
     }
 }
