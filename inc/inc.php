@@ -37,6 +37,11 @@ if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'plugins')) {
 
 session_write_close(); // Save PHP Session
 
+// Include Widgets
+foreach (glob(__DIR__.'/widgets/*.php') as $widget) {
+  require_once $widget; // Include each PHP file
+}
+
 // ** Set CSP / Frame Headers ** //
 getSecureHeaders();
 

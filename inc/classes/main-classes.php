@@ -17,6 +17,7 @@ class phpef {
     public $dbHelper;
     public $reporting;
     public $plugins;
+    public $dashboard;
 
     public function __construct() {
         $this->configFilePath = dirname(__DIR__, 1) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.json';
@@ -33,6 +34,7 @@ class phpef {
         $this->logging = $this->core->logging;
         $this->reporting = new Reporting($this->core,$this->db);
         $this->plugins = new Plugins($this->api,$this->core,$this->db);
+        $this->dashboard = new Dashboard();
         $this->checkDB();
         $this->checkUUID();
     }

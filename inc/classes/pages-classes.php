@@ -285,12 +285,12 @@ class Pages {
                   $Prepare .= ' AND Type IN (\'SubMenu\',\'MenuLink\') AND Menu = :Menu';
                   $StrictWeights = ' WHERE Type IN (\'SubMenu\',\'MenuLink\') AND Menu = :Menu';
                   $execute[':Menu'] = $Page['Menu'];
-                  $strictExecute[':Menu'] = $Page['Menu'];
+                  $StrictExecute[':Menu'] = $Page['Menu'];
               } elseif ($Page['Type'] == "SubMenuLink") {
                   $Prepare .= ' AND Type = "SubMenuLink" AND Submenu = :SubMenu';
                   $StrictWeights = ' WHERE Type IN (\'SubMenuLink\') AND Submenu = :SubMenu';
                   $execute[':SubMenu'] = $Page['Submenu'];
-                  $strictExecute[':SubMenu'] = $Page['Submenu'];
+                  $StrictExecute[':SubMenu'] = $Page['Submenu'];
               }
   
               $execute[':originalWeight'] = $originalWeight;
@@ -312,7 +312,7 @@ class Pages {
                       ' . $StrictWeights . ';
                   ');
   
-                  if ($enforceConsecutiveWeights->execute($strictExecute)) {
+                  if ($enforceConsecutiveWeights->execute($StrictExecute)) {
                       $this->api->setAPIResponseMessage('Successfully updated position');
                       return true;
                   }
