@@ -72,6 +72,14 @@ return '
             <small id="pageTypeHelp" class="form-text text-muted">The type of navigation item.</small>
           </div>
           <div class="form-group col-md-6">
+            <label for="pageLinkType">Link Type</label>
+            <select class="form-select" id="pageLinkType" aria-describedby="pageLinkTypeHelp">
+              <option value="Native">Native</option>
+              <option value="iFrame">iFrame</option>
+            </select>
+            <small id="pageLinkTypeHelp" class="form-text text-muted">The type of link (Native/iFrame).</small>
+          </div>
+          <div class="form-group col-md-6">
             <label for="pageName">Name</label>
             <input type="text" class="form-control" id="pageName" aria-describedby="pageNameHelp">
             <small id="pageNameHelp" class="form-text text-muted">The Name for this page displayed in the navigation menu.</small>
@@ -80,11 +88,6 @@ return '
             <label for="pageTitle">Title</label>
             <input type="text" class="form-control" id="pageTitle" aria-describedby="pageTitleHelp">
             <small id="pageTitleHelp" class="form-text text-muted">The title of the page shown in the top navigation bar.</small>
-          </div>
-          <div class="form-group col-md-6">
-            <label for="pageLinkType">Link Type</label>
-            <select class="form-select dynamic" id="pageLinkType" aria-describedby="pageLinkTypeHelp"></select>
-            <small id="pageLinkTypeHelp" class="form-text text-muted">The type of link (Native/iFrame).</small>
           </div>
           <div class="form-group col-md-6">
             <label for="pageUrl">Page</label>
@@ -157,27 +160,31 @@ return '
   }
 
   function getPOSTData() {
+    var pageType = $("#pageType").val();
     var pageIcon = $("#pageIcon").val();
     var pageImage = pageImageDynamicSelect.selectedValue;
     var postData = {
       name: $("#pageName").val(),
       title: $("#pageTitle").val(),
-      linktype: $("#pageLinkType").val(),
       acl: $("#pageACL").val(),
       icon: pageIcon || pageImage,
       menu: $("#pageMenu").val(),
       submenu: $("#pageSubMenu").val(),
+      linktype: null,
       type: null,
-      url: null // Initialize the url property
+      url: null
     };
 
-    if (postData.linktype == "Native") {
-      postData.url = $("#pageUrl").val();
-    } else {
-      postData.url = $("#pageiFrameUrl").val();
+    if (pageType == "Link") {      
+      postData.linktype = $("#pageLinkType").val();
+      if (postData.linktype == "Native") {
+        postData.url = $("#pageUrl").val();
+      } else {
+        postData.url = $("#pageiFrameUrl").val();
+      }
     }
 
-    switch($("#pageType").val()) {
+    switch(pageType) {
       case "Link":
         if (postData.menu && postData.submenu) {
           postData.type = "SubMenuLink";
@@ -270,6 +277,8 @@ return '
 
   function newPage() {
     $("#pageModal input,#pageModal select").val("").attr("disabled",false);
+    $("#pageType").val("Link");
+    $("#pageLinkType").val("Native");
     $("#pageModal select.dynamic").html("");
     updateDropDowns();
     $("#pageModal").modal("show");
@@ -292,6 +301,7 @@ return '
     $("#pageName").val(row.Name);
     $("#pageTitle").val(row.Title);
     $("#pageMenu").val(row.Menu);
+    $("#pageLinkType").val(row.LinkType);
     if (row.Icon && (row.Icon.startsWith("/assets/images/custom") || row.Icon.startsWith("/api/image/plugin"))) {
       pageImageDynamicSelect.setDisabled(false);
       pageImageDynamicSelect.setSelectedValue(row.Icon);
@@ -409,12 +419,6 @@ return '
       });
       row.Url ? pageUrlContainer.val(row.Url) : pageUrlContainer.val("");
     })
-    
-    const pageLinkTypeContainer = $("#pageLinkType");
-    pageLinkTypeContainer.html(`
-    <option value="Native">Native</option>
-    <option value="iFrame">iFrame</option>`);
-    $("#pageLinkType").val(row.LinkType ? row.LinkType : "");
 
     updateSubMenus(row);
   }

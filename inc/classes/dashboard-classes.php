@@ -2,6 +2,7 @@
 // Define Widget Interface
 interface WidgetInterface {
     public function render();
+    public function settings();
 }
 
 // Define Dashboard Class
@@ -20,7 +21,7 @@ class Dashboard {
                 $size = $options['size'] ?? 'col-12'; // Default size
                 $class = $options['class'] ?? ''; // Additional classes
                 $output .= '<div class="' . $size . ' ' . $class . '">';
-                $output .= $this->widgets[$widgetName]->render();
+                $output .= $this->widgets[$widgetName]['widget']->render();
                 $output .= '</div>';
             }
         }
@@ -28,11 +29,18 @@ class Dashboard {
     }
 
     public function registerWidget($widgetName, WidgetInterface $widget) {
-        $this->widgets[$widgetName] = $widget;
+        $this->widgets[$widgetName] = [
+            "widget" => $widget,
+            "info" => $widget->settings()['info']
+        ];
     }
 
     public function getWidgets() {
         return $this->widgets;
+    }
+
+    public function getWidgetSettings($widgetName) {
+        return $this->widgets[$widgetName]['widget']->settings();
     }
 
     public function getWidgetByName($name) {
@@ -40,11 +48,11 @@ class Dashboard {
     }
 
     public function getDashboards() {
-        return $this->config->get('Dashboards','Configured') ?? [];
+        return $this->config->get('Dashboards') ?? [];
     }
 
     public function buildDashboard($name) {
-        $widgets = $this->config->get('Dashboards','Configured')[$name]['Widgets'] ?? [];
+        $widgets = $this->config->get('Dashboards',$name)['Widgets'] ?? [];
       
         // Return dashboard & configured widgets
         return '

@@ -153,6 +153,30 @@ trait Common {
                     'label' => '',
                 ];
                 break;
+            case 'codeeditor':
+                $mode = strtolower($extras['mode'] ?? 'css');
+                switch ($mode) {
+                    case 'html':
+                    case 'javascript':
+                        $mode = 'ace/mode/' . $mode;
+                        break;
+                    case 'js':
+                        $mode = 'ace/mode/javascript';
+                        break;
+                    default:
+                        $mode = 'ace/mode/css';
+                        break;
+                }
+                $settingMerge = [
+                    'type' => 'html',
+                    'override' => 12,
+                    'label' => 'Custom Code',
+                    'html' => '
+                    <textarea class="form-control info-field ' . $name . 'Textarea" name="' . $name . '" data-type="textbox" data-label="'.$name.'"></textarea>
+                    <div id="' . $name . 'Editor" style="height:300px"></div>
+                    '
+                ];
+                break;
             default:
                 $settingMerge = [
                     'type' => strtolower($type),

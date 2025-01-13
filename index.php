@@ -69,12 +69,12 @@ foreach ($navLinks as $navLink) {
               $MenuItem .= <<<EOD
               <li class="menu-item">
                   <div class="icon-link">
-                      <a href="#page={$navLink['Title']}" class="toggleFrame" data-page-url="{$navLink['Url']}" data-page-type="{$navLink['LinkType']}">
+                      <a href="#page={$navLink['Name']}" class="toggleFrame" data-page-url="{$navLink['Url']}" data-page-type="{$navLink['LinkType']}">
                           {$LinkElem}
                           <span class="link_name">{$navLink['Name']}</span>
                       </a>
                       <ul class="sub-menu blank">
-                          <li><a class="link_name toggleFrame" href="#page={$navLink['Title']}" data-page-url="{$navLink['Url']}" data-page-type="{$navLink['LinkType']}">{$navLink['Name']}</a></li>
+                          <li><a class="link_name toggleFrame" href="#page={$navLink['Name']}" data-page-url="{$navLink['Url']}" data-page-type="{$navLink['LinkType']}">{$navLink['Name']}</a></li>
                       </ul>
                   </div>
               </li>
@@ -129,7 +129,7 @@ foreach ($navLinks as $navLink) {
                     $filteredMenuLinkIcon = $phpef->getImageOrIcon($filteredMenuLink['Icon']);
                       $MenuItem .= <<<EOD
                       <li>
-                          <a href="#page={$filteredMenuLink['Title']}" class="toggleFrame" data-page-url="{$filteredMenuLink['Url']}" data-page-type="{$filteredMenuLink['LinkType']}">
+                          <a href="#page={$filteredMenuLink['Name']}" class="toggleFrame" data-page-url="{$filteredMenuLink['Url']}" data-page-type="{$filteredMenuLink['LinkType']}">
                               {$filteredMenuLinkIcon}
                               <span>{$filteredMenuLink['Name']}</span>
                           </a>
@@ -160,7 +160,7 @@ foreach ($navLinks as $navLink) {
                   foreach ($filteredSubMenuNavLinks as $filteredSubMenuNavLink) {
                       if ($phpef->auth->checkAccess($filteredSubMenuNavLink['ACL'])) {
                           $SubmenuLinks .= <<<EOD
-                          <a href="#page={$filteredSubMenuNavLink['Title']}" class="toggleFrame" data-page-url="{$filteredSubMenuNavLink['Url']}" data-page-type="{$filteredSubMenuNavLink['LinkType']}">{$filteredSubMenuNavLink['Name']}</a>
+                          <a href="#page={$filteredSubMenuNavLink['Name']}" class="toggleFrame" data-page-url="{$filteredSubMenuNavLink['Url']}" data-page-type="{$filteredSubMenuNavLink['LinkType']}">{$filteredSubMenuNavLink['Name']}</a>
                           EOD;
                       }
                   }

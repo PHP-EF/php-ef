@@ -26,6 +26,10 @@ return '
           <li class="nav-item">
           <a class="nav-link" id="images-tab" data-toggle="tab" href="#images" role="tab" aria-controls="images" aria-selected="false">Images</a>
         </li>
+        </li>
+          <li class="nav-item">
+          <a class="nav-link" id="widgets-tab" data-toggle="tab" href="#widgets" role="tab" aria-controls="widgets" aria-selected="false">Widgets</a>
+        </li>
       </ul>
       <div class="tab-content" id="tabContent">
         <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
@@ -464,6 +468,37 @@ return '
             <div class="image-gallery dropzone" id="imageGallery"></div>
           </div>
         </div>
+        <div class="tab-pane fade" id="widgets" role="tabpanel" aria-labelledby="widgets-tab">
+          <div class="my-4">
+            <h5 class="mb-0 mt-5">Widgets</h5>
+            <p>Use the following to configure Widgets on '.$phpef->config->get('Styling')['websiteTitle'].'.</p>
+          </div>
+          <table data-url="/api/dashboards/widgets"
+            data-data-field="data"
+            data-toggle="table"
+            data-search="true"
+            data-filter-control="true"
+            data-show-refresh="true"
+            data-pagination="true"
+            data-toolbar="#toolbar"
+            data-sort-name="Name"
+            data-sort-order="asc"
+            data-show-columns="true"
+            data-page-size="25"
+            // data-buttons="pluginsButtons"
+            data-response-handler="responseHandler"
+            class="table table-striped" id="widgetsTable">
+
+            <thead>
+              <tr>
+                <th data-field="state" data-checkbox="true"></th>
+                <th data-field="info.image" data-sortable="true">Image</th>
+                <th data-field="info.name" data-sortable="true">Widget Name</th>
+                <th data-formatter="widgetActionFormatter" data-events="widgetActionEvents">Actions</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
       </div>
       <br>
       <button class="btn btn-success float-end ms-1" id="submitConfig">Save Configuration</button>&nbsp;
@@ -487,6 +522,27 @@ return '
       </div>
       <div class="modal-footer">
         <button class="btn btn-primary editPluginSaveButton">Save</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Widget Settings Modal -->
+<div class="modal fade" id="widgetSettingsModal" tabindex="-1" role="dialog" aria-labelledby="widgetSettingsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xxl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="widgetSettingsModalLabel"></h5>
+        <span id="widgetName" hidden></span>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="modal-body" id="widgetSettingsModalBody">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary editWidgetSaveButton">Save</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
@@ -1052,6 +1108,129 @@ return '
     }
   }
 
+  function widgetActionFormatter(value, row, index) {
+    var buttons = [
+      `<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`
+    ];
+    return buttons.join("");
+  }
+
+  window.widgetActionEvents = {
+    "click .edit": function (e, value, row, index) {
+      $("#widgetSettingsModalBody").html("");
+      buildWidgetSettingsModal(row);
+      $("#widgetSettingsModal").modal("show");
+    }
+  }
+
+  function buildWidgetSettingsModal(row) {
+    try {
+      queryAPI("GET", "/api/dashboards/widgets/"+row.info.name + "/settings").done(function(settingsResponse) {
+        $("#widgetSettingsModalBody").html(buildFormGroup(settingsResponse.data.Settings));
+        initPasswordToggle();
+        $("#widgetSettingsModalLabel").text("Widget Settings: " + row.info.name);
+        $("#widgetName").text(row.info.name);
+        $(".info-field").change(function(elem) {
+          toast("Configuration", "", $(elem.target).data("label") + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
+          $(this).addClass("changed");
+        });
+        try {
+          queryAPI("GET", "/api/config/widgets/" + row.info.name).done(function(configResponse) {
+            let data = configResponse.data;
+            for (const key in data) {
+              if (data.hasOwnProperty(key)) {
+                const value = data[key];
+                const element = $(`#widgetSettingsModal [name="${key}"]`);
+                if (element.attr("type") === "checkbox") {
+                  element.prop("checked", value);
+                } else if (element.is("input[multiple]")) {
+                  console.log(element.data("type"));
+                } else {
+                  if (element.hasClass("encrypted")) {
+                    if (value != "") {
+                      element.val("*********");
+                    }
+                  } else {
+                    element.val(value);
+                  }
+                }
+              }
+            }
+          }).fail(function(xhr) {
+            logConsole("Error", xhr, "error");
+          });
+        } catch (e) {
+          logConsole("Error", e, "error");
+        }
+      }).fail(function(xhr) {
+        logConsole("Error", xhr, "error");
+      });
+    } catch (e) {
+      logConsole("Error", e, "error");
+    }
+  }
+
+  $("#widgetSettingsModal").on("click", ".editWidgetSaveButton", function(elem) {
+      editWidgetSubmit();
+  });
+
+  function editWidgetSubmit() {
+    var widgetName = $("#widgetName").text();
+    var serializedArray = $("#widgetSettingsModal .changed[type!=checkbox]").serializeArray();
+    
+    // Include unchecked checkboxes in the formData
+    $("#widgetSettingsModal input.changed[type=checkbox]").each(function() {
+        serializedArray.push({ name: this.name, value: this.checked ? true : false });
+    });
+
+    // Convert the array into an object
+    var formData = {};
+    var encryptionPromises = [];
+
+    serializedArray.forEach(function(item) {
+        var element = $(`[name="` + item.name + `"]`);
+        if (formData[item.name]) {
+            if (!Array.isArray(formData[item.name])) {
+                formData[item.name] = [formData[item.name]];
+            }
+            formData[item.name].push(item.value);
+        } else {
+            // Check if the element is a select with the multiple attribute
+            if (element.is("select[multiple]")) {
+                if (item.value !== "") {
+                    formData[item.name] = [item.value];
+                } else {
+                    formData[item.name] = item.value;
+                }
+            } else if (element.is("input[multiple]")) {
+                formData[item.name] = getInputMultipleEntries(element);
+            } else if (element.hasClass("encrypted") && item.value !== "") {
+                // Encrypt sensitive data
+                var promise = encryptData(item.name, item.value).done(function(encryptedValue) {
+                    formData[item.name] = encryptedValue.data;
+                });
+                encryptionPromises.push(promise);
+            } else {
+                formData[item.name] = item.value;
+            }
+        }
+    });
+
+    // Wait for all encryption promises to resolve
+    $.when.apply($, encryptionPromises).done(function() {
+        queryAPI("PATCH", "/api/config/widgets/" + widgetName, formData).done(function(data) {
+            if (data["result"] == "Success") {
+                toast(data["result"], "", data["message"], "success");
+                $("#widgetSettingsModal .changed").removeClass("changed");
+            } else if (data["result"] == "Error") {
+                toast(data["result"], "", data["message"], "danger");
+            } else {
+                toast("API Error", "", "Failed to save configuration", "danger", "30000");
+            }
+        });
+    });
+  }
+
   function responseHandler(data) {
     if (data.result === "Warning" && Array.isArray(data.message)) {
         data.message.forEach(warning => {
@@ -1062,5 +1241,6 @@ return '
   }
 
   $("#pluginsTable").bootstrapTable();
+  $("#widgetsTable").bootstrapTable();
 </script>
 ';

@@ -49,7 +49,19 @@ class Config {
           $config['Plugins'][$plugin][$key] = $value;
       }
     }
-    $this->api->setAPIResponseMessage('Successfully updated configuration');
+    $this->api->setAPIResponseMessage('Successfully updated plugin configuration');
+    file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+  }
+
+  public function setWidget(&$config, $data, $widget) {
+    foreach ($data as $key => $value) {
+      if (is_array($value) && isset($config[$key]) && is_array($config[$key])) {
+          $this->setWidget($config[$key], $value);
+      } else {
+          $config['Widgets'][$widget][$key] = $value;
+      }
+    }
+    $this->api->setAPIResponseMessage('Successfully updated widget configuration');
     file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
   }
 

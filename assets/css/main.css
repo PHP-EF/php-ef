@@ -151,6 +151,7 @@ body.dark-theme .accordion-item {
   background: #36393e;
   color: #FFF;
   border: none;
+  text-decoration: none;
 }
 body.dark-theme .accordion-body {
   background: #474a50;
@@ -251,7 +252,7 @@ h6 {
 input, select {
   border: 1px solid #aaaeb2;
 }
-input.changed, select.changed {
+input.changed, select.changed, textarea.changed {
   border: 4px solid #ffbd43!important;
 }
 
@@ -355,6 +356,11 @@ body.dark-theme .toast small {
 /* Cards */
 .card-body p {
   margin-bottom: 0px;
+}
+
+/* Accordion */
+.accordion-button {
+  padding: 0.75rem 1rem;
 }
 
 /* Tabs */

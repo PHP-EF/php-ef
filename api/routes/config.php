@@ -77,3 +77,30 @@ $app->patch('/config/plugins/{plugin}', function ($request, $response, $args) {
 		->withHeader('Content-Type', 'application/json;charset=UTF-8')
 		->withStatus($GLOBALS['responseCode']);
 });
+
+$app->get('/config/widgets/{widget}', function ($request, $response, $args) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
+        $phpef->api->setAPIResponseData($phpef->config->get('Widgets',$args['widget']) ?? []);
+    }
+	// Return the response
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json')
+		->withStatus($GLOBALS['responseCode']);
+});
+
+$app->patch('/config/widgets/{widget}', function ($request, $response, $args) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
+        $data = $phpef->api->getAPIRequestData($request);
+        $config = $phpef->config->get();
+        // Update the config values with the submitted data
+        $phpef->config->setWidget($config, $data, $args['widget']);
+    }
+
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json;charset=UTF-8')
+		->withStatus($GLOBALS['responseCode']);
+});

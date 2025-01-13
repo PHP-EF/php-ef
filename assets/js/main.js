@@ -246,24 +246,22 @@ function loadContent(element = null) {
   $('.toggleFrame').removeClass('active');
   var expandNav = false;
   var type = 'page';
-  var loadType = 'Native';
   if (element != null) {
     element = $(element.currentTarget);
     element.addClass('active');
-    loadType = element.data('pageType');
   } else {
     var hashsplit = window.parent.location.hash.split('#');
     if (hashsplit[1]) {
       var qualifierSplit = hashsplit[1].split('=');
       type = qualifierSplit[0];
+      var name = qualifierSplit[1];
       switch (qualifierSplit[0]) {
         case 'dashboard':
-          element = hashsplit[1].split('=')[1];
-          break;
+          loadDashboardPane(name)
+          return;
         case 'page':
-          element = $('a[href="#page='+decodeURI(hashsplit[1].split('=')[1])+'"]');
+          element = $('a[href="#page='+decodeURI(name)+'"]');
           element.addClass('active');
-          loadType = element.data('pageType');
           $('.title-text').text(element.data('pageName'));
           expandNav = true;
           break;
@@ -274,7 +272,7 @@ function loadContent(element = null) {
     }
   }
 
-  switch (loadType) {
+  switch (element.data('pageType')) {
     case 'Native':
       loadMainWindow(element,type);
       break;

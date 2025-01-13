@@ -259,7 +259,12 @@ function getSecureHeaders() {
     $iFrameLinks = $phpef->pages->getiFrameLinks();
     $AllowList = [];
     if (!empty($iFrameLinks)) {
-        $AllowList = array_column($iFrameLinks,'Url');
+        foreach ($iFrameLinks as $link) {
+            $url = $link['Url'];
+            if (isFullyQualifiedUrl($url)) {
+                $AllowList[] = $url;
+            }
+        }
     }
     header('X-Frame-Options: ' . $XFrameOptions);
 
@@ -306,3 +311,7 @@ function getSecureHeaders() {
     header("Content-Security-Policy:  default-src 'self'; script-src 'self' $ScriptSources 'unsafe-inline' 'unsafe-eval'; style-src 'self' $StyleSources 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' $FontSources; connect-src 'self' $ConnectSource; object-src 'none'; frame-ancestors 'self'; frame-src 'self' $FrameSource; base-uri 'self'; form-action 'self';");
 }
 
+function isFullyQualifiedUrl($url) {
+    // Use filter_var to validate the URL
+    return filter_var($url, FILTER_VALIDATE_URL) !== false;
+}
