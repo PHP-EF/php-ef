@@ -1,11 +1,11 @@
 <?php
 $app->get('/dashboards', function ($request, $response, $args) {
 	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
-	$phpef->api->setAPIResponseData($phpef->dashboard->buildDashboard($args['name']));
+	$phpef->api->setAPIResponseData(array_values($phpef->dashboard->getDashboards()));
     // Return the response
-    $response->getBody()->write($GLOBALS['api']['data']);
+    $response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
-    ->withHeader('Content-Type', 'text/html')
+    ->withHeader('Content-Type', 'application/json')
     ->withStatus($GLOBALS['responseCode']);
 });
 

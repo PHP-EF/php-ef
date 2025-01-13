@@ -12,7 +12,7 @@ return '
   <div class="row justify-content-center">
     <div class="col-12 col-lg-12 col-xl-12 mx-auto">
       <h2 class="h3 mb-4 page-title">Configuration</h2>
-      <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <ul class="nav nav-tabs" id="configTabs" role="tablist">
         <li class="nav-item">
           <a class="nav-link active" id="general-tab" data-toggle="tab" href="#general" role="tab" aria-controls="general" aria-selected="true">General</a>
         </li>
@@ -28,10 +28,10 @@ return '
         </li>
         </li>
           <li class="nav-item">
-          <a class="nav-link" id="widgets-tab" data-toggle="tab" href="#widgets" role="tab" aria-controls="widgets" aria-selected="false">Widgets</a>
+          <a class="nav-link" id="dashboard-tab" data-toggle="tab" href="#dashboard" role="tab" aria-controls="dashboard" aria-selected="false">Dashboards</a>
         </li>
       </ul>
-      <div class="tab-content" id="tabContent">
+      <div class="tab-content" id="configTabContent">
         <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
           <form id="configurationForm">
             <div class="my-4">
@@ -468,36 +468,78 @@ return '
             <div class="image-gallery dropzone" id="imageGallery"></div>
           </div>
         </div>
-        <div class="tab-pane fade" id="widgets" role="tabpanel" aria-labelledby="widgets-tab">
-          <div class="my-4">
-            <h5 class="mb-0 mt-5">Widgets</h5>
-            <p>Use the following to configure Widgets on '.$phpef->config->get('Styling')['websiteTitle'].'.</p>
-          </div>
-          <table data-url="/api/dashboards/widgets"
-            data-data-field="data"
-            data-toggle="table"
-            data-search="true"
-            data-filter-control="true"
-            data-show-refresh="true"
-            data-pagination="true"
-            data-toolbar="#toolbar"
-            data-sort-name="Name"
-            data-sort-order="asc"
-            data-show-columns="true"
-            data-page-size="25"
-            // data-buttons="pluginsButtons"
-            data-response-handler="responseHandler"
-            class="table table-striped" id="widgetsTable">
+        <div class="tab-pane fade" id="dashboard" role="tabpanel" aria-labelledby="dashboards-tab">
 
-            <thead>
-              <tr>
-                <th data-field="state" data-checkbox="true"></th>
-                <th data-field="info.image" data-sortable="true">Image</th>
-                <th data-field="info.name" data-sortable="true">Widget Name</th>
-                <th data-formatter="widgetActionFormatter" data-events="widgetActionEvents">Actions</th>
-              </tr>
-            </thead>
-          </table>
+          <ul class="nav nav-tabs mt-1" role="dashboardTabs">
+            <li class="nav-item">
+              <a class="nav-link active" id="dashboards-tab" data-bs-toggle="tab" href="#Dashboards" role="tab" aria-controls="Dashboards" aria-selected="true">Dashboards</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="widgets-tab" data-bs-toggle="tab" href="#Widgets" role="tab" aria-controls="Widgets" aria-selected="false">Widgets</a>
+            </li>
+          </ul>
+          <div class="tab-content" id="dashboardTabContent">
+            <div class="tab-pane fade show active" id="dashboards" role="tabpanel" aria-labelledby="dashboards-tab">
+              <div class="my-4">
+                <h5 class="mb-0 mt-5">Dashboards</h5>
+                <p>Use the following to configure Dashboards on '.$phpef->config->get('Styling')['websiteTitle'].'.</p>
+              </div>
+              <table data-url="/api/dashboards"
+                data-data-field="data"
+                data-toggle="table"
+                data-search="true"
+                data-filter-control="true"
+                data-show-refresh="true"
+                data-pagination="true"
+                data-toolbar="#toolbar"
+                data-sort-name="Name"
+                data-sort-order="asc"
+                data-show-columns="true"
+                data-page-size="25"
+                data-response-handler="responseHandler"
+                class="table table-striped" id="dashboardsTable">
+
+                <thead>
+                  <tr>
+                    <th data-field="state" data-checkbox="true"></th>
+                    <th data-field="Name" data-sortable="true">Dashboard Name</th>
+                    <th data-field="Description" data-sortable="true">Dashboard Description</th>
+                  </tr>
+                </thead>
+              </table>
+            </div>
+            <div class="tab-pane fade" id="widgets" role="tabpanel" aria-labelledby="widgets-tab">
+              <div class="my-4">
+                <h5 class="mb-0 mt-5">Widgets</h5>
+                <p>Use the following to configure Widgets on '.$phpef->config->get('Styling')['websiteTitle'].'.</p>
+              </div>
+              <table data-url="/api/dashboards/widgets"
+                data-data-field="data"
+                data-toggle="table"
+                data-search="true"
+                data-filter-control="true"
+                data-show-refresh="true"
+                data-pagination="true"
+                data-toolbar="#toolbar"
+                data-sort-name="Name"
+                data-sort-order="asc"
+                data-show-columns="true"
+                data-page-size="25"
+                data-response-handler="responseHandler"
+                class="table table-striped" id="widgetsTable">
+
+                <thead>
+                  <tr>
+                    <th data-field="state" data-checkbox="true"></th>
+                    <th data-field="info.name" data-sortable="true">Widget Name</th>
+                    <th data-field="info.description" data-sortable="true">Widget Description</th>
+                    <th data-formatter="widgetActionFormatter" data-events="widgetActionEvents">Actions</th>
+                  </tr>
+                </thead>
+              </table>
+            </div>
+          </div>
+
         </div>
       </div>
       <br>
@@ -762,7 +804,7 @@ return '
     $(`.nav-tabs a[href="` + tabId + `"]`).tab("show");
   }
   // Listener for tab changes
-  $("#myTab .nav-link").on("click", function(elem) {
+  $("#configTabs .nav-link").on("click", function(elem) {
     elem.preventDefault();
     var href = $(elem.target).attr("href");
     if (href == "#images") {
@@ -1241,6 +1283,7 @@ return '
   }
 
   $("#pluginsTable").bootstrapTable();
+  $("#dashboardsTable").bootstrapTable();
   $("#widgetsTable").bootstrapTable();
 </script>
 ';

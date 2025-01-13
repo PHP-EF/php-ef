@@ -12,6 +12,7 @@ class CustomHTML implements WidgetInterface {
         $SettingsArr = [];
         $SettingsArr['info'] = [
             'name' => 'CustomHTML',
+            'description' => 'Enables adding Custom HTML to Dashboards',
 			'image' => ''
         ];
         for ($i = 1; $i <= $customHTMLQty; $i++) {
