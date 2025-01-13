@@ -55,14 +55,6 @@ class Dashboard {
         $widgets = $this->config->get('Dashboards',$name)['Widgets'] ?? [];
       
         // Return dashboard & configured widgets
-        return '
-        <div class="container">
-            <div class="row">
-                '.$this->render($widgets).'
-            </div>
-        </div>
-        </body>
-        </html>
-        ';
+        return $this->render($widgets);
     }
 }

@@ -1,7 +1,7 @@
 <?php
 $Dashboards = $phpef->dashboard->getDashboards();
 
-$TabList = '<ul class="nav nav-tabs" role="tablist" style="margin-top: -20px;">';
+$TabList = '<ul class="nav nav-tabs mb-2" role="tablist" style="margin-top: -20px;">';
 $TabContent = '<div class="tab-content">';
 
 $DashboardCount = 0;
