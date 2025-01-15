@@ -45,6 +45,22 @@ class Config {
     file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
   }
 
+  public function removeConfig(&$config, $section = null, $option = null) {
+    if ($section && $option) {
+        unset($config[$section][$option]);
+        if (empty($config[$section])) {
+            unset($config[$section]);
+        }
+    } elseif ($section) {
+        unset($config[$section]);
+    } else {
+        return false;
+    }
+    file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    $this->api->setAPIResponseMessage('Successfully removed configuration');
+    return true;
+  }
+
   public function set(&$config, $data) {
       $this->setConfig($config, $data);
   }

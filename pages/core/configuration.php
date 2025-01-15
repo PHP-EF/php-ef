@@ -495,6 +495,7 @@ return '
                 data-sort-order="asc"
                 data-show-columns="true"
                 data-page-size="25"
+                data-buttons="dashboardButtons"
                 data-response-handler="responseHandler"
                 class="table table-striped" id="dashboardsTable">
 
@@ -1037,9 +1038,27 @@ return '
     }
   }
 
+  function dashboardButtons() {
+    return {
+      btnAddDashboard: {
+        text: "Create new Dashboard",
+        icon: "bi bi-plus-lg",
+        event: function() {
+          buildNewDashboardSettingsModal();
+          $("#SettingsModal").modal("show");
+        },
+        attributes: {
+          title: "Create new Dashboard",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
   function dashboardActionFormatter(value, row, index) {
     var buttons = [
-      `<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`
+      `<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`,
+      `<a class="delete" title="Delete"><i class="fa fa-trash"></i></a>`
     ];
     return buttons.join("");
   }
@@ -1049,6 +1068,22 @@ return '
       $("#SettingsModalBody").html("");
       buildDashboardSettingsModal(row);
       $("#SettingsModal").modal("show");
+    },
+    "click .delete": function (e, value, row, index) {
+      if(confirm("Are you sure you want to delete the Dashboard: "+row.Name+"? This is irriversible.") == true) {
+        queryAPI("DELETE","/api/config/dashboards/"+row.Name).done(function(data) {
+          if (data["result"] == "Success") {
+            toast("Success","","Successfully deleted Dashboard: "+row.Name,"success");
+            $("#dashboardsTable").bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger","30000");
+          } else {
+            toast("Error","","Failed to delete Dashboard: "+row.Name,"danger");
+          }
+        }).fail(function() {
+            toast("Error", "", "Failed to delete Dashboard: "+row.Name, "danger");
+        });
+      }
     }
   }
 
@@ -1073,43 +1108,45 @@ return '
           $(this).addClass("changed");
         });
 
-        try {
-          queryAPI("GET", configUrl).done(function(configResponse) {
-            let data = configResponse.data;
-            for (const key in data) {
-              if (data.hasOwnProperty(key)) {
-                const value = data[key];
-                const element = $(`#SettingsModal [name="${key}"]`);
-                if (element.attr("type") === "checkbox") {
-                  element.prop("checked", value);
-                } else if (element.is("input[multiple]")) {
-                  // console.log(element.data("type"));
-                } else {
-                  if (element.hasClass("encrypted")) {
-                    if (value !== "") {
-                      element.val("*********");
-                    }
+        if (configUrl) {
+          try {
+            queryAPI("GET", configUrl).done(function(configResponse) {
+              let data = configResponse.data;
+              for (const key in data) {
+                if (data.hasOwnProperty(key)) {
+                  const value = data[key];
+                  const element = $(`#SettingsModal [name="${key}"]`);
+                  if (element.attr("type") === "checkbox") {
+                    element.prop("checked", value);
+                  } else if (element.is("input[multiple]")) {
+                    // console.log(element.data("type"));
                   } else {
-                    element.val(value);
+                    if (element.hasClass("encrypted")) {
+                      if (value !== "") {
+                        element.val("*********");
+                      }
+                    } else {
+                      element.val(value);
+                    }
                   }
                 }
               }
-            }
-            // Callback
-            let match = callback.match(/(\w+)\((.*)\)/);
-            if (match) {
-                let functionName = match[1];
-                let args = match[2].split(",").map(arg => arg.trim());
-                args = args.map(arg => eval(arg));
-                window[functionName](args);
-            } else {
-                console.error("Invalid callback format");
-            }
-          }).fail(function(xhr) {
-            logConsole("Error", xhr, "error");
-          });
-        } catch (e) {
-          logConsole("Error", e, "error");
+              // Callback
+              let match = callback.match(/(\w+)\((.*)\)/);
+              if (match) {
+                  let functionName = match[1];
+                  let args = match[2].split(",").map(arg => arg.trim());
+                  args = args.map(arg => eval(arg));
+                  window[functionName](args);
+              } else {
+                  console.error("Invalid callback format");
+              }
+            }).fail(function(xhr) {
+              logConsole("Error", xhr, "error");
+            });
+          } catch (e) {
+            logConsole("Error", e, "error");
+          }
         }
       }).fail(function(xhr) {
         logConsole("Error", xhr, "error");
@@ -1119,8 +1156,7 @@ return '
     }
   }
 
-  function submitModalSettings(type) {
-    var itemName = $("#modalItemID").val();
+  function submitModalSettings(type, element = "#modalItemID", isNew = false) {
     var serializedArray = $("#SettingsModal .changed[type!=checkbox]").serializeArray();
 
     // Include unchecked checkboxes in the formData
@@ -1160,9 +1196,17 @@ return '
     // Append selectWithTableArr to formData
     var fullFormData = Object.assign({}, formData, selectWithTableArr);
 
+    if (isNew) {
+      var api = `/api/config/${type}s`;
+      var method = "POST";
+    } else {
+      var api = `/api/config/${type}s/` + $(element).val();
+      var method = "PATCH";
+    }
+
     // Wait for all encryption promises to resolve
     $.when.apply($, encryptionPromises).done(function() {
-        queryAPI("PATCH", `/api/config/${type}s/` + itemName, fullFormData).done(function(data) {
+        queryAPI(method, api, fullFormData).done(function(data) {
             if (data.result === "Success") {
                 toast(data.result, "", data.message, "success");
                 $("#SettingsModal .changed").removeClass("changed");
@@ -1207,41 +1251,54 @@ return '
     });
   }
 
-  function widgetSelectCallback(row) {
-    const tableData = {
-      "Widgets": Object.keys(row[0].Widgets).map(key => ({
-        "dragHandle": `<span class="dragHandle" style="font-size:22px;">☰</span>`,
-        "name": key,
-        "size": `<select class="form-select" data-label="size">
-                    <option value="col-md-1">1</option>
-                    <option value="col-md-2">2</option>
-                    <option value="col-md-3">3</option>
-                    <option value="col-md-4">4</option>
-                    <option value="col-md-5">5</option>
-                    <option value="col-md-6">6</option>
-                    <option value="col-md-7">7</option>
-                    <option value="col-md-8">8</option>
-                    <option value="col-md-9">9</option>
-                    <option value="col-md-10">10</option>
-                    <option value="col-md-11">11</option>
-                    <option value="col-md-12">12</option>
-                </select>`
-      }))
-    };
-    const uniqueNames = [...new Set(tableData.Widgets.map(widget => widget.name))];
-    $("#widgetSelectTable").bootstrapTable({ data: tableData.Widgets});
-    $("#widgetSelect").val(uniqueNames);
+  function buildNewDashboardSettingsModal() {
+    buildSettingsModal([], {
+      apiUrl: `/api/dashboards/settings`,
+      configUrl: null,
+      name: "New Dashboard",
+      saveFunction: `submitDashboardSettings(true);`,
+      labelPrefix: "Dashboard",
+      dataLocation: "data"
+    });
+  }
 
-    tableData.Widgets.forEach(function(item,index) {
+  function widgetSelectCallback(row) {
+    if (row.length > 0) {
+      const tableData = {
+        "Widgets": Object.keys(row[0].Widgets).map(key => ({
+          "dragHandle": `<span class="dragHandle" style="font-size:22px;">☰</span>`,
+          "name": key,
+          "size": `<select class="form-select" data-label="size">
+                      <option value="col-md-1">1</option>
+                      <option value="col-md-2">2</option>
+                      <option value="col-md-3">3</option>
+                      <option value="col-md-4">4</option>
+                      <option value="col-md-5">5</option>
+                      <option value="col-md-6">6</option>
+                      <option value="col-md-7">7</option>
+                      <option value="col-md-8">8</option>
+                      <option value="col-md-9">9</option>
+                      <option value="col-md-10">10</option>
+                      <option value="col-md-11">11</option>
+                      <option value="col-md-12">12</option>
+                  </select>`
+        }))
+      };
+      const uniqueNames = [...new Set(tableData.Widgets.map(widget => widget.name))];
+      $("#widgetSelectTable").bootstrapTable({ data: tableData.Widgets});
+      $("#widgetSelect").val(uniqueNames);
+
+      tableData.Widgets.forEach(function(item,index) {
         let tablerow = $("#widgetSelectTable tbody tr")[index];
         let cells = $(tablerow).find("td");
         let widgetName = cells[1].textContent;
         let selectElement = $(cells[2]).find("select");
         selectElement.val(row[0].Widgets[widgetName].size);
       });
+    }
   }
 
-  function submitDashboardSettings() {
+  function submitDashboardSettings(isNew = false) {
     let tableRows = $("#widgetSelectTable tbody tr");
     tableRows.each((index, row) => {
         let cells = $(row).find("td");
@@ -1263,7 +1320,13 @@ return '
             selectWithTableArr["Widgets"][widgetName]["size"] = selectedOption;
         }
     });
-    submitModalSettings("dashboard");
+    if (isNew) {
+      submitModalSettings("dashboard",`[name="Name"]`,isNew);
+    } else {
+      submitModalSettings("dashboard");
+    }
+    $("#SettingsModal").modal("hide");
+    $("#dashboardsTable").bootstrapTable("refresh");
   }
 
   function responseHandler(data) {
