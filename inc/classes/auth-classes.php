@@ -821,6 +821,9 @@ class Auth {
           $Type = null;
         }
 
+        // Check if Admin
+        $isAdmin = in_array('Administrators',$Groups) ? true : false;
+
         $AuthResult = array(
           'Authenticated' => true,
           'Username' => $Username,
@@ -830,7 +833,8 @@ class Auth {
           'DisplayName' => $FullName,
           'IPAddress' => $IPAddress,
           'Groups' => $Groups,
-          'Type' => $Type
+          'Type' => $Type,
+          'isAdmin' => $isAdmin
         );
       } else {
         $AuthResult = array(
