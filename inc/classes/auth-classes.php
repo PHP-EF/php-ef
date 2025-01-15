@@ -747,15 +747,7 @@ class Auth {
   }
 
   public function getAuth() {
-    if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-      $IPAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    } else if (isset($_SERVER['REMOTE_ADDR'])) {
-      $IPAddress = $_SERVER['REMOTE_ADDR'];
-    } else {
-      $IPAddress = "N/A";
-    }
-    $IPAddress = explode(':',$IPAddress)[0];
-
+    $IPAddress = $this->getUserIP();
     if (isset($_COOKIE['jwt'])) {
       $secretKey = $this->config->get()['Security']['salt']; // Change this to a secure key
       if ($this->CoreJwt->isRevoked($_COOKIE['jwt']) == true) {

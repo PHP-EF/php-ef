@@ -1132,14 +1132,16 @@ return '
                 }
               }
               // Callback
-              let match = callback.match(/(\w+)\((.*)\)/);
-              if (match) {
-                  let functionName = match[1];
-                  let args = match[2].split(",").map(arg => arg.trim());
-                  args = args.map(arg => eval(arg));
-                  window[functionName](args);
-              } else {
-                  console.error("Invalid callback format");
+              if (callback) {
+                let match = callback.match(/(\w+)\((.*)\)/);
+                if (match) {
+                    let functionName = match[1];
+                    let args = match[2].split(",").map(arg => arg.trim());
+                    args = args.map(arg => eval(arg));
+                    window[functionName](args);
+                } else {
+                    console.error("Invalid callback format");
+                }
               }
             }).fail(function(xhr) {
               logConsole("Error", xhr, "error");
@@ -1183,6 +1185,7 @@ return '
                 formData[item.name] = getInputMultipleEntries(element);
             } else if (element.hasClass("encrypted") && item.value !== "") {
                 // Encrypt sensitive data
+                console.log(item.name,item.value);
                 var promise = encryptData(item.name, item.value).done(function(encryptedValue) {
                     formData[item.name] = encryptedValue.data;
                 });
@@ -1193,15 +1196,19 @@ return '
         }
     });
 
-    // Append selectWithTableArr to formData
-    var fullFormData = Object.assign({}, formData, selectWithTableArr);
-
     if (isNew) {
       var api = `/api/config/${type}s`;
       var method = "POST";
     } else {
       var api = `/api/config/${type}s/` + $(element).val();
       var method = "PATCH";
+    }
+
+    // Append selectWithTableArr to formData
+    if (selectWithTableArr) {
+      var fullFormData = Object.assign({}, formData, selectWithTableArr);
+    } else {
+      var fullFormData = formData;
     }
 
     // Wait for all encryption promises to resolve

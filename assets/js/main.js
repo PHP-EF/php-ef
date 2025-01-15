@@ -675,6 +675,15 @@ function generateUniqueId() {
   });
 }
 
+function generateSecureToken() {
+  return queryAPI('POST', '/api/auth/crypt', { key: generateUniqueId() }, 'application/json', false).then(function(data) {
+    return data.data.split(':')[2];
+  }).catch(function(error) {
+    console.error('Error generating secure token:', error);
+    throw error;
+  });
+}
+
 // Check if user ID cookie exists, if not, create one
 let tId = getCookie('tId');
 if (!tId) {

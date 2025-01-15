@@ -271,4 +271,29 @@ trait Common {
         }
         return ($force) ? $value : $Domain;
     }
+
+    public function getUserIP() {
+		if (isset($_SERVER['HTTP_CLIENT_IP'])) {
+			$ipaddress = $_SERVER['HTTP_CLIENT_IP'];
+		} elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+			$ipaddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		} elseif (isset($_SERVER['HTTP_X_FORWARDED'])) {
+			$ipaddress = $_SERVER['HTTP_X_FORWARDED'];
+		} elseif (isset($_SERVER['HTTP_FORWARDED_FOR'])) {
+			$ipaddress = $_SERVER['HTTP_FORWARDED_FOR'];
+		} elseif (isset($_SERVER['HTTP_FORWARDED'])) {
+			$ipaddress = $_SERVER['HTTP_FORWARDED'];
+		} elseif (isset($_SERVER['REMOTE_ADDR'])) {
+			$ipaddress = $_SERVER['REMOTE_ADDR'];
+		} else {
+			$ipaddress = '127.0.0.1';
+		}
+		if (strpos($ipaddress, ',') !== false) {
+			list($first, $last) = explode(",", $ipaddress);
+			unset($last);
+			return $first;
+		} else {
+			return $ipaddress;
+		}
+	}
 }
