@@ -469,7 +469,6 @@ return '
           </div>
         </div>
         <div class="tab-pane fade" id="dashboard" role="tabpanel" aria-labelledby="dashboards-tab">
-
           <ul class="nav nav-tabs mt-1" role="dashboardTabs">
             <li class="nav-item">
               <a class="nav-link active" id="dashboards-tab" data-bs-toggle="tab" href="#Dashboards" role="tab" aria-controls="Dashboards" aria-selected="true">Dashboards</a>
@@ -504,6 +503,7 @@ return '
                     <th data-field="state" data-checkbox="true"></th>
                     <th data-field="Name" data-sortable="true">Dashboard Name</th>
                     <th data-field="Description" data-sortable="true">Dashboard Description</th>
+                    <th data-formatter="dashboardActionFormatter" data-events="dashboardActionEvents">Actions</th>
                   </tr>
                 </thead>
               </table>
@@ -549,42 +549,21 @@ return '
   </div>
 </div>
 
-<!-- Plugin Settings Modal -->
-<div class="modal fade" id="pluginSettingsModal" tabindex="-1" role="dialog" aria-labelledby="pluginSettingsModalLabel" aria-hidden="true">
+<!-- Settings Modal -->
+<div class="modal fade" id="SettingsModal" tabindex="-1" role="dialog" aria-labelledby="SettingsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xxl" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="pluginSettingsModalLabel"></h5>
-        <span id="pluginName" hidden></span>
+        <h5 class="modal-title" id="SettingsModalLabel"></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
           <span aria-hidden="true"></span>
         </button>
+        <input id="modalItemID" hidden></input>
       </div>
-      <div class="modal-body" id="pluginSettingsModalBody">
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-primary editPluginSaveButton">Save</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Widget Settings Modal -->
-<div class="modal fade" id="widgetSettingsModal" tabindex="-1" role="dialog" aria-labelledby="widgetSettingsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xxl" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="widgetSettingsModalLabel"></h5>
-        <span id="widgetName" hidden></span>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true"></span>
-        </button>
-      </div>
-      <div class="modal-body" id="widgetSettingsModalBody">
+      <div class="modal-body" id="SettingsModalBody">
       </div>
       <div class="modal-footer">
-        <button class="btn btn-primary editWidgetSaveButton">Save</button>
+        <button class="btn btn-primary" id="SettingsModalSaveBtn">Save</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
@@ -622,6 +601,7 @@ return '
 
 <script>
   var imagesLoaded = false;
+  var selectWithTableArr = {};
 
   function extractImageName(url) {
     let imageName = "";
@@ -813,114 +793,6 @@ return '
     switchTab($(elem.target).attr("href"));
   });
 
-  function buildPluginSettingsModal(row) {
-    try {
-      queryAPI("GET", row.api).done(function(settingsResponse) {
-        $("#pluginSettingsModalBody").html(buildFormGroup(settingsResponse.data));
-        initPasswordToggle();
-        $("#pluginSettingsModalLabel").text("Plugin Settings: " + row.name);
-        $("#pluginName").text(row.name);
-        $(".info-field").change(function(elem) {
-          toast("Configuration", "", $(elem.target).data("label") + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
-          $(this).addClass("changed");
-        });
-        try {
-          queryAPI("GET", "/api/config/plugins/" + row.name).done(function(configResponse) {
-            let data = configResponse.data;
-            for (const key in data) {
-              if (data.hasOwnProperty(key)) {
-                const value = data[key];
-                const element = $(`#pluginSettingsModal [name="${key}"]`);
-                if (element.attr("type") === "checkbox") {
-                  element.prop("checked", value);
-                } else if (element.is("input[multiple]")) {
-                  console.log(element.data("type"));
-                } else {
-                  if (element.hasClass("encrypted")) {
-                    if (value != "") {
-                      element.val("*********");
-                    }
-                  } else {
-                    element.val(value);
-                  }
-                }
-              }
-            }
-          }).fail(function(xhr) {
-            logConsole("Error", xhr, "error");
-          });
-        } catch (e) {
-          logConsole("Error", e, "error");
-        }
-      }).fail(function(xhr) {
-        logConsole("Error", xhr, "error");
-      });
-    } catch (e) {
-      logConsole("Error", e, "error");
-    }
-  }
-
-  $("#pluginSettingsModal").on("click", ".editPluginSaveButton", function(elem) {
-      editPluginSubmit();
-  });
-
-  function editPluginSubmit() {
-    var pluginName = $("#pluginName").text();
-    var serializedArray = $("#pluginSettingsModal .changed[type!=checkbox]").serializeArray();
-    
-    // Include unchecked checkboxes in the formData
-    $("#pluginSettingsModal input.changed[type=checkbox]").each(function() {
-        serializedArray.push({ name: this.name, value: this.checked ? true : false });
-    });
-
-    // Convert the array into an object
-    var formData = {};
-    var encryptionPromises = [];
-
-    serializedArray.forEach(function(item) {
-        var element = $(`[name="` + item.name + `"]`);
-        if (formData[item.name]) {
-            if (!Array.isArray(formData[item.name])) {
-                formData[item.name] = [formData[item.name]];
-            }
-            formData[item.name].push(item.value);
-        } else {
-            // Check if the element is a select with the multiple attribute
-            if (element.is("select[multiple]")) {
-                if (item.value !== "") {
-                    formData[item.name] = [item.value];
-                } else {
-                    formData[item.name] = item.value;
-                }
-            } else if (element.is("input[multiple]")) {
-                formData[item.name] = getInputMultipleEntries(element);
-            } else if (element.hasClass("encrypted") && item.value !== "") {
-                // Encrypt sensitive data
-                var promise = encryptData(item.name, item.value).done(function(encryptedValue) {
-                    formData[item.name] = encryptedValue.data;
-                });
-                encryptionPromises.push(promise);
-            } else {
-                formData[item.name] = item.value;
-            }
-        }
-    });
-
-    // Wait for all encryption promises to resolve
-    $.when.apply($, encryptionPromises).done(function() {
-        queryAPI("PATCH", "/api/config/plugins/" + pluginName, formData).done(function(data) {
-            if (data["result"] == "Success") {
-                toast(data["result"], "", data["message"], "success");
-                $("#pluginSettingsModal .changed").removeClass("changed");
-            } else if (data["result"] == "Error") {
-                toast(data["result"], "", data["message"], "danger");
-            } else {
-                toast("API Error", "", "Failed to save configuration", "danger", "30000");
-            }
-        });
-    });
-  }
-
   function pluginUpdatesFormatter(value, row, index) {
     if (row.version < row.online_version) {
       return `<span class="badge bg-info">Update Available</span>`;
@@ -953,9 +825,9 @@ return '
 
   window.pluginActionEvents = {
     "click .edit": function (e, value, row, index) {
-      $("#pluginSettingsModalBody").html("");
+      $("#SettingsModalBody").html("");
       buildPluginSettingsModal(row);
-      $("#pluginSettingsModal").modal("show");
+      $("#SettingsModal").modal("show");
     },
     "click .install": function (e, value, row, index) {
       installPlugin(row);
@@ -1159,37 +1031,62 @@ return '
 
   window.widgetActionEvents = {
     "click .edit": function (e, value, row, index) {
-      $("#widgetSettingsModalBody").html("");
+      $("#SettingsModalBody").html("");
       buildWidgetSettingsModal(row);
-      $("#widgetSettingsModal").modal("show");
+      $("#SettingsModal").modal("show");
     }
   }
 
-  function buildWidgetSettingsModal(row) {
+  function dashboardActionFormatter(value, row, index) {
+    var buttons = [
+      `<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`
+    ];
+    return buttons.join("");
+  }
+
+  window.dashboardActionEvents = {
+    "click .edit": function (e, value, row, index) {
+      $("#SettingsModalBody").html("");
+      buildDashboardSettingsModal(row);
+      $("#SettingsModal").modal("show");
+    }
+  }
+
+  function getNestedProperty(obj, path) {
+    return path.split(".").reduce((acc, part) => acc && acc[part], obj);
+  }
+
+  function buildSettingsModal(row, options) {
+    // Empty the additional settings array
+    selectWithTableArr = {};
+    const { apiUrl, configUrl, name, saveFunction, labelPrefix, dataLocation, callback } = options;
     try {
-      queryAPI("GET", "/api/dashboards/widgets/"+row.info.name + "/settings").done(function(settingsResponse) {
-        $("#widgetSettingsModalBody").html(buildFormGroup(settingsResponse.data.Settings));
+      queryAPI("GET", apiUrl).done(function(settingsResponse) {
+        const settingsData = dataLocation ? getNestedProperty(settingsResponse, dataLocation) : settingsResponse.data;
+        $("#SettingsModalBody").html(buildFormGroup(settingsData));
         initPasswordToggle();
-        $("#widgetSettingsModalLabel").text("Widget Settings: " + row.info.name);
-        $("#widgetName").text(row.info.name);
+        $("#SettingsModalSaveBtn").attr("onclick", saveFunction);
+        $("#SettingsModalLabel").text(`${labelPrefix} Settings: ${name}`);
+        $("#modalItemID").val(name);
         $(".info-field").change(function(elem) {
           toast("Configuration", "", $(elem.target).data("label") + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
           $(this).addClass("changed");
         });
+
         try {
-          queryAPI("GET", "/api/config/widgets/" + row.info.name).done(function(configResponse) {
+          queryAPI("GET", configUrl).done(function(configResponse) {
             let data = configResponse.data;
             for (const key in data) {
               if (data.hasOwnProperty(key)) {
                 const value = data[key];
-                const element = $(`#widgetSettingsModal [name="${key}"]`);
+                const element = $(`#SettingsModal [name="${key}"]`);
                 if (element.attr("type") === "checkbox") {
                   element.prop("checked", value);
                 } else if (element.is("input[multiple]")) {
-                  console.log(element.data("type"));
+                  // console.log(element.data("type"));
                 } else {
                   if (element.hasClass("encrypted")) {
-                    if (value != "") {
+                    if (value !== "") {
                       element.val("*********");
                     }
                   } else {
@@ -1197,6 +1094,16 @@ return '
                   }
                 }
               }
+            }
+            // Callback
+            let match = callback.match(/(\w+)\((.*)\)/);
+            if (match) {
+                let functionName = match[1];
+                let args = match[2].split(",").map(arg => arg.trim());
+                args = args.map(arg => eval(arg));
+                window[functionName](args);
+            } else {
+                console.error("Invalid callback format");
             }
           }).fail(function(xhr) {
             logConsole("Error", xhr, "error");
@@ -1212,16 +1119,12 @@ return '
     }
   }
 
-  $("#widgetSettingsModal").on("click", ".editWidgetSaveButton", function(elem) {
-      editWidgetSubmit();
-  });
+  function submitModalSettings(type) {
+    var itemName = $("#modalItemID").val();
+    var serializedArray = $("#SettingsModal .changed[type!=checkbox]").serializeArray();
 
-  function editWidgetSubmit() {
-    var widgetName = $("#widgetName").text();
-    var serializedArray = $("#widgetSettingsModal .changed[type!=checkbox]").serializeArray();
-    
     // Include unchecked checkboxes in the formData
-    $("#widgetSettingsModal input.changed[type=checkbox]").each(function() {
+    $("#SettingsModal input.changed[type=checkbox]").each(function() {
         serializedArray.push({ name: this.name, value: this.checked ? true : false });
     });
 
@@ -1230,7 +1133,7 @@ return '
     var encryptionPromises = [];
 
     serializedArray.forEach(function(item) {
-        var element = $(`[name="` + item.name + `"]`);
+        var element = $(`[name="${item.name}"]`);
         if (formData[item.name]) {
             if (!Array.isArray(formData[item.name])) {
                 formData[item.name] = [formData[item.name]];
@@ -1239,11 +1142,7 @@ return '
         } else {
             // Check if the element is a select with the multiple attribute
             if (element.is("select[multiple]")) {
-                if (item.value !== "") {
-                    formData[item.name] = [item.value];
-                } else {
-                    formData[item.name] = item.value;
-                }
+                formData[item.name] = item.value !== "" ? [item.value] : item.value;
             } else if (element.is("input[multiple]")) {
                 formData[item.name] = getInputMultipleEntries(element);
             } else if (element.hasClass("encrypted") && item.value !== "") {
@@ -1258,19 +1157,113 @@ return '
         }
     });
 
+    // Append selectWithTableArr to formData
+    var fullFormData = Object.assign({}, formData, selectWithTableArr);
+
     // Wait for all encryption promises to resolve
     $.when.apply($, encryptionPromises).done(function() {
-        queryAPI("PATCH", "/api/config/widgets/" + widgetName, formData).done(function(data) {
-            if (data["result"] == "Success") {
-                toast(data["result"], "", data["message"], "success");
-                $("#widgetSettingsModal .changed").removeClass("changed");
-            } else if (data["result"] == "Error") {
-                toast(data["result"], "", data["message"], "danger");
+        queryAPI("PATCH", `/api/config/${type}s/` + itemName, fullFormData).done(function(data) {
+            if (data.result === "Success") {
+                toast(data.result, "", data.message, "success");
+                $("#SettingsModal .changed").removeClass("changed");
             } else {
-                toast("API Error", "", "Failed to save configuration", "danger", "30000");
+                toast(data.result === "Error" ? data.result : "API Error", "", data.message || "Failed to save configuration", "danger", "30000");
             }
         });
     });
+  }
+
+  function buildPluginSettingsModal(row) {
+    buildSettingsModal(row, {
+      apiUrl: row.api,
+      configUrl: `/api/config/plugins/${row.name}`,
+      name: row.name,
+      saveFunction: `submitModalSettings("plugin");`,
+      labelPrefix: "Plugin",
+      dataLocation: "data"
+    });
+  }
+
+  function buildWidgetSettingsModal(row) {
+    buildSettingsModal(row, {
+      apiUrl: `/api/dashboards/widgets/${row.info.name}/settings`,
+      configUrl: `/api/config/widgets/${row.info.name}`,
+      name: row.info.name,
+      saveFunction: `submitModalSettings("widget");`,
+      labelPrefix: "Widget",
+      dataLocation: "data.Settings"
+    });
+  }
+
+  function buildDashboardSettingsModal(row) {
+    buildSettingsModal(row, {
+      apiUrl: `/api/dashboards/settings`,
+      configUrl: `/api/config/dashboards/${row.Name}`,
+      name: row.Name,
+      saveFunction: `submitDashboardSettings();`,
+      labelPrefix: "Dashboard",
+      dataLocation: "data",
+      callback: "widgetSelectCallback(row)"
+    });
+  }
+
+  function widgetSelectCallback(row) {
+    const tableData = {
+      "Widgets": Object.keys(row[0].Widgets).map(key => ({
+        "dragHandle": `<span class="dragHandle" style="font-size:22px;">☰</span>`,
+        "name": key,
+        "size": `<select class="form-select" data-label="size">
+                    <option value="col-md-1">1</option>
+                    <option value="col-md-2">2</option>
+                    <option value="col-md-3">3</option>
+                    <option value="col-md-4">4</option>
+                    <option value="col-md-5">5</option>
+                    <option value="col-md-6">6</option>
+                    <option value="col-md-7">7</option>
+                    <option value="col-md-8">8</option>
+                    <option value="col-md-9">9</option>
+                    <option value="col-md-10">10</option>
+                    <option value="col-md-11">11</option>
+                    <option value="col-md-12">12</option>
+                </select>`
+      }))
+    };
+    const uniqueNames = [...new Set(tableData.Widgets.map(widget => widget.name))];
+    $("#widgetSelectTable").bootstrapTable({ data: tableData.Widgets});
+    $("#widgetSelect").val(uniqueNames);
+
+    tableData.Widgets.forEach(function(item,index) {
+        let tablerow = $("#widgetSelectTable tbody tr")[index];
+        let cells = $(tablerow).find("td");
+        let widgetName = cells[1].textContent;
+        let selectElement = $(cells[2]).find("select");
+        selectElement.val(row[0].Widgets[widgetName].size);
+      });
+  }
+
+  function submitDashboardSettings() {
+    let tableRows = $("#widgetSelectTable tbody tr");
+    tableRows.each((index, row) => {
+        let cells = $(row).find("td");
+        if (cells.length > 1) {
+            let widgetName = cells.eq(1).text();
+            let selectElement = cells.eq(2).find("select");
+            let selectedOption = selectElement.length ? selectElement.val() : null;
+
+            // Ensure the Widgets object exists
+            if (!selectWithTableArr["Widgets"]) {
+                selectWithTableArr["Widgets"] = {};
+            }
+
+            // Ensure the specific widget object exists
+            if (!selectWithTableArr["Widgets"][widgetName]) {
+                selectWithTableArr["Widgets"][widgetName] = {};
+            }
+
+            selectWithTableArr["Widgets"][widgetName]["size"] = selectedOption;
+        }
+    });
+    submitModalSettings("dashboard");
   }
 
   function responseHandler(data) {
@@ -1281,6 +1274,35 @@ return '
     }
     return data.data;
   }
+
+  $("#SettingsModal").on("click", "#widgetSelect", function () {
+    const widgetsSelect = $("#widgetSelect");
+    $("#widgetSelectTable").bootstrapTable("destroy");
+    const data = [];
+    Array.from(widgetsSelect[0].selectedOptions).forEach((option, index) => {
+        if (option.value) {
+            data.push({
+                dragHandle: `<span class="dragHandle" style="font-size:22px;">☰</span>`,
+                name: option.text,
+                size: `<select class="form-select" data-label="size">
+                        <option value="col-md-1">1</option>
+                        <option value="col-md-2">2</option>
+                        <option value="col-md-3">3</option>
+                        <option value="col-md-4">4</option>
+                        <option value="col-md-5">5</option>
+                        <option value="col-md-6">6</option>
+                        <option value="col-md-7">7</option>
+                        <option value="col-md-8">8</option>
+                        <option value="col-md-9">9</option>
+                        <option value="col-md-10">10</option>
+                        <option value="col-md-11">11</option>
+                        <option value="col-md-12">12</option>
+                    </select>`
+            });
+        }
+    });
+    $("#widgetSelectTable").bootstrapTable({ data: data});
+  });
 
   $("#pluginsTable").bootstrapTable();
   $("#dashboardsTable").bootstrapTable();

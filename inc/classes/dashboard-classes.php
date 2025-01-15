@@ -57,4 +57,33 @@ class Dashboard {
         // Return dashboard & configured widgets
         return $this->render($widgets);
     }
+
+    public function getDashboardSettings() {
+        global $phpef;
+
+        $AppendNone = array(
+            [
+                "name" => 'None',
+                "value" => ''
+            ]
+        );
+        $WidgetList = array_merge($AppendNone,array_map(function($item) {
+            return [
+                "name" => $item['info']['name'],
+                "value" => $item['info']['name']
+            ];
+        }, $this->getWidgets()));
+
+        return array(
+            'Settings' => array(
+                $phpef->settingsOption('input', 'Name', ['label' => 'Dashboard Name']),
+                $phpef->settingsOption('input', 'Description', ['label' => 'Dashboard Description']),
+                $phpef->settingsOption('auth', 'Auth', ['label' => 'Role Required']),
+                $phpef->settingsOption('enable', 'Enabled')
+            ),
+            'Widgets' => array(
+                $phpef->settingsOption('selectwithtable', 'Widgets', ['label' => 'Enabled Widgets', 'options' => $WidgetList, 'class' => 'widgetSelect select-multiple', 'override' => 'col-md-8', 'id' => 'widgetSelect'])
+            )
+	    );
+    }
 }

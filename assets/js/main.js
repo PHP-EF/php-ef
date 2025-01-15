@@ -827,9 +827,9 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Set Sidebar State for Mobile
-    if (isMobile()) {
-      document.querySelector(".sidebar").classList.add("close");
-    }
+  if (isMobile()) {
+    document.querySelector(".sidebar").classList.add("close");
+  }
 
   // Initialize tracking
   userTracking.init(trackingConfig);
@@ -970,6 +970,7 @@ function buildFormGroup(array) {
 function buildFormItem(item){
   var placeholder = (item.placeholder) ? ' placeholder="'+item.placeholder+'"' : '';
   var id = (item.id) ? ' id="'+item.id+'"' : '';
+  var tableId = (item.id) && (item.type == "selectwithtable") ? ' id="'+item.id+'Table"' : '';
   var type = (item.type) ? ' data-type="'+item.type+'"' : '';
   var label = (item.label) ? ' data-label="'+item.label+'"' : '';
   var value = (item.value) ? ' value="'+item.value+'"' : '';
@@ -1040,6 +1041,30 @@ function buildFormItem(item){
         document.head.appendChild(script);
       }
       return ''; // Return an empty string as the script is already added
+    case 'selectwithtable':
+      return `
+        <form id="multiSelectForm">
+            <div class="form-group">
+              <select class="form-control select-multiple widgetSelect info-field" multiple name="Widgets" data-type="selectmultiple" `+id+name+disabled+type+label+attr+`>
+              `+selectOptions(item.options, item.value)+`
+            </select>
+            </div>
+            <table `+tableId+` 
+              data-pagination="true"
+              data-reorderable-rows="true"
+              data-drag-handle=">tbody>tr>td>span.dragHandle"
+              class="table table-bordered table-striped info-field">
+                <thead>
+                    <tr>
+                        <th data-field="dragHandle"></th>
+                        <th data-field="name">Widget</th>
+                        <th data-field="size">Size</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </form>
+        `;
     default:
       return '<span class="text-danger">BuildFormItem Class not setup...';
   }
