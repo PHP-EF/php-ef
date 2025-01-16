@@ -19,7 +19,7 @@ foreach ($Dashboards as $DashboardKey => $DashboardVal) {
 
     $TabContent .= '
         <div class="tab-pane'.$active.'" id="'.$DashboardKey.'" role="tabpanel" aria-labelledby="'.$DashboardKey.'-tab">
-            <div class="row">
+            <div class="row grid">
                 '.$phpef->dashboard->buildDashboard($DashboardKey).'
             </div>
         </div>
@@ -31,5 +31,16 @@ foreach ($Dashboards as $DashboardKey => $DashboardVal) {
 $TabList .= '</ul>';
 $TabContent .= '</div>';
 $Content = $TabList . $TabContent;
+
+$Content .= '
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var elem = document.querySelector(".grid");
+        var msnry = new Masonry(elem, {
+            itemSelector: ".grid-item",
+            percentPosition: true
+        });
+    });
+</script>';
 
 return $Content;

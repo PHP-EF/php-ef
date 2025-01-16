@@ -1,3 +1,26 @@
+// Classes
+class Ping {
+  constructor() {
+      this._version = "0.0.2";
+  }
+
+  ping(url, callback, timeout = 0) {
+      const img = new Image();
+      const start = new Date();
+      let timer;
+
+      const onPingComplete = () => {
+          if (timer) clearTimeout(timer);
+          const duration = new Date() - start;
+          if (typeof callback === "function") callback(duration);
+      };
+
+      img.onload = img.onerror = onPingComplete;
+      if (timeout) timer = setTimeout(onPingComplete, timeout);
+      img.src = `//${url}/?${+new Date()}`;
+  }
+}
+
 // Core Functions & Logging
 $.xhrPool = [];
 function queryAPI(type,path,data=null,contentType="application/json",asyncValue=true){
@@ -95,8 +118,8 @@ function testAPI(type,path){
     } else {
       toast("Error", "", data["message"], "danger","30000");
     }
-  }).fail(function() {
-      toast("Error", "", "API Error", "danger","30000");
+  }).fail(function(jqXHR, textStatus, errorThrown) {
+    toast(textStatus,"","Error: "+jqXHR.status+": "+errorThrown,"danger");
   });
 }
 
@@ -243,6 +266,8 @@ function stringValidate(element, min, max, type) {
 }
 
 function loadContent(element = null) {
+  // Clear any old modals
+  $('.modal, .dz-hidden-input').not('#profileModal, #infoModal').remove();
   $('.toggleFrame').removeClass('active');
   var expandNav = false;
   var type = 'page';

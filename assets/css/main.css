@@ -122,6 +122,9 @@ body.dark-theme .list-group-item {
   background: #36393e;
   color: #FFF;
 }
+body.dark-theme hr {
+  color: #969696;
+}
 /* Form */
 body.dark-theme .form-control,
 body.dark-theme .form-select,
@@ -655,6 +658,47 @@ body.dark-theme .toast small {
 }
 
 /* Reports End */
+
+
+/*--------------------------------------------------------------
+# Dashboards / Homepage
+--------------------------------------------------------------*/
+.homepage-item-collapse {
+  display:flex;
+}
+
+.homepage-item-title {
+  direction: inherit;
+  visibility: visible;
+  box-sizing: border-box;
+  outline: 0;
+  font-family: Rubik,sans-serif;
+  margin: 10px 0;
+  font-weight: 300;
+  line-height: 22px;
+  font-size: 18px;
+  width: auto;
+  text-wrap: nowrap;
+}
+
+.hr-alt {
+  font-size: 14px;
+  line-height: 1.42857143;
+  font-family: Rubik,sans-serif;
+  font-weight: 300;
+  direction: inherit;
+  visibility: visible;
+  outline: 0 !important;
+  height: 0;
+  box-sizing: content-box;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border: 0;
+  border-top: 1px solid #eee;
+  border-color: rgba(120,130,140,0.13);
+  margin-left: .5rem !important;
+}
+
 
 /* Page Content */
 .page-content{

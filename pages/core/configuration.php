@@ -1095,6 +1095,7 @@ return '
     // Empty the additional settings array
     selectWithTableArr = {};
     const { apiUrl, configUrl, name, saveFunction, labelPrefix, dataLocation, callback } = options;
+    $("#modalItemID").val(name)
     try {
       queryAPI("GET", apiUrl).done(function(settingsResponse) {
         const settingsData = dataLocation ? getNestedProperty(settingsResponse, dataLocation) : settingsResponse.data;
@@ -1102,7 +1103,6 @@ return '
         initPasswordToggle();
         $("#SettingsModalSaveBtn").attr("onclick", saveFunction);
         $("#SettingsModalLabel").text(`${labelPrefix} Settings: ${name}`);
-        $("#modalItemID").val(name);
         $(".info-field").change(function(elem) {
           toast("Configuration", "", $(elem.target).data("label") + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
           $(this).addClass("changed");
@@ -1206,14 +1206,12 @@ return '
 
     // Append selectWithTableArr to formData
     if (selectWithTableArr) {
-      var fullFormData = Object.assign({}, formData, selectWithTableArr);
-    } else {
-      var fullFormData = formData;
+      formData = Object.assign({}, formData, selectWithTableArr);
     }
 
     // Wait for all encryption promises to resolve
     $.when.apply($, encryptionPromises).done(function() {
-        queryAPI(method, api, fullFormData).done(function(data) {
+        queryAPI(method, api, formData).done(function(data) {
             if (data.result === "Success") {
                 toast(data.result, "", data.message, "success");
                 $("#SettingsModal .changed").removeClass("changed");
