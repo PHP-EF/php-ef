@@ -23,13 +23,13 @@ foreach (glob(__DIR__.'/classes/*.php') as $class) {
 // Instantiate Class Builder
 $phpef = new phpef();
 
-// Include all Plugin Classes
+// Include all Plugin Classes & Widgets
 if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'plugins')) {
 	$folder = __DIR__ . DIRECTORY_SEPARATOR . 'plugins';
 	$directoryIterator = new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS);
 	$iteratorIterator = new RecursiveIteratorIterator($directoryIterator);
 	foreach ($iteratorIterator as $info) {
-		if ($info->getFilename() == 'plugin.php') {
+		if ($info->getFilename() == 'plugin.php' || $info->getFilename() == 'widgets.php' ) {
 			require_once $info->getPathname();
 		}
 	}

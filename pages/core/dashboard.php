@@ -19,7 +19,9 @@ foreach ($Dashboards as $DashboardKey => $DashboardVal) {
 
     $TabContent .= '
         <div class="tab-pane'.$active.'" id="'.$DashboardKey.'" role="tabpanel" aria-labelledby="'.$DashboardKey.'-tab">
-            '.$phpef->dashboard->buildDashboard($DashboardKey).'
+            <div class="row">
+                '.$phpef->dashboard->buildDashboard($DashboardKey).'
+            </div>
         </div>
     ';
 
