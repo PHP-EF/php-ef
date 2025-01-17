@@ -74,7 +74,13 @@ $app->get('/page/plugin/{plugin}/{page}', function ($request, $response, $args) 
 	if (file_exists($pagePath)) {
 		$html = '';
 		$html .= '<link href="/api/page/plugin/'.$plugin.'/css" rel="stylesheet">';
-		$html .= include_once($pagePath);
+
+		$html .= '
+		<script>
+			var pluginJSSrc = "/api/page/plugin/'.$plugin.'/js";
+			appendScript({ src: pluginJSSrc });
+		</script>
+		';
 
 		$Include = include_once($pagePath);
 		if (!$Include === false) {
@@ -82,8 +88,6 @@ $app->get('/page/plugin/{plugin}/{page}', function ($request, $response, $args) 
 		} else {
 			$response->getBody()->write(jsonE($GLOBALS['api']));
 		}
-
-		$html .= '<script src="/api/page/plugin/'.$plugin.'/js" crossorigin="anonymous"></script>';
 		$phpef->api->setAPIResponseData($html);
 		$response->getBody()->write($GLOBALS['api']['data']);
 	} else {

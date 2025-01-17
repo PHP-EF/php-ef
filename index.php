@@ -255,7 +255,7 @@ foreach ($navLinks as $navLink) {
       </div>
     </div>
     <main class="page-content" id="page-content">
-      <div class="container-fluid p-0">
+      <div class="container-fluid p-0 main-container">
         <div id="mainWindow" name="mainWindow" class="mainWindow"></div>
         <iframe id="mainFrame" name="mainFrame" class="mainFrame"></iframe>
       </div>

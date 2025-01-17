@@ -108,8 +108,8 @@ if (!(isset($SkipCSS))) {
       <script src="/assets/js/apexcharts.min.js"></script>
 
       <!-- Main -->
-      <script src="/assets/js/main.js?v1'.$phpef->getVersion()[0].'"></script>
-      <link href="/assets/css/main.css?v1'.$phpef->getVersion()[0].'" rel="stylesheet">
+      <script src="/assets/js/main.js?v'.$phpef->getVersion()[0].'"></script>
+      <link href="/assets/css/main.css?v'.$phpef->getVersion()[0].'" rel="stylesheet">
 
     </head>
     ';

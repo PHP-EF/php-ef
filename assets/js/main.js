@@ -276,8 +276,11 @@ function stringValidate(element, min, max, type) {
 }
 
 function loadContent(element = null) {
+  $('.mainWindow').attr('hidden',true);
+  $('.dynamic-plugin-js').remove();
+  // Clear any dynamically created plugin js
   // Clear any old modals
-  $('.modal, .dz-hidden-input').not('#profileModal, #infoModal').remove();
+  // $('.modal, .dz-hidden-input').not('#profileModal, #infoModal').remove();
   $('.toggleFrame').removeClass('active');
   var expandNav = false;
   var type = 'page';
@@ -291,10 +294,10 @@ function loadContent(element = null) {
       type = qualifierSplit[0];
       var name = qualifierSplit[1];
       switch (qualifierSplit[0]) {
-        case 'dashboard':
-          loadDashboardPane(name)
-          initLazyLoad();
-          return;
+        // case 'dashboard':
+        //   loadDashboardPane(name)
+        //   initLazyLoad();
+        //   return;
         case 'page':
           element = $('a[href="#page='+decodeURI(name)+'"]');
           element.addClass('active');
@@ -337,7 +340,6 @@ function loadContent(element = null) {
 
 function loadiFrame(element) {
   if (element != null) {
-    $('#mainWindow').html('').attr('hidden',true);
     $('#mainFrame').attr('hidden',false);
     var pageUrl = element.data('pageUrl');
     window.parent.document.getElementById('mainFrame').src = pageUrl;
@@ -348,7 +350,6 @@ function loadiFrame(element) {
 
 function loadMainWindow(element,type = "page") {
   $('#mainFrame').attr('src', '').attr('hidden',true);
-  $('#mainWindow').attr('hidden',false).html('');
   clearAllApexCharts();
   var endpoint = null;
   var pageUrl = '';
@@ -356,21 +357,29 @@ function loadMainWindow(element,type = "page") {
     case 'page':
       endpoint = '/api/page/';
       break;
-    case 'dashboard':
-      endpoint = '/api/dashboards/page/';
-      break;
+    // case 'dashboard':
+    //   endpoint = '/api/dashboards/page/';
+    //   break;
   }
+
   if (endpoint != null) {
-    if (type == "dashboard") {
-      pageUrl = element;
-    } else if (element != null) {
+    if (element != null) {
+      var frameId = element.data('frameId');
+      if (frameId) {
+        $(`#${frameId}`).attr('hidden',false);
+        return;
+      } else {
+        var frameId = createRandomString(12);
+        element.data('frameId',frameId);
+      }
       pageUrl = element.data('pageUrl');
     } else {
       pageUrl = 'core/default';
     }
+    $(".main-container").append(`<div id="${frameId}" class="mainWindow">New Content</div>`);
     queryAPI('GET',endpoint+pageUrl).done(function(data) {
-      $('#mainWindow').html('');
-      $('#mainWindow').html(data);
+      $(`#${frameId}`).html('');
+      $(`#${frameId}`).html(data);
     }).fail(function(jqXHR, textStatus, errorThrown) {
         toast(textStatus,"","Unable to load the requested page.<br>"+jqXHR.status+": "+errorThrown,"danger");
     });
@@ -1016,6 +1025,33 @@ function buildFormGroup(array) {
   return '<div class="d-flex">' + uList + '</ul>' + group + '</div>'; // Wrapped in a flex container for alignment
 }
 
+function appendScript(data) {
+  return new Promise((resolve, reject) => {
+    if (data.src) {
+      if (!document.querySelector(`script[src="${data.src}"]`)) {
+        var script = document.createElement('script');
+        script.src = data.src;
+        script.onload = () => resolve(true);
+        script.onerror = () => reject(new Error('Script load error'));
+        document.head.appendChild(script);
+      } else {
+        resolve(true);
+      }
+    } else if (data.script) {
+      if (!document.querySelector(`script[data-script-id="${data.id}"]`)) {
+        var script = document.createElement('script');
+        script.classList = "dynamic-plugin-js";
+        script.innerHTML = data.script;
+        script.setAttribute('data-script-id', data.id);
+        document.head.appendChild(script);
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    }
+  });
+}
+
 function buildFormItem(item){
   var placeholder = (item.placeholder) ? ' placeholder="'+item.placeholder+'"' : '';
   var id = (item.id) ? ' id="'+item.id+'"' : '';
@@ -1078,17 +1114,7 @@ function buildFormItem(item){
     case 'html':
       return item.html;
     case 'js':
-      if (item.src) {
-        if (!document.querySelector(`script[src="${item.src}"]`)) {
-          var script = document.createElement('script');
-          script.src = item.src;
-          document.head.appendChild(script);
-        }
-      } else if (item.script) {
-        var script = document.createElement('script');
-        script.innerHTML = item.script;
-        document.head.appendChild(script);
-      }
+      appendScript(item);
       return ''; // Return an empty string as the script is already added
     case 'selectwithtable':
       return `
