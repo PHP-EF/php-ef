@@ -276,11 +276,8 @@ function stringValidate(element, min, max, type) {
 }
 
 function loadContent(element = null) {
-  $('.mainWindow').attr('hidden',true);
-  $('.dynamic-plugin-js').remove();
-  // Clear any dynamically created plugin js
-  // Clear any old modals
-  // $('.modal, .dz-hidden-input').not('#profileModal, #infoModal').remove();
+  $('.mainWindow, .mainFrame').attr('hidden',true);
+  // $('.dynamic-plugin-js').remove();
   $('.toggleFrame').removeClass('active');
   var expandNav = false;
   var type = 'page';
@@ -294,10 +291,6 @@ function loadContent(element = null) {
       type = qualifierSplit[0];
       var name = qualifierSplit[1];
       switch (qualifierSplit[0]) {
-        // case 'dashboard':
-        //   loadDashboardPane(name)
-        //   initLazyLoad();
-        //   return;
         case 'page':
           element = $('a[href="#page='+decodeURI(name)+'"]');
           element.addClass('active');
@@ -340,26 +333,32 @@ function loadContent(element = null) {
 
 function loadiFrame(element) {
   if (element != null) {
-    $('#mainFrame').attr('hidden',false);
-    var pageUrl = element.data('pageUrl');
-    window.parent.document.getElementById('mainFrame').src = pageUrl;
+    var frameId = element.data('frameId');
+    if (frameId) {
+      $(`#${frameId}`).attr('hidden',false);
+      return;
+    } else {
+      var frameId = createRandomString(12);
+      var pageUrl = element.data('pageUrl');
+      element.data('frameId',frameId);
+      $(".main-container").append(`<iframe id="${frameId}" class="mainFrame"></iframe>`);
+      console.log(pageUrl);
+      console.log($(`#${frameId}`));
+      $(".main-container").find(`#${frameId}`).attr('src', pageUrl);
+    }
   } else {
     toast("Error","","Unable to load the requested iFrame.","danger");
   }
 }
 
 function loadMainWindow(element,type = "page") {
-  $('#mainFrame').attr('src', '').attr('hidden',true);
-  clearAllApexCharts();
+  // clearAllApexCharts();
   var endpoint = null;
   var pageUrl = '';
   switch(type) {
     case 'page':
       endpoint = '/api/page/';
       break;
-    // case 'dashboard':
-    //   endpoint = '/api/dashboards/page/';
-    //   break;
   }
 
   if (endpoint != null) {
@@ -376,7 +375,7 @@ function loadMainWindow(element,type = "page") {
     } else {
       pageUrl = 'core/default';
     }
-    $(".main-container").append(`<div id="${frameId}" class="mainWindow">New Content</div>`);
+    $(".main-container").append(`<div id="${frameId}" class="mainWindow"></div>`);
     queryAPI('GET',endpoint+pageUrl).done(function(data) {
       $(`#${frameId}`).html('');
       $(`#${frameId}`).html(data);
