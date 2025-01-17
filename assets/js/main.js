@@ -21,6 +21,10 @@ class Ping {
   }
 }
 
+function initLazyLoad() {
+  $('.lazyload').Lazy();
+}
+
 // Core Functions & Logging
 $.xhrPool = [];
 function queryAPI(type,path,data=null,contentType="application/json",asyncValue=true){
@@ -283,6 +287,7 @@ function loadContent(element = null) {
       switch (qualifierSplit[0]) {
         case 'dashboard':
           loadDashboardPane(name)
+          initLazyLoad();
           return;
         case 'page':
           element = $('a[href="#page='+decodeURI(name)+'"]');
@@ -293,6 +298,7 @@ function loadContent(element = null) {
       }
     } else {
       loadMainWindow();
+      initLazyLoad();
       return;
     }
   }
@@ -865,6 +871,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector(".sidebar").classList.add("close");
   }
 
+  // Initialize LazyLoad
+  initLazyLoad();
+
   // Initialize tracking
   userTracking.init(trackingConfig);
 
@@ -1102,6 +1111,22 @@ function buildFormItem(item){
     default:
       return '<span class="text-danger">BuildFormItem Class not setup...';
   }
+}
+
+function humanFileSize(bytes, si) {
+  var thresh = si ? 1000 : 1024;
+  if(Math.abs(bytes) < thresh) {
+      return bytes + ' B';
+  }
+  var units = si
+      ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
+      : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
+  var u = -1;
+  do {
+      bytes /= thresh;
+      ++u;
+  } while(Math.abs(bytes) >= thresh && u < units.length - 1);
+  return bytes.toFixed(1)+' '+units[u];
 }
 
 // Modal Backdrop Z-Index Fix

@@ -69,6 +69,9 @@ if (!(isset($SkipCSS))) {
       <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
       <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.min.css" rel="stylesheet">
 
+      <!-- LazyLoad -->
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.lazy/1.7.10/jquery.lazy.min.js"></script>
+
       <!-- datetimepicker -->
       <script src="/assets/js/jquery.datetimepicker.full.min.js"></script>
       <link rel="stylesheet" href="/assets/css/jquery.datetimepicker.css">
