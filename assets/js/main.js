@@ -25,6 +25,12 @@ function initLazyLoad() {
   $('.lazyload').Lazy();
 }
 
+function pad(n, width, z) {
+	z = z || '0';
+	n = n + '';
+	return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}
+
 // Core Functions & Logging
 $.xhrPool = [];
 function queryAPI(type,path,data=null,contentType="application/json",asyncValue=true){

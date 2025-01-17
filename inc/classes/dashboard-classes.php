@@ -20,7 +20,7 @@ class Dashboard {
             if (isset($this->widgets[$widgetName])) {
                 $size = $options['size'] ?? 'col-12'; // Default size
                 $class = $options['class'] ?? ''; // Additional classes
-                $output .= '<div class="grid-item ' . $size . ' ' . $class . ' mb-2">';
+                $output .= '<div class="grid-item ' . $size . ' ' . $class . ' mb-3">';
                 $output .= $this->widgets[$widgetName]['widget']->render();
                 $output .= '</div>';
             }

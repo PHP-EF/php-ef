@@ -415,6 +415,9 @@ body.dark-theme .toast small {
 .nav.nav-tabs .nav-link.active {
   border-bottom: 2px solid #53e69d;
 }
+.nav.nav-tabs .nav-link {
+  border-bottom: none;
+}
 
 /* Panel */
 .panel-heading {
@@ -748,6 +751,9 @@ body.dark-theme .toast small {
   margin-bottom: -1px;
   background: 0;
   color: #fff;
+}
+
+.customtab>li>a.active {
   border-color: #53e69d;
 }
 
@@ -1212,6 +1218,7 @@ body.dark-theme .image-gallery {
   height: 100vh;
   transition: all 0.5s ease;
   z-index: 500;
+  overflow-y: hidden;
 }
 .sidebar.close ~ .home-section{
   left: 78px;
