@@ -482,7 +482,6 @@ foreach ($navLinks as $navLink) {
   function setFontSize(fontsize) {
     $('html').css('font-size',fontsize);
     setCookie('fontSize',fontsize,365);
-    location.reload();
   }
 
   $(document).ready(function() {

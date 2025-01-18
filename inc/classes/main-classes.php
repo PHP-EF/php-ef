@@ -2,7 +2,8 @@
 class phpef {
     // Traits //
     Use Common,
-    Images;
+    Images,
+    Settings;
 
     private $configFilePath;
     private $dbPath;

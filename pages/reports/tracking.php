@@ -5,7 +5,7 @@ if ($phpef->auth->checkAccess("REPORT-TRACKING") == false) {
 }
 return '
 <main id="main" class="main">
-  <section class="section reporting-section">
+  <section class="section reporting-section px-3">
     <div class="row">
       <!-- Columns -->
       <div class="col-lg-12">
