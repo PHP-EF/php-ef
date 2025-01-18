@@ -174,6 +174,9 @@ class dbHelper {
       '0.7.4' => [],
       '0.7.5' => [
         "UPDATE pages SET Url = SUBSTR(url, 7) WHERE Url LIKE '#page=%';"
+      ],
+      '0.7.6' => [
+        "DELETE FROM pages WHERE Url IN ('core/users','core/rbac');"
       ]
     ];
   }

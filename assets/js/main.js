@@ -436,24 +436,6 @@ function stopTimer(timer) {
     console.log(`Timer stopped at ${seconds} seconds`);
 }
 
-function dateFormatter(value) {
-  const date = new Date(value);
-  return date.toLocaleDateString('en-US'); // Format as MM/DD/YYYY
-}
-
-function datetimeFormatter(value) {
-  const date = new Date(value);
-  return date.toLocaleString('en-GB', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: true // Format as MM/DD/YYYY
-  });
-}
-
 // ** Define ApexCharts Options ** //
 // Chart Theme
 if (getCookie('theme')) {
@@ -1179,7 +1161,7 @@ function buildFormItem(item){
         `;
     case 'bootstraptable':
       return `
-        <table class="table table-bordered table-striped info-field${extraClass}" ${id} ${name} ${disabled} ${type} ${label} ${attr} ${dataAttributes}>
+        <table class="table table-bordered table-striped ${extraClass}" ${id} ${name} ${disabled} ${type} ${label} ${attr} ${dataAttributes}>
           <thead>
             <tr>
               ${item.columns.map(column => `<th data-field="${column.field}" ${column.dataAttributes ? Object.keys(column.dataAttributes).map(key => `data-${key}="${column.dataAttributes[key]}"`).join(' ') : ''}>${column.title}</th>`).join('')}
@@ -1215,3 +1197,297 @@ function humanFileSize(bytes, si) {
 $(document).on('shown.bs.modal', '.modal', function () {
   $('.modal-backdrop').before($(this));
 });
+
+
+
+
+  // ** ACTION EVENTS ** //
+  window.pluginActionEvents = {
+    "click .edit": function (e, value, row, index) {
+      $("#SettingsModalBody").html("");
+      buildPluginSettingsModal(row);
+      $("#SettingsModal").modal("show");
+    },
+    "click .install": function (e, value, row, index) {
+      installPlugin(row);
+    },
+    "click .uninstall": function (e, value, row, index) {
+      uninstallPlugin(row);
+    },
+    "click .reinstall": function (e, value, row, index) {
+      reinstallPlugin(row);
+    },
+    "click .update": function (e, value, row, index) {
+      reinstallPlugin(row);
+    }
+  }
+
+  window.widgetActionEvents = {
+    "click .edit": function (e, value, row, index) {
+      $("#SettingsModalBody").html("");
+      buildWidgetSettingsModal(row);
+      $("#SettingsModal").modal("show");
+    }
+  }
+
+  window.dashboardActionEvents = {
+    "click .edit": function (e, value, row, index) {
+      $("#SettingsModalBody").html("");
+      buildDashboardSettingsModal(row);
+      $("#SettingsModal").modal("show");
+    },
+    "click .delete": function (e, value, row, index) {
+      if(confirm("Are you sure you want to delete the Dashboard: "+row.Name+"? This is irriversible.") == true) {
+        queryAPI("DELETE","/api/config/dashboards/"+row.Name).done(function(data) {
+          if (data["result"] == "Success") {
+            toast("Success","","Successfully deleted Dashboard: "+row.Name,"success");
+            $("#dashboardsTable").bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger","30000");
+          } else {
+            toast("Error","","Failed to delete Dashboard: "+row.Name,"danger");
+          }
+        }).fail(function() {
+            toast("Error", "", "Failed to delete Dashboard: "+row.Name, "danger");
+        });
+      }
+    }
+  }
+
+  window.userActionEvents = {
+    "click .edit": function (e, value, row, index) {
+      listUserConfig(row);
+      listGroups(row);
+      $("#editUserModal").modal("show");
+    },
+    "click .delete": function (e, value, row, index) {
+      if(confirm("Are you sure you want to delete "+row.username+" from the list of Users? This is irriversible.") == true) {
+        queryAPI("DELETE","/api/user/"+row.id).done(function(data) {
+          if (data["result"] == "Success") {
+            toast(data["result"],"",data["message"],"success");
+            $("#usersTable").bootstrapTable("refresh");
+            $("#editUserModal").modal("hide");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger","30000");
+          } else {
+            toast("Error","","Failed to remove user: "+row.username,"danger","30000");
+          }
+        }).fail(function() {
+          toast("API Error","","Failed to remove user: "+row.username,"danger","30000");
+        });
+      }
+    }
+  }
+
+  window.groupsActionEvents = {
+    "click .edit": function (e, value, row, index) {
+      editGroup(row);
+      $("#groupEditModal").modal("show");
+    },
+    "click .delete": function (e, value, row, index) {
+      if(confirm("Are you sure you want to delete "+row.Name+" from Role Based Access? This is irriversible.") == true) {
+        queryAPI("DELETE","/api/rbac/group/"+row.id).done(function(data) {
+          if (data["result"] == "Success") {
+            toast("Success","","Successfully deleted "+row.Name+" from Role Based Access","success");
+            $("#rbacGroupsTable").bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger","30000");
+          } else {
+            toast("Error","","Failed to delete "+row.Name+" from Role Based Access","danger");
+          }
+        }).fail(function() {
+            toast("Error", "", "Failed to remove " + row.Name + " from Role Based Access", "danger");
+        });
+      }
+    }
+  }
+
+  window.rolesActionEvents = {
+    "click .edit": function (e, value, row, index) {
+      editRole(row);
+      $("#roleEditModal").modal("show");
+    },
+    "click .delete": function (e, value, row, index) {
+      if(confirm("Are you sure you want to delete the "+row.name+" role? This is irriversible.") == true) {
+        queryAPI("DELETE","/api/rbac/role/"+row.id).done(function(data) {
+          if (data["result"] == "Success") {
+            toast("Success","","Successfully deleted "+row.name+" from Role Based Access","success");
+            $("#rbacRolesTable").bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger","30000");
+          } else {
+            toast("Error","","Failed to delete "+row.name+" from Role Based Access","danger");
+          }
+        }).fail(function() {
+            toast("Error", "", "Failed to remove " + targetid + " from " + group, "danger");
+        });
+      }
+    }
+  }
+
+  // ** ACTION FORMATTERS ** //
+  function widgetActionFormatter(value, row, index) {
+    var buttons = [
+      `<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`
+    ];
+    return buttons.join("");
+  }
+
+  function pluginActionFormatter(value, row, index) {
+    var buttons = [];
+    if (row.settings) {
+      buttons.push(`<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`);
+    }
+    if (row.status == "Available") {
+      buttons.push(`<a class="install" title="Install"><i class="fa-solid fa-download"></i></a>&nbsp;`);
+    } else if (row.status == "Installed") {
+      buttons.push(`<a class="uninstall" title="Uninstall"><i class="fa-solid fa-trash-can"></i></a>&nbsp;`);
+      if (row.version < row.online_version) {
+        buttons.push(`<a class="update" title="Update"><i class="fa-solid fa-upload"></i></a>&nbsp;`);      
+      } else if (row.source == "Online") {
+        buttons.push(`<a class="reinstall" title="Reinstall"><i class="fa-solid fa-arrow-rotate-right"></i></a>&nbsp;`);
+      }
+    }
+    return buttons.join("");
+  }
+
+  function editAndDeleteActionFormatter(value, row, index) {
+    var buttons = [
+      `<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`,
+      `<a class="delete" title="Delete"><i class="fa fa-trash"></i></a>`
+    ];
+    return buttons.join("");
+  }
+
+  function groupActionFormatter(value, row, index) {
+    if (row["Name"] != "Administrators") {
+      var actions = `<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`
+      if (!row["Protected"]) {
+        actions += `<a class="delete" title="Delete"><i class="fa fa-trash"></i></a>`
+      }
+      return actions
+    }
+  }
+
+  function roleActionFormatter(value, row, index) {
+    var actions = ""
+    if (!row["Protected"]) {
+      actions = `<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;<a class="delete" title="Delete"><i class="fa fa-trash"></i></a>`
+    }
+    return actions
+  }
+
+  // ** FORMATTERS ** //
+  function dateFormatter(value) {
+    const date = new Date(value);
+    return date.toLocaleDateString('en-US'); // Format as MM/DD/YYYY
+  }
+  
+  function datetimeFormatter(value) {
+    const date = new Date(value);
+    return date.toLocaleString('en-GB', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true // Format as MM/DD/YYYY
+    });
+  }
+  
+  function pluginUpdatesFormatter(value, row, index) {
+    if (row.version < row.online_version) {
+      return `<span class="badge bg-info">Update Available</span>`;
+    } else if (row.source == "Local") {
+      return `<span class="badge bg-secondary">Unknown</span>`;
+    } else if (row.status == "Available") {
+      return `<span class="badge bg-primary">Not Installed</span>`;
+    } else {
+      return `<span class="badge bg-success">Up to date</span>`;
+    }
+  }
+
+  function groupsFormatter(value, row, index) {
+    var html = ""
+    $(row.groups).each(function (group) {
+      html += `<span class="badge bg-info">`+row.groups[group]+`</span>&nbsp;`;
+    });
+    return html;
+  }
+
+  // ** TABLE BUTTONS ** //
+  function userButtons() {
+    return {
+      btnAddUser: {
+        text: "Add User",
+        icon: "bi-person-fill-add",
+        event: function() {
+          $("#newUserModal").modal("show");
+          $("#newUserModal input").val("");
+        },
+        attributes: {
+          title: "Add a new user",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
+  function rbacGroupsButtons() {
+    return {
+      btnAddGroup: {
+        text: "Add Group",
+        icon: "bi-plus-lg",
+        event: function() {
+          $("#newItemModal").modal("show");
+          $("#newItemModal input").val("");
+          $("#newItemModalLabel").text("New Access Group Wizard");
+          $("#modal-body-heading").html("<p>Enter the Access Group Name below to add it to the Role Based Access List.</p><p>You will need to edit it once created to apply the necessary permissions.</p>");
+          $("#newItemNameLabel").text("Group Name");
+          $("#newItemDescriptionLabel").text("Group Description");
+          $("#newItemNameHelp").text("The name of the Access Group to add to the Role Based Access Control.");
+          $("#newItemDescriptionHelp").text("The description for the new group.");
+          $("#newItemSubmit").attr("onclick","newGroup()")
+        },
+        attributes: {
+          title: "Add a new group",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
+  function rbacRolesButtons() {
+    return {
+      btnAddRole: {
+        text: "Add Role",
+        icon: "bi-plus-lg",
+        event: function() {
+          $("#newItemModal").modal("show");
+          $("#newItemModal input").val("");
+          $("#newItemModalLabel").text("New Role Wizard");
+          $("#modal-body-heading").html("<p>Enter the Role Name below to add it to the Role list.</p>");
+          $("#newItemNameLabel").text("Role Name");
+          $("#newItemDescriptionLabel").text("Role Description");
+          $("#newItemNameHelp").text("The name of the Role to add to the Role list.");
+          $("#newItemDescriptionHelp").text("The description for the new role.");
+          $("#newItemSubmit").attr("onclick","newRole()")
+        },
+        attributes: {
+          title: "Add a new role",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
+  // ** TABLE RESPONSE HANDLER ** //
+  function responseHandler(data) {
+    if (data.result === "Warning" && Array.isArray(data.message)) {
+        data.message.forEach(warning => {
+            toast("Warning", "", warning, "warning","30000");
+        });
+    }
+    return data.data;
+  }

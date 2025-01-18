@@ -234,7 +234,7 @@ trait Settings {
             ],
             [
                 'title' => 'Actions',
-                'dataAttributes' => ['events' => 'dashboardActionEvents', 'formatter' => 'dashboardActionFormatter'],
+                'dataAttributes' => ['events' => 'dashboardActionEvents', 'formatter' => 'editAndDeleteActionFormatter'],
             ]
         ];
 
@@ -269,7 +269,7 @@ trait Settings {
         $WidgetTableAttributes['buttons'] = 'widgetButtons';
 
         return array(
-            'Dashboards' => array(
+            'Tabs' => array(
                 $this->settingsOption('bootstrap-table', 'dashboardsTable', ['id' => 'dashboardsTable', 'columns' => $DashboardsTableColumns, 'dataAttributes' => $DashboardsTableAttributes, 'override' => 'col-md-12']),
             ),
             'Widgets' => array(
@@ -305,4 +305,164 @@ trait Settings {
 	    );
     }
 
+    public function settingsAccessControl() {
+        $TableAttributes = [
+            'data-field' => 'data',
+            'toggle' => 'table',
+            'search' => 'true',
+            'pagination' => 'true',
+            'filter-control' => 'true',
+            'filter-control-visible' => 'false',
+            'show-filter-control-switch' => 'true',
+            'show-refresh' => 'true',
+            'pagination' => 'true',
+            'toolbar' => '#toolbar',
+            'sortable' => 'true',
+            'sort-name' => 'Name',
+            'sort-order' => 'asc',
+            'show-columns' => 'true',
+            'show-export' => 'true',
+            'page-size' => '25',
+            'response-handler' => 'responseHandler',
+        ];
+
+        $UsersTableColumns = [
+            [
+                'field' => 'state',
+                'title' => 'State',
+                'dataAttributes' => ['checkbox' => 'true'],
+            ],
+            [
+                'field' => 'id',
+                'title' => 'ID',
+                'dataAttributes' => ['sortable' => 'true', 'filter-control' => 'input'],
+            ],
+            [
+                'field' => 'username',
+                'title' => 'Username',
+                'dataAttributes' => ['sortable' => 'true', 'filter-control' => 'input'],
+            ],
+            [
+                'field' => 'firstname',
+                'title' => 'First Name',
+                'dataAttributes' => ['sortable' => 'true', 'filter-control' => 'input'],
+            ],
+            [
+                'field' => 'surname',
+                'title' => 'Surname',
+                'dataAttributes' => ['sortable' => 'true', 'filter-control' => 'input'],
+            ],
+            [
+                'field' => 'email',
+                'title' => 'Email',
+                'dataAttributes' => ['sortable' => 'true', 'filter-control' => 'input'],
+            ],
+            [
+                'field' => 'groups',
+                'title' => 'Group(s)',
+                'dataAttributes' => ['sortable' => 'true', 'filter-control' => 'input', 'formatter' => 'groupsFormatter'],
+            ],
+            [
+                'field' => 'type',
+                'title' => 'Type',
+                'dataAttributes' => ['sortable' => 'true', 'filter-control' => 'select'],
+            ],
+            [
+                'field' => 'lastlogin',
+                'title' => 'Last Login Date',
+                'dataAttributes' => ['sortable' => 'false', 'filter-control' => 'input', 'formatter' => 'datetimeFormatter'],
+            ],
+            [
+                'field' => 'created',
+                'title' => 'Creation Date',
+                'dataAttributes' => ['sortable' => 'false', 'filter-control' => 'input', 'visible' => 'false', 'formatter' => 'datetimeFormatter'],
+            ],
+            [
+                'field' => 'passwordexpires',
+                'title' => 'Password Expiry Date',
+                'dataAttributes' => ['sortable' => 'false', 'filter-control' => 'input', 'visible' => 'false', 'formatter' => 'datetimeFormatter'],
+            ],
+            [
+                'title' => 'Actions',
+                'dataAttributes' => ['events' => 'userActionEvents', 'formatter' => 'editAndDeleteActionFormatter'],
+            ]
+        ];
+
+        $UsersTableAttributes = $TableAttributes;
+        $UsersTableAttributes['url'] = '/api/users';
+        $UsersTableAttributes['buttons'] = 'userButtons';
+        $UsersTableAttributes['buttons-order'] = 'btnAddUser,btnBulkDelete,refresh,columns,export,filterControlSwitch';
+
+        $GroupsTableColumns = [
+            [
+                'field' => 'state',
+                'title' => 'State',
+                'dataAttributes' => ['checkbox' => 'true'],
+            ],
+            [
+                'field' => 'id',
+                'title' => 'ID',
+                'dataAttributes' => ['sortable' => 'true', 'filter-control' => 'input'],
+            ],
+            [
+                'field' => 'Name',
+                'title' => 'Group Name',
+                'dataAttributes' => ['sortable' => 'true', 'filter-control' => 'input'],
+            ],
+            [
+                'field' => 'Description',
+                'title' => 'Group Description',
+                'dataAttributes' => ['sortable' => 'true', 'filter-control' => 'input'],
+            ],
+            [
+                'title' => 'Actions',
+                'dataAttributes' => ['events' => 'groupsActionEvents', 'formatter' => 'groupActionFormatter'],
+            ]
+        ];
+
+        $GroupsTableAttributes = $TableAttributes;
+        $GroupsTableAttributes['url'] = '/api/rbac/groups';
+        $GroupsTableAttributes['buttons'] = 'rbacGroupsButtons';
+        $GroupsTableAttributes['buttons-order'] = 'btnAddGroup,refresh,columns,export,filterControlSwitch';
+
+        $RolesTableColumns = [
+            [
+                'field' => 'state',
+                'title' => 'State',
+                'dataAttributes' => ['checkbox' => 'true'],
+            ],
+            [
+                'field' => 'name',
+                'title' => 'Role Name',
+                'dataAttributes' => ['sortable' => 'true', 'filter-control' => 'input'],
+            ],
+            [
+                'field' => 'description',
+                'title' => 'Role Description',
+                'dataAttributes' => ['sortable' => 'true', 'filter-control' => 'input'],
+            ],
+            [
+                'title' => 'Actions',
+                'dataAttributes' => ['events' => 'rolesActionEvents', 'formatter' => 'roleActionFormatter'],
+            ]
+        ];
+
+        $RolesTableAttributes = $TableAttributes;
+        $RolesTableAttributes['url'] = '/api/rbac/roles';
+        $RolesTableAttributes['buttons'] = 'rbacRolesButtons';
+        $RolesTableAttributes['buttons-order'] = 'btnAddRole,refresh,columns,export,filterControlSwitch';
+
+
+        return array(
+            'Users' => array(
+                $this->settingsOption('bootstrap-table', 'usersTable', ['id' => 'usersTable', 'columns' => $UsersTableColumns, 'dataAttributes' => $UsersTableAttributes, 'override' => 'col-md-12']),
+            ),
+            'Groups' => array(
+                $this->settingsOption('bootstrap-table', 'groupsTable', ['id' => 'groupsTable', 'columns' => $GroupsTableColumns, 'dataAttributes' => $GroupsTableAttributes, 'override' => 'col-md-12']),
+            ),
+            'Roles' => array(
+                $this->settingsOption('bootstrap-table', 'rolesTable', ['id' => 'rolesTable', 'columns' => $RolesTableColumns, 'dataAttributes' => $RolesTableAttributes, 'override' => 'col-md-12']),
+            ),
+	    );
+    }
 }

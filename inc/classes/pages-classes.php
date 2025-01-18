@@ -36,10 +36,8 @@ class Pages {
           ['Reports','Reports',null,'Menu',null,null,null,null,'fa-solid fa-chart-simple',3],
           ['Settings','Settings',null,'SubMenu','Admin',null,null,null,'fa fa-cog',1],
           ['Logs','Logs',null,'SubMenu','Admin',null,null,null,'fa-regular fa-file',2],
-          ['Users','Users','ADMIN-USERS','SubMenuLink','Admin','Settings','core/users','Native',null,1],
           ['Pages','Pages','ADMIN-PAGES','SubMenuLink','Admin','Settings','core/pages','Native',null,2],
           ['Configuration','Configuration','ADMIN-CONFIG','SubMenuLink','Admin','Settings','core/configuration','Native',null,3],
-          ['Role Based Access','Role Based Access','ADMIN-RBAC','SubMenuLink','Admin','Settings','core/rbac','Native',null,4],
           ['Portal Logs','Portal Logs','ADMIN-LOGS','SubMenuLink','Admin','Logs','core/logs','Native',null,1],
           ['Web Tracking','Web Tracking',"REPORT-TRACKING",'MenuLink',"Reports",null,"reports/tracking",'Native','fa-solid fa-bullseye',1]
         ];
