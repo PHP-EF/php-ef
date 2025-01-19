@@ -916,7 +916,7 @@ document.addEventListener('DOMContentLoaded', function() {
     event.preventDefault();
   });
 
-  $("#mainWindow").on("click", ".addInputEntry", function(elem) {
+  $("#page-content").on("click", ".addInputEntry", function(elem) {
     var input = $(elem.target).parent().prev();
     if (input.val()) {
         $(".inputEntries").append(`<li class="list-group-item inputEntry">` + input.val() + `<i class="fa fa-trash removeInputEntry"></i></li>`);
@@ -924,11 +924,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  $("#mainWindow").on("click", ".removeInputEntry", function(elem) {
+  $("#page-content").on("click", ".removeInputEntry", function(elem) {
     $(elem.target).parent().parent().prev().children(':first').addClass('changed');
     $(elem.target).parent().remove();
   });
 
+  $("body").on("click", ".tab-sub-dropdown a", function(event) {
+    event.preventDefault();
+    var targetTab = $(this).data('tabTarget');
+    $(this).parent().parent().prev().text($(this).text());
+    $(this).parent().parent().parent().parent().next().find(".active").removeClass('active');
+    $(this).parent().parent().parent().parent().next().find(targetTab).addClass('active');
+  });
+
+  $("#page-content").on("click", ".nav-tabs .d-lg-none .dropdown a", function(event) {
+    event.preventDefault();
+    $(this).parent().parent().find(".active").removeClass('active');
+  });
+  
   // Set Sidebar State for Mobile
   if (isMobile()) {
     document.querySelector(".sidebar").classList.add("close");
@@ -955,48 +968,74 @@ $(document).on('shown.bs.modal', '.modal', function () {
 
 
   // ** FORM BUILDER ** //
-  function buildFormGroup(array,noTabs = false) {
+  function buildFormGroup(array, noTabs = false) {
     var mainCount = 0;
+    var ids = {};
+    var active = '';
+    var first = Object.keys(array)[0];
+  
+    // Generate IDs once and store them
+    Object.keys(array).forEach((i, index) => {
+      ids[i] = createRandomString(10);
+    });
+  
     if (noTabs) {
       var group = '';
       var uList = '';
     } else {
-      var group = '<div id="tabsJustifiedContent" class="tab-content">';
-      var uList = '<ul id="tabsJustified" class="nav flex-column nav-tabs info-nav">';
+      var group = '<div class="tab-content tab-content-sub">';
+      var uList = `
+        <ul class="nav flex-column nav-tabs info-nav d-none d-lg-flex">
+          ${Object.keys(array).map((i, index) => {
+            active = (index == 0) ? 'active' : '';
+            return `<li role="presentation" class="nav-item"><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanClass(i)}" class="nav-link small text-uppercase ${active}"><span lang="en">${i}</span></a></li>`;
+          }).join('')}
+        </ul>
+        <div class="d-lg-none tab-sub-dropdown">
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="configSubTabsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              ${first}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-top" aria-labelledby="configSubTabsDropdown">
+              ${Object.keys(array).map((i, index) => {
+                return `<li><a href="" data-tab-target="#${ids[i]}${cleanClass(i)}" class="nav-link small text-uppercase"><span lang="en">${i}</span></a></li>`;
+              }).join('')}
+            </ul>
+          </div>
+        </div>
+      `;
     }
-    
-    $.each(array, function(i, v) {
+  
+    $.each(array, function (i, v) {
       mainCount++;
       var count = 0;
       var total = v.length;
       var active = (mainCount == 1) ? 'active' : '';
-      var customID = createRandomString(10);
-      
+  
       if (i == 'custom') {
         group += v;
       } else {
         if (!noTabs) {
-          uList += `<li role="presentation" class="nav-item"><a href="" data-bs-target="#${customID}${cleanClass(i)}" data-bs-toggle="tab" class="nav-link small text-uppercase ${active}"><span lang="en">${i}</span></a></li>`;
           group += `
             <!-- FORM GROUP -->
-            <div class="tab-pane ${active}" id="${customID}${cleanClass(i)}">
+            <div class="tab-pane ${active}" id="${ids[i]}${cleanClass(i)}">
           `;
         }
-        
+  
         var sectionCount = 0;
-        $.each(v, function(j, item) {
+        $.each(v, function (j, item) {
           var override = item.override || '6';
           sectionCount++;
           count++;
-          
+  
           if (count % 2 !== 0) {
             group += '<div class="row start">';
           }
-          
+  
           var helpID = `#help-info-${item.name}`;
           var helpTip = item.help ? `<sup><a class="help-tip" data-toggle="collapse" href="${helpID}" aria-expanded="true"><i class="m-l-5 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>` : '';
           var builtItems = '';
-          
+  
           if (item.type == 'title' || item.type == 'hr' || item.type == 'js') {
             builtItems = `${buildFormItem(item)}`;
             count = 0; // Reset count
@@ -1013,28 +1052,39 @@ $(document).on('shown.bs.modal', '.modal', function () {
               </div>
             `;
           }
-          
+  
           group += builtItems;
-          
+  
           if (count % 2 === 0 || sectionCount === total) {
             group += '</div><!--end-->';
           }
         });
-        
+  
         if (!noTabs) {
           group += '</div>';
         }
       }
     });
-    
+  
     if (noTabs) {
       var flex = '';
     } else {
       var flex = 'd-flex';
     }
-
-    return `<div class="${flex}">` + uList + '</ul>' + group + '</div>'; // Wrapped in a flex container for alignment
+  
+    return `<div class="${flex}">` + uList + group + '</div>'; // Wrapped in a flex container for alignment
   }
+  
+  // document.addEventListener('DOMContentLoaded', function () {
+  //   const dropdownItems = document.querySelectorAll('.dropdown-item');
+  //   const dropdownButton = document.getElementById('configTabsDropdown');
+  
+  //   dropdownItems.forEach(item => {
+  //     item.addEventListener('click', function () {
+  //       dropdownButton.textContent = this.textContent;
+  //     });
+  //   });
+  // });
 
   function buildFormItem(item){
     var placeholder = (item.placeholder) ? ' placeholder="'+item.placeholder+'"' : '';
@@ -1051,9 +1101,6 @@ $(document).on('shown.bs.modal', '.modal', function () {
     var attr = (item.attr) ? ' '+item.attr : '';
     var disabled = (item.disabled) ? ' disabled' : '';
     var href = (item.href) ? ' href="'+item.href+'"' : '';
-    var pwd1 = createRandomString(6);
-    var pwd2 = createRandomString(6);
-    var pwd3 = createRandomString(6);
     var helpInfo = (item.help) ? '<div class="collapse" id="help-info-'+item.name+'"><blockquote lang="en">'+item.help+'</blockquote></div>' : '';
     var smallLabel = (item.smallLabel) ? '<label><span lang="en">'+item.smallLabel+'</span></label>'+helpInfo : ''+helpInfo;
     var dataAttributes = (item.dataAttributes) ? Object.keys(item.dataAttributes).map(key => ` data-${key}="${item.dataAttributes[key]}"`).join(' ') : '';

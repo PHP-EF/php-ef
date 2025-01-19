@@ -13,26 +13,39 @@ return '
     <div class="col-12 col-lg-12 col-xl-12 mx-auto">
       <h2 class="h3 mb-4 page-title">Configuration</h2>
       <ul class="nav nav-tabs" id="configTabs" role="tablist">
+        <div class="d-lg-none w-100">
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="configTabsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              General
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="configTabsDropdown" id="configTabsDropdownMenu">
+              <li><a class="dropdown-item nav-link" href="#general" data-bs-toggle="tab">General</a></li>
+              <li><a class="dropdown-item nav-link" href="#accesscontrol" data-bs-toggle="tab">Access Control</a></li>
+              <li><a class="dropdown-item nav-link" href="#customisation" data-bs-toggle="tab">Customisation</a></li>
+              <li><a class="dropdown-item nav-link" href="#plugins" data-bs-toggle="tab">Plugins</a></li>
+              <li><a class="dropdown-item nav-link" href="#images" data-bs-toggle="tab">Images</a></li>
+              <li><a class="dropdown-item nav-link" href="#dashboards" data-bs-toggle="tab">Dashboards</a></li>
+            </ul>
+          </div>
+        </div>
+
         <li class="nav-item">
-          <a class="nav-link active" id="general-tab" data-toggle="tab" href="#general" role="tab" aria-controls="general" aria-selected="true">General</a>
+          <a class="nav-link d-none d-lg-flex active" id="general-tab" data-bs-toggle="tab" href="#general" role="tab" aria-controls="general" aria-selected="true">General</a>
         </li>
+        <li class="nav-item d-none d-lg-flex">
+          <a class="nav-link" id="accesscontrol-tab" data-bs-toggle="tab" href="#accesscontrol" role="tab" aria-controls="accesscontrol" aria-selected="false">Access Control</a>
         </li>
-          <li class="nav-item">
-          <a class="nav-link" id="accesscontrol-tab" data-toggle="tab" href="#accesscontrol" role="tab" aria-controls="accesscontrol" aria-selected="false">Access Control</a>
+        <li class="nav-item d-none d-lg-flex">
+          <a class="nav-link" id="customisation-tab" data-bs-toggle="tab" href="#customisation" role="tab" aria-controls="customisation" aria-selected="false">Customisation</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" id="customisation-tab" data-toggle="tab" href="#customisation" role="tab" aria-controls="customisation" aria-selected="false">Customisation</a>
+        <li class="nav-item d-none d-lg-flex">
+          <a class="nav-link" id="plugins-tab" data-bs-toggle="tab" href="#plugins" role="tab" aria-controls="plugins" aria-selected="false">Plugins</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" id="plugins-tab" data-toggle="tab" href="#plugins" role="tab" aria-controls="plugins" aria-selected="false">Plugins</a>
+        <li class="nav-item d-none d-lg-flex">
+          <a class="nav-link" id="images-tab" data-bs-toggle="tab" href="#images" role="tab" aria-controls="images" aria-selected="false">Images</a>
         </li>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="images-tab" data-toggle="tab" href="#images" role="tab" aria-controls="images" aria-selected="false">Images</a>
-        </li>
-        </li>
-          <li class="nav-item">
-          <a class="nav-link" id="dashboards-tab" data-toggle="tab" href="#dashboards" role="tab" aria-controls="dashboards" aria-selected="false">Dashboards</a>
+        <li class="nav-item d-none d-lg-flex">
+          <a class="nav-link" id="dashboards-tab" data-bs-toggle="tab" href="#dashboards" role="tab" aria-controls="dashboards" aria-selected="false">Dashboards</a>
         </li>
       </ul>
       <div class="tab-content" id="configTabContent">
@@ -591,9 +604,10 @@ return '
       dataLocation: "data"
     });
   }
-  // Listener for tab changes
-  $("#configTabs .nav-link").on("click", function(elem) {
+  // Listener for main tab changes
+  $("#configTabs .nav-link, #configTabsDropdownMenu .dropdown-item").on("click", function(elem) {
     elem.preventDefault();
+    $("#configTabsDropdown").text($(elem.target).text());
     var href = $(elem.target).attr("href");
     if (href == "#images") {
       loadImageGallery();
