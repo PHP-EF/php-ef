@@ -471,7 +471,26 @@ trait Settings {
     }
 
     public function settingsGroup() {
+        $Roles = $this->auth->getRBACRoles();
+        $RoleItems = array_map(function($item) {
+            return [
+                "id" => $item['id'],
+                "title" => $item['name'],
+                "description" => $item['description'],
+                "checkbox" => "true"
+            ];
+        }, $Roles);
 
+        return array(
+            "General" => array(
+                $this->settingsOption('input', 'groupName', ['label' => 'Group Name']),
+                $this->settingsOption('input', 'groupDescription', ['label' => 'Group Description']),
+                $this->settingsOption('hr'),
+                $this->settingsOption('html', 'groupRolesSelectTitle', ['html' => '<h4>Group Roles</h4><p>Enable or Disable the following roles to provide granular control to specific areas of PHP Extensible Framework.</p>', 'override' => 'col-md-12']),
+                $this->settingsOption('listgroup', 'roleList', ['items' => $RoleItems, 'override' => 'col-md-12']),
+                $this->settingsOption('input', 'groupId', ['attr' => 'hidden'])
+            )
+        );
     }
 
     public function settingsRole() {

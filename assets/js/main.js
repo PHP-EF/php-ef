@@ -1091,6 +1091,9 @@ $(document).on('shown.bs.modal', '.modal', function () {
         return '';
       case 'accordion':
         return '<div class="panel-group'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'  aria-multiselectable="true" role="tablist">'+accordionOptions(item.options, item.id)+'</div>';
+      case 'listgroup':
+        console.log(item);
+        return buildListGroup(item.items,id);
       case 'title':
         return '<h4>'+text+'</h4>';
       case 'hr':
@@ -1140,6 +1143,36 @@ $(document).on('shown.bs.modal', '.modal', function () {
       default:
         return '<span class="text-danger">BuildFormItem Class not setup...';
     }
+  }
+
+  function buildListGroup(items,id) {
+    let listGroup = `<div class="list-group mb-5 shadow" ${id}>`;
+    
+    items.forEach(item => {
+      const checkbox = item.checkbox ? `
+        <div class="col-auto">
+          <div class="custom-control custom-switch">
+            <input type="checkbox" class="custom-control-input toggle" id="${item.title}">
+            <label class="custom-control-label" for="${item.title}"></label>
+          </div>
+        </div>
+      ` : '';
+  
+      listGroup += `
+        <div class="list-group-item">
+          <div class="row align-items-center">
+            <div class="col">
+              <strong class="mb-2">${item.title}</strong>
+              <p class="text-muted mb-0">${item.description}</p>
+            </div>
+            ${checkbox}
+          </div>
+        </div>
+      `;
+    });
+  
+    listGroup += '</div>';
+    return listGroup;
   }
 
   function accordionOptions(options, parentID){
@@ -1293,15 +1326,14 @@ $(document).on('shown.bs.modal', '.modal', function () {
 
   window.groupsActionEvents = {
     "click .edit": function (e, value, row, index) {
-      editGroup(row);
-      $("#groupEditModal").modal("show");
+      buildGroupSettingsModal(row);
     },
     "click .delete": function (e, value, row, index) {
       if(confirm("Are you sure you want to delete "+row.Name+" from Role Based Access? This is irriversible.") == true) {
         queryAPI("DELETE","/api/rbac/group/"+row.id).done(function(data) {
           if (data["result"] == "Success") {
             toast("Success","","Successfully deleted "+row.Name+" from Role Based Access","success");
-            $("#rbacGroupsTable").bootstrapTable("refresh");
+            $("#groupsTable").bootstrapTable("refresh");
           } else if (data["result"] == "Error") {
             toast(data["result"],"",data["message"],"danger","30000");
           } else {
@@ -1451,15 +1483,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
         text: "Add Group",
         icon: "bi-plus-lg",
         event: function() {
-          $("#newItemModal").modal("show");
-          $("#newItemModal input").val("");
-          $("#newItemModalLabel").text("New Access Group Wizard");
-          $("#modal-body-heading").html("<p>Enter the Access Group Name below to add it to the Role Based Access List.</p><p>You will need to edit it once created to apply the necessary permissions.</p>");
-          $("#newItemNameLabel").text("Group Name");
-          $("#newItemDescriptionLabel").text("Group Description");
-          $("#newItemNameHelp").text("The name of the Access Group to add to the Role Based Access Control.");
-          $("#newItemDescriptionHelp").text("The description for the new group.");
-          $("#newItemSubmit").attr("onclick","newGroup()")
+          buildNewGroupSettingsModal();
         },
         attributes: {
           title: "Add a new group",
@@ -1763,6 +1787,30 @@ $(document).on('shown.bs.modal', '.modal', function () {
     });
   }
 
+  function buildGroupSettingsModal(row) {
+    buildSettingsModal(row, {
+    apiUrl: `/api/settings/group`,
+    name: row.Name,
+    saveFunction: `submitGroupSettings();`,
+    labelPrefix: "Group",
+    dataLocation: "data",
+    noTabs: true,
+    callback:  "populateGroupSettingsModal(row)"
+  });
+}
+
+  function buildNewGroupSettingsModal() {
+    buildSettingsModal([], {
+      apiUrl: `/api/settings/group`,
+      configUrl: null,
+      name: "New Group",
+      saveFunction: `submitGroupSettings(true);`,
+      labelPrefix: "Group",
+      dataLocation: "data",
+      noTabs: true
+    });
+  }
+
   function submitDashboardSettings(isNew = false) {
     let tableRows = $("#widgetSelectTable tbody tr");
     tableRows.each((index, row) => {
@@ -1833,4 +1881,155 @@ $(document).on('shown.bs.modal', '.modal', function () {
     }).fail(function() {
       toast("Error", "", "Failed to "+msg,"danger");
     });;
+  }
+
+  // ** GROUPS SETTINGS MODAL ** //
+
+  // Callback from `buildGroupSettingsModal`
+  function populateGroupSettingsModal(row) {
+    $("[name=groupId]").val("").val(row[0].id);
+    $("[name=groupName]").val("").val(row[0].Name);
+    $("[name=groupDescription]").val("").val(row[0].Description);
+    
+    if (row[0].PermittedResources) {
+      var PermittedResources = row[0].PermittedResources.split(",");
+      for (var resource in PermittedResources) {
+        console.log(resource);
+        console.log("#"+PermittedResources[resource]);
+        $("#"+PermittedResources[resource]).prop("checked", "true");
+      }
+    }
+    $("#SettingsModal .list-group .toggle").on("click", function(event) {
+      let id = $("[name=groupId]").val();
+      let group = $("[name=groupName]").val();
+      let toggle = $("#"+event.target.id).prop("checked") ? "enabled" : "disabled";
+      let targetid = event.target.id
+      let data = {
+        key: targetid,
+        value: toggle
+      }
+      queryAPI("PATCH","/api/rbac/group/"+id,data).done(function(data) {
+        if (data["result"] == "Success") {
+          if (toggle == "enabled") {
+            toast("Success", "", "Successfully added " + targetid + " to " + group, "success");
+          } else if (toggle == "disabled") {
+            toast("Success", "", "Successfully removed " + targetid + " to " + group, "success");
+          }
+          $("#groupsTable").bootstrapTable("refresh");
+        } else if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger","30000");
+        } else {
+          if (toggle == "enabled") {
+            toast("Error", "", "Failed to add " + targetid + " to " + group, "danger");
+          } else if (toggle == "disabled") {
+            toast("Error", "", "Failed to remove " + targetid + " from " + group, "danger");
+          }
+        }
+      }).fail(function() {
+          toast("Error", "", "Failed to remove " + targetid + " from " + group, "danger");
+      });
+    });
+  }
+
+  function submitGroupSettings(isNew = false) {
+    let name = $("[name=groupName]").val();
+    let description = $("[name=groupDescription]").val();
+    let data = {
+      name: name,
+      description: description
+    };
+    if (isNew) {
+      var method = "POST";
+      var api = "/api/rbac/groups";
+      var msg = "add new group";
+    } else {
+      let id = $("[name=groupId]").val();
+      var method = "PATCH";
+      var api = "/api/rbac/group/"+id;
+      var msg = "edit "+name;
+    }
+    queryAPI(method,api,data).done(function(data) {
+      if (data["result"] == "Success") {
+        toast(data["result"],"",data["message"],"success");
+        $("#groupsTable").bootstrapTable("refresh");
+        $("#SettingsModal").modal("hide");
+      } else if (data["result"] == "Error") {
+        toast(data["result"],"",data["message"],"danger","30000");
+      } else {
+        toast("Error","","Failed to "+msg,"danger");
+      }
+    }).fail(function() {
+      toast("Error", "", "Failed to "+msg,"danger");
+    });;
+  }
+
+  // ** PLUGINS FUNCTIONS ** //
+  function installPlugin(row){
+    toast("Installing","","Installing "+row["name"]+"...","info");
+    try {
+      queryAPI("POST","/api/plugins/install",row).done(function(data) {
+        if (data["result"] == "Success") {
+          toast(data["result"],"",data["message"],"success");
+          $("#pluginsTable").bootstrapTable("refresh");
+        } else if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger");
+        } else {
+          toast("API Error","","Failed to install plugin","danger","30000");
+        }
+      }).fail(function(xhr) {
+        toast("API Error","","Failed to install plugin","danger","30000");
+        logConsole("Error",xhr,"error");
+      });;
+    } catch(e) {
+      toast("API Error","","Failed to install plugin","danger","30000");
+      logConsole("Error",e,"error");
+    }
+  }
+
+  function uninstallPlugin(row){
+    if(confirm("Are you sure you want to uninstall the "+row.name+" plugin?") == true) {
+      toast("Uninstalling","","Uninstalling "+row["name"]+"...","info");
+      try {
+        queryAPI("POST","/api/plugins/uninstall",row).done(function(data) {
+          if (data["result"] == "Success") {
+            toast(data["result"],"",data["message"],"success");
+            $("#pluginsTable").bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger");
+          } else {
+            toast("API Error","","Failed to uninstall plugin","danger","30000");
+          }
+        }).fail(function(xhr) {
+          toast("API Error","","Failed to uninstall plugin","danger","30000");
+          logConsole("Error",xhr,"error");
+        });;
+      } catch(e) {
+        toast("API Error","","Failed to uninstall plugin","danger","30000");
+        logConsole("Error",e,"error");
+      }
+    }
+  }
+
+  function reinstallPlugin(row){
+    if(confirm("Are you sure you want to reinstall the "+row.name+" plugin?") == true) {
+      toast("Reinstalling","","Reinstalling "+row["name"]+"...","info");
+      try {
+        queryAPI("POST","/api/plugins/reinstall",row).done(function(data) {
+          if (data["result"] == "Success") {
+            toast(data["result"],"",data["message"],"success");
+            $("#pluginsTable").bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger");
+          } else {
+            toast("API Error","","Failed to reinstall plugin","danger","30000");
+          }
+        }).fail(function(xhr) {
+          toast("API Error","","Failed to reinstall plugin","danger","30000");
+          logConsole("Error",xhr,"error");
+        });;
+      } catch(e) {
+        toast("API Error","","Failed to reinstall plugin","danger","30000");
+        logConsole("Error",e,"error");
+      }
+    }
   }
