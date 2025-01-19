@@ -335,9 +335,11 @@ function loadiFrame(element) {
   if (element != null) {
     var frameId = element.data('frameId');
     if (frameId) {
+      console.info("%c Navigation %c ".concat("Switching iFrame Tab: "+element.find('span').text(), " "), "color: white; background:rgb(203, 38, 249); font-weight: 700;", "color: rgb(203, 38, 249); background: white; font-weight: 700;");
       $(`#${frameId}`).attr('hidden',false);
       return;
     } else {
+      console.info("%c Navigation %c ".concat("Loading New iFrame Tab: "+element.find('span').text(), " "), "color: white; background:rgb(203, 38, 249); font-weight: 700;", "color: rgb(203, 38, 249); background: white; font-weight: 700;");
       var frameId = createRandomString(12);
       var pageUrl = element.data('pageUrl');
       element.data('frameId',frameId);
@@ -363,9 +365,11 @@ function loadMainWindow(element,type = "page") {
     if (element != null) {
       var frameId = element.data('frameId');
       if (frameId) {
+        console.info("%c Navigation %c ".concat("Switching Native Tab: "+element.find('span').text(), " "), "color: white; background: #2dd375; font-weight: 700;", "color: #2dd375; background: white; font-weight: 700;");
         $(`#${frameId}`).attr('hidden',false);
         return;
       } else {
+        console.info("%c Navigation %c ".concat("Loading New Native Tab: "+element.find('span').text(), " "), "color: white; background: #2dd375; font-weight: 700;", "color: #2dd375; background: white; font-weight: 700;");
         var frameId = createRandomString(12);
         element.data('frameId',frameId);
       }
