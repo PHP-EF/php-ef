@@ -1644,6 +1644,21 @@ $(document).on('shown.bs.modal', '.modal', function () {
     selectWithTableArr = {};
     const { apiUrl, configUrl, name, saveFunction, labelPrefix, dataLocation, callback, noTabs } = options;
     $("#modalItemID").val(name)
+
+    function handleCallback(callback) {
+      if (callback) {
+        let match = callback.match(/(\w+)\((.*)\)/);
+        if (match) {
+            let functionName = match[1];
+            let args = match[2].split(",").map(arg => arg.trim());
+            args = args.map(arg => eval(arg));
+            window[functionName](args);
+        } else {
+            console.error("Invalid callback format");
+        }
+      }
+    }
+
     try {
       queryAPI("GET", apiUrl).done(function(settingsResponse) {
         const settingsData = dataLocation ? getNestedProperty(settingsResponse, dataLocation) : settingsResponse.data;
@@ -1658,7 +1673,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
 
         if (configUrl) {
           try {
-            queryAPI("GET", configUrl).done(function(configResponse) {
+            queryAPI("GET", configUrl, null, 'application/json', false).done(function(configResponse) {
               let data = configResponse.data;
               for (const key in data) {
                 if (data.hasOwnProperty(key)) {
@@ -1679,25 +1694,17 @@ $(document).on('shown.bs.modal', '.modal', function () {
                   }
                 }
               }
+              handleCallback(callback);
             }).fail(function(xhr) {
               logConsole("Error", xhr, "error");
             });
           } catch (e) {
             logConsole("Error", e, "error");
           }
+        } else {
+          handleCallback(callback);
         }
-        // Callback
-        if (callback) {
-          let match = callback.match(/(\w+)\((.*)\)/);
-          if (match) {
-              let functionName = match[1];
-              let args = match[2].split(",").map(arg => arg.trim());
-              args = args.map(arg => eval(arg));
-              window[functionName](args);
-          } else {
-              console.error("Invalid callback format");
-          }
-        }
+
       }).fail(function(xhr) {
         logConsole("Error", xhr, "error");
       });
@@ -1746,21 +1753,21 @@ $(document).on('shown.bs.modal', '.modal', function () {
     });
 
     if (isNew) {
-      var api = `/api/config/${type}s`;
-      var method = "POST";
+        var api = `/api/config/${type}s`;
+        var method = "POST";
     } else {
-      var api = `/api/config/${type}s/` + $(element).val();
-      var method = "PATCH";
+        var api = `/api/config/${type}s/` + $(element).val();
+        var method = "PATCH";
     }
 
     // Append selectWithTableArr to formData
     if (selectWithTableArr) {
-      formData = Object.assign({}, formData, selectWithTableArr);
+        formData = Object.assign({}, formData, selectWithTableArr);
     }
 
-    // Wait for all encryption promises to resolve
-    $.when.apply($, encryptionPromises).done(function() {
-        queryAPI(method, api, formData).done(function(data) {
+    // Return a promise that resolves when all encryption promises and the API call are done
+    return $.when.apply($, encryptionPromises).then(function() {
+        return queryAPI(method, api, formData).then(function(data) {
             if (data.result === "Success") {
                 toast(data.result, "", data.message, "success");
                 $("#SettingsModal .changed").removeClass("changed");
@@ -1886,13 +1893,20 @@ $(document).on('shown.bs.modal', '.modal', function () {
             selectWithTableArr["Widgets"][widgetName]["size"] = selectedOption;
         }
     });
+
+    let submitPromise;
     if (isNew) {
-      submitSettingsModal("dashboard",`[name="Name"]`,isNew);
+        submitPromise = submitSettingsModal("dashboard", `[name="Name"]`, isNew);
     } else {
-      submitSettingsModal("dashboard");
+        submitPromise = submitSettingsModal("dashboard");
     }
-    $("#SettingsModal").modal("hide");
-    $("#dashboardsTable").bootstrapTable("refresh");
+
+    submitPromise.then(() => {
+        $("#SettingsModal").modal("hide");
+        $("#dashboardsTable").bootstrapTable("refresh");
+    }).catch((error) => {
+        console.error("Error submitting settings:", error);
+    });
   }
 
   // ** ROLES SETTINGS MODAL ** //
@@ -2084,5 +2098,45 @@ $(document).on('shown.bs.modal', '.modal', function () {
         toast("API Error","","Failed to reinstall plugin","danger","30000");
         logConsole("Error",e,"error");
       }
+    }
+  }
+
+  // ** DASHBOARD FUNTIONS ** //
+
+  // ** WIDGET FUNCTIONS ** //
+  // Callback from `buildDashboardSettingsModal`
+  function widgetSelectCallback(row) {
+    if (row.length > 0) {
+      const tableData = {
+        "Widgets": Object.keys(row[0].Widgets).map(key => ({
+          "dragHandle": `<span class="dragHandle" style="font-size:22px;">☰</span>`,
+          "name": key,
+          "size": `<select class="form-select" data-label="size">
+                      <option value="col-md-1">1</option>
+                      <option value="col-md-2">2</option>
+                      <option value="col-md-3">3</option>
+                      <option value="col-md-4">4</option>
+                      <option value="col-md-5">5</option>
+                      <option value="col-md-6">6</option>
+                      <option value="col-md-7">7</option>
+                      <option value="col-md-8">8</option>
+                      <option value="col-md-9">9</option>
+                      <option value="col-md-10">10</option>
+                      <option value="col-md-11">11</option>
+                      <option value="col-md-12">12</option>
+                  </select>`
+        }))
+      };
+      const uniqueNames = [...new Set(tableData.Widgets.map(widget => widget.name))];
+      $("#widgetSelectTable").bootstrapTable({ data: tableData.Widgets});
+      $("#widgetSelect").val(uniqueNames);
+
+      tableData.Widgets.forEach(function(item,index) {
+        let tablerow = $("#widgetSelectTable tbody tr")[index];
+        let cells = $(tablerow).find("td");
+        let widgetName = cells[1].textContent;
+        let selectElement = $(cells[2]).find("select");
+        selectElement.val(row[0].Widgets[widgetName].size);
+      });
     }
   }

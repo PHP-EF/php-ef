@@ -100,6 +100,20 @@ class Config {
   }
 
   public function setDashboard(&$config, $data, $dashboard) {
+    // Check if Widgets key exists in the current config
+    if (isset($config['Dashboards'][$dashboard]['Widgets'])) {
+        // Get the current widgets
+        $currentWidgets = $config['Dashboards'][$dashboard]['Widgets'];
+        // Get the new widgets
+        $newWidgets = isset($data['Widgets']) ? $data['Widgets'] : [];
+        // Remove widgets that are not in the new data
+        foreach ($currentWidgets as $key => $value) {
+            if (!array_key_exists($key, $newWidgets)) {
+                unset($config['Dashboards'][$dashboard]['Widgets'][$key]);
+            }
+        }
+    }
+
     foreach ($data as $key => $value) {
         if ($key === 'Widgets') {
             // Ensure Widgets are placed correctly
