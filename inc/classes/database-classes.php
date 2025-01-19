@@ -169,7 +169,105 @@ class dbHelper {
       '0.7.2' => [
         "ALTER TABLE pages ADD COLUMN LinkType INTEGER", // Add Weight Column to Pages
         "UPDATE pages SET LinkType = 'Native'"
+      ],
+      '0.7.3' => [],
+      '0.7.4' => [],
+      '0.7.5' => [
+        "UPDATE pages SET Url = SUBSTR(url, 7) WHERE Url LIKE '#page=%';"
+      ],
+      '0.7.6' => [
+        "DELETE FROM pages WHERE Url IN ('core/users','core/rbac');"
       ]
     ];
   }
+
+	public function replaceStringInDatabase($string) {
+		$databaseStringList = [
+			'AUTOINCREMENT' => [
+				'sqlite3' => 'AUTOINCREMENT',
+				'mysqli' => 'AUTO_INCREMENT',
+				'postgre' => 'AUTOINCREMENT'
+			],
+			'COLLATE NOCASE' => [
+				'sqlite3' => 'COLLATE NOCASE',
+				'mysqli' => '',
+				'postgre' => ''
+			],
+			'INTEGER PRIMARY KEY AUTOINCREMENT' => [
+				'sqlite3' => 'INTEGER PRIMARY KEY AUTOINCREMENT',
+				'mysqli' => 'INTEGER PRIMARY KEY AUTOINCREMENT',
+				'postgre' => 'SERIAL PRIMARY KEY'
+			],
+			'DATETIME' => [
+				'sqlite3' => 'DATETIME',
+				'mysqli' => 'DATETIME',
+				'postgre' => 'TIMESTAMP'
+			],
+		];
+		if (gettype($string) == 'string') {
+			foreach ($databaseStringList as $item => $value) {
+				if (stripos($string, $item) !== false) {
+					$string = str_ireplace($item, $databaseStringList[$item][$this->config['driver']], $string);
+				}
+			}
+		}
+		return $string;
+	}
+
+	public function cleanDatabaseQuery($query)
+	{
+		if (is_array($query)) {
+			foreach ($query as $key => $value) {
+				$query[$key] = $this->cleanDatabaseQuery($value);
+			}
+			return $query;
+		} else {
+			return $this->replaceStringInDatabase($query);
+		}
+	}
+
+	public function processQueries(array $request) {
+    global $phpef;
+		$results = array();
+		$firstKey = '';
+		foreach ($request as $k => $v) {
+			try {
+				$v['query'] = $this->cleanDatabaseQuery($v['query']);
+				$query = $this->pdo->query($v['query']);
+				$keyName = (isset($v['key'])) ? $v['key'] : $k;
+				$firstKey = (isset($v['key']) && $k == 0) ? $v['key'] : $k;
+				switch ($v['function']) {
+					case 'fetchAll':
+						$results[$keyName] = $query->fetchAll();
+						break;
+					case 'fetch':
+						// PHP 8 Fix?
+						// $query->setRowClass(null);
+						$results[$keyName] = $query->fetch();
+						break;
+					case 'getAffectedRows':
+						$results[$keyName] = $query->getAffectedRows();
+						break;
+					case 'getRowCount':
+						$results[$keyName] = $query->getRowCount();
+						break;
+					case 'fetchSingle':
+						// PHP 8 Fix?
+						// $query->setRowClass(null);
+						$results[$keyName] = $query->fetchSingle();
+						break;
+					case 'query':
+						$results[$keyName] = $query;
+						break;
+					default:
+						return false;
+				}
+			} catch (Exception $e) {
+				$phpef->logging->writeLog('Database', $e, 'error', [$v['query']]);
+        $phpef->api->setAPIResponse('Error',$e,null,$v['query']);
+				return false;
+			}
+		}
+		return count($request) > 1 ? $results : $results[$firstKey];
+	}
 }

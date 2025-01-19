@@ -1,6 +1,6 @@
 <?php
-  if ($ib->auth->checkAccess("ADMIN-PAGES") == false) {
-    $ib->api->setAPIResponse('Error','Unauthorized',401);
+  if ($phpef->auth->checkAccess("ADMIN-PAGES") == false) {
+    $phpef->api->setAPIResponse('Error','Unauthorized',401);
     return false;
   }
 return '
@@ -10,7 +10,7 @@ return '
 }
 </style>
 
-<div class="section">
+<div class="container-fluid">
   <div class="row">
     <div class="col-lg-12">
       <div class="card">
@@ -37,6 +37,7 @@ return '
                       <th data-field="Title">Title</th>
                       <th data-field="Url">URL</th>
                       <th data-field="ACL">ACL</th>
+                      <th data-field="LinkType">Source</th>
                       <th data-formatter="pageActionFormatter" data-events="pageActionEvents">Actions</th>
                   </tr>
               </thead>
@@ -49,7 +50,7 @@ return '
 </div>
 
 <div class="modal fade" id="pageModal" tabindex="-1" role="dialog" aria-labelledby="pageModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="pageModalLabel">Page Information</h5>
@@ -61,48 +62,75 @@ return '
         <div class="form-group" hidden>
           <input type="text" class="form-control" id="pageID">
         </div>
-        <div class="form-group">
-          <label for="pageType">Type</label>
-          <select class="form-select" id="pageType" aria-describedby="pageTypeHelp">
-            <option value="Link">Link</option>
-            <option value="Menu">Menu</option>
-          </select>
-          <small id="pageTypeHelp" class="form-text text-muted">The type of navigation item.</small>
+        <div class="row">
+          <div class="form-group col-md-6">
+            <label for="pageType">Type</label>
+            <select class="form-select" id="pageType" aria-describedby="pageTypeHelp">
+              <option value="Link">Link</option>
+              <option value="Menu">Menu</option>
+            </select>
+            <small id="pageTypeHelp" class="form-text text-muted">The type of navigation item.</small>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="pageLinkType">Link Type</label>
+            <select class="form-select" id="pageLinkType" aria-describedby="pageLinkTypeHelp">
+              <option value="Native">Native</option>
+              <option value="iFrame">iFrame</option>
+            </select>
+            <small id="pageLinkTypeHelp" class="form-text text-muted">The type of link (Native/iFrame).</small>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="pageName">Name</label>
+            <input type="text" class="form-control" id="pageName" aria-describedby="pageNameHelp">
+            <small id="pageNameHelp" class="form-text text-muted">The Name for this page displayed in the navigation menu.</small>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="pageTitle">Title</label>
+            <input type="text" class="form-control" id="pageTitle" aria-describedby="pageTitleHelp">
+            <small id="pageTitleHelp" class="form-text text-muted">The title of the page shown in the top navigation bar.</small>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="pageUrl">Page</label>
+            <select class="form-select dynamic" id="pageUrl" aria-describedby="pageUrlHelp"></select>
+            <small id="pageUrlHelp" class="form-text text-muted">The page to to display when this link is clicked.</small>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="pageiFrameUrl">URL</label>
+            <input class="form-control" id="pageiFrameUrl" aria-describedby="pageiFrameUrlHelp">
+            <small id="pageiFrameUrlHelp" class="form-text text-muted">The URL of the page to display in the iFrame when this link is clicked.</small>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="pageACL">Role</label>
+            <select class="form-select dynamic" id="pageACL" aria-describedby="pageACLHelp"></select>
+            <small id="pageACLHelp" class="form-text text-muted">The role required for this navigation link to be visible.</small>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="pageMenu">Parent Menu</label>
+            <select class="form-select dynamic" id="pageMenu" aria-describedby="pageMenuHelp"></select>
+            <small id="pageMenuHelp" class="form-text text-muted">The Menu where this link or menu will be placed in.</small>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="pageSubMenu">Submenu</label>
+            <select class="form-select dynamic" id="pageSubMenu" aria-describedby="pageSubMenuHelp"></select>
+            <small id="pageSubMenuHelp" class="form-text text-muted">The Sub Menu where this link will be placed in.</small>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="pageName">Name</label>
-          <input type="text" class="form-control" id="pageName" aria-describedby="pageNameHelp">
-          <small id="pageNameHelp" class="form-text text-muted">The Name for this page displayed in the navigation menu.</small>
-        </div>
-        <div class="form-group">
-          <label for="pageTitle">Title</label>
-          <input type="text" class="form-control" id="pageTitle" aria-describedby="pageTitleHelp">
-          <small id="pageTitleHelp" class="form-text text-muted">The title of the page shown in the top navigation bar.</small>
-        </div>
-        <div class="form-group">
-          <label for="pageUrl">Page</label>
-          <select class="form-select dynamic" id="pageUrl" aria-describedby="pageUrlHelp"></select>
-          <small id="pageUrlHelp" class="form-text text-muted">The page to to display when this link is clicked.</small>
-        </div>
-        <div class="form-group">
-          <label for="pageACL">Role</label>
-          <select class="form-select dynamic" id="pageACL" aria-describedby="pageACLHelp"></select>
-          <small id="pageACLHelp" class="form-text text-muted">The role required for this navigation link to be visible.</small>
-        </div>
-        <div class="form-group">
-          <label for="pageMenu">Parent Menu</label>
-          <select class="form-select dynamic" id="pageMenu" aria-describedby="pageMenuHelp"></select>
-          <small id="pageMenuHelp" class="form-text text-muted">The Menu where this link will be placed in.</small>
-        </div>
-        <div class="form-group">
-          <label for="pageSubMenu">Submenu</label>
-          <select class="form-select dynamic" id="pageSubMenu" aria-describedby="pageSubMenuHelp"></select>
-          <small id="pageSubMenuHelp" class="form-text text-muted">The Sub Menu where this link will be placed in.</small>
-        </div>
-        <div class="form-group">
-          <label for="pageIcon">Icon</label>
-          <input type="text" class="form-control" id="pageIcon" aria-describedby="pageIconHelp">
-          <small id="pageIconHelp" class="form-text text-muted">The Fontawesome Icon to use.</small>
+        <hr>
+        <div class="card">
+          <div class="row">
+            <div class="form-group col-md-6">
+              <label for="pageIcon">Icon</label>
+              <input type="text" class="form-control" id="pageIcon" aria-describedby="pageIconHelp">
+              <small id="pageIconHelp" class="form-text text-muted">The Fontawesome Icon to use.</small>
+            </div>
+            <div class="form-group col-md-6">
+              <label for="pageImage">Image</label>
+              <select class="form-select" id="pageImage" aria-describedby="pageImageHelp" data-dynamic-select>
+                '.$phpef->getAllImagesForSelect().'
+              </select>
+              <small id="pageImageHelp" class="form-text text-muted">The Custom Image to use.</small>
+            </div>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
@@ -132,18 +160,31 @@ return '
   }
 
   function getPOSTData() {
+    var pageType = $("#pageType").val();
+    var pageIcon = $("#pageIcon").val();
+    var pageImage = pageImageDynamicSelect.selectedValue;
     var postData = {
       name: $("#pageName").val(),
       title: $("#pageTitle").val(),
-      url: $("#pageUrl").val(),
       acl: $("#pageACL").val(),
-      icon: $("#pageIcon").val(),
+      icon: pageIcon || pageImage,
       menu: $("#pageMenu").val(),
       submenu: $("#pageSubMenu").val(),
-      type: null
+      linktype: null,
+      type: null,
+      url: null
     };
 
-    switch($("#pageType").val()) {
+    if (pageType == "Link") {      
+      postData.linktype = $("#pageLinkType").val();
+      if (postData.linktype == "Native") {
+        postData.url = $("#pageUrl").val();
+      } else {
+        postData.url = $("#pageiFrameUrl").val();
+      }
+    }
+
+    switch(pageType) {
       case "Link":
         if (postData.menu && postData.submenu) {
           postData.type = "SubMenuLink";
@@ -180,12 +221,13 @@ return '
     });
   };
 
-  function editPageSubmit() {
+  function editPageSubmit(tableId) {
     var id = $("#pageID").val();
     queryAPI("PATCH", "/api/page/"+id, getPOSTData()).done(function(data) {
       if (data["result"] == "Success") {
         toast(data["result"], "", data["message"], "success");
-        buildPagesTable();
+        // buildPagesTable();
+        $(tableId).bootstrapTable("refresh");
         $("#pageModal").modal("hide");
       } else if (data["result"] == "Error") {
         toast(data["result"],"",data["message"],"danger","30000");
@@ -209,7 +251,8 @@ return '
     "click .edit": function (e, value, row, index) {
       $("#pageModal input").val("");
       $("#pageModal select.dynamic").html("");
-      $("#pageSubmit").attr("onclick","editPageSubmit()");
+      var tableId = `#${$(e.currentTarget).closest("table").attr("id")}`;
+      $("#pageSubmit").attr("onclick", `editPageSubmit("${tableId}")`);
       editPage(row);
       $("#pageModal").modal("show");
     },
@@ -218,7 +261,8 @@ return '
         queryAPI("DELETE","/api/page/"+row.id).done(function(data) {
           if (data["result"] == "Success") {
             toast("Success","","Successfully deleted "+row.Name+" from Pages","success");
-            buildPagesTable();
+            var tableId = `#${$(e.currentTarget).closest("table").attr("id")}`;
+            $(tableId).bootstrapTable("refresh");
           } else if (data["result"] == "Error") {
             toast(data["result"],"",data["message"],"danger","30000");
           } else {
@@ -232,7 +276,9 @@ return '
   }
 
   function newPage() {
-    $("#pageModal input").val("");
+    $("#pageModal input,#pageModal select").val("").attr("disabled",false);
+    $("#pageType").val("Link");
+    $("#pageLinkType").val("Native");
     $("#pageModal select.dynamic").html("");
     updateDropDowns();
     $("#pageModal").modal("show");
@@ -255,8 +301,29 @@ return '
     $("#pageName").val(row.Name);
     $("#pageTitle").val(row.Title);
     $("#pageMenu").val(row.Menu);
-    $("#pageUrl").val(row.Url);
-    $("#pageIcon").val(row.Icon);
+    $("#pageLinkType").val(row.LinkType);
+    if (row.Icon && (row.Icon.startsWith("/assets/images/custom") || row.Icon.startsWith("/api/image/plugin"))) {
+      pageImageDynamicSelect.setDisabled(false);
+      pageImageDynamicSelect.setSelectedValue(row.Icon);
+      $("#pageIcon").val("").attr("disabled",true);
+    } else if (row.Icon == "") {
+      pageImageDynamicSelect.setDisabled(false)
+      $("#pageIcon").attr("disabled",false).val("");
+      pageImageDynamicSelect.setSelectedValue("");
+    } else {
+      $("#pageIcon").val(row.Icon).attr("disabled",false);
+      pageImageDynamicSelect.setSelectedValue("");
+      pageImageDynamicSelect.setDisabled(true)
+    }
+
+    switch (row.LinkType) {
+      case "Native":
+        $("#pageUrl").val(row.Url);
+        break;
+      case "iFrame":
+        $("#pageiFrameUrl").val(row.Url);
+        break;
+    }
 
     var isMenu = row.Type == "Menu";
     if (isMenu) {
@@ -272,23 +339,34 @@ return '
   function hideUnneccessaryInputs() {
     var type = $("#pageType").val();
     var submenu = $("#pageSubMenu").val();
+    var linktype = $("#pageLinkType").val();
     switch(type) {
       case "Link":
-        $("#pageUrl,#pageTitle,#pageUrl,#pageSubMenu,#pageACL").parent().attr("hidden",false);
+        $("#pageUrl,#pageTitle,#pageUrl,#pageSubMenu,#pageACL,#pageLinkType,#pageiFrameUrl").parent().attr("hidden",false);
         if (submenu) {
-          $("#pageIcon").parent().attr("hidden",true);
-          $("#pageIcon").val("")
+          $("#pageIcon, #pageImage").parent().attr("hidden",true);
+          $("#pageIcon, #pageImage").val("")
         } else {
-          $("#pageIcon").parent().attr("hidden",false)
+          $("#pageIcon, #pageImage").parent().attr("hidden",false)
+        }
+        switch(linktype) {
+          case "Native":
+            $("#pageUrl").parent().attr("hidden",false).val("");
+            $("#pageiFrameUrl").parent().attr("hidden",true).val("");
+            break;
+          case "iFrame":
+            $("#pageUrl").parent().attr("hidden",true).val("");
+            $("#pageiFrameUrl").parent().attr("hidden",false).val("");
+            break;
         }
         break;
       case "Menu":
-        $("#pageUrl,#pageTitle,#pageUrl,#pageSubMenu,#pageACL").parent().attr("hidden",true).val("");
+        $("#pageUrl,#pageTitle,#pageUrl,#pageSubMenu,#pageACL,#pageLinkType,#pageiFrameUrl").parent().attr("hidden",true).val("");
         break;
     }
   }
 
-  $("#pageSubMenu").on("change", function(elem) {
+  $("#pageSubMenu, #pageLinkType").on("change", function(elem) {
     hideUnneccessaryInputs();
   });
 
@@ -331,17 +409,17 @@ return '
       $.each(menuData.data, function(index, item) {
           if (item.plugin) {
             var name = "Plugin: "+item.plugin+" / "+item.filename;
-            var val = "#page=plugin/"+item.plugin+"/"+item.filename;
+            var val = "plugin/"+item.plugin+"/"+item.filename;
           } else {
             var name = item.directory+" / "+item.filename;
-            var val = "#page="+item.directory+"/"+item.filename;
+            var val = item.directory+"/"+item.filename;
           }
           const option = $("<option></option>").val(val).text(name);
           pageUrlContainer.append(option);
       });
       row.Url ? pageUrlContainer.val(row.Url) : pageUrlContainer.val("");
     })
-    
+
     updateSubMenus(row);
   }
 
@@ -358,7 +436,7 @@ return '
           pageSubMenuContainer.append(option);
       });
       row.Submenu ? pageSubMenuContainer.val(row.Submenu) : pageSubMenuContainer.val("");
-      row.Submenu ? $("#pageIcon").parent().attr("hidden",true) : $("#pageIcon").parent().attr("hidden",false);
+      row.Submenu ? $("#pageIcon,#pageImage").parent().attr("hidden",true) : $("#pageIcon,#pageImage").parent().attr("hidden",false);
     })
     hideUnneccessaryInputs();
   }
@@ -368,7 +446,11 @@ return '
   }
 
   function pageIconFormatter(value, row, index) {
+    if (row.Icon && (row.Icon.startsWith("/assets/images/custom") || row.Icon.startsWith("/api/image/plugin"))) {
+      return `<img src="`+value+`" class="navIcon"></img>`
+    } else {
       return `<i class="navIcon `+value+`"></i>`
+    }
   }
 
   function menuDetailFormatter(index,row) {
@@ -385,7 +467,9 @@ return '
 
   function detailFormatter(index, row, prefix) {
       let html = [];
-      html.push(createTableHtml(index,prefix));
+      if (row.Type === "Menu" || row.Type === "SubMenu") {
+          html.push(createTableHtml(index, prefix));
+      }
       return html.join("");
   }
 
@@ -398,7 +482,8 @@ return '
           detailFormatter: submenuDetailFormatter,
           onExpandRow: initializeSubMenuTable,
           reorderableRows: true,
-          rowAttributes: "rowAttributes",
+          rowAttributes: rowAttributes,
+          rowStyle: rowStyle,
           onReorderRow: onReorderRow,
           columns: [{
             field: "Icon",
@@ -427,6 +512,10 @@ return '
             title: "ACL",
             sortable: true
           },{
+            field: "LinkType",
+            title: "Source",
+            sortable: true
+          },{
             title: "Actions",
             formatter: "pageActionFormatter",
             events: "pageActionEvents"
@@ -440,7 +529,8 @@ return '
           url: "/api/pages?submenu="+row.Name+"&menu="+row.Menu,
           dataField: "data",
           reorderableRows: true,
-          rowAttributes: "rowAttributes",
+          rowAttributes: rowAttributes,
+          rowStyle: rowStyle,
           onReorderRow: onReorderRow,
           columns: [{
             field: "Type",
@@ -464,6 +554,10 @@ return '
             title: "ACL",
             sortable: true
           },{
+            field: "LinkType",
+            title: "Source",
+            sortable: true
+          },{
             title: "Actions",
             formatter: "pageActionFormatter",
             events: "pageActionEvents"
@@ -480,15 +574,26 @@ return '
         detailFormatter: menuDetailFormatter,
         onExpandRow: initializeMenuTable,
         reorderableRows: true,
-        rowAttributes: "rowAttributes",
+        rowAttributes: rowAttributes,
+        rowStyle: rowStyle,
         onReorderRow: onReorderRow
     });
   }
 
   function rowAttributes(row, index) {
     return {
-      "id": "row-"+row.id
+      "id": "row-"+row.id,
+      "data-detail-view": row.Type === "Menu" || row.Type === "SubMenu"
     }
+  }
+
+  function rowStyle(row, index) {
+    if (row.Type !== "Menu" && row.Type !== "SubMenu") {
+        return {
+            classes: "no-expand"
+        };
+    }
+    return {};
   }
 
   function onReorderRow(data,row,oldrow,table) {
@@ -507,5 +612,29 @@ return '
   }
   
   buildPagesTable();
+
+  var pageIcon = $("#pageIcon");
+  var pageImage = $("#pageImage");
+  pageIcon.on("input", function() {
+    if (this.value !== "") {
+      pageImageDynamicSelect.setDisabled(true)
+    } else {
+      pageImageDynamicSelect.setDisabled(false)
+    }
+  });
+
+  // Setup Dynamic Image Select
+  var pageImageDynamicSelect = new DynamicSelect(document.getElementById("pageImage"), {
+    onChange: (value, text, option) => {
+        pageImageOnChange(value, text, option);
+    }
+  });
+  function pageImageOnChange(value, text, option) {
+    if (value !== "") {
+      pageIcon.attr("disabled",true)
+    } else {
+      pageIcon.attr("disabled",false)
+    }
+  }
 </script>
 ';

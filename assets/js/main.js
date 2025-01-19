@@ -1,3 +1,36 @@
+// Classes
+class Ping {
+  constructor() {
+      this._version = "0.0.2";
+  }
+
+  ping(url, callback, timeout = 0) {
+      const img = new Image();
+      const start = new Date();
+      let timer;
+
+      const onPingComplete = () => {
+          if (timer) clearTimeout(timer);
+          const duration = new Date() - start;
+          if (typeof callback === "function") callback(duration);
+      };
+
+      img.onload = img.onerror = onPingComplete;
+      if (timeout) timer = setTimeout(onPingComplete, timeout);
+      img.src = `//${url}/?${+new Date()}`;
+  }
+}
+
+function initLazyLoad() {
+  $('.lazyload').Lazy();
+}
+
+function pad(n, width, z) {
+	z = z || '0';
+	n = n + '';
+	return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}
+
 // Core Functions & Logging
 $.xhrPool = [];
 function queryAPI(type,path,data=null,contentType="application/json",asyncValue=true){
@@ -95,8 +128,8 @@ function testAPI(type,path){
     } else {
       toast("Error", "", data["message"], "danger","30000");
     }
-  }).fail(function() {
-      toast("Error", "", "API Error", "danger","30000");
+  }).fail(function(jqXHR, textStatus, errorThrown) {
+    toast(textStatus,"","Error: "+jqXHR.status+": "+errorThrown,"danger");
   });
 }
 
@@ -242,25 +275,47 @@ function stringValidate(element, min, max, type) {
   }
 }
 
-function loadiFrame(element = null) {
+function loadContent(element = null) {
+  $('.mainWindow, .mainFrame').attr('hidden',true);
+  // $('.dynamic-plugin-js').remove();
+  $('.toggleFrame').removeClass('active');
+  var expandNav = false;
+  var type = 'page';
   if (element != null) {
-    var hashsplit = element.split('#page=');
-    var linkElem = $('a[href="#page='+hashsplit[1]+'"]');
-    $('.toggleFrame').removeClass('active');
-    linkElem.addClass('active');
-    if (hashsplit[1].startsWith('prx')) {
-      var prxsplit = hashsplit[1].split('prx');
-      window.parent.document.getElementById('mainFrame').src = prxsplit[1];
+    element = $(element.currentTarget);
+    element.addClass('active');
+  } else {
+    var hashsplit = window.parent.location.hash.split('#');
+    if (hashsplit[1]) {
+      var qualifierSplit = hashsplit[1].split('=');
+      type = qualifierSplit[0];
+      var name = qualifierSplit[1];
+      switch (qualifierSplit[0]) {
+        case 'page':
+          element = $('a[href="#page='+decodeURI(name)+'"]');
+          element.addClass('active');
+          $('.title-text').text(element.data('pageName'));
+          expandNav = true;
+          break;
+      }
     } else {
-      window.parent.document.getElementById('mainFrame').src = '/pages/'+hashsplit[1]+".php";
+      loadMainWindow();
+      initLazyLoad();
+      return;
     }
-  } else if (window.parent.location.hash) {
-    var hashsplit = window.parent.location.hash.split('#page=');
-    // Auto-expand and set navbar to active
-    var linkElem = $('a[href="'+window.parent.location.hash+'"]');
-    linkElem.addClass('active');
-    $('.title-text').text(linkElem.data('pageName'));
-    var doubleParent = $('.icon-link > .toggleFrame.active, .sub-sub-menu .toggleFrame.active, .icon-link > .toggleFrame.active, .sub-menu .toggleFrame.active').parent().parent();
+  }
+
+  switch (element.data('pageType')) {
+    case 'Native':
+      loadMainWindow(element,type);
+      break;
+    case 'iFrame':
+      loadiFrame(element);
+      break;
+  }
+
+  if (expandNav) {
+    var doubleParent = element.parent().parent();
     if (doubleParent.hasClass('sub-sub-menu')) {
       if (!doubleParent.parent().hasClass('showMenu')) {
         doubleParent.parent().addClass('showMenu');
@@ -272,68 +327,61 @@ function loadiFrame(element = null) {
       if (!doubleParent.parent().hasClass('showMenu')) {
         doubleParent.parent().addClass('showMenu');
       }
-    }
-
-    if (hashsplit[1].startsWith('prx')) {
-      var prxsplit = hashsplit[1].split('prx');
-      window.parent.document.getElementById('mainFrame').src = prxsplit[1];
-    } else {
-      window.parent.document.getElementById('mainFrame').src = '/pages/'+hashsplit[1]+".php";
     }
   }
 }
 
-function loadMainWindow(element) {
-  $('#mainWindow').html('');
-  clearAllApexCharts();
+function loadiFrame(element) {
   if (element != null) {
-    var hashsplit = element.split('#page=');
-    var linkElem = $('a[href="#page='+hashsplit[1]+'"]');
-    $('.toggleFrame').removeClass('active');
-    linkElem.addClass('active');
-    // Remove proxy support for now
-    // if (hashsplit[1].startsWith('prx')) {
-    //   var prxsplit = hashsplit[1].split('prx');
-    //   window.parent.document.getElementById('mainFrame').src = prxsplit[1];
-    // } else {
-    //   window.parent.document.getElementById('mainFrame').src = '/pages/'+hashsplit[1]+".php";
-    // }
-    queryAPI('GET','/api/page/'+hashsplit[1]).done(function(data) {
-      $('#mainWindow').html('');
-      $('#mainWindow').html(data);
+    var frameId = element.data('frameId');
+    if (frameId) {
+      $(`#${frameId}`).attr('hidden',false);
+      return;
+    } else {
+      var frameId = createRandomString(12);
+      var pageUrl = element.data('pageUrl');
+      element.data('frameId',frameId);
+      $(".main-container").append(`<iframe id="${frameId}" class="mainFrame"></iframe>`);
+      $(".main-container").find(`#${frameId}`).attr('src', pageUrl);
+    }
+  } else {
+    toast("Error","","Unable to load the requested iFrame.","danger");
+  }
+}
+
+function loadMainWindow(element,type = "page") {
+  // clearAllApexCharts();
+  var endpoint = null;
+  var pageUrl = '';
+  switch(type) {
+    case 'page':
+      endpoint = '/api/page/';
+      break;
+  }
+
+  if (endpoint != null) {
+    if (element != null) {
+      var frameId = element.data('frameId');
+      if (frameId) {
+        $(`#${frameId}`).attr('hidden',false);
+        return;
+      } else {
+        var frameId = createRandomString(12);
+        element.data('frameId',frameId);
+      }
+      pageUrl = element.data('pageUrl');
+    } else {
+      pageUrl = 'core/default';
+    }
+    $(".main-container").append(`<div id="${frameId}" class="mainWindow"></div>`);
+    queryAPI('GET',endpoint+pageUrl).done(function(data) {
+      $(`#${frameId}`).html('');
+      $(`#${frameId}`).html(data);
     }).fail(function(jqXHR, textStatus, errorThrown) {
         toast(textStatus,"","Unable to load the requested page.<br>"+jqXHR.status+": "+errorThrown,"danger");
     });
-  } else if (window.parent.location.hash) {
-    var hashsplit = window.parent.location.hash.split('#page=');
-    // Auto-expand and set navbar to active
-    var linkElem = $('a[href="'+window.parent.location.hash+'"]');
-    linkElem.addClass('active');
-    $('.title-text').text(linkElem.data('pageName'));
-    var doubleParent = $('.icon-link > .toggleFrame.active, .sub-sub-menu .toggleFrame.active, .icon-link > .toggleFrame.active, .sub-menu .toggleFrame.active').parent().parent();
-    if (doubleParent.hasClass('sub-sub-menu')) {
-      if (!doubleParent.parent().hasClass('showMenu')) {
-        doubleParent.parent().addClass('showMenu');
-      }
-      if (!doubleParent.parent().parent().parent().hasClass('showMenu')) {
-          doubleParent.parent().parent().parent().addClass('showMenu');
-      }
-    } else if (doubleParent.hasClass('sub-menu') && doubleParent.not('.blank')) {
-      if (!doubleParent.parent().hasClass('showMenu')) {
-        doubleParent.parent().addClass('showMenu');
-      }
-    }
-    queryAPI('GET','/api/page/'+hashsplit[1]).done(function(data) {
-      $('#mainWindow').html(data);
-    }).fail(function(jqXHR, textStatus, errorThrown) {
-      toast(textStatus,"","Unable to load the requested page.<br>"+jqXHR.status+": "+errorThrown,"danger");
-    });
   } else {
-    queryAPI('GET','/api/page/core/default').done(function(data) {
-      $('#mainWindow').html(data);
-    }).fail(function(jqXHR, textStatus, errorThrown) {
-      toast(textStatus,"","Unable to load the requested page.<br>"+jqXHR.status+": "+errorThrown,"danger");
-    });
+    toast("Error","","Unable to load the requested page.<br>Invalid Type","danger");
   }
 }
 
@@ -386,24 +434,6 @@ function startTimer() {
 function stopTimer(timer) {
     clearInterval(timer);
     console.log(`Timer stopped at ${seconds} seconds`);
-}
-
-function dateFormatter(value) {
-  const date = new Date(value);
-  return date.toLocaleDateString('en-US'); // Format as MM/DD/YYYY
-}
-
-function datetimeFormatter(value) {
-  const date = new Date(value);
-  return date.toLocaleString('en-GB', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: true // Format as MM/DD/YYYY
-  });
 }
 
 // ** Define ApexCharts Options ** //
@@ -670,6 +700,15 @@ function generateUniqueId() {
   });
 }
 
+function generateSecureToken() {
+  return queryAPI('POST', '/api/auth/crypt', { key: generateUniqueId() }, 'application/json', false).then(function(data) {
+    return data.data.split(':')[2];
+  }).catch(function(error) {
+    console.error('Error generating secure token:', error);
+    throw error;
+  });
+}
+
 // Check if user ID cookie exists, if not, create one
 let tId = getCookie('tId');
 if (!tId) {
@@ -755,6 +794,75 @@ function clearAllApexCharts() {
   }
 }
 
+function initPasswordToggle() {
+  $('.passwordToggle').on('click',function(elem) {
+    let el = $(elem.target).parent().parent().prev();
+    if (el.attr('type') == "password") {
+      el.attr('type','text');
+    } else {
+      el.attr('type','password');
+    }
+  })
+}
+
+function createRandomString(length) {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  const characters = letters+'0123456789';
+  let result = letters.charAt(Math.floor(Math.random() * letters.length)); // Ensure the first character is a letter
+  const charactersLength = characters.length;
+  for (let i = 1; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
+
+function cleanClass(string){
+	return string.replace(/ +/g, "-").replace(/\W+/g, "-");
+}
+
+function appendScript(data) {
+  return new Promise((resolve, reject) => {
+    if (data.src) {
+      if (!document.querySelector(`script[src="${data.src}"]`)) {
+        var script = document.createElement('script');
+        script.src = data.src;
+        script.onload = () => resolve(true);
+        script.onerror = () => reject(new Error('Script load error'));
+        document.head.appendChild(script);
+      } else {
+        resolve(true);
+      }
+    } else if (data.script) {
+      if (!document.querySelector(`script[data-script-id="${data.id}"]`)) {
+        var script = document.createElement('script');
+        script.classList = "dynamic-plugin-js";
+        script.innerHTML = data.script;
+        script.setAttribute('data-script-id', data.id);
+        document.head.appendChild(script);
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    }
+  });
+}
+
+function humanFileSize(bytes, si) {
+  var thresh = si ? 1000 : 1024;
+  if(Math.abs(bytes) < thresh) {
+      return bytes + ' B';
+  }
+  var units = si
+      ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
+      : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
+  var u = -1;
+  do {
+      bytes /= thresh;
+      ++u;
+  } while(Math.abs(bytes) >= thresh && u < units.length - 1);
+  return bytes.toFixed(1)+' '+units[u];
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   window.charts = [];
 
@@ -822,9 +930,12 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Set Sidebar State for Mobile
-    if (isMobile()) {
-      document.querySelector(".sidebar").classList.add("close");
-    }
+  if (isMobile()) {
+    document.querySelector(".sidebar").classList.add("close");
+  }
+
+  // Initialize LazyLoad
+  initLazyLoad();
 
   // Initialize tracking
   userTracking.init(trackingConfig);
@@ -832,215 +943,1093 @@ document.addEventListener('DOMContentLoaded', function() {
   console.info("%c Web App %c ".concat("DOM Fully loaded", " "), "color: white; background: #AD80FD; font-weight: 700;", "color: #AD80FD; background: white; font-weight: 700;");
 });
 
-function initPasswordToggle() {
-  $('.passwordToggle').on('click',function(elem) {
-    let el = $(elem.target).parent().parent().prev();
-    if (el.attr('type') == "password") {
-      el.attr('type','text');
-    } else {
-      el.attr('type','password');
-    }
-  })
-}
-
-function createRandomString(length) {
-  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-  const characters = letters+'0123456789';
-  let result = letters.charAt(Math.floor(Math.random() * letters.length)); // Ensure the first character is a letter
-  const charactersLength = characters.length;
-  for (let i = 1; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
-}
-
-function cleanClass(string){
-	return string.replace(/ +/g, "-").replace(/\W+/g, "-");
-}
-
-function selectOptions(options, active){
-	var selectOptions = '';
-	$.each(options, function(i,v) {
-		activeTest = active.split(',');
-		if(activeTest.length > 1){
-			var selected = (arrayContains(v.value, activeTest)) ? 'selected' : '';
-		}else{
-			var selected = (active.toString() == v.value) ? 'selected' : '';
-		}
-		var disabled = (v.disabled) ? ' disabled' : '';
-		selectOptions += '<option '+selected+disabled+' value="'+v.value+'">'+v.name+'</option>';
-	});
-	return selectOptions;
-}
-
-function multipleInputArr(item) {
-  var valueArr = item.values;
-  var multipleInputArr = '';
-  var disabled = (item.disabled) ? ' disabled' : '';
-  $.each(valueArr, function(index, value) {
-    multipleInputArr += '<li class="list-group-item inputEntry"' + disabled + '>' + value + '<i class="fa fa-trash removeInputEntry"></i></li>';
-  });
-  return multipleInputArr;
-}
-
-function getInputMultipleEntries(elem) {
-  const entryList = elem.parent().next();
-  const listItems = entryList.find("li");
-  const values = [];
-
-  for (let i = 0; i < listItems.length; i++) {
-    const listItem = listItems[i];
-    const value = $(listItem).text();
-    values.push(value);
-  }
-  return values;
-}
-
-function buildFormGroup(array) {
-  var mainCount = 0;
-  var group = '<div id="tabsJustifiedContent" class="tab-content">';
-  var uList = '<ul id="tabsJustified" class="nav flex-column nav-tabs info-nav">'; // Changed to flex-column for vertical alignment
-  
-  $.each(array, function(i, v) {
-    mainCount++;
-    var count = 0;
-    var total = v.length;
-    var active = (mainCount == 1) ? 'active' : '';
-    var customID = createRandomString(10);
-    
-    if (i == 'custom') {
-      group += v;
-    } else {
-      uList += `<li role="presentation" class="nav-item"><a href="" data-bs-target="#${customID}${cleanClass(i)}" data-bs-toggle="tab" class="nav-link small text-uppercase ${active}"><span lang="en">${i}</span></a></li>`;
-      group += `
-        <!-- FORM GROUP -->
-        <div class="tab-pane ${active}" id="${customID}${cleanClass(i)}">
-      `;
-      
-      var sectionCount = 0;
-      $.each(v, function(j, item) {
-        var override = item.override || '6';
-        sectionCount++;
-        count++;
-        
-        if (count % 2 !== 0) {
-          group += '<div class="row start">';
-        }
-        
-        var helpID = `#help-info-${item.name}`;
-        var helpTip = item.help ? `<sup><a class="help-tip" data-toggle="collapse" href="${helpID}" aria-expanded="true"><i class="m-l-5 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>` : '';
-        var builtItems = '';
-        
-        if (item.type == 'title' || item.type == 'hr' || item.type == 'js') {
-          builtItems = `${buildFormItem(item)}`;
-          count = 0; // Reset count
-          group += '</div><!--end--><div class="row start">'; // Close current row and start a new one
-        } else {
-          builtItems = `
-            <div class="col-md-${override} p-b-10">
-              <div class="form-group">
-                <label class="control-label col-md-12"><span lang="en">${item.label}</span>${helpTip}</label>
-                <div class="col-md-12">
-                  ${buildFormItem(item)}
-                </div>
-              </div>
-            </div>
-          `;
-        }
-        
-        group += builtItems;
-        
-        if (count % 2 === 0 || sectionCount === total) {
-          group += '</div><!--end-->';
-        }
-      });
-      
-      group += '</div>';
-    }
-  });
-  
-  return '<div class="d-flex">' + uList + '</ul>' + group + '</div>'; // Wrapped in a flex container for alignment
-}
-
-function buildFormItem(item){
-  var placeholder = (item.placeholder) ? ' placeholder="'+item.placeholder+'"' : '';
-  var id = (item.id) ? ' id="'+item.id+'"' : '';
-  var type = (item.type) ? ' data-type="'+item.type+'"' : '';
-  var label = (item.label) ? ' data-label="'+item.label+'"' : '';
-  var value = (item.value) ? ' value="'+item.value+'"' : '';
-  var textarea = (item.value) ? item.value : '';
-  var name = (item.name) ? ' name="'+item.name+'"' : '';
-  var extraClass = (item.class) ? ' '+item.class : '';
-  var icon = (item.icon) ? ' '+item.icon : '';
-  var text = (item.text) ? ' '+item.text : '';
-  var attr = (item.attr) ? ' '+item.attr : '';
-  var disabled = (item.disabled) ? ' disabled' : '';
-  var href = (item.href) ? ' href="'+item.href+'"' : '';
-  var pwd1 = createRandomString(6);
-  var pwd2 = createRandomString(6);
-  var pwd3 = createRandomString(6);
-  var helpInfo = (item.help) ? '<div class="collapse" id="help-info-'+item.name+'"><blockquote lang="en">'+item.help+'</blockquote></div>' : '';
-    var smallLabel = (item.smallLabel) ? '<label><span lang="en">'+item.smallLabel+'</span></label>'+helpInfo : ''+helpInfo;
-
-  //+tof(item.value,'c')+`
-  switch (item.type) {
-    case 'select-input':
-      return smallLabel + '<input list="'+item.name+'Options" lang="en" type="text" class="form-control info-field' + extraClass + '"' + placeholder + value + id + name + disabled + type + label + attr + '/><datalist id="'+item.name+'Options">' + selectOptions(item.options, item.value) + '</datalist>';
-    case 'input':
-    case 'text':
-      return smallLabel+'<input lang="en" type="text" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' />';
-    case 'inputmultiple':
-      return '<div class="input-group mb-3"><input lang="en" type="text" class="form-control info-field'+extraClass+'" multiple '+placeholder+id+name+disabled+type+label+attr+'/><div class="input-group-append"><button class="btn btn-outline-success addInputEntry" type="button">'+text+'</button></div></div><ul class="list-group mt-3 inputEntries">'+multipleInputArr(item)+'</ul>';
-    case 'number':
-      return smallLabel+'<input lang="en" type="number" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'/>';
-    case 'textbox':
-      return smallLabel+'<textarea class="form-control info-field'+extraClass+'"'+placeholder+id+name+disabled+type+label+attr+' autocomplete="new-password">'+textarea+'</textarea>';
-    case 'password':
-      return smallLabel+'<input lang="en" type="password" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'/>';
-    case 'password-alt':
-      return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'/><span class="input-group-btn"> <button class="btn btn-default showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
-    case 'password-alt-copy':
-      return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'/><span class="input-group-btn"> <button class="btn btn-primary clipboard" type="button" data-clipboard-text="'+item.value+'"><i class="fa icon-docs"></i></button></span><span class="input-group-btn"> <button class="btn btn-inverse showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
-    case 'hidden':
-      return '<input lang="en" type="hidden" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'/>';
-    case 'select':
-      return smallLabel+'<select class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'>'+selectOptions(item.options, item.value)+'</select>';
-    case 'selectmultiple':
-      return smallLabel+'<select class="form-control info-field'+extraClass+'" multiple '+placeholder+value+id+name+disabled+type+label+attr+'>'+selectOptions(item.options, item.value)+'</select>';
-    case 'switch':
-    case 'checkbox':
-      return smallLabel+'<div class="form-check form-switch"><input class="form-check-input info-field'+extraClass+'" type="checkbox"'+name+value+id+disabled+type+label+attr+'/></div>';
-    case 'button':
-      return smallLabel+'<button class="btn btn-sm btn-success btn-rounded waves-effect waves-light b-none'+extraClass+'" '+href+attr+' type="button"><span class="btn-label"><i class="'+icon+'"></i></span><span lang="en">'+text+'</span></button>';
-    case 'blank':
-      return '';
-    case 'accordion':
-      return '<div class="panel-group'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+'  aria-multiselectable="true" role="tablist">'+accordionOptions(item.options, item.id)+'</div>';
-    case 'title':
-      return '<h4>'+text+'</h4>';
-    case 'hr':
-      return '<hr class="mt-3">';
-    case 'html':
-      return item.html;
-    case 'js':
-      if (item.src) {
-        if (!document.querySelector(`script[src="${item.src}"]`)) {
-          var script = document.createElement('script');
-          script.src = item.src;
-          document.head.appendChild(script);
-        }
-      } else if (item.script) {
-        var script = document.createElement('script');
-        script.innerHTML = item.script;
-        document.head.appendChild(script);
-      }
-      return ''; // Return an empty string as the script is already added
-    default:
-      return '<span class="text-danger">BuildFormItem Class not setup...';
-  }
-}
-
 // Modal Backdrop Z-Index Fix
 $(document).on('shown.bs.modal', '.modal', function () {
   $('.modal-backdrop').before($(this));
 });
+
+
+  // **************** //
+  // ** CLEANED UP ** //
+  // **************** //
+
+
+  // ** FORM BUILDER ** //
+  function buildFormGroup(array,noTabs = false) {
+    var mainCount = 0;
+    if (noTabs) {
+      var group = '';
+      var uList = '';
+    } else {
+      var group = '<div id="tabsJustifiedContent" class="tab-content">';
+      var uList = '<ul id="tabsJustified" class="nav flex-column nav-tabs info-nav">';
+    }
+    
+    $.each(array, function(i, v) {
+      mainCount++;
+      var count = 0;
+      var total = v.length;
+      var active = (mainCount == 1) ? 'active' : '';
+      var customID = createRandomString(10);
+      
+      if (i == 'custom') {
+        group += v;
+      } else {
+        if (!noTabs) {
+          uList += `<li role="presentation" class="nav-item"><a href="" data-bs-target="#${customID}${cleanClass(i)}" data-bs-toggle="tab" class="nav-link small text-uppercase ${active}"><span lang="en">${i}</span></a></li>`;
+          group += `
+            <!-- FORM GROUP -->
+            <div class="tab-pane ${active}" id="${customID}${cleanClass(i)}">
+          `;
+        }
+        
+        var sectionCount = 0;
+        $.each(v, function(j, item) {
+          var override = item.override || '6';
+          sectionCount++;
+          count++;
+          
+          if (count % 2 !== 0) {
+            group += '<div class="row start">';
+          }
+          
+          var helpID = `#help-info-${item.name}`;
+          var helpTip = item.help ? `<sup><a class="help-tip" data-toggle="collapse" href="${helpID}" aria-expanded="true"><i class="m-l-5 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>` : '';
+          var builtItems = '';
+          
+          if (item.type == 'title' || item.type == 'hr' || item.type == 'js') {
+            builtItems = `${buildFormItem(item)}`;
+            count = 0; // Reset count
+            group += '</div><!--end--><div class="row start">'; // Close current row and start a new one
+          } else {
+            builtItems = `
+              <div class="col-md-${override} p-b-10">
+                <div class="form-group">
+                  <label class="control-label col-md-12"><span lang="en">${item.label}</span>${helpTip}</label>
+                  <div class="col-md-12">
+                    ${buildFormItem(item)}
+                  </div>
+                </div>
+              </div>
+            `;
+          }
+          
+          group += builtItems;
+          
+          if (count % 2 === 0 || sectionCount === total) {
+            group += '</div><!--end-->';
+          }
+        });
+        
+        if (!noTabs) {
+          group += '</div>';
+        }
+      }
+    });
+    
+    if (noTabs) {
+      var flex = '';
+    } else {
+      var flex = 'd-flex';
+    }
+
+    return `<div class="${flex}">` + uList + '</ul>' + group + '</div>'; // Wrapped in a flex container for alignment
+  }
+
+  function buildFormItem(item){
+    var placeholder = (item.placeholder) ? ' placeholder="'+item.placeholder+'"' : '';
+    var id = (item.id) ? ' id="'+item.id+'"' : '';
+    var tableId = (item.id) && (item.type == "selectwithtable") ? ' id="'+item.id+'Table"' : '';
+    var type = (item.type) ? ' data-type="'+item.type+'"' : '';
+    var label = (item.label) ? ' data-label="'+item.label+'"' : '';
+    var value = (item.value) ? ' value="'+item.value+'"' : '';
+    var textarea = (item.value) ? item.value : '';
+    var name = (item.name) ? ' name="'+item.name+'"' : '';
+    var extraClass = (item.class) ? ' '+item.class : '';
+    var icon = (item.icon) ? ' '+item.icon : '';
+    var text = (item.text) ? ' '+item.text : '';
+    var attr = (item.attr) ? ' '+item.attr : '';
+    var disabled = (item.disabled) ? ' disabled' : '';
+    var href = (item.href) ? ' href="'+item.href+'"' : '';
+    var pwd1 = createRandomString(6);
+    var pwd2 = createRandomString(6);
+    var pwd3 = createRandomString(6);
+    var helpInfo = (item.help) ? '<div class="collapse" id="help-info-'+item.name+'"><blockquote lang="en">'+item.help+'</blockquote></div>' : '';
+    var smallLabel = (item.smallLabel) ? '<label><span lang="en">'+item.smallLabel+'</span></label>'+helpInfo : ''+helpInfo;
+    var dataAttributes = (item.dataAttributes) ? Object.keys(item.dataAttributes).map(key => ` data-${key}="${item.dataAttributes[key]}"`).join(' ') : '';
+
+    switch (item.type) {
+      case 'select-input':
+        return smallLabel + '<input list="'+item.name+'Options" lang="en" type="text" class="form-control info-field' + extraClass + '"' + placeholder + value + id + name + disabled + type + label + attr + dataAttributes + '/><datalist id="'+item.name+'Options">' + selectOptions(item.options, item.value) + '</datalist>';
+      case 'input':
+      case 'text':
+        return smallLabel+'<input lang="en" type="text" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+' />';
+      case 'inputmultiple':
+        return '<div class="input-group mb-3"><input lang="en" type="text" class="form-control info-field'+extraClass+'" multiple '+placeholder+id+name+disabled+type+label+attr+dataAttributes+'/><div class="input-group-append"><button class="btn btn-outline-success addInputEntry" type="button">'+text+'</button></div></div><ul class="list-group mt-3 inputEntries">'+multipleInputArr(item)+'</ul>';
+      case 'number':
+        return smallLabel+'<input lang="en" type="number" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>';
+      case 'textbox':
+        return smallLabel+'<textarea class="form-control info-field'+extraClass+'"'+placeholder+id+name+disabled+type+label+attr+dataAttributes+' autocomplete="new-password">'+textarea+'</textarea>';
+      case 'password':
+        return smallLabel+'<input lang="en" type="password" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>';
+      case 'password-alt':
+        return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/><span class="input-group-btn"> <button class="btn btn-default showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
+      case 'password-alt-copy':
+        return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/><span class="input-group-btn"> <button class="btn btn-primary clipboard" type="button" data-clipboard-text="'+item.value+'"><i class="fa icon-docs"></i></button></span><span class="input-group-btn"> <button class="btn btn-inverse showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
+      case 'hidden':
+        return '<input lang="en" type="hidden" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>';
+      case 'select':
+        return smallLabel+'<select class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>';
+      case 'selectmultiple':
+        return smallLabel+'<select class="form-control info-field'+extraClass+'" multiple '+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>';
+      case 'switch':
+      case 'checkbox':
+        return smallLabel+'<div class="form-check form-switch"><input class="form-check-input info-field'+extraClass+'" type="checkbox"'+name+value+id+disabled+type+label+attr+dataAttributes+'/></div>';
+      case 'button':
+        return smallLabel+'<button class="btn btn-sm btn-success btn-rounded waves-effect waves-light b-none'+extraClass+'" '+href+attr+dataAttributes+' type="button"><span class="btn-label"><i class="'+icon+'"></i></span><span lang="en">'+text+'</span></button>';
+      case 'blank':
+        return '';
+      case 'accordion':
+        return '<div class="panel-group'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'  aria-multiselectable="true" role="tablist">'+accordionOptions(item.options, item.id)+'</div>';
+      case 'listgroup':
+        console.log(item);
+        return buildListGroup(item.items,id);
+      case 'title':
+        return '<h4>'+text+'</h4>';
+      case 'hr':
+        return '<hr class="mt-3">';
+      case 'html':
+        return item.html;
+      case 'js':
+        appendScript(item);
+        return ''; // Return an empty string as the script is already added
+      case 'selectwithtable':
+        return `
+          <form id="multiSelectForm">
+              <div class="form-group">
+                <select class="form-control select-multiple widgetSelect info-field" multiple name="Widgets" data-type="selectmultiple" `+id+name+disabled+type+label+attr+dataAttributes+`>
+                `+selectOptions(item.options, item.value)+`
+              </select>
+              </div>
+              <table `+tableId+` 
+                data-pagination="true"
+                data-reorderable-rows="true"
+                data-drag-handle=">tbody>tr>td>span.dragHandle"
+                class="table table-bordered table-striped info-field" `+dataAttributes+`>
+                  <thead>
+                      <tr>
+                          <th data-field="dragHandle"></th>
+                          <th data-field="name">Widget</th>
+                          <th data-field="size">Size</th>
+                      </tr>
+                  </thead>
+                  <tbody></tbody>
+              </table>
+          </form>
+          `;
+      case 'bootstraptable':
+        return `
+          <table class="table table-bordered table-striped ${extraClass}" ${id} ${name} ${disabled} ${type} ${label} ${attr} ${dataAttributes}>
+            <thead>
+              <tr>
+                ${item.columns.map(column => `<th data-field="${column.field}" ${column.dataAttributes ? Object.keys(column.dataAttributes).map(key => `data-${key}="${column.dataAttributes[key]}"`).join(' ') : ''}>${column.title}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+          <script>$("#${item.id}").bootstrapTable();</script>
+          `;
+      default:
+        return '<span class="text-danger">BuildFormItem Class not setup...';
+    }
+  }
+
+  function buildListGroup(items,id) {
+    let listGroup = `<div class="list-group mb-5 shadow" ${id}>`;
+    
+    items.forEach(item => {
+      const checkbox = item.checkbox ? `
+        <div class="col-auto">
+          <div class="custom-control custom-switch">
+            <input type="checkbox" class="custom-control-input toggle" id="${item.title}">
+            <label class="custom-control-label" for="${item.title}"></label>
+          </div>
+        </div>
+      ` : '';
+  
+      listGroup += `
+        <div class="list-group-item">
+          <div class="row align-items-center">
+            <div class="col">
+              <strong class="mb-2">${item.title}</strong>
+              <p class="text-muted mb-0">${item.description}</p>
+            </div>
+            ${checkbox}
+          </div>
+        </div>
+      `;
+    });
+  
+    listGroup += '</div>';
+    return listGroup;
+  }
+
+  function accordionOptions(options, parentID){
+    var accordionOptions = '';
+    $.each(options, function(i,v) {
+      var id = createRandomString(10);
+      var extraClass = (v.class) ? ' '+v.class : '';
+      var header = (i) ? ' '+i : '';
+      if(typeof v == 'object'){
+        var body = '';
+        $.each(v, function(val) {
+          var helpTip = v[val].helpTip ?? '';
+          if (v[val].type == 'title' || v[val].type == 'hr' || v[val].type == 'js') {
+            body += buildFormItem(v[val]);
+          } else {
+            body += `<div class="col-md-6"><label class="control-label"><span lang="en">${v[val].label}</span>${helpTip}</label>`;
+            body += buildFormItem(v[val]);
+            body += `</div>`;
+          }
+        });
+      }else{
+        var body = v.body;
+      }
+      accordionOptions += `
+      <div class="panel">
+        <div class="panel-heading" id="`+id+`-heading" role="tab">
+          <a class="panel-title collapsed" data-bs-toggle="collapse" href="#`+id+`-collapse" data-bs-parent="#`+parentID+`" aria-expanded="false" aria-controls="`+id+`-collapse"><span lang="en">`+header+`</span></a>
+        </div>
+        <div class="panel-collapse collapse" id="`+id+`-collapse" aria-labelledby="`+id+`-heading" role="tabpanel" aria-expanded="false" style="height: 0px;">
+          <div class="panel-body px-3">
+            <div class="row pt-2">
+              `+body+`
+            </div>
+          </div>
+        </div>
+      </div>
+      `;
+    });
+    return accordionOptions;
+  }
+
+  function multipleInputArr(item) {
+    var valueArr = item.values;
+    var multipleInputArr = '';
+    var disabled = (item.disabled) ? ' disabled' : '';
+    $.each(valueArr, function(index, value) {
+      multipleInputArr += '<li class="list-group-item inputEntry"' + disabled + '>' + value + '<i class="fa fa-trash removeInputEntry"></i></li>';
+    });
+    return multipleInputArr;
+  }
+
+  function getInputMultipleEntries(elem) {
+    const entryList = elem.parent().next();
+    const listItems = entryList.find("li");
+    const values = [];
+
+    for (let i = 0; i < listItems.length; i++) {
+      const listItem = listItems[i];
+      const value = $(listItem).text();
+      values.push(value);
+    }
+    return values;
+  }
+
+  function selectOptions(options, active){
+    var selectOptions = '';
+    $.each(options, function(i,v) {
+      activeTest = active.split(',');
+      if(activeTest.length > 1){
+        var selected = (arrayContains(v.value, activeTest)) ? 'selected' : '';
+      }else{
+        var selected = (active.toString() == v.value) ? 'selected' : '';
+      }
+      var disabled = (v.disabled) ? ' disabled' : '';
+      selectOptions += '<option '+selected+disabled+' value="'+v.value+'">'+v.name+'</option>';
+    });
+    return selectOptions;
+  }
+
+  // ** ACTION EVENTS ** //
+  window.pluginActionEvents = {
+    "click .edit": function (e, value, row, index) {
+      buildPluginSettingsModal(row);
+    },
+    "click .install": function (e, value, row, index) {
+      installPlugin(row);
+    },
+    "click .uninstall": function (e, value, row, index) {
+      uninstallPlugin(row);
+    },
+    "click .reinstall": function (e, value, row, index) {
+      reinstallPlugin(row);
+    },
+    "click .update": function (e, value, row, index) {
+      reinstallPlugin(row);
+    }
+  }
+
+  window.widgetActionEvents = {
+    "click .edit": function (e, value, row, index) {
+      buildWidgetSettingsModal(row);
+    }
+  }
+
+  window.dashboardActionEvents = {
+    "click .edit": function (e, value, row, index) {
+      buildDashboardSettingsModal(row);
+    },
+    "click .delete": function (e, value, row, index) {
+      if(confirm("Are you sure you want to delete the Dashboard: "+row.Name+"? This is irriversible.") == true) {
+        queryAPI("DELETE","/api/config/dashboards/"+row.Name).done(function(data) {
+          if (data["result"] == "Success") {
+            toast("Success","","Successfully deleted Dashboard: "+row.Name,"success");
+            $("#dashboardsTable").bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger","30000");
+          } else {
+            toast("Error","","Failed to delete Dashboard: "+row.Name,"danger");
+          }
+        }).fail(function() {
+            toast("Error", "", "Failed to delete Dashboard: "+row.Name, "danger");
+        });
+      }
+    }
+  }
+
+  window.userActionEvents = {
+    "click .edit": function (e, value, row, index) {
+      listUserConfig(row);
+      listGroups(row);
+      $("#editUserModal").modal("show");
+    },
+    "click .delete": function (e, value, row, index) {
+      if(confirm("Are you sure you want to delete "+row.username+" from the list of Users? This is irriversible.") == true) {
+        queryAPI("DELETE","/api/user/"+row.id).done(function(data) {
+          if (data["result"] == "Success") {
+            toast(data["result"],"",data["message"],"success");
+            $("#usersTable").bootstrapTable("refresh");
+            $("#editUserModal").modal("hide");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger","30000");
+          } else {
+            toast("Error","","Failed to remove user: "+row.username,"danger","30000");
+          }
+        }).fail(function() {
+          toast("API Error","","Failed to remove user: "+row.username,"danger","30000");
+        });
+      }
+    }
+  }
+
+  window.groupsActionEvents = {
+    "click .edit": function (e, value, row, index) {
+      buildGroupSettingsModal(row);
+    },
+    "click .delete": function (e, value, row, index) {
+      if(confirm("Are you sure you want to delete "+row.Name+" from Role Based Access? This is irriversible.") == true) {
+        queryAPI("DELETE","/api/rbac/group/"+row.id).done(function(data) {
+          if (data["result"] == "Success") {
+            toast("Success","","Successfully deleted "+row.Name+" from Role Based Access","success");
+            $("#groupsTable").bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger","30000");
+          } else {
+            toast("Error","","Failed to delete "+row.Name+" from Role Based Access","danger");
+          }
+        }).fail(function() {
+            toast("Error", "", "Failed to remove " + row.Name + " from Role Based Access", "danger");
+        });
+      }
+    }
+  }
+
+  window.rolesActionEvents = {
+    "click .edit": function (e, value, row, index) {
+      buildRoleSettingsModal(row);
+    },
+    "click .delete": function (e, value, row, index) {
+      if(confirm("Are you sure you want to delete the "+row.name+" role? This is irriversible.") == true) {
+        queryAPI("DELETE","/api/rbac/role/"+row.id).done(function(data) {
+          if (data["result"] == "Success") {
+            toast("Success","","Successfully deleted "+row.name+" from Role Based Access","success");
+            $("#rolesTable").bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger","30000");
+          } else {
+            toast("Error","","Failed to delete "+row.name+" from Role Based Access","danger");
+          }
+        }).fail(function() {
+            toast("Error", "", "Failed to remove " + targetid + " from " + group, "danger");
+        });
+      }
+    }
+  }
+
+  // ** ACTION FORMATTERS ** //
+  function widgetActionFormatter(value, row, index) {
+    var buttons = [
+      `<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`
+    ];
+    return buttons.join("");
+  }
+
+  function pluginActionFormatter(value, row, index) {
+    var buttons = [];
+    if (row.settings) {
+      buttons.push(`<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`);
+    }
+    if (row.status == "Available") {
+      buttons.push(`<a class="install" title="Install"><i class="fa-solid fa-download"></i></a>&nbsp;`);
+    } else if (row.status == "Installed") {
+      buttons.push(`<a class="uninstall" title="Uninstall"><i class="fa-solid fa-trash-can"></i></a>&nbsp;`);
+      if (row.version < row.online_version) {
+        buttons.push(`<a class="update" title="Update"><i class="fa-solid fa-upload"></i></a>&nbsp;`);      
+      } else if (row.source == "Online") {
+        buttons.push(`<a class="reinstall" title="Reinstall"><i class="fa-solid fa-arrow-rotate-right"></i></a>&nbsp;`);
+      }
+    }
+    return buttons.join("");
+  }
+
+  function editAndDeleteActionFormatter(value, row, index) {
+    var buttons = [
+      `<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`,
+      `<a class="delete" title="Delete"><i class="fa fa-trash"></i></a>`
+    ];
+    return buttons.join("");
+  }
+
+  function groupActionFormatter(value, row, index) {
+    if (row["Name"] != "Administrators") {
+      var actions = `<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`
+      if (!row["Protected"]) {
+        actions += `<a class="delete" title="Delete"><i class="fa fa-trash"></i></a>`
+      }
+      return actions
+    }
+  }
+
+  function roleActionFormatter(value, row, index) {
+    var actions = ""
+    if (!row["Protected"]) {
+      actions = `<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;<a class="delete" title="Delete"><i class="fa fa-trash"></i></a>`
+    }
+    return actions
+  }
+
+  // ** FORMATTERS ** //
+  function dateFormatter(value) {
+    const date = new Date(value);
+    return date.toLocaleDateString('en-US'); // Format as MM/DD/YYYY
+  }
+  
+  function datetimeFormatter(value) {
+    const date = new Date(value);
+    return date.toLocaleString('en-GB', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true // Format as MM/DD/YYYY
+    });
+  }
+  
+  function pluginUpdatesFormatter(value, row, index) {
+    if (row.version < row.online_version) {
+      return `<span class="badge bg-info">Update Available</span>`;
+    } else if (row.source == "Local") {
+      return `<span class="badge bg-secondary">Unknown</span>`;
+    } else if (row.status == "Available") {
+      return `<span class="badge bg-primary">Not Installed</span>`;
+    } else {
+      return `<span class="badge bg-success">Up to date</span>`;
+    }
+  }
+
+  function groupsFormatter(value, row, index) {
+    var html = ""
+    $(row.groups).each(function (group) {
+      html += `<span class="badge bg-info">`+row.groups[group]+`</span>&nbsp;`;
+    });
+    return html;
+  }
+
+  // ** TABLE BUTTONS ** //
+  function usersTableButtons() {
+    return {
+      btnAddUser: {
+        text: "Add User",
+        icon: "bi-person-fill-add",
+        event: function() {
+          $("#newUserModal").modal("show");
+          $("#newUserModal input").val("");
+        },
+        attributes: {
+          title: "Add a new user",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
+  function groupsTableButtons() {
+    return {
+      btnAddGroup: {
+        text: "Add Group",
+        icon: "bi-plus-lg",
+        event: function() {
+          buildNewGroupSettingsModal();
+        },
+        attributes: {
+          title: "Add a new group",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
+  function rolesTableButtons() {
+    return {
+      btnAddRole: {
+        text: "Add Role",
+        icon: "bi-plus-lg",
+        event: function() {
+          buildNewRoleSettingsModal();
+        },
+        attributes: {
+          title: "Add a new role",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
+  function pluginsTableButtons() {
+    return {
+      btnEditPluginURLs: {
+        text: "Edit Plugin URL(s)",
+        icon: "bi bi-pencil-square",
+        event: function() {
+          $("#urlList").html("");
+          populatePluginRepositories();
+          $("#onlinePluginsModal").modal("show");
+        },
+        attributes: {
+          title: "Edit Plugin URL(s)",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
+  function dashboardsTableButtons() {
+    return {
+      btnAddDashboard: {
+        text: "Create new Dashboard",
+        icon: "bi bi-plus-lg",
+        event: function() {
+          buildNewDashboardSettingsModal();
+        },
+        attributes: {
+          title: "Create new Dashboard",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
+  // ** TABLE RESPONSE HANDLER ** //
+  function responseHandler(data) {
+    if (data.result === "Warning" && Array.isArray(data.message)) {
+        data.message.forEach(warning => {
+            toast("Warning", "", warning, "warning","30000");
+        });
+    }
+    return data.data;
+  }
+
+  // ** BUILD / SUBMIT SETTINGS ** //
+  function buildSettings(elem, setting, options) {
+    // Empty the additional settings array
+    selectWithTableArr = {};
+    const { dataLocation, noTabs } = options;
+    id = $(elem).attr("id");
+    if (tabsLoaded.includes(setting)) {
+      console.log("tab already loaded: "+setting);
+    } else {
+      tabsLoaded.push(setting);
+      try {
+        queryAPI("GET", "/api/settings/"+setting).done(function(settingsResponse) {
+          const settingsData = dataLocation ? getNestedProperty(settingsResponse, dataLocation) : settingsResponse.data;
+          $(elem).html(buildFormGroup(settingsData,noTabs));
+          initPasswordToggle();
+          $(".info-field").change(function(elem) {
+            toast("Configuration", "", $(elem.target).data("label") + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
+            $(this).addClass("changed");
+          });
+          populateSettingsForm(`#`+id);
+        }).fail(function(xhr) {
+          logConsole("Error", xhr, "error");
+        });
+      } catch (e) {
+        logConsole("Error", e, "error");
+      }
+    }
+  }
+
+  // ** BUILD / SUBMIT SETTINGS MODALS ** //
+
+  function buildSettingsModal(row, options) {
+    // Clear Modal Content
+    $("#SettingsModalBody").html("");
+    // Empty the additional settings array
+    selectWithTableArr = {};
+    const { apiUrl, configUrl, name, saveFunction, labelPrefix, dataLocation, callback, noTabs } = options;
+    $("#modalItemID").val(name)
+    try {
+      queryAPI("GET", apiUrl).done(function(settingsResponse) {
+        const settingsData = dataLocation ? getNestedProperty(settingsResponse, dataLocation) : settingsResponse.data;
+        $("#SettingsModalBody").html(buildFormGroup(settingsData,noTabs));
+        initPasswordToggle();
+        $("#SettingsModalSaveBtn").attr("onclick", saveFunction);
+        $("#SettingsModalLabel").text(`${labelPrefix} Settings: ${name}`);
+        $(".info-field").change(function(elem) {
+          toast("Configuration", "", $(elem.target).data("label") + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
+          $(this).addClass("changed");
+        });
+
+        if (configUrl) {
+          try {
+            queryAPI("GET", configUrl).done(function(configResponse) {
+              let data = configResponse.data;
+              for (const key in data) {
+                if (data.hasOwnProperty(key)) {
+                  const value = data[key];
+                  const element = $(`#SettingsModal [name="${key}"]`);
+                  if (element.attr("type") === "checkbox") {
+                    element.prop("checked", value);
+                  } else if (element.is("input[multiple]")) {
+                    // console.log(element.data("type"));
+                  } else {
+                    if (element.hasClass("encrypted")) {
+                      if (value !== "") {
+                        element.val("*********");
+                      }
+                    } else {
+                      element.val(value);
+                    }
+                  }
+                }
+              }
+            }).fail(function(xhr) {
+              logConsole("Error", xhr, "error");
+            });
+          } catch (e) {
+            logConsole("Error", e, "error");
+          }
+        }
+        // Callback
+        if (callback) {
+          let match = callback.match(/(\w+)\((.*)\)/);
+          if (match) {
+              let functionName = match[1];
+              let args = match[2].split(",").map(arg => arg.trim());
+              args = args.map(arg => eval(arg));
+              window[functionName](args);
+          } else {
+              console.error("Invalid callback format");
+          }
+        }
+      }).fail(function(xhr) {
+        logConsole("Error", xhr, "error");
+      });
+    } catch (e) {
+      logConsole("Error", e, "error");
+    }
+    // Show Modal
+    $("#SettingsModal").modal("show");
+  }
+
+  function submitSettingsModal(type, element = "#modalItemID", isNew = false) {
+    var serializedArray = $("#SettingsModal .changed[type!=checkbox]").serializeArray();
+
+    // Include unchecked checkboxes in the formData
+    $("#SettingsModal input.changed[type=checkbox]").each(function() {
+        serializedArray.push({ name: this.name, value: this.checked ? true : false });
+    });
+
+    // Convert the array into an object
+    var formData = {};
+    var encryptionPromises = [];
+
+    serializedArray.forEach(function(item) {
+        var element = $(`[name="${item.name}"]`);
+        if (formData[item.name]) {
+            if (!Array.isArray(formData[item.name])) {
+                formData[item.name] = [formData[item.name]];
+            }
+            formData[item.name].push(item.value);
+        } else {
+            // Check if the element is a select with the multiple attribute
+            if (element.is("select[multiple]")) {
+                formData[item.name] = item.value !== "" ? [item.value] : item.value;
+            } else if (element.is("input[multiple]")) {
+                formData[item.name] = getInputMultipleEntries(element);
+            } else if (element.hasClass("encrypted") && item.value !== "") {
+                // Encrypt sensitive data
+                var promise = encryptData(item.name, item.value).done(function(encryptedValue) {
+                    formData[item.name] = encryptedValue.data;
+                });
+                encryptionPromises.push(promise);
+            } else {
+                formData[item.name] = item.value;
+            }
+        }
+    });
+
+    if (isNew) {
+      var api = `/api/config/${type}s`;
+      var method = "POST";
+    } else {
+      var api = `/api/config/${type}s/` + $(element).val();
+      var method = "PATCH";
+    }
+
+    // Append selectWithTableArr to formData
+    if (selectWithTableArr) {
+      formData = Object.assign({}, formData, selectWithTableArr);
+    }
+
+    // Wait for all encryption promises to resolve
+    $.when.apply($, encryptionPromises).done(function() {
+        queryAPI(method, api, formData).done(function(data) {
+            if (data.result === "Success") {
+                toast(data.result, "", data.message, "success");
+                $("#SettingsModal .changed").removeClass("changed");
+            } else {
+                toast(data.result === "Error" ? data.result : "API Error", "", data.message || "Failed to save configuration", "danger", "30000");
+            }
+        });
+    });
+  }
+
+  function buildPluginSettingsModal(row) {
+    buildSettingsModal(row, {
+      apiUrl: row.api,
+      configUrl: `/api/config/plugins/${row.name}`,
+      name: row.name,
+      saveFunction: `submitSettingsModal("plugin");`,
+      labelPrefix: "Plugin",
+      dataLocation: "data"
+    });
+  }
+
+  function buildWidgetSettingsModal(row) {
+    buildSettingsModal(row, {
+      apiUrl: `/api/settings/widgets/${row.info.name}`,
+      configUrl: `/api/config/widgets/${row.info.name}`,
+      name: row.info.name,
+      saveFunction: `submitSettingsModal("widget");`,
+      labelPrefix: "Widget",
+      dataLocation: "data.Settings"
+    });
+  }
+
+  function buildDashboardSettingsModal(row) {
+    buildSettingsModal(row, {
+      apiUrl: `/api/settings/dashboard`,
+      configUrl: `/api/config/dashboards/${row.Name}`,
+      name: row.Name,
+      saveFunction: `submitDashboardSettings();`,
+      labelPrefix: "Dashboard",
+      dataLocation: "data",
+      callback: "widgetSelectCallback(row)"
+    });
+  }
+
+  function buildNewDashboardSettingsModal() {
+    buildSettingsModal([], {
+      apiUrl: `/api/settings/dashboard`,
+      configUrl: null,
+      name: "New Dashboard",
+      saveFunction: `submitDashboardSettings(true);`,
+      labelPrefix: "Dashboard",
+      dataLocation: "data"
+    });
+  }
+
+  function buildRoleSettingsModal(row) {
+      buildSettingsModal(row, {
+      apiUrl: `/api/settings/role`,
+      name: row.name,
+      saveFunction: `submitRoleSettings();`,
+      labelPrefix: "Role",
+      dataLocation: "data",
+      noTabs: true,
+      callback:  "populateRoleSettingsModal(row)"
+    });
+  }
+
+  function buildNewRoleSettingsModal() {
+    buildSettingsModal([], {
+      apiUrl: `/api/settings/role`,
+      configUrl: null,
+      name: "New Role",
+      saveFunction: `submitRoleSettings(true);`,
+      labelPrefix: "Role",
+      dataLocation: "data",
+      noTabs: true
+    });
+  }
+
+  function buildGroupSettingsModal(row) {
+    buildSettingsModal(row, {
+    apiUrl: `/api/settings/group`,
+    name: row.Name,
+    saveFunction: `submitGroupSettings();`,
+    labelPrefix: "Group",
+    dataLocation: "data",
+    noTabs: true,
+    callback:  "populateGroupSettingsModal(row)"
+  });
+}
+
+  function buildNewGroupSettingsModal() {
+    buildSettingsModal([], {
+      apiUrl: `/api/settings/group`,
+      configUrl: null,
+      name: "New Group",
+      saveFunction: `submitGroupSettings(true);`,
+      labelPrefix: "Group",
+      dataLocation: "data",
+      noTabs: true
+    });
+  }
+
+  function submitDashboardSettings(isNew = false) {
+    let tableRows = $("#widgetSelectTable tbody tr");
+    tableRows.each((index, row) => {
+        let cells = $(row).find("td");
+        if (cells.length > 1) {
+            let widgetName = cells.eq(1).text();
+            let selectElement = cells.eq(2).find("select");
+            let selectedOption = selectElement.length ? selectElement.val() : null;
+
+            // Ensure the Widgets object exists
+            if (!selectWithTableArr["Widgets"]) {
+                selectWithTableArr["Widgets"] = {};
+            }
+
+            // Ensure the specific widget object exists
+            if (!selectWithTableArr["Widgets"][widgetName]) {
+                selectWithTableArr["Widgets"][widgetName] = {};
+            }
+
+            selectWithTableArr["Widgets"][widgetName]["size"] = selectedOption;
+        }
+    });
+    if (isNew) {
+      submitSettingsModal("dashboard",`[name="Name"]`,isNew);
+    } else {
+      submitSettingsModal("dashboard");
+    }
+    $("#SettingsModal").modal("hide");
+    $("#dashboardsTable").bootstrapTable("refresh");
+  }
+
+  // ** ROLES SETTINGS MODAL ** //
+
+  // Callback from `buildRoleSettingsModal`
+  function populateRoleSettingsModal(row) {
+    $("[name=roleId]").val("").val(row[0].id);
+    $("[name=roleName]").val("").val(row[0].name);
+    $("[name=roleDescription]").val("").val(row[0].description);
+  }
+
+  function submitRoleSettings(isNew = false) {
+    let name = $("[name=roleName]").val();
+    let description = $("[name=roleDescription]").val();
+    let data = {
+      name: name,
+      description: description
+    };
+    if (isNew) {
+      var method = "POST";
+      var api = "/api/rbac/roles";
+      var msg = "add new role";
+    } else {
+      let id = $("[name=roleId]").val();
+      var method = "PATCH";
+      var api = "/api/rbac/role/"+id;
+      var msg = "edit "+name;
+    }
+    queryAPI(method,api,data).done(function(data) {
+      if (data["result"] == "Success") {
+        toast(data["result"],"",data["message"],"success");
+        $("#rolesTable").bootstrapTable("refresh");
+        $("#SettingsModal").modal("hide");
+      } else if (data["result"] == "Error") {
+        toast(data["result"],"",data["message"],"danger","30000");
+      } else {
+        toast("Error","","Failed to "+msg,"danger");
+      }
+    }).fail(function() {
+      toast("Error", "", "Failed to "+msg,"danger");
+    });;
+  }
+
+  // ** GROUPS SETTINGS MODAL ** //
+
+  // Callback from `buildGroupSettingsModal`
+  function populateGroupSettingsModal(row) {
+    $("[name=groupId]").val("").val(row[0].id);
+    $("[name=groupName]").val("").val(row[0].Name);
+    $("[name=groupDescription]").val("").val(row[0].Description);
+    
+    if (row[0].PermittedResources) {
+      var PermittedResources = row[0].PermittedResources.split(",");
+      for (var resource in PermittedResources) {
+        console.log(resource);
+        console.log("#"+PermittedResources[resource]);
+        $("#"+PermittedResources[resource]).prop("checked", "true");
+      }
+    }
+    $("#SettingsModal .list-group .toggle").on("click", function(event) {
+      let id = $("[name=groupId]").val();
+      let group = $("[name=groupName]").val();
+      let toggle = $("#"+event.target.id).prop("checked") ? "enabled" : "disabled";
+      let targetid = event.target.id
+      let data = {
+        key: targetid,
+        value: toggle
+      }
+      queryAPI("PATCH","/api/rbac/group/"+id,data).done(function(data) {
+        if (data["result"] == "Success") {
+          if (toggle == "enabled") {
+            toast("Success", "", "Successfully added " + targetid + " to " + group, "success");
+          } else if (toggle == "disabled") {
+            toast("Success", "", "Successfully removed " + targetid + " to " + group, "success");
+          }
+          $("#groupsTable").bootstrapTable("refresh");
+        } else if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger","30000");
+        } else {
+          if (toggle == "enabled") {
+            toast("Error", "", "Failed to add " + targetid + " to " + group, "danger");
+          } else if (toggle == "disabled") {
+            toast("Error", "", "Failed to remove " + targetid + " from " + group, "danger");
+          }
+        }
+      }).fail(function() {
+          toast("Error", "", "Failed to remove " + targetid + " from " + group, "danger");
+      });
+    });
+  }
+
+  function submitGroupSettings(isNew = false) {
+    let name = $("[name=groupName]").val();
+    let description = $("[name=groupDescription]").val();
+    let data = {
+      name: name,
+      description: description
+    };
+    if (isNew) {
+      var method = "POST";
+      var api = "/api/rbac/groups";
+      var msg = "add new group";
+    } else {
+      let id = $("[name=groupId]").val();
+      var method = "PATCH";
+      var api = "/api/rbac/group/"+id;
+      var msg = "edit "+name;
+    }
+    queryAPI(method,api,data).done(function(data) {
+      if (data["result"] == "Success") {
+        toast(data["result"],"",data["message"],"success");
+        $("#groupsTable").bootstrapTable("refresh");
+        $("#SettingsModal").modal("hide");
+      } else if (data["result"] == "Error") {
+        toast(data["result"],"",data["message"],"danger","30000");
+      } else {
+        toast("Error","","Failed to "+msg,"danger");
+      }
+    }).fail(function() {
+      toast("Error", "", "Failed to "+msg,"danger");
+    });;
+  }
+
+  // ** PLUGINS FUNCTIONS ** //
+  function installPlugin(row){
+    toast("Installing","","Installing "+row["name"]+"...","info");
+    try {
+      queryAPI("POST","/api/plugins/install",row).done(function(data) {
+        if (data["result"] == "Success") {
+          toast(data["result"],"",data["message"],"success");
+          $("#pluginsTable").bootstrapTable("refresh");
+        } else if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger");
+        } else {
+          toast("API Error","","Failed to install plugin","danger","30000");
+        }
+      }).fail(function(xhr) {
+        toast("API Error","","Failed to install plugin","danger","30000");
+        logConsole("Error",xhr,"error");
+      });;
+    } catch(e) {
+      toast("API Error","","Failed to install plugin","danger","30000");
+      logConsole("Error",e,"error");
+    }
+  }
+
+  function uninstallPlugin(row){
+    if(confirm("Are you sure you want to uninstall the "+row.name+" plugin?") == true) {
+      toast("Uninstalling","","Uninstalling "+row["name"]+"...","info");
+      try {
+        queryAPI("POST","/api/plugins/uninstall",row).done(function(data) {
+          if (data["result"] == "Success") {
+            toast(data["result"],"",data["message"],"success");
+            $("#pluginsTable").bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger");
+          } else {
+            toast("API Error","","Failed to uninstall plugin","danger","30000");
+          }
+        }).fail(function(xhr) {
+          toast("API Error","","Failed to uninstall plugin","danger","30000");
+          logConsole("Error",xhr,"error");
+        });;
+      } catch(e) {
+        toast("API Error","","Failed to uninstall plugin","danger","30000");
+        logConsole("Error",e,"error");
+      }
+    }
+  }
+
+  function reinstallPlugin(row){
+    if(confirm("Are you sure you want to reinstall the "+row.name+" plugin?") == true) {
+      toast("Reinstalling","","Reinstalling "+row["name"]+"...","info");
+      try {
+        queryAPI("POST","/api/plugins/reinstall",row).done(function(data) {
+          if (data["result"] == "Success") {
+            toast(data["result"],"",data["message"],"success");
+            $("#pluginsTable").bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger");
+          } else {
+            toast("API Error","","Failed to reinstall plugin","danger","30000");
+          }
+        }).fail(function(xhr) {
+          toast("API Error","","Failed to reinstall plugin","danger","30000");
+          logConsole("Error",xhr,"error");
+        });;
+      } catch(e) {
+        toast("API Error","","Failed to reinstall plugin","danger","30000");
+        logConsole("Error",e,"error");
+      }
+    }
+  }

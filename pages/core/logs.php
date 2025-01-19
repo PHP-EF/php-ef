@@ -1,13 +1,13 @@
 <?php
-  if ($ib->auth->checkAccess("ADMIN-LOGS") == false) {
-    $ib->api->setAPIResponse('Error','Unauthorized',401);
+  if ($phpef->auth->checkAccess("ADMIN-LOGS") == false) {
+    $phpef->api->setAPIResponse('Error','Unauthorized',401);
     return false;
   }
 
-  $LogFiles = array_reverse($ib->logging->getLogFiles());
+  $LogFiles = array_reverse($phpef->logging->getLogFiles());
   $LogFileArr = array();
     foreach ($LogFiles as $LogFile) {
-      $LogFileShort = explode(".log",explode($ib->config->get("System","logfilename")."-",$LogFile)[1]);
+      $LogFileShort = explode(".log",explode($phpef->config->get("System","logfilename")."-",$LogFile)[1]);
       if ($LogFileShort[0] != null) {
         array_push($LogFileArr,$LogFileShort[0]);
       }
@@ -24,7 +24,7 @@
     <div class="col-14 col-lg-14 col-xl-14 mx-auto">
       <h2 class="h3 mb-4 page-title">Logs</h2>
       <div class="my-4">
-          <p>The following table displays logs from '.$ib->config->get('Styling')['websiteTitle'].'.</p>
+          <p>The following table displays logs from '.$phpef->config->get('Styling')['websiteTitle'].'.</p>
           <table  data-url="/api/logs"
             data-data-field="data"  
             data-toggle="table"

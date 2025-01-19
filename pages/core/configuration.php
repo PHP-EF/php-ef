@@ -1,6 +1,6 @@
 <?php
-  if ($ib->auth->checkAccess("ADMIN-CONFIG") == false) {
-    $ib->api->setAPIResponse('Error','Unauthorized',401);
+  if ($phpef->auth->checkAccess("ADMIN-CONFIG") == false) {
+    $phpef->api->setAPIResponse('Error','Unauthorized',401);
     return false;
   }
 
@@ -12,401 +12,81 @@ return '
   <div class="row justify-content-center">
     <div class="col-12 col-lg-12 col-xl-12 mx-auto">
       <h2 class="h3 mb-4 page-title">Configuration</h2>
-      <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <ul class="nav nav-tabs" id="configTabs" role="tablist">
         <li class="nav-item">
           <a class="nav-link active" id="general-tab" data-toggle="tab" href="#general" role="tab" aria-controls="general" aria-selected="true">General</a>
+        </li>
+        </li>
+          <li class="nav-item">
+          <a class="nav-link" id="accesscontrol-tab" data-toggle="tab" href="#accesscontrol" role="tab" aria-controls="accesscontrol" aria-selected="false">Access Control</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" id="customisation-tab" data-toggle="tab" href="#customisation" role="tab" aria-controls="customisation" aria-selected="false">Customisation</a>
         </li>
-          <li class="nav-item">
+        <li class="nav-item">
           <a class="nav-link" id="plugins-tab" data-toggle="tab" href="#plugins" role="tab" aria-controls="plugins" aria-selected="false">Plugins</a>
         </li>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="images-tab" data-toggle="tab" href="#images" role="tab" aria-controls="images" aria-selected="false">Images</a>
+        </li>
+        </li>
+          <li class="nav-item">
+          <a class="nav-link" id="dashboards-tab" data-toggle="tab" href="#dashboards" role="tab" aria-controls="dashboards" aria-selected="false">Dashboards</a>
+        </li>
       </ul>
-      <div class="tab-content" id="tabContent">
+      <div class="tab-content" id="configTabContent">
         <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
-          <form id="configurationForm">
-            <div class="my-4">
-              <h5 class="mb-0 mt-5">Configuration</h5>
-              <p>Use the fields below to modify the configuration for '.$ib->config->get('Styling')['websiteTitle'].'.</p>
-              <div class="card border-secondary p-3">
-                <div class="card-title">
-                  <h5>System</h5>
-                </div>
-                <div class="form-group">
-                  <label for="System[logfilename]">Log File Name</label>
-                  <input type="text" class="form-control info-field" id="System[logfilename]" aria-describedby="System[logfilename]Help" name="System[logfilename]">
-                  <small id="System[logfilename]Help" class="form-text text-muted">The name of the log file <b>without</b> the file extension.</small>
-                </div>
-                <div class="form-group">
-                  <label for="System[logdirectory]">Log Directory</label>
-                  <input type="text" class="form-control info-field" id="System[logdirectory]" aria-describedby="System[logdirectory]Help" name="System[logdirectory]">
-                  <small id="System[logdirectory]Help" class="form-text text-muted">The full path of the log directory including the trailing slash.</small>
-                </div>
-                <div class="form-group">
-                  <label for="System[loglevel]">Log Level</label>
-                  <select type="select" class="form-select info-field" id="System[loglevel]" aria-describedby="System[loglevel]Help" name="System[loglevel]">
-                    <option>Debug</option>
-                    <option>Info</option>
-                    <option>Warning</option>
-                  </select>
-                  <small id="System[loglevel]Help" class="form-text text-muted">Specify which log level you would like to use. Enabling <b>Debug</b> logs will generate lots of data.</small>
-                </div>
-                <div class="form-group">
-                  <label for="System[logretention]">Log Retention</label>
-                  <input type="text" class="form-control info-field" id="System[logretention]" aria-describedby="System[logretention]Help" name="System[logretention]">
-                  <small id="System[logretention]Help" class="form-text text-muted">How many days to keep system logs before they are purged.</small>
-                </div>
-                <div class="form-group">
-                  <label for="System[CURL-Timeout]">CURL Timeout</label>
-                  <input type="text" class="form-control info-field" id="System[CURL-Timeout]" aria-describedby="System[CURL-Timeout]Help" name="System[CURL-Timeout]">
-                  <small id="System[CURL-Timeout]Help" class="form-text text-muted">Specify the timeout used for CURL requests. (Can be increased if long running outbound API calls time out)</small>
-                </div>
-                <div class="form-group">
-                  <label for="System[CURL-ConnectTimeout]">CURL Timeout on Connect</label>
-                  <input type="text" class="form-control info-field" id="System[CURL-ConnectTimeout]" aria-describedby="System[CURL-ConnectTimeout]Help" name="System[CURL-ConnectTimeout]">
-                  <small id="System[CURL-ConnectTimeout]Help" class="form-text text-muted">Specify the timeout used for CURL requests on connect. (Shouldn"t need to be increased)</small>
-                </div>
-              </div>
-              <br>
-              <div class="card border-secondary p-3">
-                <div class="card-title">
-                  <h5>Security</h5>
-                </div>
-                <div class="form-group">
-                  <label for="Security[salt]">Salt</label>
-                  <input type="password" class="form-control info-field" id="Security[salt]" aria-describedby="Security[salt]Help" name="Security[salt]">
-                  <small id="Security[salt]Help" class="form-text text-muted">The salt used to encrypt credentials. <b>WARNING! Changing the Salt will invalidate all client-side stored API Keys</b></small>
-                </div>
-                <div class="form-group">
-                  <label for="Security[Headers][X-Frame-Options]">X-Frame-Options</label>
-                  <input type="text" class="form-control info-field" placeholder="SAMEORIGIN" id="Security[Headers][X-Frame-Options]" aria-describedby="Security[Headers][X-Frame-Options]Help" name="Security[Headers][X-Frame-Options]">
-                  <small id="Security[Headers][X-Frame-Options]Help" class="form-text text-muted">Customise the X-Frame-Options header</b></small>
-                </div>
-                <div class="form-group">
-                  <label for="Security[Headers][Frame-Source]">Content Security Policy: Frame Source</label>
-                  <input type="text" class="form-control info-field" placeholder="self" id="Security[Headers][Frame-Source]" aria-describedby="Security[Headers][Frame-Source]Help" name="Security[Headers][Frame-Source]">
-                  <small id="Security[Headers][Frame-Source]Help" class="form-text text-muted">Customise the frame-src component of the Content Security Policy header. It is strongly advised to leave this alone unless you know what you are doing.</b></small>
-                </div>
-              </div>
-              <br>
-              <div class="card border-secondary p-3">
-                <div class="card-title">
-                  <h5>Authentication</h5>
-                </div>
-                <div class="accordion" id="ldapConfigAccordian">
-                  <div class="accordion-item">
-                    <h2 class="accordion-header" id="ldapConfigAccordianHeading">
-                      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#ldapConfig" aria-expanded="true" aria-controls="ldapConfig">
-                      LDAP Configuration
-                      </button>
-                    </h2>
-                    <div id="ldapConfig" class="accordion-collapse collapse" aria-labelledby="ldapConfigAccordianHeading" data-bs-parent="#ldapConfigAccordian">
-                      <div class="accordion-body">
-                        <div class="card border-secondary p-3">
-                          <div class="card-title">
-                            <h5>LDAP Configuration</h5>
-                          </div>
-                          <div class="row">
-                            <div class="col-lg-6 col-12">
-                              <div class="form-group">
-                                  <label for="LDAP[ldap_server]">LDAP Server</label>
-                                  <input type="text" class="form-control info-field" id="LDAP[ldap_server]" name="LDAP[ldap_server]" placeholder="ldap://fqdn:389">
-                              </div>
-                              <div class="form-group">
-                                  <label for="LDAP[service_dn]">LDAP Bind Username</label>
-                                  <input type="text" class="form-control info-field" id="LDAP[service_dn]" name="LDAP[service_dn]" placeholder="cn=read-only-admin,dc=example,dc=com">
-                              </div>
-                              <div class="form-group">
-                                  <label for="LDAP[service_dn]">LDAP Bind Password</label>
-                                  <input type="password" class="form-control info-field" id="LDAP[service_password]" name="LDAP[service_password]" placeholder="*********">
-                              </div>
-                            </div>
-                            <div class="col-lg-6 col-12">
-                              <div class="form-group">
-                                <label for="LDAP[user_dn]">User DN</label>
-                                <input type="text" class="form-control info-field" id="LDAP[user_dn]" name="LDAP[user_dn]" placeholder="dc=example,dc=com">
-                              </div>
-                              <div class="form-group">
-                                <label for="LDAP[base_dn]">Base DN</label>
-                                <input type="text" class="form-control info-field" id="LDAP[base_dn]" name="LDAP[base_dn]" placeholder="dc=example,dc=com">
-                              </div>
-                              <br>
-                              <div class="form-group">
-                                <div class="form-check form-switch">
-                                  <label class="form-check-label" for="LDAP[enabled]">Enable LDAP</label>
-                                  <input class="form-check-input info-field" type="checkbox" id="LDAP[enabled]" name="LDAP[enabled]">
-                                </div>
-                              </div>
-                              <div class="form-group">
-                                <div class="form-check form-switch">
-                                  <label class="form-check-label" for="LDAP[AutoCreateUsers]">Auto-Create Users</label>
-                                  <input class="form-check-input info-field" type="checkbox" id="LDAP[AutoCreateUsers]" name="LDAP[AutoCreateUsers]">
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <hr>
-                          <div class="row">
-                            <h4>User Attribute Mapping</h4>
-                            <p>Used for mapping LDAP Attributes to the account information</p>
-                            <div class="col-md-6 col-12">
-                              <div class="form-group">
-                                  <label for="LDAP[attributes][Username]">Username Attribute</label>
-                                  <input type="text" class="form-control info-field" id="LDAP[attributes][Username]" name="LDAP[attributes][Username]" placeholder="sAMAccountName">
-                              </div>
-                              <div class="form-group">
-                                  <label for="LDAP[attributes][FirstName]">First Name Attribute</label>
-                                  <input type="text" class="form-control info-field" id="LDAP[attributes][FirstName]" name="LDAP[attributes][FirstName]" placeholder="givenName">
-                              </div>
-                              <div class="form-group">
-                                  <label for="LDAP[attributes][LastName]">Last Name Attribute</label>
-                                  <input type="text" class="form-control info-field" id="LDAP[attributes][LastName]" name="LDAP[attributes][LastName]" placeholder="sn">
-                              </div>
-                            </div>
-                            <div class="col-md-6 col-12">
-                              <div class="form-group">
-                                  <label for="LDAP[attributes][Email]">Email Attribute</label>
-                                  <input class="form-control info-field" id="LDAP[attributes][Email]" name="LDAP[attributes][Email]" placeholder="mail">
-                              </div>
-                              <div class="form-group">
-                                  <label for="LDAP[attributes][Groups]">Groups Attribute</label>
-                                  <input class="form-control info-field" id="LDAP[attributes][Groups]" name="LDAP[attributes][Groups]" placeholder="memberOf">
-                              </div>
-                              <div class="form-group">
-                                  <label for="LDAP[attributes][DN]">Distinguished Name Attribute</label>
-                                  <input class="form-control info-field" id="LDAP[attributes][DN]" name="LDAP[attributes][DN]" placeholder="distinguishedName">
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <br>
-                <div class="accordion" id="samlConfigAccordian">
-                  <div class="accordion-item">
-                    <h2 class="accordion-header" id="samlConfigAccordianHeading">
-                      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#samlConfig" aria-expanded="true" aria-controls="samlConfig">
-                      SAML Configuration
-                      </button>
-                    </h2>
-                    <div id="samlConfig" class="accordion-collapse collapse" aria-labelledby="samlConfigAccordianHeading" data-bs-parent="#samlConfigAccordian">
-                      <div class="accordion-body">
-                        <div class="card border-secondary p-3">
-                          <div class="card-title">
-                            <h5>SAML Configuration</h5>
-                          </div>
-                          <div class="row">
-                            <div class="col-lg-6 col-12">
-                              <h4>Service Provider (SP)</h4>
-                              <div class="form-group">
-                                  <label for="SAML[sp][entityId]">Entity ID</label>
-                                  <input type="text" class="form-control info-field" id="SAML[sp][entityId]" name="SAML[sp][entityId]">
-                              </div>
-                              <div class="form-group">
-                                  <label for="SAML[sp][assertionConsumerService][url]">Assertion Consumer Service URL</label>
-                                  <input type="text" class="form-control info-field" id="SAML[sp][assertionConsumerService][url]" name="SAML[sp][assertionConsumerService][url]">
-                              </div>
-                              <div class="form-group">
-                                  <label for="SAML[sp][singleLogoutService][url]">Single Logout Service URL</label>
-                                  <input type="text" class="form-control info-field" id="SAML[sp][singleLogoutService][url]" name="SAML[sp][singleLogoutService][url]">
-                              </div>
-                              <div class="form-group">
-                                  <label for="SAML[sp][x509cert]">X.509 Certificate</label>
-                                  <textarea class="form-control info-field" id="SAML[sp][x509cert]" name="SAML[sp][x509cert]"></textarea>
-                              </div>
-                              <div class="form-group">
-                                  <label for="SAML[sp][privateKey]">Private Key</label>
-                                  <textarea class="form-control info-field" id="SAML[sp][privateKey]" name="SAML[sp][privateKey]"></textarea>
-                              </div>
-                            </div>
-                            <div class="col-lg-6 col-12">
-                              <h4>Identity Provider (IdP)</h4>
-                              <div class="form-group">
-                                  <label for="SAML[idp][entityId]">Entity ID</label>
-                                  <input type="text" class="form-control info-field" id="SAML[idp][entityId]" name="SAML[idp][entityId]">
-                              </div>
-                              <div class="form-group">
-                                  <label for="SAML[idp][singleSignOnService][url]">Single Sign-On Service URL</label>
-                                  <input type="text" class="form-control info-field" id="SAML[idp][singleSignOnService][url]" name="SAML[idp][singleSignOnService][url]">
-                              </div>
-                              <div class="form-group">
-                                  <label for="SAML[idp][singleLogoutService][url]">Single Logout Service URL</label>
-                                  <input type="text" class="form-control info-field" id="SAML[idp][singleLogoutService][url]" name="SAML[idp][singleLogoutService][url]">
-                              </div>
-                              <div class="form-group">
-                                  <label for="SAML[idp][x509cert]">X.509 Certificate</label>
-                                  <textarea class="form-control info-field" id="SAML[idp][x509cert]" name="SAML[idp][x509cert]"></textarea>
-                              </div>
-                              <br>
-                              <div class="form-group">
-                                <div class="form-check form-switch">
-                                  <label class="form-check-label" for="SAML[enabled]">Enable SAML</label>
-                                  <input class="form-check-input info-field" type="checkbox" id="SAML[enabled]" name="SAML[enabled]">
-                                </div>
-                              </div>
-                              <div class="form-group">
-                                <div class="form-check form-switch">
-                                  <label class="form-check-label" for="SAML[AutoCreateUsers]">Auto-Create Users</label>
-                                  <input class="form-check-input info-field" type="checkbox" id="SAML[AutoCreateUsers]" name="SAML[AutoCreateUsers]">
-                                </div>
-                              </div>
-                              <div class="form-group">
-                                <div class="form-check form-switch">
-                                  <label class="form-check-label" for="SAML[strict]">Use Strict Mode</label>
-                                  <input class="form-check-input info-field" type="checkbox" id="SAML[strict]" name="SAML[strict]">
-                                </div>
-                              </div>
-                              <div class="form-group">
-                                <div class="form-check form-switch">
-                                  <label class="form-check-label" for="SAML[debug]">Use Debug Mode</label>
-                                  <input class="form-check-input info-field" type="checkbox" id="SAML[debug]" name="SAML[debug]">
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <hr>
-                          <div class="row">
-                            <h4>User Attribute Mapping</h4>
-                            <p>Used for mapping SAML Attributes to the account information</p>
-                            <div class="col-md-6 col-12">
-                              <div class="form-group">
-                                  <label for="SAML[attributes][Username]">Username Attribute</label>
-                                  <input type="text" class="form-control info-field" id="SAML[attributes][Username]" name="SAML[attributes][Username]">
-                              </div>
-                              <div class="form-group">
-                                  <label for="SAML[attributes][FirstName]">First Name Attribute</label>
-                                  <input type="text" class="form-control info-field" id="SAML[attributes][FirstName]" name="SAML[attributes][FirstName]">
-                              </div>
-                              <div class="form-group">
-                                  <label for="SAML[attributes][LastName]">Last Name Attribute</label>
-                                  <input type="text" class="form-control info-field" id="SAML[attributes][LastName]" name="SAML[attributes][LastName]">
-                              </div>
-                            </div>
-                            <div class="col-md-6 col-12">
-                              <div class="form-group">
-                                  <label for="SAML[attributes][Email]">Email Attribute</label>
-                                  <input class="form-control info-field" id="SAML[attributes][Email]" name="SAML[attributes][Email]">
-                              </div>
-                              <div class="form-group">
-                                  <label for="SAML[attributes][Groups]">Groups Attribute</label>
-                                  <input class="form-control info-field" id="SAML[attributes][Groups]" name="SAML[attributes][Groups]">
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+          <div class="my-4">
+            <div class="card card-rounded border-secondary p-3">
+              <div class="general-content">
+                <form id="generalForm"></form>
               </div>
             </div>
-          </form>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="accesscontrol" role="tabpanel" aria-labelledby="accesscontrol-tab">
+          <div class="my-4">
+            <div class="card card-rounded border-secondary p-3">
+              <div class="accesscontrol-content">
+                <form id="accesscontrolForm"></form>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="tab-pane fade" id="customisation" role="tabpanel" aria-labelledby="customisation-tab">
-          <form id="customisationForm">
-            <div class="my-4">
-              <h5 class="mb-0 mt-5">Customisation</h5>
-              <p>Use the fields below to customize the style and logos for '.$ib->config->get('Styling')['websiteTitle'].'.</p>
-              <div class="card border-secondary p-3">
-                <div class="card-title">
-                  <h5>General</h5>
-                </div>
-                <div class="form-group row">
-                  <div class="col-lg-6 col-12">
-                    <label for="Styling[logo-sm][Image]">Logo Image (Small)</label>
-                    <input type="text" class="form-control info-field" id="Styling[logo-sm][Image]" aria-describedby="Styling[logo-sm][Image]Help" name="Styling[logo-sm][Image]">
-                    <small id="Styling[logo-sm][Image]Help" class="form-text text-muted">The path of the small logo to be used in the top-left navbar.</small>
-                  </div>
-                  <div class="col-lg-6 col-12">
-                    <label for="Styling[logo-sm][CSS]">Logo CSS (Small)</label>
-                    <input type="text" class="form-control info-field" id="Styling[logo-sm][CSS]" aria-describedby="Styling[logo-sm][CSS]Help" name="Styling[logo-sm][CSS]">
-                    <small id="Styling[logo-sm][CSS]Help" class="form-text text-muted">Custom CSS for the small logo.</small>
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <div class="col-lg-6 col-12">
-                    <label for="Styling[logo-lg][Image]">Logo Image (Large)</label>
-                    <input type="text" class="form-control info-field" id="Styling[logo-lg][Image]" aria-describedby="Styling[logo-lg][Image]Help" name="Styling[logo-lg][Image]">
-                    <small id="Styling[logo-lg][Image]Help" class="form-text text-muted">The path of the large logo to be used in the top-left navbar.</small>
-                  </div>
-                  <div class="col-lg-6 col-12">
-                    <label for="Styling[logo-lg][CSS]">Logo CSS (Large)</label>
-                    <input type="text" class="form-control info-field" id="Styling[logo-lg][CSS]" aria-describedby="Styling[logo-lg][CSS]Help" name="Styling[logo-lg][CSS]">
-                    <small id="Styling[logo-lg][CSS]Help" class="form-text text-muted">Custom CSS for the large logo.</small>
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <div class="col-lg-6 col-12">
-                    <label for="Styling[favicon][Image]">Favicon</label>
-                    <input type="text" class="form-control info-field" id="Styling[favicon][Image]" aria-describedby="Styling[favicon][Image]Help" name="Styling[favicon][Image]">
-                    <small id="Styling[favicon][Image]Help" class="form-text text-muted">The path of the favicon image.</small>
-                  </div>
-                  <div class="col-lg-6 col-12">
-                    <label for="Styling[websiteTitle]">Website Title</label>
-                    <input type="text" class="form-control info-field" id="Styling[websiteTitle]" aria-describedby="Styling[websiteTitle]Help" name="Styling[websiteTitle]">
-                    <small id="Styling[websiteTitle]Help" class="form-text text-muted">The website title.</small>
-                  </div>
-                </div>
-              </div>
-              <br>
-              <div class="card border-secondary p-3">
-                <div class="card-title">
-                  <h5>Content</h5>
-                </div>
-                <div class="form-group row">
-                  <div class="col-lg-6 col-12">
-                    <label for="Styling[html][homepage]">Homepage HTML</label>
-                    <textarea class="form-control info-field" id="Styling[html][homepage]" name="Styling[html][homepage]"></textarea>
-                    <small id="Styling[html][homepage]Help" class="form-text text-muted">Custom HTML for the homepage.</small>
-                  </div>
-                  <div class="col-lg-6 col-12">
-                    <label for="Styling[html][about]">About HTML</label>
-                    <textarea class="form-control info-field" id="Styling[html][about]" name="Styling[html][about]"></textarea>
-                    <small id="Styling[html][about]Help" class="form-text text-muted">Custom HTML for the about page in the information modal.</small>
-                  </div>
-                </div>
+          <div class="my-4">
+            <div class="card card-rounded border-secondary p-3">
+              <div class="customisation-content">
+                <form id="customisationForm"></form>
               </div>
             </div>
-          </form>
+          </div>
         </div>
         <div class="tab-pane fade" id="plugins" role="tabpanel" aria-labelledby="plugins-tab">
           <div class="my-4">
-            <h5 class="mb-0 mt-5">Plugins</h5>
-            <p>Use the following to configure Plugins installed on '.$ib->config->get('Styling')['websiteTitle'].'.</p>
+            <div class="card card-rounded border-secondary p-3">
+              <div class="plugins-content">
+                <form id="pluginsForm"></form>
+              </div>
+            </div>
           </div>
-          <table data-url="/api/plugins/available"
-            data-data-field="data"
-            data-toggle="table"
-            data-search="true"
-            data-filter-control="true"
-            data-show-refresh="true"
-            data-pagination="true"
-            data-toolbar="#toolbar"
-            data-sort-name="Name"
-            data-sort-order="asc"
-            data-page-size="25"
-            data-buttons="pluginsButtons"
-            data-response-handler="responseHandler"
-            class="table table-striped" id="pluginsTable">
-
-            <thead>
-              <tr>
-                <th data-field="state" data-checkbox="true"></th>
-                <th data-field="name" data-sortable="true">Plugin Name</th>
-                <th data-field="author" data-sortable="true">Author</th>
-                <th data-field="category" data-sortable="true">Category</th>
-                <th data-field="version" data-sortable="true">Version</th>
-                <th data-field="link" data-sortable="true">URL</th>
-                <th data-field="status" data-sortable="true">Status</th>
-                <th data-field="source" data-sortable="true">Source</th>
-                <th data-field="update" data-sortable="true" data-formatter="pluginUpdatesFormatter">Updates</th>
-                <th data-formatter="pluginActionFormatter" data-events="pluginActionEvents">Actions</th>
-              </tr>
-            </thead>
-          </table>
+        </div>
+        <div class="tab-pane fade" id="images" role="tabpanel" aria-labelledby="images-tab">
+          <div class="my-4">
+            <h5 class="mb-0 mt-5">Images</h5>
+            <p>Use the following to configure Custom Images on '.$phpef->config->get('Styling')['websiteTitle'].'.</p>
+            <div class="image-gallery dropzone" id="imageGallery"></div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="dashboards" role="tabpanel" aria-labelledby="dashboards-tab">
+          <div class="my-4">
+            <div class="card card-rounded border-secondary p-3">
+              <div class="dashboards-content">
+                <form id="dashboardsForm"></form>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <br>
@@ -416,21 +96,21 @@ return '
   </div>
 </div>
 
-<!-- Plugin Settings Modal -->
-<div class="modal fade" id="pluginSettingsModal" tabindex="-1" role="dialog" aria-labelledby="pluginSettingsModalLabel" aria-hidden="true">
+<!-- Settings Modal -->
+<div class="modal fade" id="SettingsModal" tabindex="-1" role="dialog" aria-labelledby="SettingsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xxl" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="pluginSettingsModalLabel"></h5>
-        <span id="pluginName" hidden></span>
+        <h5 class="modal-title" id="SettingsModalLabel"></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
           <span aria-hidden="true"></span>
         </button>
+        <input id="modalItemID" hidden></input>
       </div>
-      <div class="modal-body" id="pluginSettingsModalBody">
+      <div class="modal-body" id="SettingsModalBody">
       </div>
       <div class="modal-footer">
-        <button class="btn btn-primary editPluginSaveButton">Save</button>
+        <button class="btn btn-primary" id="SettingsModalSaveBtn">Save</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
@@ -466,56 +146,421 @@ return '
   </div>
 </div>
 
+<!-- All of these modals should be refactored to Settings Modal -->
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editUserModalLabel">User Information</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="modal-body" id="editModelBody">
+        <div class="form-group" hidden>
+          <label for="editUserID">ID</label>
+          <input type="text" class="form-control" id="editUserID" aria-describedby="editUserIDHelp">
+          <small id="editUserIDHelp" class="form-text text-muted">The username for the new user.</small>
+        </div>
+        <div class="form-group">
+          <label for="editUserName">Username</label>
+          <input type="text" class="form-control" id="editUserName" aria-describedby="editUserNameHelp">
+          <small id="editUserNameHelp" class="form-text text-muted">The Username for the account.</small>
+        </div>
+        <div class="form-group">
+          <label for="editUserFirstname">First Name</label>
+          <input type="text" class="form-control" id="editUserFirstname" aria-describedby="editUserFirstnameHelp">
+          <small id="editUserFirstnameHelp" class="form-text text-muted">Enter the updated users first name.</small>
+        </div>
+        <div class="form-group">
+          <label for="editUserSurname">Surname</label>
+          <input type="text" class="form-control" id="editUserSurname" aria-describedby="editUserSurnameHelp">
+          <small id="editUserSurnameHelp" class="form-text text-muted">Enter the updated users surname.</small>
+        </div>
+        <div class="form-group">
+          <label for="editUserEmail">Email</label>
+          <input type="text" class="form-control" id="editUserEmail" aria-describedby="editUserEmailHelp">
+          <small id="editUserEmailHelp" class="form-text text-muted">Enter the updated users email address.</small>
+        </div>
+        <div class="form-group">
+          <label for="editUserType">Account Type</label>
+          <input type="text" class="form-control" id="editUserType" aria-describedby="editUserTypeHelp" disabled>
+          <small id="editUserTypeHelp" class="form-text text-muted">The type of account (Local or SSO).</small>
+        </div>
+        <div class="form-group">
+          <label for="editCreated">Created Date</label>
+          <input type="text" class="form-control" id="editCreated" aria-describedby="editCreatedHelp" disabled>
+          <small id="editCreatedHelp" class="form-text text-muted">The date when this account was created.</small>
+        </div>
+        <div class="form-group">
+          <label for="editLastLogin">Last Login Date</label>
+          <input type="text" class="form-control" id="editLastLogin" aria-describedby="editLastLoginHelp" disabled>
+          <small id="editLastLoginHelp" class="form-text text-muted">The date when this account last logged in.</small>
+        </div>
+        <div class="form-group">
+          <label for="editPasswordExpires">Password Expiry Date</label>
+          <input type="text" class="form-control" id="editPasswordExpires" aria-describedby="editPasswordExpiresHelp" disabled>
+          <small id="editPasswordExpiresHelp" class="form-text text-muted">The date/time of when the password for this account will expire.</small>
+        </div>
+        <hr>
+        <div class="accordion" id="resetPasswordAccordion">
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="resetPasswordHeading">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#resetPassword" aria-expanded="true" aria-controls="resetPassword">
+              Reset Password
+              </button>
+            </h2>
+            <div id="resetPassword" class="accordion-collapse collapse" aria-labelledby="resetPasswordHeading" data-bs-parent="#resetPasswordAccordion">
+              <div class="accordion-body">
+                <div class="form-group">
+                  <label for="editUserPassword">Password</label>
+                  <i class="fa fa-info-circle hover-target" aria-hidden="true"></i>
+                  <input type="password" class="form-control" id="editUserPassword" aria-describedby="editUserPasswordHelp">
+                  <small id="editUserPasswordHelp" class="form-text text-muted">The updated password for the user.</small>
+                </div>
+                <div class="form-group">
+                  <label for="editUserPassword2">Verify Password</label>
+                  <input type="password" class="form-control" id="editUserPassword2" aria-describedby="editUserPassword2Help">
+                  <small id="editUserPassword2Help" class="form-text text-muted">Enter the updated password again.</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr>
+        <div id="popover" class="popover" role="alert">
+          <h4 class="alert-heading">Password Complexity</h4>
+          <p>Minimum of 8 characters</p>
+          <p>At least one uppercase letter</p>
+          <p>At least one lowercase letter</p>
+          <p>At least one number</p>
+          <p>At least one special character</p>
+        </div>
+        <h4>Groups</h4>
+        <p>Enable or Disable the following groups to provide granular control to specific areas of '.$phpef->config->get('Styling')['websiteTitle'].'.</p>
+	      <div class="list-group mb-5 shadow" id="modalListGroup"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-success" id="editUserSubmit">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New User Modal -->
+<div class="modal fade" id="newUserModal" tabindex="-1" role="dialog" aria-labelledby="newUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="newUserModalLabel">New User Wizard</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="modal-body" id="newUserModelBody">
+	      <p>Enter the information below to create the new user.</p>
+        <div class="form-group">
+          <label for="newUserName">Username</label>
+          <input type="text" class="form-control" id="newUserName" aria-describedby="newUserNameHelp">
+          <small id="newUserNameHelp" class="form-text text-muted">The username for the new user.</small>
+        </div>
+        <div class="form-group">
+          <label for="newUserFirstname">First Name</label>
+          <input type="text" class="form-control" id="newUserFirstname" aria-describedby="newUserFirstnameHelp">
+          <small id="newUserFirstnameHelp" class="form-text text-muted">Enter the new users first name.</small>
+        </div>
+        <div class="form-group">
+          <label for="newUserSurname">Surname</label>
+          <input type="text" class="form-control" id="newUserSurname" aria-describedby="newUserSurnameHelp">
+          <small id="newUserSurnameHelp" class="form-text text-muted">Enter the new users surname.</small>
+        </div>
+        <div class="form-group">
+          <label for="newUserEmail">Email</label>
+          <input type="text" class="form-control" id="newUserEmail" aria-describedby="newUserEmailHelp">
+          <small id="newUserEmailHelp" class="form-text text-muted">Enter the new users email address.</small>
+        </div>
+        <div class="form-group">
+          <label for="newUserPassword">Password</label>&nbsp;
+          <i class="fa fa-info-circle hover-target" aria-hidden="true"></i>
+          <input type="password" class="form-control" id="newUserPassword" aria-describedby="newUserPasswordHelp">
+          <small id="newUserPasswordHelp" class="form-text text-muted">The password for the new user.</small>
+        </div>
+        <div class="form-group">
+          <label for="newUserPassword2">Verify Password</label>
+          <input type="password" class="form-control" id="newUserPassword2" aria-describedby="newUserPassword2Help">
+          <small id="newUserPassword2Help" class="form-text text-muted">Enter the password again.</small>
+        </div>
+        <br>
+        <div class="form-check form-switch">
+          <input class="form-check-input info-field" type="checkbox" id="expire" name="expire">
+          <label class="form-check-label" for="expire">Require Password Reset At First Login</label>
+        </div>
+        <hr>
+        <div id="popover" class="popover" role="alert">
+          <h4 class="alert-heading">Password Complexity</h4>
+          <p>Minimum of 8 characters</p>
+          <p>At least one uppercase letter</p>
+          <p>At least one lowercase letter</p>
+          <p>At least one number</p>
+          <p>At least one special character</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-success" id="newUserSubmit">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Group Modal -->
+<div class="modal fade" id="groupEditModal" tabindex="-1" role="dialog" aria-labelledby="groupEditModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="groupEditModalLabel"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="modal-body" id="editModelBody">
+        <h4>Group Information</h4>
+	      <div class="form-group">
+          <input type="text" class="form-control" id="editGroupID" aria-describedby="editGroupIDHelp" hidden>
+          <div class="input-group mb-1">
+            <input type="text" class="form-control" id="editGroupDescription" aria-describedby="editGroupDescriptionHelp">
+            <button class="btn btn-primary" id="editGroupDescriptionSaveButton">Save</button>
+	        </div>
+          <small id="editGroupDescriptionHelp" class="form-text text-muted">The group description.</small>
+	      </div>
+	      <hr>
+        <h4>Group Roles</h4>
+        <p>Enable or Disable the following roles to provide granular control to specific areas of '.$phpef->config->get('Styling')['websiteTitle'].'.</p>
+	      <div class="list-group mb-5 shadow" id="modalListRoles"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New Item Modal -->
+<div class="modal fade" id="newItemModal" tabindex="-1" role="dialog" aria-labelledby="newItemModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="newItemModalLabel"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="modal-body" id="newItemModalBody">
+        <div id="modal-body-heading"></div>
+        <form>
+          <div class="form-group">
+            <label id="newItemNameLabel" for="newItemName"></label>
+            <input type="text" class="form-control" id="newItemName" aria-describedby="newItemNameHelp">
+            <small id="newItemNameHelp" class="form-text text-muted"></small>
+      	  </div>
+          <div class="form-group">
+            <label id="newItemDescriptionLabel" for="newItemDescription"></label>
+            <input type="text" class="form-control" id="newItemDescription" aria-describedby="newItemDescriptionHelp">
+            <small id="newItemDescriptionHelp" class="form-text text-muted"></small>
+          </div>
+          <button id="newItemSubmit" class="btn btn-primary preventDefault" onclick="">Submit</button>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
+  var imagesLoaded = false;
+  var tabsLoaded = [];
+  var selectWithTableArr = {};
+  let config = {};
+
+  // ** Image Functions ** //
+  
+  function extractImageName(url) {
+    let imageName = "";
+
+    if (url.includes("/assets/images/custom/")) {
+        imageName = url.split("/assets/images/custom/")[1];
+        imageType = "native";
+    } else if (url.includes("/api/image/plugin/")) {
+        const parts = url.split("/");
+        imageName = parts[parts.length - 2] + "." + parts[parts.length - 1];
+        imageType = parts[parts.length - 3];
+    }
+
+    return {
+      "name": imageName,
+      "type": imageType
+    }
+  }
+
+  function loadImageGallery() {
+    if (imagesLoaded == false) {
+      queryAPI("GET", "/api/images").done(function(images) {
+        const imageGallery = $("#imageGallery");
+        images.data.forEach(image => {
+          var imageExtract = extractImageName(image);
+          var imageName = imageExtract["name"];
+          var imageType = imageExtract["type"];
+          if (imageType == "native") {
+            imageGallery.append(`<div class="image-container" data-bs-toggle="tooltip" data-bs-title="`+imageName+`"><img src="`+image+`" class="custom-image" data-image-name="`+imageName+`"></img><span class="fa fa-trash" onclick="deleteImage(this)"></span></div>`);
+          } else {
+           imageGallery.append(`<div class="image-container" data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="Plugin: `+imageType+`<br>`+imageName+`"><img src="`+image+`" class="custom-image" data-image-name="`+imageName+`"></img></div>`);
+          }
+        });
+        imagesLoaded = true;
+        var tooltipTriggerList = document.querySelectorAll(`[data-bs-toggle="tooltip"]`)
+        var tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+      }).fail(function(xhr) {
+        toast("Error", "", xhr, "danger", 30000);
+      });
+    }
+  }
+
+  var imageGalleryDropzone = new Dropzone("#imageGallery", {
+    url: "/api/images",
+    paramName: "file", // The name that will be used to transfer the file
+    maxFilesize: 5, // MB
+    acceptedFiles: "image/*",
+    disablePreviews: true,
+    init: function() {
+      this.on("sending", function(file, xhr, formData) {
+        // Append additional data if needed
+        formData.append("fileName", file.name);
+      });
+      this.on("success", function(file, response) {
+        // Add the uploaded image to the gallery
+        var imageGallery = $("#imageGallery");
+        imageGallery.append(`<div class="image-container" data-bs-toggle="tooltip" data-bs-title="`+file.name+`"><img src="/assets/images/custom/`+file.name+`" data-image-name="`+file.name+`" class="custom-image"></img><span class="fa fa-trash" onclick="deleteImage(this)"></span></div>`);
+        var newImage = imageGallery.find("img.custom-image").last();
+        newImage.tooltip();
+        toast ("Success","","Successfully uploaded image","success");
+      });
+      this.on("error", function(file, response) {
+        toast ("Error","","Failed to upload image","danger", 30000);
+      });
+    }
+  });
+
+  function deleteImage(elem) {
+    // Get the parent element of the trash icon, which is the image container
+    var imageContainer = elem.parentElement;
+
+    // Find the image element within the image container
+    var imageElement = imageContainer.querySelector("img");
+
+    var imgName = $(imageElement).attr("data-image-name");
+
+    if(confirm("Are you sure you want to delete "+imgName+" from the list of Images? This is irriversible.") == true) {
+      queryAPI("DELETE","/api/images?fileName="+imgName).done(function(data) {
+        if (data["result"] == "Success") {
+          imageElement.remove();
+          toast(data["result"],"",data["message"],"success");
+        } else if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger","30000");
+        } else {
+          toast("Error", "", "Failed to delete image", "danger");
+        }
+      }).fail(function() {
+          toast("Error", "", "Failed to delete image", "danger");
+      });
+    };
+  }
+
   function getConfig() {
     $.getJSON("/api/config", function(data) {
-      let config = data.data;
+      config = data.data;
 
       const updateConfigValues = (config, parentKey = "") => {
         for (const section in config) {
-          for (const key in config[section]) {
-            const value = config[section][key];
-            const fullKey = parentKey ? `${parentKey}[${section}][${key}]` : `${section}[${key}]`;
-            const selector = `#${$.escapeSelector(fullKey)}`;
-            if (typeof value === "object" && !Array.isArray(value) && value !== null) {
-              updateConfigValues({ [fullKey]: value });
-            } else if (typeof value === "boolean") {
-              $(selector).prop("checked", value);
-            } else {
-              $(selector).val(value);
-            }
+          const value = config[section];
+          const fullKey = parentKey ? `${parentKey}[${section}]` : section;
+          const selector = `[name=${$.escapeSelector(fullKey)}]`;
+
+          if (typeof value === "object" && !Array.isArray(value) && value !== null) {
+            updateConfigValues(value, fullKey);
+          } else if (typeof value === "boolean") {
+            $(selector).prop("checked", value);
+          } else {
+            $(selector).val(value);
           }
         }
       };
+
       updateConfigValues(config);
     });
   }
 
-  getConfig();
+  function populateSettingsForm(elem) {
+      const updateConfigValues = (config, parentKey = "") => {
+        for (const section in config) {
+          const value = config[section];
+          const fullKey = parentKey ? `${parentKey}[${section}]` : section;
+          const selector = `${elem} [name=${$.escapeSelector(fullKey)}]`;
+
+          if (typeof value === "object" && !Array.isArray(value) && value !== null) {
+            updateConfigValues(value, fullKey);
+          } else if (typeof value === "boolean") {
+            $(selector).prop("checked", value);
+          } else {
+            $(selector).val(value);
+          }
+        }
+      };
+      updateConfigValues(config);
+  }
 
   $(".info-field").change(function(elem) {
     toast("Configuration","",$(elem.target.previousElementSibling).text()+" has changed.<br><small>Save configuration to apply changes.</small>","warning");
     $(this).addClass("changed");
   });
 
+  function encryptData(key, value) {
+    return $.post("/api/auth/crypt", { key: value });
+  }
+
   $("#submitConfig").click(function(event) {
     event.preventDefault();
-    var formData = $("#configurationForm .changed,#customisationForm .changed").serializeArray();
+    var formData = $(".info-field.changed").serializeArray();
     
     // Include unchecked checkboxes in the formData
-    $("#configurationForm input.changed[type=checkbox]").each(function() {
-        formData.push({ name: this.name, value: this.checked ? true : false });
+    $("input.info-field.changed[type=checkbox]").each(function() {
+        formData.push({ name: this.name, value: this.checked });
     });
 
     var configData = {};
+    var encryptionPromises = [];
+
     formData.forEach(function(item) { 
         var keys = item.name.split("[").map(function(key) {
-            return key.replace("]","");
+            return key.replace("]", "");
         });
         var temp = configData;
         keys.forEach(function(key, index) {
             if (index === keys.length - 1) {
-                temp[key] = item.value;
+                var inputElement = $("[name=\'" + item.name + "\']");
+                if (inputElement.hasClass("encrypted") && item.value !== "") {
+                    // Encrypt sensitive data
+                    var promise = encryptData(item.name, item.value).done(function(encryptedValue) {
+                        temp[key] = encryptedValue.data;
+                    });
+                    encryptionPromises.push(promise);
+                } else {
+                    temp[key] = item.value;
+                }
             } else {
                 temp[key] = temp[key] || {};
                 temp = temp[key];
@@ -523,187 +568,38 @@ return '
         });
     });
 
-    queryAPI("PATCH","/api/config",configData).done(function(data) {
-        if (data["result"] == "Success") {
-            toast("Success","","Successfully saved configuration","success");
-        } else if (data["result"] == "Error") {
-            toast("Error","","Failed to save configuration","danger");
-        } else {
-            toast("API Error","","Failed to save configuration","danger","30000");
-        }
+    // Wait for all encryption promises to resolve
+    $.when.apply($, encryptionPromises).done(function() {
+        queryAPI("PATCH", "/api/config", configData).done(function(data) {
+            if (data.result === "Success") {
+                toast("Success", "", "Successfully saved configuration", "success");
+                $(".info-field.changed").removeClass("changed");
+            } else if (data.result === "Error") {
+                toast("Error", "", "Failed to save configuration", "danger");
+            } else {
+                toast("API Error", "", "Failed to save configuration", "danger", "30000");
+            }
+        });
     });
   });
 
   // Function to switch tabs
   function switchTab(tabId) {
     $(`.nav-tabs a[href="` + tabId + `"]`).tab("show");
+    var tabIdNoHash = tabId.split("#")[1];
+    buildSettings($(tabId+`Form`), tabIdNoHash, {
+      dataLocation: "data"
+    });
   }
   // Listener for tab changes
-  $("#myTab .nav-link").on("click", function(elem) {
+  $("#configTabs .nav-link").on("click", function(elem) {
     elem.preventDefault();
+    var href = $(elem.target).attr("href");
+    if (href == "#images") {
+      loadImageGallery();
+    }
     switchTab($(elem.target).attr("href"));
   });
-
-
-  // PLUGINS //
-  function buildPluginSettingsModal(row) {
-    try {
-      queryAPI("GET", row.api).done(function(settingsResponse) {
-        $("#pluginSettingsModalBody").html(buildFormGroup(settingsResponse.data));
-        initPasswordToggle();
-        $("#pluginSettingsModalLabel").text("Plugin Settings: " + row.name);
-        $("#pluginName").text(row.name);
-        $(".info-field").change(function(elem) {
-          toast("Configuration", "", $(elem.target).data("label") + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
-          $(this).addClass("changed");
-        });
-        try {
-          queryAPI("GET", "/api/config/plugins/" + row.name).done(function(configResponse) {
-            let data = configResponse.data;
-            for (const key in data) {
-              if (data.hasOwnProperty(key)) {
-                const value = data[key];
-                const element = $(`#pluginSettingsModal [name="${key}"]`);
-                if (element.attr("type") === "checkbox") {
-                  element.prop("checked", value);
-                } else if (element.is("input[multiple]")) {
-                  console.log(element.data("type"));
-                } else {
-                  element.val(value);
-                }
-              }
-            }
-          }).fail(function(xhr) {
-            logConsole("Error", xhr, "error");
-          });
-        } catch (e) {
-          logConsole("Error", e, "error");
-        }
-      }).fail(function(xhr) {
-        logConsole("Error", xhr, "error");
-      });
-    } catch (e) {
-      logConsole("Error", e, "error");
-    }
-  }
-
-  $("#pluginSettingsModal").on("click", ".editPluginSaveButton", function(elem) {
-      editPluginSubmit();
-  });
-
-  function editPluginSubmit() {
-    var pluginName = $("#pluginName").text();
-    var serializedArray = $("#pluginSettingsModal .changed[type!=checkbox]").serializeArray();
-    
-    // Include unchecked checkboxes in the formData
-    $("#pluginSettingsModal input.changed[type=checkbox]").each(function() {
-        serializedArray.push({ name: this.name, value: this.checked ? true : false });
-    });
-
-    // Convert the array into an object
-    var formData = {};
-    serializedArray.forEach(function(item) {
-        var element = $(`[name="` + item.name + `"]`);
-        if (formData[item.name]) {
-            if (!Array.isArray(formData[item.name])) {
-                formData[item.name] = [formData[item.name]];
-            }
-            formData[item.name].push(item.value);
-        } else {
-            // Check if the element is a select with the multiple attribute
-            if (element.is("select[multiple]")) {
-              if (item.value !== "") {
-                formData[item.name] = [item.value];
-              } else {
-                formData[item.name] = item.value;
-              }
-            } else if (element.is("input[multiple]")) {
-              formData[item.name] = getInputMultipleEntries(element);
-            } else {
-                formData[item.name] = item.value;
-            }
-        }
-    });
-
-    queryAPI("PATCH", "/api/config/plugins/" + pluginName, formData).done(function(data) {
-        if (data["result"] == "Success") {
-            toast(data["result"], "", data["message"], "success");
-            $("#pluginSettingsModal").modal("hide");
-        } else if (data["result"] == "Error") {
-            toast(data["result"], "", data["message"], "danger");
-        } else {
-            toast("API Error", "", "Failed to save configuration", "danger", "30000");
-        }
-    });
-  }
-
-  function pluginUpdatesFormatter(value, row, index) {
-    if (row.version < row.online_version) {
-      return `<span class="badge bg-info">Update Available</span>`;
-    } else if (row.source == "Local") {
-      return `<span class="badge bg-secondary">Unknown</span>`;
-    } else if (row.status == "Available") {
-      return `<span class="badge bg-primary">Not Installed</span>`;
-    } else {
-      return `<span class="badge bg-success">Up to date</span>`;
-    }
-  }
-
-  function pluginActionFormatter(value, row, index) {
-    var buttons = [];
-    if (row.settings) {
-      buttons.push(`<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`);
-    }
-    if (row.status == "Available") {
-      buttons.push(`<a class="install" title="Install"><i class="fa-solid fa-download"></i></a>&nbsp;`);
-    } else if (row.status == "Installed") {
-      buttons.push(`<a class="uninstall" title="Uninstall"><i class="fa-solid fa-trash-can"></i></a>&nbsp;`);
-      if (row.version < row.online_version) {
-        buttons.push(`<a class="update" title="Update"><i class="fa-solid fa-upload"></i></a>&nbsp;`);      
-      } else if (row.source == "Online") {
-        buttons.push(`<a class="reinstall" title="Reinstall"><i class="fa-solid fa-arrow-rotate-right"></i></a>&nbsp;`);
-      }
-    }
-    return buttons.join("");
-  }
-
-  window.pluginActionEvents = {
-    "click .edit": function (e, value, row, index) {
-      $("#pluginSettingsModalBody").html("");
-      buildPluginSettingsModal(row);
-      $("#pluginSettingsModal").modal("show");
-    },
-    "click .install": function (e, value, row, index) {
-      installPlugin(row);
-    },
-    "click .uninstall": function (e, value, row, index) {
-      uninstallPlugin(row);
-    },
-    "click .reinstall": function (e, value, row, index) {
-      reinstallPlugin(row);
-    },
-    "click .update": function (e, value, row, index) {
-      reinstallPlugin(row);
-    }
-  }
-
-  function pluginsButtons() {
-    return {
-      btnEditPluginURLs: {
-        text: "Edit Plugin URL(s)",
-        icon: "bi bi-pencil-square",
-        event: function() {
-          $("#urlList").html("");
-          populatePluginRepositories();
-          $("#onlinePluginsModal").modal("show");
-        },
-        attributes: {
-          title: "Edit Plugin URL(s)",
-          style: "background-color:#4bbe40;border-color:#4bbe40;"
-        }
-	    }
-    }
-  }
 
   function populatePluginRepositories() {
     queryAPI("GET","/api/plugins/repositories").done(function(data) {
@@ -796,85 +692,257 @@ return '
     }
   })
 
-  function installPlugin(row){
-    toast("Installing","","Installing "+row["name"]+"...","info");
-    try {
-      queryAPI("POST","/api/plugins/install",row).done(function(data) {
+  function getNestedProperty(obj, path) {
+    return path.split(".").reduce((acc, part) => acc && acc[part], obj);
+  }
+
+  function widgetSelectCallback(row) {
+    if (row.length > 0) {
+      const tableData = {
+        "Widgets": Object.keys(row[0].Widgets).map(key => ({
+          "dragHandle": `<span class="dragHandle" style="font-size:22px;">☰</span>`,
+          "name": key,
+          "size": `<select class="form-select" data-label="size">
+                      <option value="col-md-1">1</option>
+                      <option value="col-md-2">2</option>
+                      <option value="col-md-3">3</option>
+                      <option value="col-md-4">4</option>
+                      <option value="col-md-5">5</option>
+                      <option value="col-md-6">6</option>
+                      <option value="col-md-7">7</option>
+                      <option value="col-md-8">8</option>
+                      <option value="col-md-9">9</option>
+                      <option value="col-md-10">10</option>
+                      <option value="col-md-11">11</option>
+                      <option value="col-md-12">12</option>
+                  </select>`
+        }))
+      };
+      const uniqueNames = [...new Set(tableData.Widgets.map(widget => widget.name))];
+      $("#widgetSelectTable").bootstrapTable({ data: tableData.Widgets});
+      $("#widgetSelect").val(uniqueNames);
+
+      tableData.Widgets.forEach(function(item,index) {
+        let tablerow = $("#widgetSelectTable tbody tr")[index];
+        let cells = $(tablerow).find("td");
+        let widgetName = cells[1].textContent;
+        let selectElement = $(cells[2]).find("select");
+        selectElement.val(row[0].Widgets[widgetName].size);
+      });
+    }
+  }
+
+  $("#SettingsModal").on("click", "#widgetSelect", function () {
+    const widgetsSelect = $("#widgetSelect");
+    $("#widgetSelectTable").bootstrapTable("destroy");
+    const data = [];
+    Array.from(widgetsSelect[0].selectedOptions).forEach((option, index) => {
+        if (option.value) {
+            data.push({
+                dragHandle: `<span class="dragHandle" style="font-size:22px;">☰</span>`,
+                name: option.text,
+                size: `<select class="form-select" data-label="size">
+                        <option value="col-md-1">1</option>
+                        <option value="col-md-2">2</option>
+                        <option value="col-md-3">3</option>
+                        <option value="col-md-4">4</option>
+                        <option value="col-md-5">5</option>
+                        <option value="col-md-6">6</option>
+                        <option value="col-md-7">7</option>
+                        <option value="col-md-8">8</option>
+                        <option value="col-md-9">9</option>
+                        <option value="col-md-10">10</option>
+                        <option value="col-md-11">11</option>
+                        <option value="col-md-12">12</option>
+                    </select>`
+            });
+        }
+    });
+    $("#widgetSelectTable").bootstrapTable({ data: data});
+  });
+
+
+  // ** USER FUNTIONS ** //
+
+  function listUserConfig(row) {
+    $("#editUserID").val(row["id"]);
+    $("#editUserName").val(row["username"]);
+    $("#editUserFirstname").val(row["firstname"]);
+    $("#editUserSurname").val(row["surname"]);
+    $("#editUserEmail").val(row["email"]);
+    if (row["type"] == "SSO") {
+      $("#editUserPassword").attr("disabled",true);
+      $("#editUserPassword2").attr("disabled",true);
+    } else {
+      $("#editUserPassword").attr("disabled",false);
+      $("#editUserPassword2").attr("disabled",false);
+    }
+    $("#editUserType").val(row["type"]);
+    $("#editLastLogin").val(row["lastlogin"]);
+    $("#editPasswordExpires").val(row["passwordexpires"]);
+    $("#editCreated").val(row["created"]);
+  }
+
+  function listGroups(row) {
+    var div = document.getElementById("modalListGroup");
+    queryAPI("GET","/api/rbac/groups/configurable").done(function(data) {
+      div.innerHTML = "";
+      var groups = data["data"]
+      for (var key in groups) {
+        div.innerHTML += `
+          <div class="list-group-item">
+            <div class="row align-items-center">
+              <div class="col">
+                <strong class="mb-2">${groups[key]["Name"]}</strong>
+                <p class="text-muted mb-0">${groups[key]["Description"]}</p>
+              </div>
+              <div class="col-auto">
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input toggle" id="${groups[key]["Name"].replaceAll(" ", "--")}">
+                  <label class="custom-control-label" for="${groups[key]["Name"].replaceAll(" ", "--")}"></label>
+                </div>
+	            </div>
+            </div>
+          </div>`
+      };
+      var groupsplit = row.groups;
+      if (groupsplit[0] != "") {
+        for (var group in groupsplit) {
+          $("#"+groupsplit[group].replaceAll(" ", "--")).prop("checked", "true");
+        }
+      }
+    }).fail(function() {
+      toast("API Error","","Failed to retrieve list of configurable groups","danger","30000");
+    });;
+  }
+
+  $(document).on("click", "#newUserSubmit", function(event) {
+    // Prevent the default form submission
+    event.preventDefault();
+
+    // Get values from the input fields
+    var username = $("#newUserName").val().trim();
+    var password = $("#newUserPassword").val().trim();
+    var confirmPassword = $("#newUserPassword2").val().trim();
+    var firstname = $("#newUserFirstname").val().trim();
+    var surname = $("#newUserSurname").val().trim();
+    var email = $("#newUserEmail").val().trim();
+    var expire = $("#expire")[0].checked;
+    let data = {
+      un: username ? username : null,
+      pw: password ? password : null,
+      fn: firstname ? firstname : null,
+      sn: surname ? surname : null,
+      em: email ? email : null,
+      expire: expire ? expire : null,
+    }
+    // Initialize a flag for validation
+    var isValid = true;
+
+    // Check if all fields are populated
+    if (!username || !password || !confirmPassword) {
+      toast("Error","","All fields must be filled out","danger","30000");
+      isValid = false;
+    }
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      toast("Error","","Passwords do not match","danger","30000");
+      isValid = false;
+    }
+
+    // Display error messages or proceed with form submission
+    if (isValid) {
+      queryAPI("POST","/api/users",data).done(function(data) {
         if (data["result"] == "Success") {
           toast(data["result"],"",data["message"],"success");
-          $("#pluginsTable").bootstrapTable("refresh");
+          $("#usersTable").bootstrapTable("refresh");
+          $("#newUserModal").modal("hide");
         } else if (data["result"] == "Error") {
-          toast(data["result"],"",data["message"],"danger");
+          toast(data["result"],"",data["message"],"danger","30000");
         } else {
-          toast("API Error","","Failed to install plugin","danger","30000");
+          toast("Error","","Failed to add new user","danger","30000");
         }
-      }).fail(function(xhr) {
-        toast("API Error","","Failed to install plugin","danger","30000");
-        logConsole("Error",xhr,"error");
-      });;
-    } catch(e) {
-      toast("API Error","","Failed to install plugin","danger","30000");
-      logConsole("Error",e,"error");
+      }).fail(function(data) {
+        toast("API Error","","Failed to add new user","danger","30000");
+      });
     }
-  }
+  });
 
-  function uninstallPlugin(row){
-    if(confirm("Are you sure you want to uninstall the "+row.name+" plugin?") == true) {
-      toast("Uninstalling","","Uninstalling "+row["name"]+"...","info");
-      try {
-        queryAPI("POST","/api/plugins/uninstall",row).done(function(data) {
-          if (data["result"] == "Success") {
-            toast(data["result"],"",data["message"],"success");
-            $("#pluginsTable").bootstrapTable("refresh");
-          } else if (data["result"] == "Error") {
-            toast(data["result"],"",data["message"],"danger");
-          } else {
-            toast("API Error","","Failed to uninstall plugin","danger","30000");
-          }
-        }).fail(function(xhr) {
-          toast("API Error","","Failed to uninstall plugin","danger","30000");
-          logConsole("Error",xhr,"error");
-        });;
-      } catch(e) {
-        toast("API Error","","Failed to uninstall plugin","danger","30000");
-        logConsole("Error",e,"error");
+  $(document).on("click", "#editUserSubmit", function(event) {
+    var id = $("#editUserID").val().trim();
+    let data = {
+      un: $("#editUserName").val().trim() ? $("#editUserName").val().trim() : null,
+      pw: $("#editUserPassword").val().trim() ? $("#editUserPassword").val().trim() : null,
+      fn: $("#editUserFirstname").val().trim() ? $("#editUserFirstname").val().trim() : null,
+      sn: $("#editUserSurname").val().trim() ? $("#editUserSurname").val().trim() : null,
+      em: $("#editUserEmail").val().trim() ? $("#editUserEmail").val().trim() : null
+    };
+    queryAPI("PATCH","/api/user/"+id,data).done(function(data) {
+      if (data["result"] == "Success") {
+        toast(data["result"],"",data["message"],"success");
+        $("#usersTable").bootstrapTable("refresh");
+        $("#editUserModal").modal("hide");
+      } else if (data["result"] == "Error") {
+        toast(data["result"],"",data["message"],"danger","30000");
+      } else {
+        toast("Error","","Failed to update user: "+un,"danger","30000");
       }
-    }
-  }
+    }).fail(function(data) {
+      toast("API Error","","Failed to update user: "+un,"danger","30000");
+    })
+  });
 
-  function reinstallPlugin(row){
-    if(confirm("Are you sure you want to reinstall the "+row.name+" plugin?") == true) {
-      toast("Reinstalling","","Reinstalling "+row["name"]+"...","info");
-      try {
-        queryAPI("POST","/api/plugins/reinstall",row).done(function(data) {
-          if (data["result"] == "Success") {
-            toast(data["result"],"",data["message"],"success");
-            $("#pluginsTable").bootstrapTable("refresh");
-          } else if (data["result"] == "Error") {
-            toast(data["result"],"",data["message"],"danger");
-          } else {
-            toast("API Error","","Failed to reinstall plugin","danger","30000");
-          }
-        }).fail(function(xhr) {
-          toast("API Error","","Failed to reinstall plugin","danger","30000");
-          logConsole("Error",xhr,"error");
-        });;
-      } catch(e) {
-        toast("API Error","","Failed to reinstall plugin","danger","30000");
-        logConsole("Error",e,"error");
+  $(document).ready(function() {
+    $(".hover-target").hover(
+        function() {
+            $(".popover").css({
+                display: "block",
+            });
+        },
+        function() {
+            $(".popover").hide();
+        }
+    );
+    $("#newUserPassword, #newUserPassword2").on("change", function() {
+      var password = $("#newUserPassword").val();
+      var confirmPassword = $("#newUserPassword2").val();
+
+      if (password !== confirmPassword) {
+        if (password !== "" && confirmPassword !== "") {
+          toast("Warning","","The entered passwords do not match","danger","3000");
+          $("#newUserSubmit").attr("disabled",true);
+          $("#newUserPassword").css("color","red").css("border-color","red");
+          $("#newUserPassword2").css("color","red").css("border-color","red");
+        }
+      } else {
+        $("#newUserSubmit").attr("disabled",false);
+        $("#newUserPassword").css("color","green").css("border-color","green");
+        $("#newUserPassword2").css("color","green").css("border-color","green");
       }
-    }
-  }
+    });
+    $("#editUserPassword, #editUserPassword2").on("change", function() {
+      var password = $("#editUserPassword").val();
+      var confirmPassword = $("#editUserPassword2").val();
 
-  function responseHandler(data) {
-    if (data.result === "Warning" && Array.isArray(data.message)) {
-        data.message.forEach(warning => {
-            toast("Warning", "", warning, "warning","30000");
-        });
-    }
-    return data.data;
-  }
+      if (password !== confirmPassword) {
+        if (password !== "" && confirmPassword !== "") {
+          toast("Warning","","The entered passwords do not match","danger","3000");
+          $("#editUserSubmit").attr("disabled",true);
+          $("#editUserPassword").css("color","red").css("border-color","red");
+          $("#editUserPassword2").css("color","red").css("border-color","red");
+        }
+      } else {
+        $("#newUserSubmit").attr("disabled",false);
+        $("#editUserPassword").css("color","green").css("border-color","green");
+        $("#editUserPassword2").css("color","green").css("border-color","green");
+      }
+    });
+  });
 
-  $("#pluginsTable").bootstrapTable();
+  // ** END USER FUNTIONS ** //
+
+  getConfig();
+  switchTab("#general");
 </script>
 ';

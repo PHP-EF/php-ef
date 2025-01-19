@@ -1,16 +1,16 @@
 <?php
 $app->get('/reports/tracking/records', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    $data = $request->getQueryParams();
-    if ($ib->auth->checkAccess("REPORT-TRACKING")) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->auth->checkAccess("REPORT-TRACKING")) {
+        $data = $request->getQueryParams();
         if (isset($data['granularity']) && isset($data['filters'])) {
             $Filters = $data['filters'];
             $Start = $data['start'] ?? null;
             $End = $data['end'] ?? null;
-            $ib->logging->writeLog("Reporting","Queried Web Tracking","info");
-            $ib->api->setAPIResponseData($ib->reporting->getTrackingRecords($data['granularity'],json_decode($Filters,true),$Start,$End));
+            $phpef->logging->writeLog("Reporting","Queried Web Tracking","info");
+            $phpef->api->setAPIResponseData($phpef->reporting->getTrackingRecords($data['granularity'],json_decode($Filters,true),$Start,$End));
         } else {
-            $ib->api->setAPIResponse('Error','Required values are missing from the request');
+            $phpef->api->setAPIResponse('Error','Required values are missing from the request');
         }
     }
 
@@ -21,17 +21,17 @@ $app->get('/reports/tracking/records', function ($request, $response, $args) {
 });
 
 $app->get('/reports/tracking/stats', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    $data = $request->getQueryParams();
-    if ($ib->auth->checkAccess("REPORT-TRACKING")) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->auth->checkAccess("REPORT-TRACKING")) {
+        $data = $request->getQueryParams();
         if (isset($data['granularity']) && isset($data['filters'])) {
             $Filters = $data['filters'];
             if (isset($data['start'])) { $Start = $data['start']; } else { $Start = null; }
             if (isset($data['end'])) { $End = $data['end']; } else { $End = null; }
-            $ib->logging->writeLog("Reporting","Queried Web Tracking Stats","debug");
-            $ib->api->setAPIResponseData($ib->reporting->getTrackingStats($data['granularity'],json_decode($Filters,true),$Start,$End));
+            $phpef->logging->writeLog("Reporting","Queried Web Tracking Stats","debug");
+            $phpef->api->setAPIResponseData($phpef->reporting->getTrackingStats($data['granularity'],json_decode($Filters,true),$Start,$End));
         } else {
-            $ib->api->setAPIResponse('Error','Required values are missing from the request');
+            $phpef->api->setAPIResponse('Error','Required values are missing from the request');
         }
     }
 
@@ -42,11 +42,11 @@ $app->get('/reports/tracking/stats', function ($request, $response, $args) {
 });
 
 $app->get('/reports/tracking/summary', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    $data = $request->getQueryParams();
-    if ($ib->auth->checkAccess("REPORT-TRACKING")) {
-        $ib->logging->writeLog("Reporting","Queried Web Tracking Summary","debug");
-        $ib->api->setAPIResponseData($ib->reporting->getTrackingSummary());
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->auth->checkAccess("REPORT-TRACKING")) {
+        $data = $request->getQueryParams();
+        $phpef->logging->writeLog("Reporting","Queried Web Tracking Summary","debug");
+        $phpef->api->setAPIResponseData($phpef->reporting->getTrackingSummary());
     }
 
 	$response->getBody()->write(jsonE($GLOBALS['api']));

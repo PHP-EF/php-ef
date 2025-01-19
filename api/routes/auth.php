@@ -1,10 +1,10 @@
 <?php
 $app->get('/auth/heartbeat', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-	if ($ib->auth->getAuth()['Authenticated'] == true) {
-		$ib->api->setAPIResponseCode(200);
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+	if ($phpef->auth->getAuth()['Authenticated'] == true) {
+		$phpef->api->setAPIResponseCode(200);
 	} else {
-		$ib->api->setAPIResponse('Error','Session timed out',301);
+		$phpef->api->setAPIResponse('Error','Session timed out',301);
 	}
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
@@ -13,9 +13,9 @@ $app->get('/auth/heartbeat', function ($request, $response, $args) {
 });
 
 $app->get('/auth/whoami', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if (null !== $ib->auth->getAuth()) {
-        $AuthContent = $ib->auth->getAuth();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if (null !== $phpef->auth->getAuth()) {
+        $AuthContent = $phpef->auth->getAuth();
         $AuthContent['headers'] = getallheaders();
         $UnsetHeaders = array(
             "Remote-Email",
@@ -26,7 +26,7 @@ $app->get('/auth/whoami', function ($request, $response, $args) {
         foreach ($UnsetHeaders as $UnsetHeader) {
             unset($AuthContent['headers'][$UnsetHeader]);
         }
-        $ib->api->setAPIResponseData($AuthContent);
+        $phpef->api->setAPIResponseData($AuthContent);
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
@@ -35,8 +35,8 @@ $app->get('/auth/whoami', function ($request, $response, $args) {
 });
 
 $app->post('/auth/login', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    $ib->auth->login($ib->api->getAPIRequestData($request));
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    $phpef->auth->login($phpef->api->getAPIRequestData($request));
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
 		->withHeader('Content-Type', 'application/json;charset=UTF-8')
@@ -44,8 +44,8 @@ $app->post('/auth/login', function ($request, $response, $args) {
 });
 
 $app->get('/auth/logout', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    $ib->auth->logout();
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    $phpef->auth->logout();
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
 		->withHeader('Content-Type', 'application/json;charset=UTF-8')
@@ -54,12 +54,12 @@ $app->get('/auth/logout', function ($request, $response, $args) {
 
 // Administrative Password Reset
 $app->post('/auth/password/reset', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    $data = $ib->api->getAPIRequestData($request);
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    $data = $phpef->api->getAPIRequestData($request);
 	if (isset($data['pw'])) {
-		$ib->auth->resetPassword($data['pw']);
+		$phpef->auth->resetPassword($data['pw']);
 	} else {
-		$ib->api->setAPIResponse('Error','New password missing from request');
+		$phpef->api->setAPIResponse('Error','New password missing from request');
 	}
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
@@ -69,12 +69,12 @@ $app->post('/auth/password/reset', function ($request, $response, $args) {
 
 // User Expired Password Reset
 $app->post('/auth/password/expired', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    $data = $ib->api->getAPIRequestData($request);
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    $data = $phpef->api->getAPIRequestData($request);
 	if (isset($data['un']) && isset($data['cpw']) && isset($data['pw'])) {
-		$ib->auth->resetExpiredPassword($data['un'],$data['cpw'],$data['pw']);
+		$phpef->auth->resetExpiredPassword($data['un'],$data['cpw'],$data['pw']);
 	} else {
-		$ib->api->setAPIResponse('Error','Required values missing from the request');
+		$phpef->api->setAPIResponse('Error','Required values missing from the request');
 	}
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
@@ -84,12 +84,12 @@ $app->post('/auth/password/expired', function ($request, $response, $args) {
 
 // Crypt - Used for returning encrypted strings for saving API Keys locally within the browser
 $app->post('/auth/crypt', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    $data = $ib->api->getAPIRequestData($request);
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    $data = $phpef->api->getAPIRequestData($request);
 	if (isset($data['key'])) {
-		$ib->api->setAPIResponseData(encrypt($data['key'],$ib->config->get("Security","salt")));
+		$phpef->api->setAPIResponseData(encrypt($data['key'],$phpef->config->get("Security","salt")));
 	} else {
-		$ib->api->setAPIResponse('Error','key is missing from the request');
+		$phpef->api->setAPIResponse('Error','key is missing from the request');
 	}
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
@@ -99,11 +99,11 @@ $app->post('/auth/crypt', function ($request, $response, $args) {
 
 // SAML SSO
 $app->get('/auth/sso', function ($request, $response, $args) {
-    $ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->config->get('SAML', 'enabled')) {
-        $ib->auth->sso();
+    $phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->config->get('SAML', 'enabled')) {
+        $phpef->auth->sso();
     } else {
-		$ib->api->setAPIResponse('Error', 'SSO is not enabled', '400');
+		$phpef->api->setAPIResponse('Error', 'SSO is not enabled', '400');
 		$response->getBody()->write(jsonE($GLOBALS['api']));
 		return $response
 			->withHeader('Content-Type', 'application/json;charset=UTF-8')
@@ -112,11 +112,11 @@ $app->get('/auth/sso', function ($request, $response, $args) {
 });
 
 $app->get('/auth/slo', function ($request, $response, $args) {
-    $ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->config->get('SAML', 'enabled')) {
-        $ib->auth->slo();
+    $phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->config->get('SAML', 'enabled')) {
+        $phpef->auth->slo();
     } else {
-		$ib->api->setAPIResponse('Error', 'SSO is not enabled', '400');
+		$phpef->api->setAPIResponse('Error', 'SSO is not enabled', '400');
 		$response->getBody()->write(jsonE($GLOBALS['api']));
 		return $response
 			->withHeader('Content-Type', 'application/json;charset=UTF-8')
@@ -125,14 +125,14 @@ $app->get('/auth/slo', function ($request, $response, $args) {
 });
 
 $app->post('/auth/acs', function ($request, $response, $args) {
-    $ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->config->get('SAML', 'enabled')) {
-        if (isset($ib->api->getAPIRequestData($request)['SAMLResponse'])) {
-            $ib->auth->acs();
+    $phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->config->get('SAML', 'enabled')) {
+        if (isset($phpef->api->getAPIRequestData($request)['SAMLResponse'])) {
+            $phpef->auth->acs();
 			$response->getBody()->write(jsonE($GLOBALS['api']));
         }
     } else {
-		$ib->api->setAPIResponse('Error', 'SSO is not enabled', '400');
+		$phpef->api->setAPIResponse('Error', 'SSO is not enabled', '400');
 		$response->getBody()->write(jsonE($GLOBALS['api']));
     }
 	return $response
@@ -141,14 +141,14 @@ $app->post('/auth/acs', function ($request, $response, $args) {
 });
 
 $app->get('/auth/samlMetadata', function ($request, $response, $args) {
-    $ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->config->get('SAML', 'enabled')) {
-        $response->getBody()->write($ib->auth->getSamlMetadata());
+    $phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->config->get('SAML', 'enabled')) {
+        $response->getBody()->write($phpef->auth->getSamlMetadata());
 		return $response
 			->withHeader('Content-Type', 'application/xml')
 			->withStatus($GLOBALS['responseCode']);
     } else {
-		$ib->api->setAPIResponse('Error', 'SSO is not enabled', '400');
+		$phpef->api->setAPIResponse('Error', 'SSO is not enabled', '400');
 		$response->getBody()->write(jsonE($GLOBALS['api']));
 		return $response
 			->withHeader('Content-Type', 'application/json;charset=UTF-8')
