@@ -356,7 +356,6 @@ function loadMainWindow(element,type = "page") {
   // clearAllApexCharts();
   var endpoint = null;
   var pageUrl = '';
-  var pageName = element.find('span').text() != '' ? element.find('span').text() : element.text();
   switch(type) {
     case 'page':
       endpoint = '/api/page/';
@@ -365,6 +364,7 @@ function loadMainWindow(element,type = "page") {
 
   if (endpoint != null) {
     if (element != null) {
+      var pageName = element.find('span').text() != '' ? element.find('span').text() : element.text();
       var frameId = element.data('frameId');
       if (frameId) {
         console.info("%c Navigation %c ".concat("Switching Native Tab: "+pageName, " "), "color: white; background: #2dd375; font-weight: 700;", "color: #2dd375; background: white; font-weight: 700;");

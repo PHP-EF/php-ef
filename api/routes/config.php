@@ -67,9 +67,8 @@ $app->patch('/config/plugins/{plugin}', function ($request, $response, $args) {
 	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
         $data = $phpef->api->getAPIRequestData($request);
-        $config = $phpef->config->get();
         // Update the config values with the submitted data
-        $phpef->config->setPlugin($config, $data, $args['plugin']);
+        $phpef->config->setPlugin($data, $args['plugin']);
     }
 
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -94,9 +93,8 @@ $app->patch('/config/widgets/{widget}', function ($request, $response, $args) {
 	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
         $data = $phpef->api->getAPIRequestData($request);
-        $config = $phpef->config->get();
         // Update the config values with the submitted data
-        $phpef->config->setWidget($config, $data, $args['widget']);
+        $phpef->config->setWidget($data, $args['widget']);
     }
 
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -122,9 +120,8 @@ $app->post('/config/dashboards', function ($request, $response, $args) {
     if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
         $data = $phpef->api->getAPIRequestData($request);
         if (isset($data['Name'])) {
-            $config = $phpef->config->get();
             // Update the config values with the submitted data
-            $phpef->config->setDashboard($config, $data, $data['Name']);
+            $phpef->config->setDashboard($data, $data['Name']);
             $phpef->api->setAPIResponseMessage('Successfully created dashboard');
         } else {
             $phpef->api->setAPIResponse('Error','Name missing from request');
