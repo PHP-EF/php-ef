@@ -794,6 +794,75 @@ function clearAllApexCharts() {
   }
 }
 
+function initPasswordToggle() {
+  $('.passwordToggle').on('click',function(elem) {
+    let el = $(elem.target).parent().parent().prev();
+    if (el.attr('type') == "password") {
+      el.attr('type','text');
+    } else {
+      el.attr('type','password');
+    }
+  })
+}
+
+function createRandomString(length) {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  const characters = letters+'0123456789';
+  let result = letters.charAt(Math.floor(Math.random() * letters.length)); // Ensure the first character is a letter
+  const charactersLength = characters.length;
+  for (let i = 1; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
+
+function cleanClass(string){
+	return string.replace(/ +/g, "-").replace(/\W+/g, "-");
+}
+
+function appendScript(data) {
+  return new Promise((resolve, reject) => {
+    if (data.src) {
+      if (!document.querySelector(`script[src="${data.src}"]`)) {
+        var script = document.createElement('script');
+        script.src = data.src;
+        script.onload = () => resolve(true);
+        script.onerror = () => reject(new Error('Script load error'));
+        document.head.appendChild(script);
+      } else {
+        resolve(true);
+      }
+    } else if (data.script) {
+      if (!document.querySelector(`script[data-script-id="${data.id}"]`)) {
+        var script = document.createElement('script');
+        script.classList = "dynamic-plugin-js";
+        script.innerHTML = data.script;
+        script.setAttribute('data-script-id', data.id);
+        document.head.appendChild(script);
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    }
+  });
+}
+
+function humanFileSize(bytes, si) {
+  var thresh = si ? 1000 : 1024;
+  if(Math.abs(bytes) < thresh) {
+      return bytes + ' B';
+  }
+  var units = si
+      ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
+      : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
+  var u = -1;
+  do {
+      bytes /= thresh;
+      ++u;
+  } while(Math.abs(bytes) >= thresh && u < units.length - 1);
+  return bytes.toFixed(1)+' '+units[u];
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   window.charts = [];
 
@@ -874,339 +943,286 @@ document.addEventListener('DOMContentLoaded', function() {
   console.info("%c Web App %c ".concat("DOM Fully loaded", " "), "color: white; background: #AD80FD; font-weight: 700;", "color: #AD80FD; background: white; font-weight: 700;");
 });
 
-function initPasswordToggle() {
-  $('.passwordToggle').on('click',function(elem) {
-    let el = $(elem.target).parent().parent().prev();
-    if (el.attr('type') == "password") {
-      el.attr('type','text');
-    } else {
-      el.attr('type','password');
-    }
-  })
-}
-
-function createRandomString(length) {
-  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-  const characters = letters+'0123456789';
-  let result = letters.charAt(Math.floor(Math.random() * letters.length)); // Ensure the first character is a letter
-  const charactersLength = characters.length;
-  for (let i = 1; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
-}
-
-function cleanClass(string){
-	return string.replace(/ +/g, "-").replace(/\W+/g, "-");
-}
-
-function selectOptions(options, active){
-	var selectOptions = '';
-	$.each(options, function(i,v) {
-		activeTest = active.split(',');
-		if(activeTest.length > 1){
-			var selected = (arrayContains(v.value, activeTest)) ? 'selected' : '';
-		}else{
-			var selected = (active.toString() == v.value) ? 'selected' : '';
-		}
-		var disabled = (v.disabled) ? ' disabled' : '';
-		selectOptions += '<option '+selected+disabled+' value="'+v.value+'">'+v.name+'</option>';
-	});
-	return selectOptions;
-}
-
-function accordionOptions(options, parentID){
-	var accordionOptions = '';
-	$.each(options, function(i,v) {
-		var id = createRandomString(10);
-		var extraClass = (v.class) ? ' '+v.class : '';
-		var header = (i) ? ' '+i : '';
-		if(typeof v == 'object'){
-      var body = '';
-      // body += buildFormGroup();
-      $.each(v, function(val) {
-        var helpTip = v[val].helpTip ?? '';
-        if (v[val].type == 'title' || v[val].type == 'hr' || v[val].type == 'js') {
-          body += buildFormItem(v[val]);
-        } else {
-          body += `<div class="col-md-6"><label class="control-label"><span lang="en">${v[val].label}</span>${helpTip}</label>`;
-          body += buildFormItem(v[val]);
-          body += `</div>`;
-        }
-      });
-		}else{
-			var body = v.body;
-		}
-		accordionOptions += `
-		<div class="panel">
-			<div class="panel-heading" id="`+id+`-heading" role="tab">
-				<a class="panel-title collapsed" data-bs-toggle="collapse" href="#`+id+`-collapse" data-bs-parent="#`+parentID+`" aria-expanded="false" aria-controls="`+id+`-collapse"><span lang="en">`+header+`</span></a>
-			</div>
-			<div class="panel-collapse collapse" id="`+id+`-collapse" aria-labelledby="`+id+`-heading" role="tabpanel" aria-expanded="false" style="height: 0px;">
-				<div class="panel-body px-3">
-          <div class="row pt-2">
-            `+body+`
-          </div>
-        </div>
-			</div>
-		</div>
-		`;
-	});
-	return accordionOptions;
-}
-
-function multipleInputArr(item) {
-  var valueArr = item.values;
-  var multipleInputArr = '';
-  var disabled = (item.disabled) ? ' disabled' : '';
-  $.each(valueArr, function(index, value) {
-    multipleInputArr += '<li class="list-group-item inputEntry"' + disabled + '>' + value + '<i class="fa fa-trash removeInputEntry"></i></li>';
-  });
-  return multipleInputArr;
-}
-
-function getInputMultipleEntries(elem) {
-  const entryList = elem.parent().next();
-  const listItems = entryList.find("li");
-  const values = [];
-
-  for (let i = 0; i < listItems.length; i++) {
-    const listItem = listItems[i];
-    const value = $(listItem).text();
-    values.push(value);
-  }
-  return values;
-}
-
-function buildFormGroup(array) {
-  var mainCount = 0;
-  var group = '<div id="tabsJustifiedContent" class="tab-content">';
-  var uList = '<ul id="tabsJustified" class="nav flex-column nav-tabs info-nav">'; // Changed to flex-column for vertical alignment
-  
-  $.each(array, function(i, v) {
-    mainCount++;
-    var count = 0;
-    var total = v.length;
-    var active = (mainCount == 1) ? 'active' : '';
-    var customID = createRandomString(10);
-    
-    if (i == 'custom') {
-      group += v;
-    } else {
-      uList += `<li role="presentation" class="nav-item"><a href="" data-bs-target="#${customID}${cleanClass(i)}" data-bs-toggle="tab" class="nav-link small text-uppercase ${active}"><span lang="en">${i}</span></a></li>`;
-      group += `
-        <!-- FORM GROUP -->
-        <div class="tab-pane ${active}" id="${customID}${cleanClass(i)}">
-      `;
-      
-      var sectionCount = 0;
-      $.each(v, function(j, item) {
-        var override = item.override || '6';
-        sectionCount++;
-        count++;
-        
-        if (count % 2 !== 0) {
-          group += '<div class="row start">';
-        }
-        
-        var helpID = `#help-info-${item.name}`;
-        var helpTip = item.help ? `<sup><a class="help-tip" data-toggle="collapse" href="${helpID}" aria-expanded="true"><i class="m-l-5 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>` : '';
-        var builtItems = '';
-        
-        if (item.type == 'title' || item.type == 'hr' || item.type == 'js') {
-          builtItems = `${buildFormItem(item)}`;
-          count = 0; // Reset count
-          group += '</div><!--end--><div class="row start">'; // Close current row and start a new one
-        } else {
-          builtItems = `
-            <div class="col-md-${override} p-b-10">
-              <div class="form-group">
-                <label class="control-label col-md-12"><span lang="en">${item.label}</span>${helpTip}</label>
-                <div class="col-md-12">
-                  ${buildFormItem(item)}
-                </div>
-              </div>
-            </div>
-          `;
-        }
-        
-        group += builtItems;
-        
-        if (count % 2 === 0 || sectionCount === total) {
-          group += '</div><!--end-->';
-        }
-      });
-      
-      group += '</div>';
-    }
-  });
-  
-  return '<div class="d-flex">' + uList + '</ul>' + group + '</div>'; // Wrapped in a flex container for alignment
-}
-
-function appendScript(data) {
-  return new Promise((resolve, reject) => {
-    if (data.src) {
-      if (!document.querySelector(`script[src="${data.src}"]`)) {
-        var script = document.createElement('script');
-        script.src = data.src;
-        script.onload = () => resolve(true);
-        script.onerror = () => reject(new Error('Script load error'));
-        document.head.appendChild(script);
-      } else {
-        resolve(true);
-      }
-    } else if (data.script) {
-      if (!document.querySelector(`script[data-script-id="${data.id}"]`)) {
-        var script = document.createElement('script');
-        script.classList = "dynamic-plugin-js";
-        script.innerHTML = data.script;
-        script.setAttribute('data-script-id', data.id);
-        document.head.appendChild(script);
-        resolve(true);
-      } else {
-        resolve(true);
-      }
-    }
-  });
-}
-
-function buildFormItem(item){
-  var placeholder = (item.placeholder) ? ' placeholder="'+item.placeholder+'"' : '';
-  var id = (item.id) ? ' id="'+item.id+'"' : '';
-  var tableId = (item.id) && (item.type == "selectwithtable") ? ' id="'+item.id+'Table"' : '';
-  var type = (item.type) ? ' data-type="'+item.type+'"' : '';
-  var label = (item.label) ? ' data-label="'+item.label+'"' : '';
-  var value = (item.value) ? ' value="'+item.value+'"' : '';
-  var textarea = (item.value) ? item.value : '';
-  var name = (item.name) ? ' name="'+item.name+'"' : '';
-  var extraClass = (item.class) ? ' '+item.class : '';
-  var icon = (item.icon) ? ' '+item.icon : '';
-  var text = (item.text) ? ' '+item.text : '';
-  var attr = (item.attr) ? ' '+item.attr : '';
-  var disabled = (item.disabled) ? ' disabled' : '';
-  var href = (item.href) ? ' href="'+item.href+'"' : '';
-  var pwd1 = createRandomString(6);
-  var pwd2 = createRandomString(6);
-  var pwd3 = createRandomString(6);
-  var helpInfo = (item.help) ? '<div class="collapse" id="help-info-'+item.name+'"><blockquote lang="en">'+item.help+'</blockquote></div>' : '';
-  var smallLabel = (item.smallLabel) ? '<label><span lang="en">'+item.smallLabel+'</span></label>'+helpInfo : ''+helpInfo;
-  var dataAttributes = (item.dataAttributes) ? Object.keys(item.dataAttributes).map(key => ` data-${key}="${item.dataAttributes[key]}"`).join(' ') : '';
-
-  switch (item.type) {
-    case 'select-input':
-      return smallLabel + '<input list="'+item.name+'Options" lang="en" type="text" class="form-control info-field' + extraClass + '"' + placeholder + value + id + name + disabled + type + label + attr + dataAttributes + '/><datalist id="'+item.name+'Options">' + selectOptions(item.options, item.value) + '</datalist>';
-    case 'input':
-    case 'text':
-      return smallLabel+'<input lang="en" type="text" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+' />';
-    case 'inputmultiple':
-      return '<div class="input-group mb-3"><input lang="en" type="text" class="form-control info-field'+extraClass+'" multiple '+placeholder+id+name+disabled+type+label+attr+dataAttributes+'/><div class="input-group-append"><button class="btn btn-outline-success addInputEntry" type="button">'+text+'</button></div></div><ul class="list-group mt-3 inputEntries">'+multipleInputArr(item)+'</ul>';
-    case 'number':
-      return smallLabel+'<input lang="en" type="number" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>';
-    case 'textbox':
-      return smallLabel+'<textarea class="form-control info-field'+extraClass+'"'+placeholder+id+name+disabled+type+label+attr+dataAttributes+' autocomplete="new-password">'+textarea+'</textarea>';
-    case 'password':
-      return smallLabel+'<input lang="en" type="password" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>';
-    case 'password-alt':
-      return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/><span class="input-group-btn"> <button class="btn btn-default showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
-    case 'password-alt-copy':
-      return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/><span class="input-group-btn"> <button class="btn btn-primary clipboard" type="button" data-clipboard-text="'+item.value+'"><i class="fa icon-docs"></i></button></span><span class="input-group-btn"> <button class="btn btn-inverse showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
-    case 'hidden':
-      return '<input lang="en" type="hidden" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>';
-    case 'select':
-      return smallLabel+'<select class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>';
-    case 'selectmultiple':
-      return smallLabel+'<select class="form-control info-field'+extraClass+'" multiple '+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>';
-    case 'switch':
-    case 'checkbox':
-      return smallLabel+'<div class="form-check form-switch"><input class="form-check-input info-field'+extraClass+'" type="checkbox"'+name+value+id+disabled+type+label+attr+dataAttributes+'/></div>';
-    case 'button':
-      return smallLabel+'<button class="btn btn-sm btn-success btn-rounded waves-effect waves-light b-none'+extraClass+'" '+href+attr+dataAttributes+' type="button"><span class="btn-label"><i class="'+icon+'"></i></span><span lang="en">'+text+'</span></button>';
-    case 'blank':
-      return '';
-    case 'accordion':
-      return '<div class="panel-group'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'  aria-multiselectable="true" role="tablist">'+accordionOptions(item.options, item.id)+'</div>';
-    case 'title':
-      return '<h4>'+text+'</h4>';
-    case 'hr':
-      return '<hr class="mt-3">';
-    case 'html':
-      return item.html;
-    case 'js':
-      appendScript(item);
-      return ''; // Return an empty string as the script is already added
-    case 'selectwithtable':
-      return `
-        <form id="multiSelectForm">
-            <div class="form-group">
-              <select class="form-control select-multiple widgetSelect info-field" multiple name="Widgets" data-type="selectmultiple" `+id+name+disabled+type+label+attr+dataAttributes+`>
-              `+selectOptions(item.options, item.value)+`
-            </select>
-            </div>
-            <table `+tableId+` 
-              data-pagination="true"
-              data-reorderable-rows="true"
-              data-drag-handle=">tbody>tr>td>span.dragHandle"
-              class="table table-bordered table-striped info-field" `+dataAttributes+`>
-                <thead>
-                    <tr>
-                        <th data-field="dragHandle"></th>
-                        <th data-field="name">Widget</th>
-                        <th data-field="size">Size</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </form>
-        `;
-    case 'bootstraptable':
-      return `
-        <table class="table table-bordered table-striped ${extraClass}" ${id} ${name} ${disabled} ${type} ${label} ${attr} ${dataAttributes}>
-          <thead>
-            <tr>
-              ${item.columns.map(column => `<th data-field="${column.field}" ${column.dataAttributes ? Object.keys(column.dataAttributes).map(key => `data-${key}="${column.dataAttributes[key]}"`).join(' ') : ''}>${column.title}</th>`).join('')}
-            </tr>
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
-        <script>$("#${item.id}").bootstrapTable();</script>
-        `;
-    default:
-      return '<span class="text-danger">BuildFormItem Class not setup...';
-  }
-}
-
-function humanFileSize(bytes, si) {
-  var thresh = si ? 1000 : 1024;
-  if(Math.abs(bytes) < thresh) {
-      return bytes + ' B';
-  }
-  var units = si
-      ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
-      : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
-  var u = -1;
-  do {
-      bytes /= thresh;
-      ++u;
-  } while(Math.abs(bytes) >= thresh && u < units.length - 1);
-  return bytes.toFixed(1)+' '+units[u];
-}
-
 // Modal Backdrop Z-Index Fix
 $(document).on('shown.bs.modal', '.modal', function () {
   $('.modal-backdrop').before($(this));
 });
 
 
+  // **************** //
+  // ** CLEANED UP ** //
+  // **************** //
 
+
+  // ** FORM BUILDER ** //
+  function buildFormGroup(array,noTabs = false) {
+    var mainCount = 0;
+    if (noTabs) {
+      var group = '';
+      var uList = '';
+    } else {
+      var group = '<div id="tabsJustifiedContent" class="tab-content">';
+      var uList = '<ul id="tabsJustified" class="nav flex-column nav-tabs info-nav">';
+    }
+    
+    $.each(array, function(i, v) {
+      mainCount++;
+      var count = 0;
+      var total = v.length;
+      var active = (mainCount == 1) ? 'active' : '';
+      var customID = createRandomString(10);
+      
+      if (i == 'custom') {
+        group += v;
+      } else {
+        if (!noTabs) {
+          uList += `<li role="presentation" class="nav-item"><a href="" data-bs-target="#${customID}${cleanClass(i)}" data-bs-toggle="tab" class="nav-link small text-uppercase ${active}"><span lang="en">${i}</span></a></li>`;
+          group += `
+            <!-- FORM GROUP -->
+            <div class="tab-pane ${active}" id="${customID}${cleanClass(i)}">
+          `;
+        }
+        
+        var sectionCount = 0;
+        $.each(v, function(j, item) {
+          var override = item.override || '6';
+          sectionCount++;
+          count++;
+          
+          if (count % 2 !== 0) {
+            group += '<div class="row start">';
+          }
+          
+          var helpID = `#help-info-${item.name}`;
+          var helpTip = item.help ? `<sup><a class="help-tip" data-toggle="collapse" href="${helpID}" aria-expanded="true"><i class="m-l-5 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>` : '';
+          var builtItems = '';
+          
+          if (item.type == 'title' || item.type == 'hr' || item.type == 'js') {
+            builtItems = `${buildFormItem(item)}`;
+            count = 0; // Reset count
+            group += '</div><!--end--><div class="row start">'; // Close current row and start a new one
+          } else {
+            builtItems = `
+              <div class="col-md-${override} p-b-10">
+                <div class="form-group">
+                  <label class="control-label col-md-12"><span lang="en">${item.label}</span>${helpTip}</label>
+                  <div class="col-md-12">
+                    ${buildFormItem(item)}
+                  </div>
+                </div>
+              </div>
+            `;
+          }
+          
+          group += builtItems;
+          
+          if (count % 2 === 0 || sectionCount === total) {
+            group += '</div><!--end-->';
+          }
+        });
+        
+        if (!noTabs) {
+          group += '</div>';
+        }
+      }
+    });
+    
+    if (noTabs) {
+      var flex = '';
+    } else {
+      var flex = 'd-flex';
+    }
+
+    return `<div class="${flex}">` + uList + '</ul>' + group + '</div>'; // Wrapped in a flex container for alignment
+  }
+
+  function buildFormItem(item){
+    var placeholder = (item.placeholder) ? ' placeholder="'+item.placeholder+'"' : '';
+    var id = (item.id) ? ' id="'+item.id+'"' : '';
+    var tableId = (item.id) && (item.type == "selectwithtable") ? ' id="'+item.id+'Table"' : '';
+    var type = (item.type) ? ' data-type="'+item.type+'"' : '';
+    var label = (item.label) ? ' data-label="'+item.label+'"' : '';
+    var value = (item.value) ? ' value="'+item.value+'"' : '';
+    var textarea = (item.value) ? item.value : '';
+    var name = (item.name) ? ' name="'+item.name+'"' : '';
+    var extraClass = (item.class) ? ' '+item.class : '';
+    var icon = (item.icon) ? ' '+item.icon : '';
+    var text = (item.text) ? ' '+item.text : '';
+    var attr = (item.attr) ? ' '+item.attr : '';
+    var disabled = (item.disabled) ? ' disabled' : '';
+    var href = (item.href) ? ' href="'+item.href+'"' : '';
+    var pwd1 = createRandomString(6);
+    var pwd2 = createRandomString(6);
+    var pwd3 = createRandomString(6);
+    var helpInfo = (item.help) ? '<div class="collapse" id="help-info-'+item.name+'"><blockquote lang="en">'+item.help+'</blockquote></div>' : '';
+    var smallLabel = (item.smallLabel) ? '<label><span lang="en">'+item.smallLabel+'</span></label>'+helpInfo : ''+helpInfo;
+    var dataAttributes = (item.dataAttributes) ? Object.keys(item.dataAttributes).map(key => ` data-${key}="${item.dataAttributes[key]}"`).join(' ') : '';
+
+    switch (item.type) {
+      case 'select-input':
+        return smallLabel + '<input list="'+item.name+'Options" lang="en" type="text" class="form-control info-field' + extraClass + '"' + placeholder + value + id + name + disabled + type + label + attr + dataAttributes + '/><datalist id="'+item.name+'Options">' + selectOptions(item.options, item.value) + '</datalist>';
+      case 'input':
+      case 'text':
+        return smallLabel+'<input lang="en" type="text" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+' />';
+      case 'inputmultiple':
+        return '<div class="input-group mb-3"><input lang="en" type="text" class="form-control info-field'+extraClass+'" multiple '+placeholder+id+name+disabled+type+label+attr+dataAttributes+'/><div class="input-group-append"><button class="btn btn-outline-success addInputEntry" type="button">'+text+'</button></div></div><ul class="list-group mt-3 inputEntries">'+multipleInputArr(item)+'</ul>';
+      case 'number':
+        return smallLabel+'<input lang="en" type="number" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>';
+      case 'textbox':
+        return smallLabel+'<textarea class="form-control info-field'+extraClass+'"'+placeholder+id+name+disabled+type+label+attr+dataAttributes+' autocomplete="new-password">'+textarea+'</textarea>';
+      case 'password':
+        return smallLabel+'<input lang="en" type="password" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>';
+      case 'password-alt':
+        return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/><span class="input-group-btn"> <button class="btn btn-default showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
+      case 'password-alt-copy':
+        return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/><span class="input-group-btn"> <button class="btn btn-primary clipboard" type="button" data-clipboard-text="'+item.value+'"><i class="fa icon-docs"></i></button></span><span class="input-group-btn"> <button class="btn btn-inverse showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
+      case 'hidden':
+        return '<input lang="en" type="hidden" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>';
+      case 'select':
+        return smallLabel+'<select class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>';
+      case 'selectmultiple':
+        return smallLabel+'<select class="form-control info-field'+extraClass+'" multiple '+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>';
+      case 'switch':
+      case 'checkbox':
+        return smallLabel+'<div class="form-check form-switch"><input class="form-check-input info-field'+extraClass+'" type="checkbox"'+name+value+id+disabled+type+label+attr+dataAttributes+'/></div>';
+      case 'button':
+        return smallLabel+'<button class="btn btn-sm btn-success btn-rounded waves-effect waves-light b-none'+extraClass+'" '+href+attr+dataAttributes+' type="button"><span class="btn-label"><i class="'+icon+'"></i></span><span lang="en">'+text+'</span></button>';
+      case 'blank':
+        return '';
+      case 'accordion':
+        return '<div class="panel-group'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'  aria-multiselectable="true" role="tablist">'+accordionOptions(item.options, item.id)+'</div>';
+      case 'title':
+        return '<h4>'+text+'</h4>';
+      case 'hr':
+        return '<hr class="mt-3">';
+      case 'html':
+        return item.html;
+      case 'js':
+        appendScript(item);
+        return ''; // Return an empty string as the script is already added
+      case 'selectwithtable':
+        return `
+          <form id="multiSelectForm">
+              <div class="form-group">
+                <select class="form-control select-multiple widgetSelect info-field" multiple name="Widgets" data-type="selectmultiple" `+id+name+disabled+type+label+attr+dataAttributes+`>
+                `+selectOptions(item.options, item.value)+`
+              </select>
+              </div>
+              <table `+tableId+` 
+                data-pagination="true"
+                data-reorderable-rows="true"
+                data-drag-handle=">tbody>tr>td>span.dragHandle"
+                class="table table-bordered table-striped info-field" `+dataAttributes+`>
+                  <thead>
+                      <tr>
+                          <th data-field="dragHandle"></th>
+                          <th data-field="name">Widget</th>
+                          <th data-field="size">Size</th>
+                      </tr>
+                  </thead>
+                  <tbody></tbody>
+              </table>
+          </form>
+          `;
+      case 'bootstraptable':
+        return `
+          <table class="table table-bordered table-striped ${extraClass}" ${id} ${name} ${disabled} ${type} ${label} ${attr} ${dataAttributes}>
+            <thead>
+              <tr>
+                ${item.columns.map(column => `<th data-field="${column.field}" ${column.dataAttributes ? Object.keys(column.dataAttributes).map(key => `data-${key}="${column.dataAttributes[key]}"`).join(' ') : ''}>${column.title}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+          <script>$("#${item.id}").bootstrapTable();</script>
+          `;
+      default:
+        return '<span class="text-danger">BuildFormItem Class not setup...';
+    }
+  }
+
+  function accordionOptions(options, parentID){
+    var accordionOptions = '';
+    $.each(options, function(i,v) {
+      var id = createRandomString(10);
+      var extraClass = (v.class) ? ' '+v.class : '';
+      var header = (i) ? ' '+i : '';
+      if(typeof v == 'object'){
+        var body = '';
+        $.each(v, function(val) {
+          var helpTip = v[val].helpTip ?? '';
+          if (v[val].type == 'title' || v[val].type == 'hr' || v[val].type == 'js') {
+            body += buildFormItem(v[val]);
+          } else {
+            body += `<div class="col-md-6"><label class="control-label"><span lang="en">${v[val].label}</span>${helpTip}</label>`;
+            body += buildFormItem(v[val]);
+            body += `</div>`;
+          }
+        });
+      }else{
+        var body = v.body;
+      }
+      accordionOptions += `
+      <div class="panel">
+        <div class="panel-heading" id="`+id+`-heading" role="tab">
+          <a class="panel-title collapsed" data-bs-toggle="collapse" href="#`+id+`-collapse" data-bs-parent="#`+parentID+`" aria-expanded="false" aria-controls="`+id+`-collapse"><span lang="en">`+header+`</span></a>
+        </div>
+        <div class="panel-collapse collapse" id="`+id+`-collapse" aria-labelledby="`+id+`-heading" role="tabpanel" aria-expanded="false" style="height: 0px;">
+          <div class="panel-body px-3">
+            <div class="row pt-2">
+              `+body+`
+            </div>
+          </div>
+        </div>
+      </div>
+      `;
+    });
+    return accordionOptions;
+  }
+
+  function multipleInputArr(item) {
+    var valueArr = item.values;
+    var multipleInputArr = '';
+    var disabled = (item.disabled) ? ' disabled' : '';
+    $.each(valueArr, function(index, value) {
+      multipleInputArr += '<li class="list-group-item inputEntry"' + disabled + '>' + value + '<i class="fa fa-trash removeInputEntry"></i></li>';
+    });
+    return multipleInputArr;
+  }
+
+  function getInputMultipleEntries(elem) {
+    const entryList = elem.parent().next();
+    const listItems = entryList.find("li");
+    const values = [];
+
+    for (let i = 0; i < listItems.length; i++) {
+      const listItem = listItems[i];
+      const value = $(listItem).text();
+      values.push(value);
+    }
+    return values;
+  }
+
+  function selectOptions(options, active){
+    var selectOptions = '';
+    $.each(options, function(i,v) {
+      activeTest = active.split(',');
+      if(activeTest.length > 1){
+        var selected = (arrayContains(v.value, activeTest)) ? 'selected' : '';
+      }else{
+        var selected = (active.toString() == v.value) ? 'selected' : '';
+      }
+      var disabled = (v.disabled) ? ' disabled' : '';
+      selectOptions += '<option '+selected+disabled+' value="'+v.value+'">'+v.name+'</option>';
+    });
+    return selectOptions;
+  }
 
   // ** ACTION EVENTS ** //
   window.pluginActionEvents = {
     "click .edit": function (e, value, row, index) {
-      $("#SettingsModalBody").html("");
       buildPluginSettingsModal(row);
-      $("#SettingsModal").modal("show");
     },
     "click .install": function (e, value, row, index) {
       installPlugin(row);
@@ -1224,17 +1240,13 @@ $(document).on('shown.bs.modal', '.modal', function () {
 
   window.widgetActionEvents = {
     "click .edit": function (e, value, row, index) {
-      $("#SettingsModalBody").html("");
       buildWidgetSettingsModal(row);
-      $("#SettingsModal").modal("show");
     }
   }
 
   window.dashboardActionEvents = {
     "click .edit": function (e, value, row, index) {
-      $("#SettingsModalBody").html("");
       buildDashboardSettingsModal(row);
-      $("#SettingsModal").modal("show");
     },
     "click .delete": function (e, value, row, index) {
       if(confirm("Are you sure you want to delete the Dashboard: "+row.Name+"? This is irriversible.") == true) {
@@ -1304,15 +1316,14 @@ $(document).on('shown.bs.modal', '.modal', function () {
 
   window.rolesActionEvents = {
     "click .edit": function (e, value, row, index) {
-      editRole(row);
-      $("#roleEditModal").modal("show");
+      buildRoleSettingsModal(row);
     },
     "click .delete": function (e, value, row, index) {
       if(confirm("Are you sure you want to delete the "+row.name+" role? This is irriversible.") == true) {
         queryAPI("DELETE","/api/rbac/role/"+row.id).done(function(data) {
           if (data["result"] == "Success") {
             toast("Success","","Successfully deleted "+row.name+" from Role Based Access","success");
-            $("#rbacRolesTable").bootstrapTable("refresh");
+            $("#rolesTable").bootstrapTable("refresh");
           } else if (data["result"] == "Error") {
             toast(data["result"],"",data["message"],"danger","30000");
           } else {
@@ -1417,7 +1428,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
   }
 
   // ** TABLE BUTTONS ** //
-  function userButtons() {
+  function usersTableButtons() {
     return {
       btnAddUser: {
         text: "Add User",
@@ -1434,7 +1445,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
     }
   }
 
-  function rbacGroupsButtons() {
+  function groupsTableButtons() {
     return {
       btnAddGroup: {
         text: "Add Group",
@@ -1458,24 +1469,50 @@ $(document).on('shown.bs.modal', '.modal', function () {
     }
   }
 
-  function rbacRolesButtons() {
+  function rolesTableButtons() {
     return {
       btnAddRole: {
         text: "Add Role",
         icon: "bi-plus-lg",
         event: function() {
-          $("#newItemModal").modal("show");
-          $("#newItemModal input").val("");
-          $("#newItemModalLabel").text("New Role Wizard");
-          $("#modal-body-heading").html("<p>Enter the Role Name below to add it to the Role list.</p>");
-          $("#newItemNameLabel").text("Role Name");
-          $("#newItemDescriptionLabel").text("Role Description");
-          $("#newItemNameHelp").text("The name of the Role to add to the Role list.");
-          $("#newItemDescriptionHelp").text("The description for the new role.");
-          $("#newItemSubmit").attr("onclick","newRole()")
+          buildNewRoleSettingsModal();
         },
         attributes: {
           title: "Add a new role",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
+  function pluginsTableButtons() {
+    return {
+      btnEditPluginURLs: {
+        text: "Edit Plugin URL(s)",
+        icon: "bi bi-pencil-square",
+        event: function() {
+          $("#urlList").html("");
+          populatePluginRepositories();
+          $("#onlinePluginsModal").modal("show");
+        },
+        attributes: {
+          title: "Edit Plugin URL(s)",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
+  function dashboardsTableButtons() {
+    return {
+      btnAddDashboard: {
+        text: "Create new Dashboard",
+        icon: "bi bi-plus-lg",
+        event: function() {
+          buildNewDashboardSettingsModal();
+        },
+        attributes: {
+          title: "Create new Dashboard",
           style: "background-color:#4bbe40;border-color:#4bbe40;"
         }
 	    }
@@ -1490,4 +1527,310 @@ $(document).on('shown.bs.modal', '.modal', function () {
         });
     }
     return data.data;
+  }
+
+  // ** BUILD / SUBMIT SETTINGS ** //
+  function buildSettings(elem, setting, options) {
+    // Empty the additional settings array
+    selectWithTableArr = {};
+    const { dataLocation, noTabs } = options;
+    id = $(elem).attr("id");
+    if (tabsLoaded.includes(setting)) {
+      console.log("tab already loaded: "+setting);
+    } else {
+      tabsLoaded.push(setting);
+      try {
+        queryAPI("GET", "/api/settings/"+setting).done(function(settingsResponse) {
+          const settingsData = dataLocation ? getNestedProperty(settingsResponse, dataLocation) : settingsResponse.data;
+          $(elem).html(buildFormGroup(settingsData,noTabs));
+          initPasswordToggle();
+          $(".info-field").change(function(elem) {
+            toast("Configuration", "", $(elem.target).data("label") + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
+            $(this).addClass("changed");
+          });
+          populateSettingsForm(`#`+id);
+        }).fail(function(xhr) {
+          logConsole("Error", xhr, "error");
+        });
+      } catch (e) {
+        logConsole("Error", e, "error");
+      }
+    }
+  }
+
+  // ** BUILD / SUBMIT SETTINGS MODALS ** //
+
+  function buildSettingsModal(row, options) {
+    // Clear Modal Content
+    $("#SettingsModalBody").html("");
+    // Empty the additional settings array
+    selectWithTableArr = {};
+    const { apiUrl, configUrl, name, saveFunction, labelPrefix, dataLocation, callback, noTabs } = options;
+    $("#modalItemID").val(name)
+    try {
+      queryAPI("GET", apiUrl).done(function(settingsResponse) {
+        const settingsData = dataLocation ? getNestedProperty(settingsResponse, dataLocation) : settingsResponse.data;
+        $("#SettingsModalBody").html(buildFormGroup(settingsData,noTabs));
+        initPasswordToggle();
+        $("#SettingsModalSaveBtn").attr("onclick", saveFunction);
+        $("#SettingsModalLabel").text(`${labelPrefix} Settings: ${name}`);
+        $(".info-field").change(function(elem) {
+          toast("Configuration", "", $(elem.target).data("label") + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
+          $(this).addClass("changed");
+        });
+
+        if (configUrl) {
+          try {
+            queryAPI("GET", configUrl).done(function(configResponse) {
+              let data = configResponse.data;
+              for (const key in data) {
+                if (data.hasOwnProperty(key)) {
+                  const value = data[key];
+                  const element = $(`#SettingsModal [name="${key}"]`);
+                  if (element.attr("type") === "checkbox") {
+                    element.prop("checked", value);
+                  } else if (element.is("input[multiple]")) {
+                    // console.log(element.data("type"));
+                  } else {
+                    if (element.hasClass("encrypted")) {
+                      if (value !== "") {
+                        element.val("*********");
+                      }
+                    } else {
+                      element.val(value);
+                    }
+                  }
+                }
+              }
+            }).fail(function(xhr) {
+              logConsole("Error", xhr, "error");
+            });
+          } catch (e) {
+            logConsole("Error", e, "error");
+          }
+        }
+        // Callback
+        if (callback) {
+          let match = callback.match(/(\w+)\((.*)\)/);
+          if (match) {
+              let functionName = match[1];
+              let args = match[2].split(",").map(arg => arg.trim());
+              args = args.map(arg => eval(arg));
+              window[functionName](args);
+          } else {
+              console.error("Invalid callback format");
+          }
+        }
+      }).fail(function(xhr) {
+        logConsole("Error", xhr, "error");
+      });
+    } catch (e) {
+      logConsole("Error", e, "error");
+    }
+    // Show Modal
+    $("#SettingsModal").modal("show");
+  }
+
+  function submitSettingsModal(type, element = "#modalItemID", isNew = false) {
+    var serializedArray = $("#SettingsModal .changed[type!=checkbox]").serializeArray();
+
+    // Include unchecked checkboxes in the formData
+    $("#SettingsModal input.changed[type=checkbox]").each(function() {
+        serializedArray.push({ name: this.name, value: this.checked ? true : false });
+    });
+
+    // Convert the array into an object
+    var formData = {};
+    var encryptionPromises = [];
+
+    serializedArray.forEach(function(item) {
+        var element = $(`[name="${item.name}"]`);
+        if (formData[item.name]) {
+            if (!Array.isArray(formData[item.name])) {
+                formData[item.name] = [formData[item.name]];
+            }
+            formData[item.name].push(item.value);
+        } else {
+            // Check if the element is a select with the multiple attribute
+            if (element.is("select[multiple]")) {
+                formData[item.name] = item.value !== "" ? [item.value] : item.value;
+            } else if (element.is("input[multiple]")) {
+                formData[item.name] = getInputMultipleEntries(element);
+            } else if (element.hasClass("encrypted") && item.value !== "") {
+                // Encrypt sensitive data
+                var promise = encryptData(item.name, item.value).done(function(encryptedValue) {
+                    formData[item.name] = encryptedValue.data;
+                });
+                encryptionPromises.push(promise);
+            } else {
+                formData[item.name] = item.value;
+            }
+        }
+    });
+
+    if (isNew) {
+      var api = `/api/config/${type}s`;
+      var method = "POST";
+    } else {
+      var api = `/api/config/${type}s/` + $(element).val();
+      var method = "PATCH";
+    }
+
+    // Append selectWithTableArr to formData
+    if (selectWithTableArr) {
+      formData = Object.assign({}, formData, selectWithTableArr);
+    }
+
+    // Wait for all encryption promises to resolve
+    $.when.apply($, encryptionPromises).done(function() {
+        queryAPI(method, api, formData).done(function(data) {
+            if (data.result === "Success") {
+                toast(data.result, "", data.message, "success");
+                $("#SettingsModal .changed").removeClass("changed");
+            } else {
+                toast(data.result === "Error" ? data.result : "API Error", "", data.message || "Failed to save configuration", "danger", "30000");
+            }
+        });
+    });
+  }
+
+  function buildPluginSettingsModal(row) {
+    buildSettingsModal(row, {
+      apiUrl: row.api,
+      configUrl: `/api/config/plugins/${row.name}`,
+      name: row.name,
+      saveFunction: `submitSettingsModal("plugin");`,
+      labelPrefix: "Plugin",
+      dataLocation: "data"
+    });
+  }
+
+  function buildWidgetSettingsModal(row) {
+    buildSettingsModal(row, {
+      apiUrl: `/api/settings/widgets/${row.info.name}`,
+      configUrl: `/api/config/widgets/${row.info.name}`,
+      name: row.info.name,
+      saveFunction: `submitSettingsModal("widget");`,
+      labelPrefix: "Widget",
+      dataLocation: "data.Settings"
+    });
+  }
+
+  function buildDashboardSettingsModal(row) {
+    buildSettingsModal(row, {
+      apiUrl: `/api/settings/dashboard`,
+      configUrl: `/api/config/dashboards/${row.Name}`,
+      name: row.Name,
+      saveFunction: `submitDashboardSettings();`,
+      labelPrefix: "Dashboard",
+      dataLocation: "data",
+      callback: "widgetSelectCallback(row)"
+    });
+  }
+
+  function buildNewDashboardSettingsModal() {
+    buildSettingsModal([], {
+      apiUrl: `/api/settings/dashboard`,
+      configUrl: null,
+      name: "New Dashboard",
+      saveFunction: `submitDashboardSettings(true);`,
+      labelPrefix: "Dashboard",
+      dataLocation: "data"
+    });
+  }
+
+  function buildRoleSettingsModal(row) {
+      buildSettingsModal(row, {
+      apiUrl: `/api/settings/role`,
+      name: row.name,
+      saveFunction: `submitRoleSettings();`,
+      labelPrefix: "Role",
+      dataLocation: "data",
+      noTabs: true,
+      callback:  "populateRoleSettingsModal(row)"
+    });
+  }
+
+  function buildNewRoleSettingsModal() {
+    buildSettingsModal([], {
+      apiUrl: `/api/settings/role`,
+      configUrl: null,
+      name: "New Role",
+      saveFunction: `submitRoleSettings(true);`,
+      labelPrefix: "Role",
+      dataLocation: "data",
+      noTabs: true
+    });
+  }
+
+  function submitDashboardSettings(isNew = false) {
+    let tableRows = $("#widgetSelectTable tbody tr");
+    tableRows.each((index, row) => {
+        let cells = $(row).find("td");
+        if (cells.length > 1) {
+            let widgetName = cells.eq(1).text();
+            let selectElement = cells.eq(2).find("select");
+            let selectedOption = selectElement.length ? selectElement.val() : null;
+
+            // Ensure the Widgets object exists
+            if (!selectWithTableArr["Widgets"]) {
+                selectWithTableArr["Widgets"] = {};
+            }
+
+            // Ensure the specific widget object exists
+            if (!selectWithTableArr["Widgets"][widgetName]) {
+                selectWithTableArr["Widgets"][widgetName] = {};
+            }
+
+            selectWithTableArr["Widgets"][widgetName]["size"] = selectedOption;
+        }
+    });
+    if (isNew) {
+      submitSettingsModal("dashboard",`[name="Name"]`,isNew);
+    } else {
+      submitSettingsModal("dashboard");
+    }
+    $("#SettingsModal").modal("hide");
+    $("#dashboardsTable").bootstrapTable("refresh");
+  }
+
+  // ** ROLES SETTINGS MODAL ** //
+
+  // Callback from `buildRoleSettingsModal`
+  function populateRoleSettingsModal(row) {
+    $("[name=roleId]").val("").val(row[0].id);
+    $("[name=roleName]").val("").val(row[0].name);
+    $("[name=roleDescription]").val("").val(row[0].description);
+  }
+
+  function submitRoleSettings(isNew = false) {
+    let name = $("[name=roleName]").val();
+    let description = $("[name=roleDescription]").val();
+    let data = {
+      name: name,
+      description: description
+    };
+    if (isNew) {
+      var method = "POST";
+      var api = "/api/rbac/roles";
+      var msg = "add new role";
+    } else {
+      let id = $("[name=roleId]").val();
+      var method = "PATCH";
+      var api = "/api/rbac/role/"+id;
+      var msg = "edit "+name;
+    }
+    queryAPI(method,api,data).done(function(data) {
+      if (data["result"] == "Success") {
+        toast(data["result"],"",data["message"],"success");
+        $("#rolesTable").bootstrapTable("refresh");
+        $("#SettingsModal").modal("hide");
+      } else if (data["result"] == "Error") {
+        toast(data["result"],"",data["message"],"danger","30000");
+      } else {
+        toast("Error","","Failed to "+msg,"danger");
+      }
+    }).fail(function() {
+      toast("Error", "", "Failed to "+msg,"danger");
+    });;
   }

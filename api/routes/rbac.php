@@ -112,6 +112,17 @@ $app->get('/rbac/roles', function ($request, $response, $args) {
 		->withStatus($GLOBALS['responseCode']);
 });
 
+$app->get('/rbac/role/{id}', function ($request, $response, $args) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-RBAC")) {
+        $phpef->api->setAPIResponseData($phpef->auth->getRBACRoleByID($args['id']));
+    }
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json;charset=UTF-8')
+		->withStatus($GLOBALS['responseCode']);
+});
+
 $app->post('/rbac/roles', function ($request, $response, $args) {
 	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-RBAC")) {

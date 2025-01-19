@@ -104,7 +104,7 @@ trait Settings {
             'sort-order' => 'asc',
             'show-columns' => 'true',
             'page-size' => '25',
-            'buttons' => 'pluginsButtons',
+            'buttons' => 'pluginsTableButtons',
             'response-handler' => 'responseHandler',
         ];
 
@@ -240,7 +240,7 @@ trait Settings {
 
         $DashboardsTableAttributes = $TableAttributes;
         $DashboardsTableAttributes['url'] = '/api/dashboards';
-        $DashboardsTableAttributes['buttons'] = 'dashboardButtons';
+        $DashboardsTableAttributes['buttons'] = 'dashboardsTableButtons';
 
         $WidgetTableColumns = [
             [
@@ -390,7 +390,7 @@ trait Settings {
 
         $UsersTableAttributes = $TableAttributes;
         $UsersTableAttributes['url'] = '/api/users';
-        $UsersTableAttributes['buttons'] = 'userButtons';
+        $UsersTableAttributes['buttons'] = 'usersTableButtons';
         $UsersTableAttributes['buttons-order'] = 'btnAddUser,btnBulkDelete,refresh,columns,export,filterControlSwitch';
 
         $GroupsTableColumns = [
@@ -422,7 +422,7 @@ trait Settings {
 
         $GroupsTableAttributes = $TableAttributes;
         $GroupsTableAttributes['url'] = '/api/rbac/groups';
-        $GroupsTableAttributes['buttons'] = 'rbacGroupsButtons';
+        $GroupsTableAttributes['buttons'] = 'groupsTableButtons';
         $GroupsTableAttributes['buttons-order'] = 'btnAddGroup,refresh,columns,export,filterControlSwitch';
 
         $RolesTableColumns = [
@@ -449,7 +449,7 @@ trait Settings {
 
         $RolesTableAttributes = $TableAttributes;
         $RolesTableAttributes['url'] = '/api/rbac/roles';
-        $RolesTableAttributes['buttons'] = 'rbacRolesButtons';
+        $RolesTableAttributes['buttons'] = 'rolesTableButtons';
         $RolesTableAttributes['buttons-order'] = 'btnAddRole,refresh,columns,export,filterControlSwitch';
 
 
@@ -464,5 +464,23 @@ trait Settings {
                 $this->settingsOption('bootstrap-table', 'rolesTable', ['id' => 'rolesTable', 'columns' => $RolesTableColumns, 'dataAttributes' => $RolesTableAttributes, 'override' => 'col-md-12']),
             ),
 	    );
+    }
+
+    public function settingsUser() {
+
+    }
+
+    public function settingsGroup() {
+
+    }
+
+    public function settingsRole() {
+        return array(
+            "General" => array(
+                $this->settingsOption('input', 'roleName', ['label' => 'Role Name']),
+                $this->settingsOption('input', 'roleDescription', ['label' => 'Role Description']),
+                $this->settingsOption('input', 'roleId', ['attr' => 'hidden'])
+            )
+        );
     }
 }
