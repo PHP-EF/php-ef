@@ -111,7 +111,7 @@ return '
 
 <!-- Settings Modal -->
 <div class="modal fade" id="SettingsModal" tabindex="-1" role="dialog" aria-labelledby="SettingsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xxl" role="document">
+  <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="SettingsModalLabel"></h5>
