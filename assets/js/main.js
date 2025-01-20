@@ -1671,10 +1671,11 @@ $(document).on('shown.bs.modal', '.modal', function () {
 
   // ** BUILD / SUBMIT SETTINGS MODALS ** //
 
-  function buildSettingsModal(row, options) {
+  function buildSettingsModal(row, options, size = "xxl") {
     // Clear Modal Content
     changedModalSettingsElements.clear();
     $("#SettingsModalBody").html("");
+    $("#SettingsModal .modal-dialog").removeClass("modal-xs modal-sm modal-md modal-lg modal-xl modal-xxl").addClass(`modal-${size}`);
     // Empty the additional settings array
     selectWithTableArr = {};
     const { apiUrl, configUrl, name, saveFunction, labelPrefix, dataLocation, callback, noTabs } = options;
@@ -1819,7 +1820,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
       saveFunction: `submitSettingsModal("plugins");`,
       labelPrefix: "Plugin",
       dataLocation: "data"
-    });
+    },'xxl');
   }
 
   function buildWidgetSettingsModal(row) {
@@ -1830,7 +1831,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
       saveFunction: `submitSettingsModal("widgets");`,
       labelPrefix: "Widget",
       dataLocation: "data.Settings"
-    });
+    },'xl');
   }
 
   function buildDashboardSettingsModal(row) {
@@ -1842,7 +1843,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
       labelPrefix: "Dashboard",
       dataLocation: "data",
       callback: "widgetSelectCallback(row)"
-    });
+    },'lg');
   }
 
   function buildNewDashboardSettingsModal() {
@@ -1853,7 +1854,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
       saveFunction: `submitDashboardSettings(true);`,
       labelPrefix: "Dashboard",
       dataLocation: "data"
-    });
+    },'lg');
   }
 
   function buildRoleSettingsModal(row) {
@@ -1865,7 +1866,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
       dataLocation: "data",
       noTabs: true,
       callback:  "populateRoleSettingsModal(row)"
-    });
+    },'md');
   }
 
   function buildNewRoleSettingsModal() {
@@ -1877,7 +1878,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
       labelPrefix: "Role",
       dataLocation: "data",
       noTabs: true
-    });
+    },'md');
   }
 
   function buildGroupSettingsModal(row) {
@@ -1889,7 +1890,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
     dataLocation: "data",
     noTabs: true,
     callback:  "populateGroupSettingsModal(row)"
-  });
+  },'lg');
   }
 
   function buildNewGroupSettingsModal() {
@@ -1901,18 +1902,18 @@ $(document).on('shown.bs.modal', '.modal', function () {
       labelPrefix: "Group",
       dataLocation: "data",
       noTabs: true
-    });
+    },'lg');
   }
 
   function buildUserSettingsModal(row) {
     buildSettingsModal(row, {
       apiUrl: `/api/settings/user`,
-      name: row.Name,
+      name: row.username,
       saveFunction: `submitUserSettings();`,
       labelPrefix: "User",
       dataLocation: "data",
       callback:  "populateUserSettingsModal(row)"
-    });
+    },'lg');
   }
 
   function buildNewUserSettingsModal() {
@@ -1923,7 +1924,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
       saveFunction: `submitUserSettings(true);`,
       labelPrefix: "User",
       dataLocation: "data"
-    });
+    },'lg');
   }
 
   function submitDashboardSettings(isNew = false) {
@@ -1980,6 +1981,38 @@ $(document).on('shown.bs.modal', '.modal', function () {
     });
   }
 
+  function submitGroupSettings(isNew = false) {
+    var submitPromise;
+    if (isNew) {
+        submitPromise = submitSettingsModal("groups", "[name=groupId]", isNew, "/api/rbac/");
+    } else {
+        submitPromise = submitSettingsModal("group", "[name=groupId]", isNew, "/api/rbac/");
+    }
+
+    submitPromise.then(() => {
+        $("#SettingsModal").modal("hide");
+        $("#groupsTable").bootstrapTable("refresh");
+    }).catch((error) => {
+        console.error("Error submitting settings:", error);
+    });
+  }
+
+  function submitRoleSettings(isNew = false) {
+    var submitPromise;
+    if (isNew) {
+        submitPromise = submitSettingsModal("roles", "[name=roleId]", isNew, "/api/rbac/");
+    } else {
+        submitPromise = submitSettingsModal("role", "[name=roleId]", isNew, "/api/rbac/");
+    }
+
+    submitPromise.then(() => {
+        $("#SettingsModal").modal("hide");
+        $("#rolesTable").bootstrapTable("refresh");
+    }).catch((error) => {
+        console.error("Error submitting settings:", error);
+    });
+  }
+
   // ** ROLES SETTINGS MODAL ** //
 
   // Callback from `buildRoleSettingsModal`
@@ -1987,38 +2020,6 @@ $(document).on('shown.bs.modal', '.modal', function () {
     $("[name=roleId]").val("").val(row[0].id);
     $("[name=roleName]").val("").val(row[0].name);
     $("[name=roleDescription]").val("").val(row[0].description);
-  }
-
-  function submitRoleSettings(isNew = false) {
-    let name = $("[name=roleName]").val();
-    let description = $("[name=roleDescription]").val();
-    let data = {
-      name: name,
-      description: description
-    };
-    if (isNew) {
-      var method = "POST";
-      var api = "/api/rbac/roles";
-      var msg = "add new role";
-    } else {
-      let id = $("[name=roleId]").val();
-      var method = "PATCH";
-      var api = "/api/rbac/role/"+id;
-      var msg = "edit "+name;
-    }
-    queryAPI(method,api,data).done(function(data) {
-      if (data["result"] == "Success") {
-        toast(data["result"],"",data["message"],"success");
-        $("#rolesTable").bootstrapTable("refresh");
-        $("#SettingsModal").modal("hide");
-      } else if (data["result"] == "Error") {
-        toast(data["result"],"",data["message"],"danger","30000");
-      } else {
-        toast("Error","","Failed to "+msg,"danger");
-      }
-    }).fail(function() {
-      toast("Error", "", "Failed to "+msg,"danger");
-    });;
   }
 
   // ** GROUPS SETTINGS MODAL ** //
@@ -2067,38 +2068,6 @@ $(document).on('shown.bs.modal', '.modal', function () {
           toast("Error", "", "Failed to remove " + targetid + " from " + group, "danger");
       });
     });
-  }
-
-  function submitGroupSettings(isNew = false) {
-    var name = $("[name=groupName]").val();
-    var description = $("[name=groupDescription]").val();
-    var data = {
-      name: name,
-      description: description
-    };
-    if (isNew) {
-      var method = "POST";
-      var api = "/api/rbac/groups";
-      var msg = "add new group";
-    } else {
-      var id = $("[name=groupId]").val();
-      var method = "PATCH";
-      var api = "/api/rbac/group/"+id;
-      var msg = "edit "+name;
-    }
-    queryAPI(method,api,data).done(function(data) {
-      if (data["result"] == "Success") {
-        toast(data["result"],"",data["message"],"success");
-        $("#groupsTable").bootstrapTable("refresh");
-        $("#SettingsModal").modal("hide");
-      } else if (data["result"] == "Error") {
-        toast(data["result"],"",data["message"],"danger","30000");
-      } else {
-        toast("Error","","Failed to "+msg,"danger");
-      }
-    }).fail(function() {
-      toast("Error", "", "Failed to "+msg,"danger");
-    });;
   }
 
   // ** USERS SETTINGS MODAL ** //

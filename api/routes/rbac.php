@@ -51,9 +51,9 @@ $app->post('/rbac/groups', function ($request, $response, $args) {
 	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-RBAC")) {
         $data = $phpef->api->getAPIRequestData($request);
-        if (isset($data['name'])) {
-            $Description = $data['description'] ?? null;
-            $phpef->auth->newRBACGroup($data['name'],$Description);
+        if (isset($data['groupName'])) {
+            $Description = $data['groupDescription'] ?? null;
+            $phpef->auth->newRBACGroup($data['groupName'],$Description);
         }
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -67,8 +67,8 @@ $app->patch('/rbac/group/{id}', function ($request, $response, $args) {
     $data = $phpef->api->getAPIRequestData($request);
     if ($phpef->auth->checkAccess("ADMIN-RBAC")) {
         if (isset($args['id'])) {
-            $GroupName = $data['name'] ?? null;
-            $Description = $data['description'] ?? null;
+            $GroupName = $data['groupName'] ?? null;
+            $Description = $data['groupDescription'] ?? null;
             $Key = $data['key'] ?? null;
             $Value = $data['value'] ?? null;
             if (!$GroupName && !$Description && !$Key && !$Value) {
@@ -127,9 +127,9 @@ $app->post('/rbac/roles', function ($request, $response, $args) {
 	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-RBAC")) {
         $data = $phpef->api->getAPIRequestData($request);
-        if (isset($data['name'])) {
-            $Description = $data['description'] ?? null;
-            $phpef->auth->newRBACRole($data['name'],$Description);
+        if (isset($data['roleName'])) {
+            $Description = $data['roleDescription'] ?? null;
+            $phpef->auth->newRBACRole($data['roleName'],$Description);
         }
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -143,8 +143,8 @@ $app->patch('/rbac/role/{id}', function ($request, $response, $args) {
     if ($phpef->auth->checkAccess("ADMIN-RBAC")) {
         $data = $phpef->api->getAPIRequestData($request);
         if (isset($args['id'])) {
-            $RoleName = $data['name'] ?? null;
-            $RoleDescription = $data['description'] ?? null;
+            $RoleName = $data['roleName'] ?? null;
+            $RoleDescription = $data['roleDescription'] ?? null;
             $phpef->auth->updateRBACRole($args['id'],$RoleName,$RoleDescription);
         } else {
             $phpef->api->setAPIResponse('Error','id missing from request',400);
