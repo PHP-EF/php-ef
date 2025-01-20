@@ -935,11 +935,13 @@ document.addEventListener('DOMContentLoaded', function() {
     $(this).parent().parent().parent().parent().next().find(targetTab).addClass('active');
   });
 
+  // Listener to remove active class from dropdown tabs (For mobile)
   $("#page-content").on("click", ".nav-tabs .d-lg-none .dropdown a", function(event) {
     event.preventDefault();
     $(this).parent().parent().find(".active").removeClass('active');
   });
 
+  // Listener to add changed class to main settings elements
   $("#page-content").on('change', '.info-field', function(event) {
       const elementName = $(this).data('label');
       if (!changedSettingsElements.has(elementName)) {
@@ -949,6 +951,7 @@ document.addEventListener('DOMContentLoaded', function() {
       $(this).addClass("changed");
   });
 
+  // Listener to add changed class to modal settings elements
   $("body").on('change', '#SettingsModal .info-field', function(event) {
     const elementName = $(this).data('label');
     if (!changedModalSettingsElements.has(elementName)) {
@@ -956,7 +959,18 @@ document.addEventListener('DOMContentLoaded', function() {
         changedModalSettingsElements.add(elementName);
     }
     $(this).addClass("changed");
-});
+  });
+
+  $(".hover-target").hover(
+    function() {
+        $(".popover").css({
+            display: "block",
+        });
+    },
+    function() {
+        $(".popover").hide();
+    }
+  );
   
   // Set Sidebar State for Mobile
   if (isMobile()) {
@@ -1091,17 +1105,6 @@ $(document).on('shown.bs.modal', '.modal', function () {
     return `<div class="${flex}">` + uList + group + '</div>'; // Wrapped in a flex container for alignment
   }
   
-  // document.addEventListener('DOMContentLoaded', function () {
-  //   const dropdownItems = document.querySelectorAll('.dropdown-item');
-  //   const dropdownButton = document.getElementById('configTabsDropdown');
-  
-  //   dropdownItems.forEach(item => {
-  //     item.addEventListener('click', function () {
-  //       dropdownButton.textContent = this.textContent;
-  //     });
-  //   });
-  // });
-
   function buildFormItem(item){
     var placeholder = (item.placeholder) ? ' placeholder="'+item.placeholder+'"' : '';
     var id = (item.id) ? ' id="'+item.id+'"' : '';
@@ -1364,9 +1367,8 @@ $(document).on('shown.bs.modal', '.modal', function () {
 
   window.userActionEvents = {
     "click .edit": function (e, value, row, index) {
-      listUserConfig(row);
-      listGroups(row);
-      $("#editUserModal").modal("show");
+      buildUserSettingsModal(row);
+      $("#SettingsModal").modal("show");
     },
     "click .delete": function (e, value, row, index) {
       if(confirm("Are you sure you want to delete "+row.username+" from the list of Users? This is irriversible.") == true) {
@@ -1529,8 +1531,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
         text: "Add User",
         icon: "bi-person-fill-add",
         event: function() {
-          $("#newUserModal").modal("show");
-          $("#newUserModal input").val("");
+          buildNewUserSettingsModal();
         },
         attributes: {
           title: "Add a new user",
@@ -1718,7 +1719,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
     $("#SettingsModal").modal("show");
   }
 
-  function submitSettingsModal(type, element = "#modalItemID", isNew = false) {
+  function submitSettingsModal(type, element = "#modalItemID", isNew = false, apiStub = null) {
     var serializedArray = $("#SettingsModal .changed[type!=checkbox]").serializeArray();
 
     // Include unchecked checkboxes in the formData
@@ -1755,11 +1756,12 @@ $(document).on('shown.bs.modal', '.modal', function () {
         }
     });
 
+    var apiStub = apiStub ?? '/api/config/';
     if (isNew) {
-        var api = `/api/config/${type}s`;
+        var api = `${apiStub}${type}`;
         var method = "POST";
     } else {
-        var api = `/api/config/${type}s/` + $(element).val();
+        var api = `${apiStub}${type}/` + $(element).val();
         var method = "PATCH";
     }
 
@@ -1787,7 +1789,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
       apiUrl: row.api,
       configUrl: `/api/config/plugins/${row.name}`,
       name: row.name,
-      saveFunction: `submitSettingsModal("plugin");`,
+      saveFunction: `submitSettingsModal("plugins");`,
       labelPrefix: "Plugin",
       dataLocation: "data"
     });
@@ -1798,7 +1800,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
       apiUrl: `/api/settings/widgets/${row.info.name}`,
       configUrl: `/api/config/widgets/${row.info.name}`,
       name: row.info.name,
-      saveFunction: `submitSettingsModal("widget");`,
+      saveFunction: `submitSettingsModal("widgets");`,
       labelPrefix: "Widget",
       dataLocation: "data.Settings"
     });
@@ -1861,7 +1863,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
     noTabs: true,
     callback:  "populateGroupSettingsModal(row)"
   });
-}
+  }
 
   function buildNewGroupSettingsModal() {
     buildSettingsModal([], {
@@ -1872,6 +1874,28 @@ $(document).on('shown.bs.modal', '.modal', function () {
       labelPrefix: "Group",
       dataLocation: "data",
       noTabs: true
+    });
+  }
+
+  function buildUserSettingsModal(row) {
+    buildSettingsModal(row, {
+      apiUrl: `/api/settings/user`,
+      name: row.Name,
+      saveFunction: `submitUserSettings();`,
+      labelPrefix: "User",
+      dataLocation: "data",
+      callback:  "populateUserSettingsModal(row)"
+    });
+  }
+
+  function buildNewUserSettingsModal() {
+    buildSettingsModal([], {
+      apiUrl: `/api/settings/newuser`,
+      configUrl: null,
+      name: "New User",
+      saveFunction: `submitUserSettings(true);`,
+      labelPrefix: "User",
+      dataLocation: "data"
     });
   }
 
@@ -1898,16 +1922,32 @@ $(document).on('shown.bs.modal', '.modal', function () {
         }
     });
 
-    let submitPromise;
+    var submitPromise;
     if (isNew) {
-        submitPromise = submitSettingsModal("dashboard", `[name="Name"]`, isNew);
+        submitPromise = submitSettingsModal("dashboards", `[name="Name"]`, isNew);
     } else {
-        submitPromise = submitSettingsModal("dashboard");
+        submitPromise = submitSettingsModal("dashboards");
     }
 
     submitPromise.then(() => {
         $("#SettingsModal").modal("hide");
         $("#dashboardsTable").bootstrapTable("refresh");
+    }).catch((error) => {
+        console.error("Error submitting settings:", error);
+    });
+  }
+
+  function submitUserSettings(isNew = false) {
+    var submitPromise;
+    if (isNew) {
+        submitPromise = submitSettingsModal("users", "[name=userId]", isNew, "/api/");
+    } else {
+        submitPromise = submitSettingsModal("user", "[name=userId]", isNew, "/api/");
+    }
+
+    submitPromise.then(() => {
+        $("#SettingsModal").modal("hide");
+        $("#usersTable").bootstrapTable("refresh");
     }).catch((error) => {
         console.error("Error submitting settings:", error);
     });
@@ -1971,15 +2011,15 @@ $(document).on('shown.bs.modal', '.modal', function () {
       }
     }
     $("#SettingsModal .list-group .toggle").on("click", function(event) {
-      let id = $("[name=groupId]").val();
-      let group = $("[name=groupName]").val();
-      let toggle = $("#"+event.target.id).prop("checked") ? "enabled" : "disabled";
-      let targetid = event.target.id
-      let data = {
+      var groupid = $("[name=groupId]").val();
+      var group = $("[name=groupName]").val();
+      var toggle = $("#"+event.target.id).prop("checked") ? "enabled" : "disabled";
+      var targetid = event.target.id
+      var data = {
         key: targetid,
         value: toggle
       }
-      queryAPI("PATCH","/api/rbac/group/"+id,data).done(function(data) {
+      queryAPI("PATCH","/api/rbac/group/"+groupid,data).done(function(data) {
         if (data["result"] == "Success") {
           if (toggle == "enabled") {
             toast("Success", "", "Successfully added " + targetid + " to " + group, "success");
@@ -2003,9 +2043,9 @@ $(document).on('shown.bs.modal', '.modal', function () {
   }
 
   function submitGroupSettings(isNew = false) {
-    let name = $("[name=groupName]").val();
-    let description = $("[name=groupDescription]").val();
-    let data = {
+    var name = $("[name=groupName]").val();
+    var description = $("[name=groupDescription]").val();
+    var data = {
       name: name,
       description: description
     };
@@ -2014,7 +2054,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
       var api = "/api/rbac/groups";
       var msg = "add new group";
     } else {
-      let id = $("[name=groupId]").val();
+      var id = $("[name=groupId]").val();
       var method = "PATCH";
       var api = "/api/rbac/group/"+id;
       var msg = "edit "+name;
@@ -2032,6 +2072,76 @@ $(document).on('shown.bs.modal', '.modal', function () {
     }).fail(function() {
       toast("Error", "", "Failed to "+msg,"danger");
     });;
+  }
+
+  // ** USERS SETTINGS MODAL ** //
+
+  // Callback from `buildUserSettingsModal`
+  function populateUserSettingsModal(row) {
+    row = row[0];
+    $("[name=userId]").val(row["id"]);
+    $("[name=userUsername]").val(row["username"]);
+    $("[name=userFirstName]").val(row["firstname"]);
+    $("[name=userLastName]").val(row["surname"]);
+    $("[name=userEmail]").val(row["email"]);
+    $("[name=userType]").val(row["type"]);
+    $("[name=userLastLogin]").val(row["lastlogin"]);
+    $("[name=userPasswordExpires]").val(row["passwordexpires"]);
+    $("[name=userCreated]").val(row["created"]);
+
+    if (row["type"] == "Local") {
+      $("[name=userPassword]").attr("disabled",false);
+      $("[name=userPassword2]").attr("disabled",false);
+    } else {
+      $("[name=userPassword]").attr("disabled",true);
+      $("[name=userPassword2]").attr("disabled",true);
+    }
+
+    var groupsplit = row.groups;
+    if (groupsplit[0] != "") {
+      for (var group in groupsplit) {
+        $("#"+groupsplit[group].replaceAll(" ", "--")).prop("checked", "true");
+      }
+    }
+
+    $("[name=userPassword], [name=userPassword2]").on("change", function() {
+      var password = $("[name=userPassword]").val();
+      var confirmPassword = $("[name=userPassword2]").val();
+
+      if (password !== confirmPassword) {
+        if (password !== "" && confirmPassword !== "") {
+          toast("Warning","","The entered passwords do not match","danger","3000");
+          $("#editUserSubmit").attr("disabled",true);
+          $("[name=userPassword]").css("color","red").css("border-color","red");
+          $("[name=userPassword2]").css("color","red").css("border-color","red");
+        }
+      } else {
+        $("#newUserSubmit").attr("disabled",false);
+        $("[name=userPassword]").css("color","green").css("border-color","green");
+        $("[name=userPassword2]").css("color","green").css("border-color","green");
+      }
+    });
+
+    $("#SettingsModal .list-group .toggle").on("click", function(event) {
+      var userid = $("[name=userId]").val().trim();
+      var data = {
+        groups: $("#SettingsModal .list-group .toggle:checked").map(function() {
+          return this.id.replaceAll("--"," ");
+        }).get().join(",")
+      }
+      queryAPI("PATCH","/api/user/"+userid,data).done(function(data) {
+        if (data["result"] == "Success") {
+          toast(data["result"],"",data["message"],"success");
+          $("#usersTable").bootstrapTable("refresh");
+        } else if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger","30000");
+        } else {
+          toast("Error","","Failed to update user groups","danger","30000");
+        }
+      }).fail(function(data) {
+        toast("API Error","","Failed to update user groups","danger","30000");
+      });
+    });
   }
 
   // ** PLUGINS FUNCTIONS ** //
