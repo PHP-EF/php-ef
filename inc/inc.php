@@ -107,6 +107,11 @@ if (!(isset($SkipCSS))) {
       <!-- Charts -->
       <script src="/assets/js/apexcharts.min.js"></script>
 
+      <!-- ACE -->
+      <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.37.5/src-noconflict/ace.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.37.5/src-noconflict/snippets/python.min.js"></script>
+      <link href="https://cdn.jsdelivr.net/npm/ace-builds@1.37.5/css/ace.min.css" rel="stylesheet">
+
       <!-- Main -->
       <script src="/assets/js/main.js?v'.$phpef->getVersion()[0].'"></script>
       <link href="/assets/css/main.css?v'.$phpef->getVersion()[0].'" rel="stylesheet">

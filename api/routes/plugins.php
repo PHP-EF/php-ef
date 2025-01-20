@@ -84,8 +84,7 @@ $app->post('/plugins/repositories', function ($request, $response, $args) {
 	if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
 		$data = $phpef->api->getAPIRequestData($request);
 		if (isset($data['list'])) {
-			$config = $phpef->config->get();
-			$phpef->api->setAPIResponseData($phpef->config->setRepositories($config,$data['list']));
+			$phpef->api->setAPIResponseData($phpef->config->setRepositories($data['list']));
 		} else {
 			$phpef->api->setAPIResponse('Error','List missing from request');
 		}

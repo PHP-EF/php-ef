@@ -12,20 +12,41 @@ class core {
 class Config {
   private $configFile;
   private $api;
+  private $config;
 
   public function __construct($conf,$api) {
     $this->configFile = $conf;
     $this->api = $api;
+    $this->checkConfig();
+    $this->cacheConfig();
+  }
+
+  private function checkConfig() {
+    if (!file_exists($this->configFile)) {
+      copy(dirname(__DIR__,1) . DIRECTORY_SEPARATOR . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.json.example',$this->configFile);
+      if ($this->cacheConfig()) {
+        $salt = bin2hex(random_bytes(16));
+        $this->set($config, array("Security" => array("salt" => $salt)));
+      }
+    }
+  }
+
+  private function cacheConfig() {
+    try {
+      $this->config = json_decode(file_get_contents($this->configFile),true);
+      return true;
+    } catch (Exception $e) {
+      return false;
+    }
   }
 
   public function get($Section = null,$Option = null) {
-    $config_json = json_decode(file_get_contents($this->configFile),true); //Config file that has configurations for site.
     if($Section && $Option) {
-      return $config_json[$Section][$Option] ?? null;
+      return $this->config[$Section][$Option] ?? null;
     } elseif($Section) {
-      return $config_json[$Section] ?? null;
+      return $this->config[$Section] ?? null;
     } else {
-      return $config_json ?? null;
+      return $this->config ?? null;
     }
   }
 
@@ -43,6 +64,7 @@ class Config {
     }
     $this->api->setAPIResponseMessage('Successfully updated configuration');
     file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    $this->cacheConfig();
   }
 
   public function removeConfig(&$config, $section = null, $option = null) {
@@ -58,22 +80,40 @@ class Config {
     }
     file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     $this->api->setAPIResponseMessage('Successfully removed configuration');
+    $this->cacheConfig();
     return true;
   }
 
   public function set(&$config, $data) {
-      $this->setConfig($config, $data);
+    $config = $this->get();
+    $this->setConfig($config, $data);
   }
 
-  public function setPlugin(&$config, $data, $plugin) {
-      $this->setConfig($config, $data, 'Plugins', $plugin);
+  public function setPlugin($data, $plugin) {
+    $config = $this->get();
+    $this->setConfig($config, $data, 'Plugins', $plugin);
   }
 
-  public function setWidget(&$config, $data, $widget) {
-      $this->setConfig($config, $data, 'Widgets', $widget);
+  public function setWidget($data, $widget) {
+    $config = $this->get();
+    $this->setConfig($config, $data, 'Widgets', $widget);
   }
 
   public function setDashboard(&$config, $data, $dashboard) {
+    // Check if Widgets key exists in the current config
+    if (isset($config['Dashboards'][$dashboard]['Widgets'])) {
+        // Get the current widgets
+        $currentWidgets = $config['Dashboards'][$dashboard]['Widgets'];
+        // Get the new widgets
+        $newWidgets = isset($data['Widgets']) ? $data['Widgets'] : [];
+        // Remove widgets that are not in the new data
+        foreach ($currentWidgets as $key => $value) {
+            if (!array_key_exists($key, $newWidgets)) {
+                unset($config['Dashboards'][$dashboard]['Widgets'][$key]);
+            }
+        }
+    }
+
     foreach ($data as $key => $value) {
         if ($key === 'Widgets') {
             // Ensure Widgets are placed correctly
@@ -89,12 +129,15 @@ class Config {
     }
     $this->api->setAPIResponseMessage('Successfully updated dashboard configuration');
     file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    $this->cacheConfig();
   }
 
   public function setRepositories(&$config,$list) {
+    $config = $this->get();
     $config['PluginRepositories'] = $list;
     $this->api->setAPIResponseMessage('Successfully updated repository configuration');
     file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+    $this->cacheConfig();
   }
 }
 

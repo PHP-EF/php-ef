@@ -14,8 +14,8 @@ trait Settings {
                 $this->settingsOption('input', 'Styling[websiteTitle]', ['label' => 'Website Title']),
             ),
             'Homepage' => array(
-				$this->settingsOption('code-editor', 'Styling[html][homepage]', ['label' => 'Homepage HTML', 'mode' => 'html']),
-                $this->settingsOption('code-editor', 'Styling[html][about]', ['label' => 'About HTML', 'mode' => 'html']),
+				$this->settingsOption('code-editor', 'Styling[html][homepage]', ['label' => 'Homepage HTML', 'mode' => 'html', 'value' => $this->config->get('Styling', 'html')['homepage']]),
+                $this->settingsOption('code-editor', 'Styling[html][about]', ['label' => 'About HTML', 'mode' => 'html', 'value' => $this->config->get('Styling', 'html')['about']]),
             )
 	    );
     }
