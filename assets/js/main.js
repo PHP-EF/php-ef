@@ -1908,7 +1908,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
   function buildUserSettingsModal(row) {
     buildSettingsModal(row, {
       apiUrl: `/api/settings/user`,
-      name: row.Name,
+      name: row.username,
       saveFunction: `submitUserSettings();`,
       labelPrefix: "User",
       dataLocation: "data",
