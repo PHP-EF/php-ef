@@ -2,7 +2,7 @@ vendor/*
 files/*
 inc/logs/*
 inc/plugins/*
-!inc/plugins/Example
+!inc/plugins/index.php
 inc/config/*
 !config.json.example
 !files/index.php

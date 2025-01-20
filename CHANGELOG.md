@@ -1,3 +1,12 @@
+## v0.7.6
+- Major overhaul to UX/UI
+
+## v0.7.5
+- Various improvements and bugfixes
+
+## v0.7.4
+- Move password inputs to encrypted fields
+
 ## v0.7.3
 - Various style changes & improvements
 

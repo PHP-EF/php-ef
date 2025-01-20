@@ -1,8 +1,8 @@
 <?php
 // Define the method (get/post/put/patch/delete/etc.)
 $app->get('/helloworld', function ($request, $response, $args) {
-	// Instantiate ib Class
-	$ib = ($request->getAttribute('ib')) ?? new ib();
+	// Instantiate phpef Class
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 
 	// API Endpoint Code
 	$result = 'Success';
@@ -13,7 +13,7 @@ $app->get('/helloworld', function ($request, $response, $args) {
 	);
 
 	// Set the response
-	$ib->api->setAPIResponse($result,$message,$responseCode,$data);
+	$phpef->api->setAPIResponse($result,$message,$responseCode,$data);
 
 	// Return the response
 	$response->getBody()->write(jsonE($GLOBALS['api']));

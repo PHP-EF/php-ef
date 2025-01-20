@@ -2,7 +2,7 @@
     "System": {
         "logfilename": "php-ef",
         "logdirectory": "logs/",
-        "loglevel": "Debug",
+        "loglevel": "Info",
         "logretention": "30",
         "CURL-Timeout": "180",
         "CURL-ConnectTimeout": "90"
@@ -26,7 +26,7 @@
         }
     },
     "Security": {
-        "salt": "somesupersecurepasswordhere"
+        "salt": "somesupersecurepasswordhere",
         "Headers": {
             "X-Frame-Options": "",
             "Frame-Source": ""
@@ -83,6 +83,9 @@
             "Groups": "groups"
         }
     },
+    "Dashboards": {},
+    "Widgets": {},
     "Plugins": {},
-    "PluginRepositories": []
+    "PluginRepositories": [],
+    "PluginMarketplaceEnabled": true
 }

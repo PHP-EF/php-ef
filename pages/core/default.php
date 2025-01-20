@@ -2,7 +2,7 @@
   return '
   <div class="container">
     <div class="row">
-    '.$ib->config->get('Styling')['html']['homepage'].'
+    '.$phpef->config->get('Styling')['html']['homepage'].'
     </div>
     <hr>
 
@@ -16,7 +16,7 @@
       </div>
       <div class="mb-2">
         <small>
-          <span class="fa-solid fa-code-compare"></span> PHP-EF: v'.$ib->getVersion()[0].' | <span class="fa-solid fa-database"></span> Database: v'.$ib->dbHelper->getDatabaseVersion().'
+          <span class="fa-solid fa-code-compare"></span> PHP-EF: v'.$phpef->getVersion()[0].' | <span class="fa-solid fa-database"></span> Database: v'.$phpef->dbHelper->getDatabaseVersion().'
           </a>
         </small>
       </div>

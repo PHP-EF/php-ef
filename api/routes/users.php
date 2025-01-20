@@ -1,8 +1,8 @@
 <?php
 $app->get('/users', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->auth->checkAccess("ADMIN-USERS")) {
-        $ib->api->setAPIResponseData($ib->auth->getAllUsers());
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-USERS")) {
+        $phpef->api->setAPIResponseData($phpef->auth->getAllUsers());
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
@@ -11,17 +11,17 @@ $app->get('/users', function ($request, $response, $args) {
 });
 
 $app->post('/users', function ($request, $response, $args) {
-    $ib = ($request->getAttribute('ib')) ?? new ib();
-    $data = $ib->api->getAPIRequestData($request);
-    if ($ib->auth->checkAccess("ADMIN-USERS")) {
-        $UN = $data['un'] ?? exit($ib->api->setAPIResponse('Error','Username missing from request'));
-        $PW = $data['pw'] ?? exit($ib->api->setAPIResponse('Error','Password missing from request'));
-        $FN = $data['fn'] ?? null;
-        $SN = $data['sn'] ?? null;
-        $EM = $data['em'] ?? null;
+    $phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    $data = $phpef->api->getAPIRequestData($request);
+    if ($phpef->auth->checkAccess("ADMIN-USERS")) {
+        $UN = $data['userUsername'] ?? exit($phpef->api->setAPIResponse('Error','Username missing from request'));
+        $PW = $data['userPassword'] ?? exit($phpef->api->setAPIResponse('Error','Password missing from request'));
+        $FN = $data['userFirstName'] ?? null;
+        $SN = $data['userLastName'] ?? null;
+        $EM = $data['userEmail'] ?? null;
         $Groups = $data['groups'] ?? null;
         $Expire = $data['expire'] ?? 'false';
-        $ib->auth->newUser($UN,$PW,$FN,$SN,$EM,$Groups,'Local',$Expire);
+        $phpef->auth->newUser($UN,$PW,$FN,$SN,$EM,$Groups,'Local',$Expire);
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
@@ -30,23 +30,19 @@ $app->post('/users', function ($request, $response, $args) {
 });
 
 $app->patch('/user/{id}', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    $data = $ib->api->getAPIRequestData($request);
-    if ($ib->auth->checkAccess("ADMIN-USERS")) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    $data = $phpef->api->getAPIRequestData($request);
+    if ($phpef->auth->checkAccess("ADMIN-USERS")) {
         if (isset($args['id'])) {
-            $FN = $data['fn'] ?? null;
-            $SN = $data['sn'] ?? null;
-            $EM = $data['em'] ?? null;
-            $UN = $data['un'] ?? null;
-            $PW = $data['pw'] ?? null;
+            $FN = $data['userFirstName'] ?? null;
+            $SN = $data['userLastName'] ?? null;
+            $EM = $data['userEmail'] ?? null;
+            $UN = $data['userUsername'] ?? null;
+            $PW = $data['userPassword'] ?? null;
             $Groups = $data['groups'] ?? null;
-            // if (!$FN && !$SN && !$EM && !$UN && !$PW && $Groups) {
-            //     $ib->api->setAPIResponseMessage('Nothing to update');
-            // } else {
-                $ib->auth->updateUser($args['id'],$UN,$PW,$FN,$SN,$EM,$Groups);
-            // }
+            $phpef->auth->updateUser($args['id'],$UN,$PW,$FN,$SN,$EM,$Groups);
         } else {
-            $ib->api->setAPIResponse('Error','id missing from request',400);
+            $phpef->api->setAPIResponse('Error','id missing from request',400);
         }
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -56,12 +52,12 @@ $app->patch('/user/{id}', function ($request, $response, $args) {
 });
 
 $app->delete('/user/{id}', function ($request, $response, $args) {
-	$ib = ($request->getAttribute('ib')) ?? new ib();
-    if ($ib->auth->checkAccess("ADMIN-USERS")) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-USERS")) {
         if (isset($args['id'])) {
-            $ib->auth->removeUser($args['id']);
+            $phpef->auth->removeUser($args['id']);
         } else {
-            $ib->api->setAPIResponse('Error','id missing from request',400);
+            $phpef->api->setAPIResponse('Error','id missing from request',400);
         }
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));

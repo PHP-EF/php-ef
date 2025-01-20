@@ -1,11 +1,11 @@
 <?php
-if ($ib->auth->checkAccess("REPORT-TRACKING") == false) {
-  $ib->api->setAPIResponse('Error','Unauthorized',401);
+if ($phpef->auth->checkAccess("REPORT-TRACKING") == false) {
+  $phpef->api->setAPIResponse('Error','Unauthorized',401);
   return false;
 }
 return '
 <main id="main" class="main">
-  <section class="section reporting-section">
+  <section class="section reporting-section px-3">
     <div class="row">
       <!-- Columns -->
       <div class="col-lg-12">
@@ -271,11 +271,6 @@ return '
         },{
           field: "path",
           title: "Path",
-          sortable: true,
-          filterControl: "select"
-        },{
-          field: "pageCategory",
-          title: "Page Category",
           sortable: true,
           filterControl: "select"
         },{

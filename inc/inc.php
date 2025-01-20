@@ -1,6 +1,11 @@
 <?php
+session_start(); // Start a PHP session
+
 // Set error log for background tasks
 ini_set('error_log',__DIR__.'/logs/php.error.log');
+
+// Set Global Plugins Var
+$GLOBALS['plugins'] = [];
 
 // Include Composer
 require_once(__DIR__.'/../vendor/autoload.php');
@@ -16,34 +21,32 @@ foreach (glob(__DIR__.'/classes/*.php') as $class) {
 }
 
 // Instantiate Class Builder
-$ib = new ib();
+$phpef = new phpef();
 
-// Include all Plugin Classes
+// Include all Plugin Classes & Widgets
 if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'plugins')) {
 	$folder = __DIR__ . DIRECTORY_SEPARATOR . 'plugins';
 	$directoryIterator = new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS);
 	$iteratorIterator = new RecursiveIteratorIterator($directoryIterator);
 	foreach ($iteratorIterator as $info) {
-		if ($info->getFilename() == 'plugin.php') {
+		if ($info->getFilename() == 'plugin.php' || $info->getFilename() == 'widgets.php' ) {
 			require_once $info->getPathname();
 		}
 	}
 }
 
-// ** Set Headers ** //
-// X-Frame-Options
-$XFrameOptions = $ib->config->get('Security', 'Headers')['X-Frame-Options'] ?? 'SAMEORIGIN';
-$iFrameLinks = $ib->pages->getiFrameLinks();
-$AllowList = [];
-if (!empty($iFrameLinks)) {
-  $AllowList = array_column($iFrameLinks,'Name');
+session_write_close(); // Save PHP Session
+
+// Include Widgets
+foreach (glob(__DIR__.'/widgets/*.php') as $widget) {
+  require_once $widget; // Include each PHP file
 }
-$FrameSource = $ib->config->get('Security', 'Headers')['Frame-Source'] ?? implode(' ',$AllowList);
-header('X-Frame-Options: ' . $XFrameOptions);
-header("Content-Security-Policy:  default-src 'self'; script-src 'self' https://code.jquery.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rawgit.com https://code.jquery.com https://unpkg.com 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self' https://plex.tv; object-src 'none'; frame-ancestors 'self'; frame-src 'self' $FrameSource; base-uri 'self'; form-action 'self';");
+
+// ** Set CSP / Frame Headers ** //
+getSecureHeaders();
 
 if (!(isset($SkipCSS))) {
-  $faviconPath = $ib->config->get('Styling', 'favicon')['Image'];
+  $faviconPath = $phpef->config->get('Styling', 'favicon')['Image'];
   $faviconPath = $faviconPath ? $faviconPath : '/assets/images/favicon.ico';
     echo '
     <head>
@@ -59,15 +62,27 @@ if (!(isset($SkipCSS))) {
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
       <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
       <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet" crossorigin="anonymous">
       <link rel="stylesheet" href="https://rawgit.com/vitalets/x-editable/master/dist/bootstrap3-editable/css/bootstrap-editable.css" crossorigin="anonymous">
       <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
       <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.min.css" rel="stylesheet">
 
+      <!-- LazyLoad -->
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.lazy/1.7.10/jquery.lazy.min.js"></script>
+
       <!-- datetimepicker -->
       <script src="/assets/js/jquery.datetimepicker.full.min.js"></script>
       <link rel="stylesheet" href="/assets/css/jquery.datetimepicker.css">
+
+      <!-- Dropzone -->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css">
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"></script>
+
+      <!-- Dynamic Select -->
+      <link rel="stylesheet" href="/assets/css/dynamic-select.css">
+      <script src="/assets/js/dynamic-select.js"></script>
 
       <!-- Bootstrap-Table -->
       <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.24.0/dist/bootstrap-table.min.js"></script>
@@ -92,9 +107,14 @@ if (!(isset($SkipCSS))) {
       <!-- Charts -->
       <script src="/assets/js/apexcharts.min.js"></script>
 
+      <!-- ACE -->
+      <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.37.5/src-noconflict/ace.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.37.5/src-noconflict/snippets/python.min.js"></script>
+      <link href="https://cdn.jsdelivr.net/npm/ace-builds@1.37.5/css/ace.min.css" rel="stylesheet">
+
       <!-- Main -->
-      <script src="/assets/js/main.js?v'.$ib->getVersion()[0].'"></script>
-      <link href="/assets/css/main.css?v'.$ib->getVersion()[0].'" rel="stylesheet">
+      <script src="/assets/js/main.js?v'.$phpef->getVersion()[0].'"></script>
+      <link href="/assets/css/main.css?v'.$phpef->getVersion()[0].'" rel="stylesheet">
 
     </head>
     ';

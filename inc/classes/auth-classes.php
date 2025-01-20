@@ -56,6 +56,9 @@ class CoreJwt {
 }
 
 class Auth {
+  // Traits //
+  Use Common;
+
   private $db;
   private $config;
   private $logging;
@@ -283,19 +286,19 @@ class Auth {
         $prepare[] = 'username = :username';
         $execute[':username'] = $username;
       }
-      if (!empty($firstname)) {
+      if (!empty($firstname) || $firstname === "") {
         $prepare[] = 'firstname = :firstname';
         $execute[':firstname'] = $firstname;
       }
-      if (!empty($surname)) {
+      if (!empty($surname) || $surname === "") {
         $prepare[] = 'surname = :surname';
         $execute[':surname'] = $surname;
       }
-      if (!empty($email)) {
+      if (!empty($email) || $email === "") {
         $prepare[] = 'email = :email';
         $execute[':email'] = $email;
       }
-      if (!empty($groups) || $groups == "") {
+      if (!empty($groups) || $groups === "") {
         $prepare[] = 'groups = :groups';
         $execute[':groups'] = $groups;
       }
@@ -492,7 +495,13 @@ class Auth {
         ldap_set_option($ldapconn, LDAP_OPT_REFERRALS, 0);
 
         // Authenticate as service account
-        $service_bind = @ldap_bind($ldapconn, $config['service_dn'], $config['service_password']);
+        try {
+          $service_password = decrypt($config['service_password'],$this->config->get("Security","salt")); 
+        } catch (Exception $e) {
+          $this->logging->writeLog('LDAP','Failed to decrypt LDAP Service Password','error');
+          return false;
+        }
+        $service_bind = @ldap_bind($ldapconn, $config['service_dn'], $service_password);
         if (!$service_bind) {
             ldap_unbind($ldapconn);
             return false;
@@ -563,7 +572,7 @@ class Auth {
     // Generate JWT token
     $jwt = $this->CoreJwt->generateToken($user['username'], $user['firstname'], $user['surname'], $user['email'], explode(',', $user['groups']), $user['type']);
     // Set JWT as a cookie
-    setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
+    $this->cookie('set','jwt', $jwt, 30); // 30 days
 
     $this->logging->writeLog("Authentication", $user['username']." successfully logged in", "info");
     $this->api->setAPIResponseMessage('Successfully logged in');
@@ -631,7 +640,7 @@ class Auth {
       // Generate JWT token
       $jwt = $this->CoreJwt->generateToken($LoginArr['Username'],$LoginArr['FirstName'],$LoginArr['LastName'],$LoginArr['Email'],$LoginArr['Groups'],$LoginArr['Type']);
       // Set JWT as a cookie
-      setcookie('jwt', $jwt, time() + (86400 * 30), "/"); // 30 days
+      $this->cookie('set','jwt', $jwt, 30); // 30 days
       $this->api->setAPIResponseMessage('Successfully logged in');
       return true;
     }
@@ -738,15 +747,7 @@ class Auth {
   }
 
   public function getAuth() {
-    if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-      $IPAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    } else if (isset($_SERVER['REMOTE_ADDR'])) {
-      $IPAddress = $_SERVER['REMOTE_ADDR'];
-    } else {
-      $IPAddress = "N/A";
-    }
-    $IPAddress = explode(':',$IPAddress)[0];
-
+    $IPAddress = $this->getUserIP();
     if (isset($_COOKIE['jwt'])) {
       $secretKey = $this->config->get()['Security']['salt']; // Change this to a secure key
       if ($this->CoreJwt->isRevoked($_COOKIE['jwt']) == true) {
@@ -820,6 +821,9 @@ class Auth {
           $Type = null;
         }
 
+        // Check if Admin
+        $isAdmin = in_array('Administrators',$Groups) ? true : false;
+
         $AuthResult = array(
           'Authenticated' => true,
           'Username' => $Username,
@@ -829,7 +833,8 @@ class Auth {
           'DisplayName' => $FullName,
           'IPAddress' => $IPAddress,
           'Groups' => $Groups,
-          'Type' => $Type
+          'Type' => $Type,
+          'isAdmin' => $isAdmin
         );
       } else {
         $AuthResult = array(
@@ -1181,5 +1186,21 @@ class Auth {
       ];
     }, $roles));
     return $roleKeyValuePairs;
+  }
+
+  public function getRBACGroupsForMenu($protected = false,$configurable = false) {
+    $groups = array_column($this->getRBACGroups($protected,$configurable),'Name');
+    $groupKeyValuePairs = [];
+    $groupKeyValuePairs[] = [
+      "name" => "None",
+      "value" => ""
+    ];
+    $groupKeyValuePairs = array_merge($groupKeyValuePairs,array_map(function($item) {
+      return [
+        "name" => $item,
+        "value" => $item
+      ];
+    }, $groups));
+    return $groupKeyValuePairs;
   }
 }
