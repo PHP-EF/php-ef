@@ -395,7 +395,8 @@ return '
 </div>
 
 <script>
-  const changedElements = new Set();
+  const changedSettingsElements = new Set();
+  const changedModalSettingsElements = new Set();
   var imagesLoaded = false;
   var tabsLoaded = [];
   var selectWithTableArr = {};
@@ -543,7 +544,7 @@ return '
 
   $("#submitConfig").click(function(event) {
     event.preventDefault();
-    var formData = $(".info-field.changed").serializeArray();
+    var formData = $("#page-content .info-field.changed").serializeArray();
     
     // Include unchecked checkboxes in the formData
     $("input.info-field.changed[type=checkbox]").each(function() {
@@ -583,7 +584,7 @@ return '
             if (data.result === "Success") {
                 toast("Success", "", "Successfully saved configuration", "success");
                 $(".info-field.changed").removeClass("changed");
-                changedElements.clear();
+                changedSettingsElements.clear();
             } else if (data.result === "Error") {
                 toast("Error", "", "Failed to save configuration", "danger");
             } else {

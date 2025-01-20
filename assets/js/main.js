@@ -942,14 +942,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
   $("#page-content").on('change', '.info-field', function(event) {
       const elementName = $(this).data('label');
-      console.log("Element name:", elementName); // Debugging statement
-
-      if (!changedElements.has(elementName)) {
+      if (!changedSettingsElements.has(elementName)) {
           toast("Configuration", "", elementName + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
-          changedElements.add(elementName);
+          changedSettingsElements.add(elementName);
       }
       $(this).addClass("changed");
   });
+
+  $("body").on('change', '#SettingsModal .info-field', function(event) {
+    const elementName = $(this).data('label');
+    if (!changedModalSettingsElements.has(elementName)) {
+        toast("Configuration", "", elementName + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
+        changedModalSettingsElements.add(elementName);
+    }
+    $(this).addClass("changed");
+});
   
   // Set Sidebar State for Mobile
   if (isMobile()) {
@@ -1638,6 +1645,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
 
   function buildSettingsModal(row, options) {
     // Clear Modal Content
+    changedModalSettingsElements.clear();
     $("#SettingsModalBody").html("");
     // Empty the additional settings array
     selectWithTableArr = {};
@@ -1766,7 +1774,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
             if (data.result === "Success") {
                 toast(data.result, "", data.message, "success");
                 $("#SettingsModal .changed").removeClass("changed");
-                changedElements.clear();
+                changedModalSettingsElements.clear();
             } else {
                 toast(data.result === "Error" ? data.result : "API Error", "", data.message || "Failed to save configuration", "danger", "30000");
             }
