@@ -226,6 +226,7 @@ class Reporting {
         $Select = 'SELECT * FROM '.$table.'';
         break;
     }
+    $Select .= ' ORDER BY '.$dateField.' DESC';
     return $Select;
   }
 }
