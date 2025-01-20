@@ -468,7 +468,64 @@ trait Settings {
     }
 
     public function settingsUser() {
+        $Groups = $this->auth->getRBACGroups(false,true);
+        $GroupItems = array_map(function($item) {
+            return [
+                "id" => $item['id'],
+                "title" => $item['Name'],
+                "description" => $item['Description'],
+                "checkbox" => "true"
+            ];
+        }, $Groups);
 
+
+        $PasswordSettings = array(
+            "Reset Password" => array(
+                $this->settingsOption('password-alt', 'userPassword', ['label' => 'Password']),
+                $this->settingsOption('password-alt', 'userPassword2', ['label' => 'Confirm Password'])
+            )
+        );
+
+        return array(
+            'General' => array(
+                $this->settingsOption('input', 'userUsername', ['label' => 'Username']),
+                $this->settingsOption('input', 'userFirstName', ['label' => 'First Name']),
+                $this->settingsOption('input', 'userLastName', ['label' => 'Surname']),
+                $this->settingsOption('input', 'userEmail', ['label' => 'Email']),
+                $this->settingsOption('hr'),
+                $this->settingsOption('blank'),
+                $this->settingsOption('accordion', 'PasswordReset', ['id' => 'PasswordReset', 'options' => $PasswordSettings, 'override' => 'col-md-12']),
+                $this->settingsOption('input', 'userType', ['label' => 'Type', 'attr' => 'disabled readonly']),
+                $this->settingsOption('input', 'userLastLogin', ['label' => 'Last Login', 'attr' => 'disabled readonly']),
+                $this->settingsOption('input', 'userPasswordExpires', ['label' => 'Password Expires', 'attr' => 'disabled readonly']),
+                $this->settingsOption('input', 'userCreated', ['label' => 'User Created', 'attr' => 'disabled readonly']),
+                $this->settingsOption('input', 'userId', ['attr' => 'hidden'])
+            ),
+            'Groups' => array(
+                $this->settingsOption('listgroup', 'groupList', ['items' => $GroupItems, 'override' => 'col-md-12'])
+            )
+        );
+    }
+
+    public function settingsNewUser() {
+        $PasswordSettings = array(
+            "Reset Password" => array(
+                $this->settingsOption('password-alt', 'userPassword', ['label' => 'Password']),
+                $this->settingsOption('password-alt', 'userPassword2', ['label' => 'Confirm Password'])
+            )
+        );
+
+        return array(
+            'General' => array(
+                $this->settingsOption('input', 'userUsername', ['label' => 'Username']),
+                $this->settingsOption('input', 'userFirstName', ['label' => 'First Name']),
+                $this->settingsOption('input', 'userLastName', ['label' => 'Surname']),
+                $this->settingsOption('input', 'userEmail', ['label' => 'Email']),
+                $this->settingsOption('password-alt', 'userPassword', ['label' => 'Password']),
+                $this->settingsOption('password-alt', 'userPassword2', ['label' => 'Confirm Password']),
+                $this->settingsOption('checkbox', 'expire', ['label' => 'Require Password Reset At First Login'])
+            )
+        );
     }
 
     public function settingsGroup() {

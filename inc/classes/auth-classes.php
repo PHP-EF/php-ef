@@ -286,19 +286,19 @@ class Auth {
         $prepare[] = 'username = :username';
         $execute[':username'] = $username;
       }
-      if (!empty($firstname)) {
+      if (!empty($firstname) || $firstname === "") {
         $prepare[] = 'firstname = :firstname';
         $execute[':firstname'] = $firstname;
       }
-      if (!empty($surname)) {
+      if (!empty($surname) || $surname === "") {
         $prepare[] = 'surname = :surname';
         $execute[':surname'] = $surname;
       }
-      if (!empty($email)) {
+      if (!empty($email) || $email === "") {
         $prepare[] = 'email = :email';
         $execute[':email'] = $email;
       }
-      if (!empty($groups) || $groups == "") {
+      if (!empty($groups) || $groups === "") {
         $prepare[] = 'groups = :groups';
         $execute[':groups'] = $groups;
       }
