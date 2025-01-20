@@ -308,7 +308,7 @@ function getSecureHeaders() {
     };
 
     header('X-Frame-Options: ' . $XFrameOptions);
-    header("Content-Security-Policy:  default-src 'self'; script-src 'self' $ScriptSources 'unsafe-inline' 'unsafe-eval'; style-src 'self' $StyleSources 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' $FontSources; connect-src 'self' $ConnectSource; object-src 'none'; frame-ancestors 'self'; frame-src 'self' $FrameSource; base-uri 'self'; form-action 'self';");
+    header("Content-Security-Policy:  default-src 'self'; script-src 'self' $ScriptSources 'unsafe-inline' 'unsafe-eval'; style-src 'self' $StyleSources 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' $FontSources; connect-src 'self' $ConnectSource; object-src 'none'; frame-ancestors 'self'; frame-src 'self' $FrameSource; base-uri 'self'; form-action 'self'; worker-src 'self' blob:;");
 }
 
 function isFullyQualifiedUrl($url) {

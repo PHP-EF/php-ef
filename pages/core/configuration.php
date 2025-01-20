@@ -395,6 +395,7 @@ return '
 </div>
 
 <script>
+  const changedElements = new Set();
   var imagesLoaded = false;
   var tabsLoaded = [];
   var selectWithTableArr = {};
@@ -419,74 +420,6 @@ return '
       "type": imageType
     }
   }
-
-  $("#SettingsModal").on("click", "#widgetSelect", function () {
-    const widgetsSelect = $("#widgetSelect");
-    const table = $("#widgetSelectTable");
-    const selectedValues = Array.from(widgetsSelect[0].selectedOptions).map(option => option.value);
-    
-    // Get current table data
-    const currentData = table.bootstrapTable("getData");
-    const sizeMap = {};
-
-    // Store current sizes
-    currentData.forEach(row => {
-        const selectElement = table.find(`select[data-label="size"]`).filter((index, element) => $(element).closest("tr").find("td").eq(1).text() === row.name);
-        if (selectElement.length) {
-            sizeMap[row.name] = selectElement.val();
-        }
-    });
-
-    const newData = [];
-
-    // Add or update rows based on selected options
-    Array.from(widgetsSelect[0].selectedOptions).forEach(option => {
-        if (option.value) {
-            const existingRow = currentData.find(row => row.name === option.text);
-            if (existingRow) {
-                newData.push(existingRow);
-            } else {
-                newData.push({
-                    dragHandle: `<span class="dragHandle" style="font-size:22px;">☰</span>`,
-                    name: option.text,
-                    size: `<select class="form-select" data-label="size">
-                            <option value="col-md-1">1</option>
-                            <option value="col-md-2">2</option>
-                            <option value="col-md-3">3</option>
-                            <option value="col-md-4">4</option>
-                            <option value="col-md-5">5</option>
-                            <option value="col-md-6">6</option>
-                            <option value="col-md-7">7</option>
-                            <option value="col-md-8">8</option>
-                            <option value="col-md-9">9</option>
-                            <option value="col-md-10">10</option>
-                            <option value="col-md-11">11</option>
-                            <option value="col-md-12">12</option>
-                        </select>`
-                });
-            }
-        }
-    });
-
-    // Remove rows that are no longer selected
-    currentData.forEach(row => {
-        if (!selectedValues.includes(row.name)) {
-            table.bootstrapTable("remove", { field: "name", values: [row.name] });
-        }
-    });
-
-    // Update table with new data
-    table.bootstrapTable("load", newData);
-
-    // Restore selected values in the dropdowns
-    newData.forEach(row => {
-        const selectElement = table.find(`select[data-label="size"]`).filter((index, element) => $(element).closest("tr").find("td").eq(1).text() === row.name);
-        if (selectElement.length && sizeMap[row.name]) {
-            selectElement.val(sizeMap[row.name]);
-        }
-    });
-  });
-
 
   function loadImageGallery() {
     if (imagesLoaded == false) {
@@ -604,11 +537,6 @@ return '
       updateConfigValues(config);
   }
 
-  $(".info-field").change(function(elem) {
-    toast("Configuration","",$(elem.target.previousElementSibling).text()+" has changed.<br><small>Save configuration to apply changes.</small>","warning");
-    $(this).addClass("changed");
-  });
-
   function encryptData(key, value) {
     return $.post("/api/auth/crypt", { key: value });
   }
@@ -655,6 +583,7 @@ return '
             if (data.result === "Success") {
                 toast("Success", "", "Successfully saved configuration", "success");
                 $(".info-field.changed").removeClass("changed");
+                changedElements.clear();
             } else if (data.result === "Error") {
                 toast("Error", "", "Failed to save configuration", "danger");
             } else {

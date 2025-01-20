@@ -2,9 +2,11 @@
 // Define Custom HTML Widgets
 class CustomHTML implements WidgetInterface {
     private $phpef;
+    private $widgetConfig;
 
     public function __construct($phpef) {
         $this->phpef = $phpef;
+        $this->widgetConfig = $this->phpef->config->get('Widgets','CustomHTML');
     }
 
     public function settings() {
@@ -17,10 +19,11 @@ class CustomHTML implements WidgetInterface {
         ];
         for ($i = 1; $i <= $customHTMLQty; $i++) {
 			$i = sprintf('%02d', $i);
+            $htmlVal = $this->widgetConfig['CustomHTML' . $i] ?? '';
 			$SettingsArr['Settings']['Custom HTML ' . $i] = array(
 				$this->phpef->settingsOption('enable', 'CustomHTML' . $i . 'Enabled'),
 				$this->phpef->settingsOption('auth', 'CustomHTML' . $i . 'Auth', ['label' => 'Role Required']),
-				$this->phpef->settingsOption('code-editor', 'CustomHTML' . $i, ['label' => 'Custom HTML Code', 'mode' => 'html']),
+				$this->phpef->settingsOption('code-editor', 'CustomHTML' . $i, ['label' => 'Custom HTML Code', 'mode' => 'html', 'value' => $htmlVal]),
 			);
 		}
         return $SettingsArr;
@@ -33,11 +36,11 @@ class CustomHTML implements WidgetInterface {
         for ($i = 1; $i <= $customHTMLQty; $i++) {
 			$i = sprintf('%02d', $i);
             $instance = 'CustomHTML'.$i;
-            if (isset($Config[$instance])) {
-                $Auth = $Config[$instance.'Auth'] ?? null;
-                $Enabled = $Config[$instance.'Enabled'] ?? false;
+            if (isset($this->widgetConfig[$instance])) {
+                $Auth = $this->widgetConfig[$instance.'Auth'] ?? null;
+                $Enabled = $this->widgetConfig[$instance.'Enabled'] ?? false;
                 if ($this->phpef->auth->checkAccess($Auth) !== false && $Enabled) {
-                    $return .= $Config[$instance];
+                    $return .= $this->widgetConfig[$instance];
                 }
             }
 		}

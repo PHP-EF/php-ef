@@ -947,6 +947,17 @@ document.addEventListener('DOMContentLoaded', function() {
     event.preventDefault();
     $(this).parent().parent().find(".active").removeClass('active');
   });
+
+  $("#page-content").on('change', '.info-field', function(event) {
+      const elementName = $(this).data('label');
+      console.log("Element name:", elementName); // Debugging statement
+
+      if (!changedElements.has(elementName)) {
+          toast("Configuration", "", elementName + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
+          changedElements.add(elementName);
+      }
+      $(this).addClass("changed");
+  });
   
   // Set Sidebar State for Mobile
   if (isMobile()) {
@@ -1621,10 +1632,6 @@ $(document).on('shown.bs.modal', '.modal', function () {
           const settingsData = dataLocation ? getNestedProperty(settingsResponse, dataLocation) : settingsResponse.data;
           $(elem).html(buildFormGroup(settingsData,noTabs));
           initPasswordToggle();
-          $(".info-field").change(function(elem) {
-            toast("Configuration", "", $(elem.target).data("label") + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
-            $(this).addClass("changed");
-          });
           populateSettingsForm(`#`+id);
         }).fail(function(xhr) {
           logConsole("Error", xhr, "error");
@@ -1666,10 +1673,6 @@ $(document).on('shown.bs.modal', '.modal', function () {
         initPasswordToggle();
         $("#SettingsModalSaveBtn").attr("onclick", saveFunction);
         $("#SettingsModalLabel").text(`${labelPrefix} Settings: ${name}`);
-        $(".info-field").change(function(elem) {
-          toast("Configuration", "", $(elem.target).data("label") + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
-          $(this).addClass("changed");
-        });
 
         if (configUrl) {
           try {
@@ -1771,6 +1774,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
             if (data.result === "Success") {
                 toast(data.result, "", data.message, "success");
                 $("#SettingsModal .changed").removeClass("changed");
+                changedElements.clear();
             } else {
                 toast(data.result === "Error" ? data.result : "API Error", "", data.message || "Failed to save configuration", "danger", "30000");
             }

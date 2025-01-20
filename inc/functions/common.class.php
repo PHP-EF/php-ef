@@ -167,13 +167,34 @@ trait Common {
                         $mode = 'ace/mode/css';
                         break;
                 }
+                $sanitized_name = preg_replace('/[^a-zA-Z0-9_]/', '', $name);
+                $value = $extras['value'] ?? '';
                 $settingMerge = [
                     'type' => 'html',
                     'override' => 12,
                     'label' => 'Custom Code',
                     'html' => '
-                    <textarea class="form-control info-field ' . $name . 'Textarea" name="' . $name . '" data-type="textbox" data-label="'.$name.'"></textarea>
-                    <div id="' . $name . 'Editor" style="height:300px"></div>
+                        <textarea class="form-control info-field ' . $name . 'Textarea" name="' . $name . '" data-type="textbox" data-label="' . $name . '" hidden></textarea>
+                        <div id="' . $sanitized_name . 'Editor" style="height:300px"></div>
+                        <script>
+                            console.log(`[name="' . $name .'"]`);
+                            var ' . $sanitized_name . ' = ace.edit("' . $sanitized_name . 'Editor");
+                            ' . $sanitized_name . '.session.setMode("' . $mode . '");
+                            ' . $sanitized_name . '.setTheme("ace/theme/idle_fingers");
+                            ' . $sanitized_name . '.setShowPrintMargin(false);
+                            
+                            ' . $sanitized_name . '.setValue(`' . $value .'`, -1); // -1 to move cursor to the start
+                            
+                            ' . $sanitized_name . '.session.on("change", function(delta) {
+                                $(`[name="' . $name .'"]`).val(' . $sanitized_name . '.getValue());
+                                $(`[name="' . $name .'"]`).trigger("change");
+                            });
+                
+                            // Update Ace editor when textarea value changes
+                            $(`[name="' . $name .'"]`).on("input", function() {
+                                ' . $sanitized_name . '.setValue($(this).val(), -1); // -1 to move cursor to the start
+                            });
+                        </script>
                     '
                 ];
                 break;

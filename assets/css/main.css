@@ -827,6 +827,14 @@ body.dark-theme .toast small {
   height: 100%;
 }
 
+/* Ace Editor */
+.ace_editor, .ace_editor *{
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", "Droid Sans Mono", "Consolas", monospace !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+}
+
 /* Custom Image Gallery */
 body.light-theme .image-gallery {
   background-color: #faf9f6;
