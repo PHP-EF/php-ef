@@ -208,6 +208,10 @@ function getNoAsync(url) {
   }).responseText);
 }
 
+function encryptData(key, value) {
+  return $.post("/api/auth/crypt", { key: value });
+}
+
 const intToIp4 = int =>
   [(int >>> 24) & 0xFF, (int >>> 16) & 0xFF,
    (int >>> 8) & 0xFF, int & 0xFF].join('.');
@@ -1640,6 +1644,25 @@ $(document).on('shown.bs.modal', '.modal', function () {
         logConsole("Error", e, "error");
       }
     }
+  }
+
+  function populateSettingsForm(elem) {
+    const updateConfigValues = (config, parentKey = "") => {
+      for (const section in config) {
+        const value = config[section];
+        const fullKey = parentKey ? `${parentKey}[${section}]` : section;
+        const selector = `${elem} [name=${$.escapeSelector(fullKey)}]`;
+
+        if (typeof value === "object" && !Array.isArray(value) && value !== null) {
+          updateConfigValues(value, fullKey);
+        } else if (typeof value === "boolean") {
+          $(selector).prop("checked", value);
+        } else {
+          $(selector).val(value);
+        }
+      }
+    };
+    updateConfigValues(config);
   }
 
   // ** BUILD / SUBMIT SETTINGS MODALS ** //

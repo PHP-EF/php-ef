@@ -519,29 +519,6 @@ return '
     });
   }
 
-  function populateSettingsForm(elem) {
-      const updateConfigValues = (config, parentKey = "") => {
-        for (const section in config) {
-          const value = config[section];
-          const fullKey = parentKey ? `${parentKey}[${section}]` : section;
-          const selector = `${elem} [name=${$.escapeSelector(fullKey)}]`;
-
-          if (typeof value === "object" && !Array.isArray(value) && value !== null) {
-            updateConfigValues(value, fullKey);
-          } else if (typeof value === "boolean") {
-            $(selector).prop("checked", value);
-          } else {
-            $(selector).val(value);
-          }
-        }
-      };
-      updateConfigValues(config);
-  }
-
-  function encryptData(key, value) {
-    return $.post("/api/auth/crypt", { key: value });
-  }
-
   $("#submitConfig").click(function(event) {
     event.preventDefault();
     var formData = $("#page-content .info-field.changed").serializeArray();
