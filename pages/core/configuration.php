@@ -708,11 +708,6 @@ return '
     return path.split(".").reduce((acc, part) => acc && acc[part], obj);
   }
 
-
-  // ** USER FUNTIONS ** //
-
-  // ** END USER FUNTIONS ** //
-
   getConfig();
   switchTab("#general");
 </script>
