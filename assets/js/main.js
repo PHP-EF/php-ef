@@ -212,6 +212,10 @@ function encryptData(key, value) {
   return $.post("/api/auth/crypt", { key: value });
 }
 
+function getNestedProperty(obj, path) {
+  return path.split(".").reduce((acc, part) => acc && acc[part], obj);
+}
+
 const intToIp4 = int =>
   [(int >>> 24) & 0xFF, (int >>> 16) & 0xFF,
    (int >>> 8) & 0xFF, int & 0xFF].join('.');
