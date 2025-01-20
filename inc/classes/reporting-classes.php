@@ -83,6 +83,7 @@ class Reporting {
   public function getTrackingRecords($granularity,$filters,$start,$end) {
     $execute = [];
     $Select = $this->sqlSelectByGranularity($granularity,'dateTime','reporting_tracking',$start,$end);
+    $Select .= ' ORDER BY dateTime DESC';
 
     if ($granularity == 'custom') {
       if ($start != null && $end != null) {
@@ -226,7 +227,6 @@ class Reporting {
         $Select = 'SELECT * FROM '.$table.'';
         break;
     }
-    $Select .= ' ORDER BY '.$dateField.' DESC';
     return $Select;
   }
 }

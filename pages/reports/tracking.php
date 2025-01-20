@@ -274,11 +274,6 @@ return '
           sortable: true,
           filterControl: "select"
         },{
-          field: "pageCategory",
-          title: "Page Category",
-          sortable: true,
-          filterControl: "select"
-        },{
           field: "pageName",
           title: "Page Name",
           sortable: true,
