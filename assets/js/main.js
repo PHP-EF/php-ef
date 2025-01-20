@@ -660,19 +660,11 @@ function splitUrl(url) {
 
 // Function to split hash into Page Category and Page Name
 function splitHash(hash) {
-  const pagesMap = hash.match(/^#page=(plugin\/)?([^\/]+)\/([^\/]+)$/);
+  const pagesMap = hash.match(/^#page=([^\/]+)$/);
   if (pagesMap) {
     return {
-      pageCategory: pagesMap[2],
-      pageName: pagesMap[3]
-    };
-  }
-
-  const homeMatch = window.location.pathname.match(/^\/([^\/]+)$/);
-  if (homeMatch) {
-    return {
-      pageCategory: 'home',
-      pageName: homeMatch[1]
+      pageCategory: '',
+      pageName: decodeURI(pagesMap[1])
     };
   }
 

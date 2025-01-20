@@ -4,18 +4,19 @@ trait Settings {
     public function settingsCustomisation() {
         return array(
             'Top Bar' => array(
+                $this->settingsOption('input', 'Styling[websiteTitle]', ['label' => 'Website Title']),
+                $this->settingsOption('blank'),
                 $this->settingsOption('input', 'Styling[logo-sm][Image]', ['label' => 'Logo Image (Small)']),
                 $this->settingsOption('input', 'Styling[logo-sm][CSS]', ['label' => 'Logo CSS (Small)']),
                 $this->settingsOption('input', 'Styling[logo-lg][Image]', ['label' => 'Logo Image (Large)']),
-                $this->settingsOption('input', 'Styling[logo-lg][CSS]', ['label' => 'Logo Image (CSS)']),
+                $this->settingsOption('input', 'Styling[logo-lg][CSS]', ['label' => 'Logo Image (CSS)'])
             ),
             'Favicon' => array(
-                $this->settingsOption('input', 'Styling[favicon][Image]', ['label' => 'Favicon']),
-                $this->settingsOption('input', 'Styling[websiteTitle]', ['label' => 'Website Title']),
+                $this->settingsOption('input', 'Styling[favicon][Image]', ['label' => 'Favicon'])
             ),
             'Homepage' => array(
 				$this->settingsOption('code-editor', 'Styling[html][homepage]', ['label' => 'Homepage HTML', 'mode' => 'html', 'value' => $this->config->get('Styling', 'html')['homepage']]),
-                $this->settingsOption('code-editor', 'Styling[html][about]', ['label' => 'About HTML', 'mode' => 'html', 'value' => $this->config->get('Styling', 'html')['about']]),
+                $this->settingsOption('code-editor', 'Styling[html][about]', ['label' => 'About HTML', 'mode' => 'html', 'value' => $this->config->get('Styling', 'html')['about']])
             )
 	    );
     }
