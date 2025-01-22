@@ -399,14 +399,6 @@ body .popover {
   margin: 0%!important;
 }
 
-/* Toasts */
-.toast-body {
-  color: #000;
-}
-body.dark-theme .toast small {
-  color: #000;
-}
-
 /* Save Button Show */
 .saveBtnShow {
   left: -25px;
