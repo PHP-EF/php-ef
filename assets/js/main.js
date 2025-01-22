@@ -1230,7 +1230,7 @@ document.addEventListener('DOMContentLoaded', function() {
                       <tr>
                           ${item.columns.map(column => `
                               <th data-field="${column.field}" ${column.dataAttributes ? Object.keys(column.dataAttributes).map(key => `data-${key}="${column.dataAttributes[key]}"`).join(' ') : ''}>
-                                  ${column.title}
+                                  ${column.title ?? ''}
                               </th>
                           `).join('')}
                       </tr>
@@ -1552,13 +1552,17 @@ document.addEventListener('DOMContentLoaded', function() {
       buttons.push(`<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`);
     }
     if (row.status == "Available") {
-      buttons.push(`<a class="install" title="Install"><i class="fa-solid fa-download"></i></a>&nbsp;`);
+      if (row.requirementsMet) {
+        buttons.push(`<a class="install" title="Install"><i class="fa-solid fa-download"></i></a>&nbsp;`);
+      }
     } else if (row.status == "Installed") {
       buttons.push(`<a class="uninstall" title="Uninstall"><i class="fa-solid fa-trash-can"></i></a>&nbsp;`);
       if (row.version < row.online_version) {
         buttons.push(`<a class="update" title="Update"><i class="fa-solid fa-upload"></i></a>&nbsp;`);      
       } else if (row.source == "Online") {
-        buttons.push(`<a class="reinstall" title="Reinstall"><i class="fa-solid fa-arrow-rotate-right"></i></a>&nbsp;`);
+        if (row.requirementsMet) {
+          buttons.push(`<a class="reinstall" title="Reinstall"><i class="fa-solid fa-arrow-rotate-right"></i></a>&nbsp;`);
+        }
       }
     }
     return buttons.join("");
@@ -1618,14 +1622,18 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function pluginUpdatesFormatter(value, row, index) {
-    if (row.version < row.online_version) {
-      return `<span class="badge bg-info">Update Available</span>`;
-    } else if (row.source == "Local") {
-      return `<span class="badge bg-secondary">Unknown</span>`;
-    } else if (row.status == "Available") {
-      return `<span class="badge bg-primary">Not Installed</span>`;
+    if (row.requirementsMet) {
+      if (row.version < row.online_version) {
+        return `<span class="badge bg-info">Update Available</span>`;
+      } else if (row.source == "Local") {
+        return `<span class="badge bg-secondary">Unknown</span>`;
+      } else if (row.status == "Available") {
+        return `<span class="badge bg-primary">Not Installed</span>`;
+      } else {
+        return `<span class="badge bg-success">Up to date</span>`;
+      }
     } else {
-      return `<span class="badge bg-success">Up to date</span>`;
+      return `<span class="badge bg-warning" style="text-wrap: auto;">`+row.requirementsReason+`</span>`;
     }
   }
 
@@ -1649,12 +1657,12 @@ document.addEventListener('DOMContentLoaded', function() {
     return pagesDetermineType(value);
   }
 
-  function menuDetailFormatter(index,row) {
-    return pagesDetailFormatter(index,row,"menu");
-  }
-
-  function submenuDetailFormatter(index,row) {
-    return pagesDetailFormatter(index,row,"submenu");
+  function pluginRequirementsFormatter(value, row, index) {
+    var html = ""
+    $(row.requires).each(function (require) {
+      html += `<span class="badge bg-info">`+row.requires[require]+`</span>&nbsp;`;
+    });
+    return html;
   }
 
   // ** TABLE DETAIL FORMATTERS ** //
@@ -1664,6 +1672,14 @@ document.addEventListener('DOMContentLoaded', function() {
         html.push(createTableHtml(index, prefix));
     }
     return html.join("");
+  }
+
+  function menuDetailFormatter(index,row) {
+    return pagesDetailFormatter(index,row,"menu");
+  }
+
+  function submenuDetailFormatter(index,row) {
+    return pagesDetailFormatter(index,row,"submenu");
   }
 
   // ** TABLE BUTTONS ** //
@@ -1774,6 +1790,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     return data.data;
   }
+
+  function dragHandlerResponseHandler(data) {
+    // Iterate through each row in the response data
+    data.data.forEach(function(row) {
+        // Append the span to the dragHandle field
+        row.dragHandle = '<span class="dragHandle" style="font-size:22px;">☰</span>';
+    });
+
+    return data;
+}
 
   // ** BUILD / SUBMIT SETTINGS ** //
   function buildSettings(elem, setting, options) {
@@ -2609,7 +2635,12 @@ document.addEventListener('DOMContentLoaded', function() {
         rowAttributes: pagesRowAttributes,
         rowStyle: pagesRowStyle,
         onReorderRow: pagesRowOnReorderRow,
+        dragHandle: '>tbody>tr>td>span.dragHandle',
+        responseHandler: 'dragHandlerResponseHandler',
         columns: [{
+          field: 'dragHandle',
+          width: "25px"
+        },{
           field: "Icon",
           title: "Icon",
           formatter: "pageIconFormatter",
@@ -2657,7 +2688,12 @@ document.addEventListener('DOMContentLoaded', function() {
           rowAttributes: pagesRowAttributes,
           rowStyle: pagesRowStyle,
           onReorderRow: pagesRowOnReorderRow,
+          dragHandle: '>tbody>tr>td>span.dragHandle',
+          responseHandler: 'dragHandlerResponseHandler',
           columns: [{
+            field: 'dragHandler',
+            width: "25px"
+          },{
             field: "Type",
             title: "Type",
             formatter: "typeFormatter",

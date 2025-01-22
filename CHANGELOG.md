@@ -1,3 +1,7 @@
+## v0.7.8
+- Add plugin dependency support
+- Add News Feed widget
+
 ## v0.7.7
 - Upgrade to Bootstrap 5.3.3
 - Introduce support for BS themes

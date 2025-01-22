@@ -34,7 +34,7 @@ class phpef {
         $this->pages = new Pages($this->db,$this->api,$this->core);
         $this->logging = $this->core->logging;
         $this->reporting = new Reporting($this->core,$this->db);
-        $this->plugins = new Plugins($this->api,$this->core,$this->db);
+        $this->plugins = new Plugins($this->api,$this->core,$this->db,$this->getVersion()[0]);
         $this->dashboard = new Dashboard($this->core);
         $this->checkDB();
         $this->checkUUID();

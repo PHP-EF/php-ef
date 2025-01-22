@@ -3,11 +3,13 @@ class Plugins {
     private $api;
     private $core;
     private $db;
+    private $version;
 
-    public function __construct($api,$core,$db) {
+    public function __construct($api,$core,$db,$version) {
         $this->api = $api;
         $this->core = $core;
         $this->db = $db;
+        $this->version = $version;
     }
 
     public function getMarketplacePlugins() {
@@ -118,7 +120,33 @@ class Plugins {
                 }
             }
         }
-    
+        foreach ($uniquePlugins as &$uniquePlugin) {
+            $requirementsMet = true;
+            $requirementsNotMet = [];
+            $uniquePlugin['requirementsMet'] = $requirementsMet;
+            $uniquePlugin['requirementsReason'] = 'Requirements satisfied';
+            // Check for 'requires' field and validate requirements
+            if (isset($uniquePlugin['requires'])) {
+                foreach ($uniquePlugin['requires'] as $requirement) {
+                    if (!in_array($requirement, $installedPluginNames)) {
+                        $requirementsMet = false;
+                        $requirementsNotMet[] = $requirement;
+                    }
+                }
+                if (!empty($requirementsNotMet)) {
+                    $uniquePlugin['requirementsMet'] = $requirementsMet;
+                    $uniquePlugin['requirementsReason'] = 'Missing Plugins: '.implode(', ',$requirementsNotMet);
+                }
+            }
+
+            if (isset($uniquePlugin['minimum_php-ef_version'])) {
+                if ($uniquePlugin['minimum_php-ef_version'] > $this->version) {
+                    $uniquePlugin['requirementsMet'] = false;
+                    $uniquePlugin['requirementsReason'] = 'PHP-EF version too low.<br>Requires: '.$uniquePlugin['minimum_php-ef_version'].'<br>Installed: '.$this->version;
+                }
+            }
+        }
+
         // Convert back to a list
         $result = array_values($uniquePlugins);
     

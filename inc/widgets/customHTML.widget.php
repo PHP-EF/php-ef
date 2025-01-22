@@ -30,7 +30,7 @@ class CustomHTML implements WidgetInterface {
     }
 
     public function render() {
-        $Config = $this->phpef->config->get('Widgets','CustomHTML');
+        $Config = $this->widgetConfig;
         $customHTMLQty = 5;
         $return = '';
         for ($i = 1; $i <= $customHTMLQty; $i++) {

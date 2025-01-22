@@ -186,6 +186,11 @@ trait Settings {
                 'dataAttributes' => ['sortable' => 'true', 'formatter' => 'pluginUpdatesFormatter'],
             ],
             [
+                'field' => 'requires',
+                'title' => 'Dependencies',
+                'dataAttributes' => ['sortable' => 'false', 'visible' => 'false', 'formatter' => 'pluginRequirementsFormatter'],
+            ],
+            [
                 'title' => 'Actions',
                 'dataAttributes' => ['events' => 'pluginActionEvents', 'formatter' => 'pluginActionFormatter'],
             ]
@@ -579,9 +584,8 @@ trait Settings {
 
         $CombinedTableColumns = [
             [
-                'field' => 'state',
-                'title' => 'State',
-                'dataAttributes' => ['checkbox' => 'true'],
+                'field' => 'dragHandle',
+                'dataAttributes' => ['width' => '25px']
             ],
             [
                 'field' => 'Icon',
@@ -628,6 +632,8 @@ trait Settings {
         $CombinedTableAttributes['reorderable-rows'] = 'true';
         $CombinedTableAttributes['row-attributes'] = 'pagesRowAttributes';
         $CombinedTableAttributes['row-style'] = 'pagesRowStyle';
+        $CombinedTableAttributes['drag-handle'] = '>tbody>tr>td>span.dragHandle';
+        $CombinedTableAttributes['response-handler'] = 'dragHandlerResponseHandler';
 
         $CombinedTableEvents = [
             'onExpandRow' => 'pagesInitializeMenuTable',
