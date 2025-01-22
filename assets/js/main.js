@@ -1176,8 +1176,10 @@ document.addEventListener('DOMContentLoaded', function() {
         return smallLabel+'<button class="btn btn-sm btn-success btn-rounded waves-effect waves-light b-none'+extraClass+'" '+href+attr+dataAttributes+' type="button"><span class="btn-label"><i class="'+icon+'"></i></span><span lang="en">'+text+'</span></button>';
       case 'blank':
         return '';
+      case 'panel':
+        return '<div class="panel-group'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'  aria-multiselectable="true" role="tablist">'+panelOptions(item.options, item.id)+'</div>';
       case 'accordion':
-        return '<div class="panel-group'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'  aria-multiselectable="true" role="tablist">'+accordionOptions(item.options, item.id)+'</div>';
+        return '<div class="accordion'+extraClass+'"'+id+disabled+name+disabled+type+label+attr+dataAttributes+'>'+accordionOptions(item.options, item.id)+'</div>';
       case 'listgroup':
         return buildListGroup(item.items,id);
       case 'title':
@@ -1278,6 +1280,45 @@ document.addEventListener('DOMContentLoaded', function() {
     return listGroup;
   }
 
+  function panelOptions(options, parentID){
+    var panelOptions = '';
+    $.each(options, function(i,v) {
+      var id = createRandomString(10);
+      var extraClass = (v.class) ? ' '+v.class : '';
+      var header = (i) ? ' '+i : '';
+      if(typeof v == 'object'){
+        var body = '';
+        $.each(v, function(val) {
+          var helpTip = v[val].helpTip ?? '';
+          if (v[val].type == 'title' || v[val].type == 'hr' || v[val].type == 'js') {
+            body += buildFormItem(v[val]);
+          } else {
+            body += `<div class="col-md-6"><label class="control-label"><span lang="en">${v[val].label}</span>${helpTip}</label>`;
+            body += buildFormItem(v[val]);
+            body += `</div>`;
+          }
+        });
+      }else{
+        var body = v.body;
+      }
+      panelOptions += `
+      <div class="panel">
+        <div class="panel-heading" id="`+id+`-heading" role="tab">
+          <a class="panel-title collapsed" data-bs-toggle="collapse" href="#`+id+`-collapse" data-bs-parent="#`+parentID+`" aria-expanded="false" aria-controls="`+id+`-collapse"><span lang="en">`+header+`</span></a>
+        </div>
+        <div class="panel-collapse collapse" id="`+id+`-collapse" aria-labelledby="`+id+`-heading" role="tabpanel" aria-expanded="false" style="height: 0px;">
+          <div class="panel-body px-3">
+            <div class="row pt-2">
+              `+body+`
+            </div>
+          </div>
+        </div>
+      </div>
+      `;
+    });
+    return panelOptions;
+  }
+
   function accordionOptions(options, parentID){
     var accordionOptions = '';
     $.each(options, function(i,v) {
@@ -1300,14 +1341,16 @@ document.addEventListener('DOMContentLoaded', function() {
         var body = v.body;
       }
       accordionOptions += `
-      <div class="panel">
-        <div class="panel-heading" id="`+id+`-heading" role="tab">
-          <a class="panel-title collapsed" data-bs-toggle="collapse" href="#`+id+`-collapse" data-bs-parent="#`+parentID+`" aria-expanded="false" aria-controls="`+id+`-collapse"><span lang="en">`+header+`</span></a>
-        </div>
-        <div class="panel-collapse collapse" id="`+id+`-collapse" aria-labelledby="`+id+`-heading" role="tabpanel" aria-expanded="false" style="height: 0px;">
-          <div class="panel-body px-3">
-            <div class="row pt-2">
-              `+body+`
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="`+id+`-heading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#`+id+`-collapse" aria-expanded="false" aria-controls="`+id+`">`+header+`</button>
+        </h2>
+        <div id="`+id+`-collapse" class="accordion-collapse collapse" aria-labelledby="`+id+`-heading" data-bs-parent="#`+id+`">
+          <div class="accordion-body">
+            <div class="card-body">
+              <div class="row">
+                `+body+`
+              </div>
             </div>
           </div>
         </div>

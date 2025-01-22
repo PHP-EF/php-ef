@@ -6,14 +6,14 @@ class CustomHTML implements WidgetInterface {
 
     public function __construct($phpef) {
         $this->phpef = $phpef;
-        $this->widgetConfig = $this->phpef->config->get('Widgets','CustomHTML');
+        $this->widgetConfig = $this->phpef->config->get('Widgets','Custom HTML');
     }
 
     public function settings() {
         $customHTMLQty = 5;
         $SettingsArr = [];
         $SettingsArr['info'] = [
-            'name' => 'CustomHTML',
+            'name' => 'Custom HTML',
             'description' => 'Enables adding Custom HTML to Dashboards',
 			'image' => ''
         ];
@@ -49,4 +49,4 @@ class CustomHTML implements WidgetInterface {
 }
 
 // Register Custom HTML Widgets
-$phpef->dashboard->registerWidget('CustomHTML', new CustomHTML($phpef));
+$phpef->dashboard->registerWidget('Custom HTML', new CustomHTML($phpef));

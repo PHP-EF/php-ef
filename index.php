@@ -408,7 +408,7 @@ foreach ($navLinks as $navLink) {
             <div class="accordion" id="resetPasswordAccordion">
               <div class="accordion-item">
                 <h2 class="accordion-header" id="resetPasswordHeading">
-                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#resetPassword" aria-expanded="true" aria-controls="resetPassword">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#resetPassword" aria-expanded="true" aria-controls="resetPassword">
                   Reset Password
                   </button>
                 </h2>

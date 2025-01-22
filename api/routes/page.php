@@ -31,8 +31,10 @@ $app->get('/page/plugin/{plugin}/js', function ($request, $response, $args) {
 	// Get Custom JS
 	if (file_exists($pluginDir.'/main.js')) {
 		$jsContent = file_get_contents($pluginDir.'/main.js');
-		$phpef->api->setAPIResponseData($jsContent);
-		$response->getBody()->write($GLOBALS['api']['data']);
+		if ($jsContent) {
+			$phpef->api->setAPIResponseData($jsContent);
+			$response->getBody()->write($GLOBALS['api']['data']);
+		}
 	} else {
 		$response->getBody()->write(jsonE($GLOBALS['api']));
 	}
@@ -51,8 +53,10 @@ $app->get('/page/plugin/{plugin}/css', function ($request, $response, $args) {
 	// Get Custom JS
 	if (file_exists($pluginDir.'/styles.css')) {
 		$cssContent = file_get_contents($pluginDir.'/styles.css');
-		$phpef->api->setAPIResponseData($cssContent);
-		$response->getBody()->write($GLOBALS['api']['data']);
+		if ($cssContent) {
+			$phpef->api->setAPIResponseData($cssContent);
+			$response->getBody()->write($GLOBALS['api']['data']);
+		}
 	} else {
 		$response->getBody()->write(jsonE($GLOBALS['api']));
 	}
