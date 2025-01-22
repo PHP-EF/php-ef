@@ -280,19 +280,19 @@ foreach ($navLinks as $navLink) {
                 <!--tabs-->
                 <ul id="tabsJustified" class="nav nav-tabs flex-column info-nav">
                   <li class="nav-item">
-                    <a href="" data-bs-target="#about" data-bs-toggle="tab" class="nav-link small text-uppercase active">About</a>
+                    <a href="" data-bs-target="#about" data-bs-toggle="tab" class="nav-link text-uppercase active">About</a>
                   </li>
                   <li class="nav-item">
-                    <a href="" data-bs-target="#support" data-bs-toggle="tab" class="nav-link small text-uppercase">Support</a>
+                    <a href="" data-bs-target="#support" data-bs-toggle="tab" class="nav-link text-uppercase">Support</a>
                   </li>
                   <li class="nav-item">
-                    <a href="" data-bs-target="#license" data-bs-toggle="tab" class="nav-link small text-uppercase">License</a>
+                    <a href="" data-bs-target="#license" data-bs-toggle="tab" class="nav-link text-uppercase">License</a>
                   </li>
                   <li class="nav-item">
-                    <a href="" data-bs-target="#debugger" data-bs-toggle="tab" class="nav-link small text-uppercase">Debugger</a>
+                    <a href="" data-bs-target="#debugger" data-bs-toggle="tab" class="nav-link text-uppercase">Debugger</a>
                   </li>
                   <li class="nav-item">
-                    <a href="" data-bs-target="#changelog" data-bs-toggle="tab" class="nav-link small text-uppercase">Change Log</a>
+                    <a href="" data-bs-target="#changelog" data-bs-toggle="tab" class="nav-link text-uppercase">Change Log</a>
                   </li>
                 </ul>
                 <!--/tabs-->
@@ -497,8 +497,10 @@ foreach ($navLinks as $navLink) {
     var cookie = getCookie('theme');
     let toggle = document.getElementById('themeToggle');
     if (cookie == "dark") {
+      $('html').attr('data-bs-theme',"dark");
       toggle.className = 'fa-regular fa-lightbulb toggleon toggler';
     } else {
+      $('html').attr('data-bs-theme',"light");
       toggle.className = 'fa-solid fa-lightbulb toggleoff toggler';
     }
 

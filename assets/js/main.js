@@ -973,6 +973,15 @@ document.addEventListener('DOMContentLoaded', function() {
     $(this).addClass("changed");
   });
 
+  // Custom jQuery to handle nested tabs
+  $("body").on('click', '#configTabContent .nav-tabs .nav-link', function (event) {
+    event.preventDefault();
+    $('#configTabContent .nav-tabs .nav-link').removeClass('active');
+    $('#configTabContent .nav-tabs .nav-link').removeClass('show active');
+    $(this).addClass('active');
+    $($(this).attr('href')).addClass('show active');
+  });
+
   $(".hover-target").hover(
     function() {
         $(".popover").css({
@@ -998,10 +1007,10 @@ document.addEventListener('DOMContentLoaded', function() {
   console.info("%c Web App %c ".concat("DOM Fully loaded", " "), "color: white; background: #AD80FD; font-weight: 700;", "color: #AD80FD; background: white; font-weight: 700;");
 });
 
-// Modal Backdrop Z-Index Fix
-$(document).on('shown.bs.modal', '.modal', function () {
-  $('.modal-backdrop').before($(this));
-});
+  // Modal Backdrop Z-Index Fix
+  $(document).on('shown.bs.modal', '.modal', function () {
+    $('.modal-backdrop').before($(this));
+  });
 
 
   // **************** //
@@ -1027,24 +1036,24 @@ $(document).on('shown.bs.modal', '.modal', function () {
     } else {
       var group = '<div class="tab-content tab-content-sub">';
       var uList = `
-        <ul class="nav flex-column nav-tabs info-nav d-none d-lg-flex">
+        <ul class="nav flex-column nav-tabs info-nav">
+          <div class="d-lg-none tab-sub-dropdown">
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="configSubTabsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                ${first}
+              </button>
+              <ul class="dropdown-menu dropdown-menu-top" aria-labelledby="configSubTabsDropdown">
+                ${Object.keys(array).map((i, index) => {
+                  return `<li><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanClass(i)}" class="nav-link ${active}"><span lang="en">${i}</span></a></li>`;
+                }).join('')}
+              </ul>
+            </div>
+          </div>
           ${Object.keys(array).map((i, index) => {
             active = (index == 0) ? 'active' : '';
-            return `<li role="presentation" class="nav-item"><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanClass(i)}" class="nav-link small text-uppercase ${active}"><span lang="en">${i}</span></a></li>`;
+            return `<li role="presentation" class="nav-item d-none d-lg-flex"><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanClass(i)}" class="nav-link ${active}"><span lang="en">${i}</span></a></li>`;
           }).join('')}
         </ul>
-        <div class="d-lg-none tab-sub-dropdown">
-          <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="configSubTabsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-              ${first}
-            </button>
-            <ul class="dropdown-menu dropdown-menu-top" aria-labelledby="configSubTabsDropdown">
-              ${Object.keys(array).map((i, index) => {
-                return `<li><a href="" data-tab-target="#${ids[i]}${cleanClass(i)}" class="nav-link small text-uppercase"><span lang="en">${i}</span></a></li>`;
-              }).join('')}
-            </ul>
-          </div>
-        </div>
       `;
     }
   
@@ -1852,7 +1861,6 @@ $(document).on('shown.bs.modal', '.modal', function () {
       var noneCheckboxSelector = "#SettingsModal input[type!=checkbox], #SettingsModal select";
       var checkboxSelector = "#SettingsModal input[type=checkbox]";
     }
-    console.log(noneCheckboxSelector);
     var serializedArray = $(`${noneCheckboxSelector}`).serializeArray();
     // Include unchecked checkboxes in the formData
     $(`${checkboxSelector}`).each(function() {
@@ -1864,7 +1872,6 @@ $(document).on('shown.bs.modal', '.modal', function () {
     var encryptionPromises = [];
 
     serializedArray.forEach(function(item) {
-      console.log(`[name="${item.name}"]`);
         var element = $(`[name="${item.name}"]`);
         if (formData[item.name]) {
             if (!Array.isArray(formData[item.name])) {

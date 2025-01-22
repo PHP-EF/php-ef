@@ -441,7 +441,7 @@ body.dark-theme .toast small {
 
 /* Tabs */
 .nav.nav-tabs {
-  min-width: 150px;
+  min-width: 160px;
 }
 .d-flex .nav.nav-tabs {
   border-right: 1px solid #dee2e6;
@@ -461,6 +461,10 @@ body.dark-theme .toast small {
 }
 .nav.nav-tabs .nav-link {
   border-bottom: none;
+}
+.d-flex .nav li.nav-item,
+.nav.nav-tabs .nav-link {
+  width: 100%;
 }
 
 /* Panel */
@@ -1701,8 +1705,14 @@ body .bootstrap-table .fixed-table-container .fixed-table-body {
     width: calc(100% - 300px);
     overflow-x: hidden;
   }
-  .nav.nav-tabs {
+  #configTabs {
+    position: relative;
+    width: 100%;
+  }
+  #configTabContent .nav.nav-tabs {
     min-width: 100px;
+    width: 92%;
+    position: absolute;
   }
   .tab-content {
     padding: 0 10px;
@@ -1715,6 +1725,7 @@ body .bootstrap-table .fixed-table-container .fixed-table-body {
     width: 100%;
     top: 0;
     left: 0;
+    display: block;
   }
   .tab-sub-dropdown .dropdown .dropdown-toggle {
     width: 100%;
