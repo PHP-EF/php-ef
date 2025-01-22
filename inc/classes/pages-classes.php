@@ -79,45 +79,87 @@ class Pages {
       return $users; 
     }
   
-    public function new($Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon,$LinkType) {
+    public function new($data) {
       $prepare = [];
       $execute = [];
-      if (!empty($Name)) {
+
+      if (isset($data['pageName'])) {
         $prepare[] = 'Name';
-        $execute[':Name'] = $Name;
+        $execute[':Name'] = $data['pageName'];
       }
-      if (!empty($Title)) {
+      if (isset($data['pageTitle'])) {
         $prepare[] = 'Title';
-        $execute[':Title'] = $Title;
+        $execute[':Title'] = $data['pageTitle'];
       }
-      if (!empty($Type)) {
+      if (isset($data['pageMenu'])) {
+        $prepare[] = 'Menu';
+        $execute[':Menu'] = $data['pageMenu'];
+      }
+      if (isset($data['pageSubMenu'])) {
+        $prepare[] = 'Submenu';
+        $execute[':Submenu'] = $data['pageSubMenu'];
+      }
+      if (isset($data['pageRole'])) {
+        $prepare[] = 'ACL';
+        $execute[':ACL'] = $data['pageRole'];
+      }
+      if (isset($data['pageIcon'])) {
+        $prepare[] = 'Icon';
+        $execute[':Icon'] = $data['pageIcon'];
+      } else if (isset($data['pageImage'])) {
+        $prepare[] = 'Icon';
+        $execute[':Icon'] = $data['pageImage'];
+      }
+      if (isset($data['pageLinkType'])) {
+        $prepare[] = 'LinkType';
+        $execute[':LinkType'] = $data['pageLinkType'];
+      }
+
+      if (isset($data['pageUrl']) && isset($data['pageLinkType']) && $data['pageLinkType'] == 'Native') {
+        $prepare[] = 'Url';
+        $execute[':Url'] = $data['pageUrl'];
+      } else if (isset($data['pageiFrameUrl']) && isset($data['pageLinkType']) && $data['pageLinkType'] == 'iFrame') {
+        $prepare[] = 'Url';
+        $execute[':Url'] = $data['pageiFrameUrl'];
+      } else {
+        $this->api->setAPIResponse('Error','Invalid link configuration');
+        return false;
+      }
+
+      $pageMenu = $data['pageMenu'] ?? null;
+      $pageSubMenu = $data['pageSubMenu'] ?? null;
+      $pageType = $data['pageType'] ?? null;
+      switch ($pageType) {
+        case "Link":
+        case "MenuLink":
+        case "SubMenuLink":
+          if ((isset($pageMenu) && $pageMenu != "") && (isset($pageSubMenu) && $pageSubMenu != "")) {
+            $pageType = "SubMenuLink";
+          } else if (isset($pageMenu) && $pageMenu != "") {
+            $pageType = "MenuLink";
+          } else {
+            $pageType = "Link";
+          }
+          break;
+        case "Menu":
+        case "SubMenu":
+          if (!empty($pageMenu)) {
+            $pageType = "SubMenu";
+          } else {
+            $pageType = "Menu";
+          }
+          break;
+      }
+      if ($pageType) {
         $prepare[] = 'Type';
-        $execute[':Type'] = $Type;
+        $execute[':Type'] = $pageType;
       }
+      
       if (!empty($Url)) {
         $prepare[] = 'Url';
         $execute[':Url'] = $Url;
       }
-      if (!empty($Menu)) {
-        $prepare[] = 'Menu';
-        $execute[':Menu'] = $Menu;
-      }
-      if (!empty($Submenu)) {
-        $prepare[] = 'Submenu';
-        $execute[':Submenu'] = $Submenu;
-      }
-      if (!empty($ACL)) {
-        $prepare[] = 'ACL';
-        $execute[':ACL'] = $ACL;
-      }
-      if (!empty($Icon)) {
-        $prepare[] = 'Icon';
-        $execute[':Icon'] = $Icon;
-      }
-      if (!empty($LinkType)) {
-        $prepare[] = 'LinkType';
-        $execute[':LinkType'] = $LinkType;
-      }
+      
       $valueArray = array_map(function($value) {
         return ':' . $value;
       }, $prepare);
@@ -126,13 +168,102 @@ class Pages {
       $this->api->setAPIResponseMessage('Created new page successfully.');
     }
   
-    public function set($ID,$Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon,$LinkType) {
-      if ($this->getPageById($ID)) {
+    public function set($ID,$data) {
+      $CurrentPage = $this->getPageById($ID);
+      if ($CurrentPage) {
         $prepare = [];
         $execute = [];
-        $stmt = $this->db->prepare('UPDATE pages SET Name = :Name, Title = :Title, Type = :Type, Url = :Url, Menu = :Menu, Submenu = :Submenu, ACL = :ACL, Icon = :Icon, LinkType = :LinkType WHERE id = :id');
-        $stmt->execute([':id' => $ID,':Name' => $Name,':Title' => $Title,':Type' => $Type,':Url' => $Url,':Menu' => $Menu,':Submenu' => $Submenu,':ACL' => $ACL,':Icon' => $Icon, ':LinkType' => $LinkType]);
-        $this->api->setAPIResponseMessage('Page updated successfully');
+        $execute[':id'] = $ID;
+        if (isset($data['pageName'])) {
+          $prepare[] = 'Name = :Name';
+          $execute[':Name'] = $data['pageName'];
+        }
+        if (isset($data['pageTitle'])) {
+          $prepare[] = 'Title = :Title';
+          $execute[':Title'] = $data['pageTitle'];
+        }
+        if (isset($data['pageMenu'])) {
+          $prepare[] = 'Menu = :Menu';
+          $execute[':Menu'] = $data['pageMenu'];
+        }
+        if (isset($data['pageSubMenu'])) {
+          $prepare[] = 'Submenu = :Submenu';
+          $execute[':Submenu'] = $data['pageSubMenu'];
+        }
+        if (isset($data['pageRole'])) {
+          $prepare[] = 'ACL = :ACL';
+          $execute[':ACL'] = $data['pageRole'];
+        }
+        if (isset($data['pageIcon'])) {
+          $prepare[] = 'Icon = :Icon';
+          $execute[':Icon'] = $data['pageIcon'];
+        } else if (isset($data['pageImage'])) {
+          $prepare[] = 'Icon = :Icon';
+          $execute[':Icon'] = $data['pageImage'];
+        }
+        if (isset($data['pageLinkType'])) {
+          $prepare[] = 'LinkType = :LinkType';
+          $execute[':LinkType'] = $data['pageLinkType'];
+        }
+
+        if (isset($data['pageUrl']) && isset($data['pageiFrameUrl'])) {
+          $this->api->setAPIResponse('Error','Page URL and iFrame URL are mutually exclusive parameters');
+          return false;
+        }
+        if (isset($data['pageUrl'])) {
+          if ((isset($data['pageLinkType']) && $data['pageLinkType'] == 'Native') || $CurrentPage['LinkType'] == 'Native') {
+            $prepare[] = 'Url = :Url';
+            $execute[':Url'] = $data['pageUrl'];
+          } else {
+            $this->api->setAPIResponse('Error','pageUrl can only be set for Native links');
+            return false;
+          }
+        } else if (isset($data['pageiFrameUrl'])) {
+          if ((isset($data['pageLinkType']) && $data['pageLinkType'] == 'iFrame') || $CurrentPage['LinkType'] == 'iFrame') {
+            $prepare[] = 'Url = :Url';
+            $execute[':Url'] = $data['pageiFrameUrl'];
+          } else {
+            $this->api->setAPIResponse('Error','pageiFrameUrl can only be set for iFrame links');
+            return false;
+          }
+        }
+
+        $pageMenu = $data['pageMenu'] ?? $CurrentPage['Menu'];
+        $pageSubMenu = $data['pageSubMenu'] ?? $CurrentPage['Submenu'];
+        $pageType = $data['pageType'] ?? $CurrentPage['Type'];
+        switch ($pageType) {
+          case "Link":
+          case "MenuLink":
+          case "SubMenuLink":
+            if ((isset($pageMenu) && $pageMenu != "") && (isset($pageSubMenu) && $pageSubMenu != "")) {
+              $pageType = "SubMenuLink";
+            } else if (isset($pageMenu) && $pageMenu != "") {
+              $pageType = "MenuLink";
+            } else {
+              $pageType = "Link";
+            }
+            break;
+          case "Menu":
+          case "SubMenu":
+            if (!empty($pageMenu)) {
+              $pageType = "SubMenu";
+            } else {
+              $pageType = "Menu";
+            }
+            break;
+        }
+        if ($pageType != $CurrentPage['Type']) {
+          $prepare[] = 'Type = :Type';
+          $execute[':Type'] = $pageType;
+        }
+        
+        if (!empty($prepare)) {
+          $stmt = $this->db->prepare('UPDATE pages SET '.implode(", ",$prepare).' WHERE id = :id');
+          $stmt->execute($execute);
+          $this->api->setAPIResponseMessage('Page updated successfully');
+        } else {
+          $this->api->setAPIResponseMessage('Nothing to update');
+        }
       } else {
         $this->api->setAPIResponse('Error','Page does not exist');
       }

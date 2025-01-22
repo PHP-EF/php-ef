@@ -560,4 +560,128 @@ trait Settings {
             )
         );
     }
+
+    public function settingsPages() {
+        $TableAttributes = [
+            'data-field' => 'data',
+            'toggle' => 'table',
+            'search' => 'true',
+            'filter-control' => 'true',
+            'show-refresh' => 'true',
+            'pagination' => 'true',
+            'toolbar' => '#toolbar',
+            'sort-name' => 'Name',
+            'sort-order' => 'asc',
+            'show-columns' => 'true',
+            'page-size' => '25',
+            'response-handler' => 'responseHandler',
+        ];
+
+        $CombinedTableColumns = [
+            [
+                'field' => 'state',
+                'title' => 'State',
+                'dataAttributes' => ['checkbox' => 'true'],
+            ],
+            [
+                'field' => 'Icon',
+                'title' => 'Icon',
+                'dataAttributes' => ['formatter' => 'pageIconFormatter']
+            ],
+            [
+                'field' => 'Name',
+                'title' => 'Name',
+                'dataAttributes' => ['sortable' => 'true'],
+            ],
+            [
+                'field' => 'Title',
+                'title' => 'Title',
+                'dataAttributes' => ['sortable' => 'true'],
+            ],
+            [
+                'field' => 'Url',
+                'title' => 'URL',
+                'dataAttributes' => ['sortable' => 'true', 'visible' => 'false'],
+            ],
+            [
+                'field' => 'ACL',
+                'title' => 'Role',
+                'dataAttributes' => ['sortable' => 'true'],
+            ],
+            [
+                'field' => 'LinkType',
+                'title' => 'Type',
+                'dataAttributes' => ['sortable' => 'true'],
+            ],
+            [
+                'title' => 'Actions',
+                'dataAttributes' => ['events' => 'pageActionEvents', 'formatter' => 'pageActionFormatter'],
+            ]
+        ];
+
+        $CombinedTableAttributes = $TableAttributes;
+        $CombinedTableAttributes['url'] = '/api/pages/root';
+        $CombinedTableAttributes['buttons'] = 'pagesTableButtons';
+        $CombinedTableAttributes['buttons-order'] = 'btnAddPage';
+        $CombinedTableAttributes['detail-formatter'] = 'menuDetailFormatter';
+        $CombinedTableAttributes['detail-view'] = 'true';
+        $CombinedTableAttributes['reorderable-rows'] = 'true';
+        $CombinedTableAttributes['row-attributes'] = 'pagesRowAttributes';
+        $CombinedTableAttributes['row-style'] = 'pagesRowStyle';
+
+        $CombinedTableEvents = [
+            'onExpandRow' => 'pagesInitializeMenuTable',
+            'onReorderRow' => 'pagesRowOnReorderRow'
+        ];
+
+        return array(
+            'Manage' => array(
+                $this->settingsOption('bootstrap-table', 'combinedTable', ['id' => 'combinedTable', 'columns' => $CombinedTableColumns, 'dataAttributes' => $CombinedTableAttributes, 'events' => $CombinedTableEvents, 'override' => '12']),
+            )
+	    );
+    }
+
+    public function settingsPage() {
+        $AppendNone = array(
+            [
+                "name" => 'None',
+                "value" => ''
+            ]
+        );
+
+        $AvailablePagesSelect = array_merge($AppendNone,array_map(function($item) {
+            $Prefix = $item['plugin'] ? 'Plugin: ' : '';
+            $PageName = $Prefix ? $Prefix . $item['plugin'] . ' / ' . $item['filename'] : $item['directory'] . ' / ' . $item['filename'];
+            $PageValue = $Prefix ? 'plugin/' . $item['directory'] . '/' . $item['filename'] : $item['directory'] . '/' . $item['filename'];
+            return [
+                "name" => $PageName,
+                "value" => $PageValue
+            ];
+        }, $this->pages->getAllAvailablePages()));
+
+        $AvailableMenusSelect = array_merge($AppendNone,array_map(function($item) {
+            return [
+                "name" => $item['Name'],
+                "value" => $item['Name']
+            ];
+        }, $this->pages->getByType('Menu')));
+        
+        return array(
+            "General" => array(
+                $this->settingsOption('select', 'pageType', ['label' => 'Type', 'options' => array(array("name" => 'Link', "value" => 'Link'),array("name" => 'Menu', "value" => 'Menu'))]),
+                $this->settingsOption('select', 'pageLinkType', ['label' => 'Link Type', 'options' => array(array("name" => 'Native', "value" => 'Native'),array("name" => 'iFrame', "value" => 'iFrame')), 'noRow' => 'true']),
+                $this->settingsOption('input', 'pageName', ['label' => 'Name', 'noRow' => 'true']),
+                $this->settingsOption('input', 'pageTitle', ['label' => 'Title', 'noRow' => 'true']),
+                $this->settingsOption('select', 'pageUrl', ['label' => 'Page', 'options' => $AvailablePagesSelect, 'noRow' => 'true']),
+                $this->settingsOption('input', 'pageiFrameUrl', ['label' => 'URL', 'noRow' => 'true']),
+                $this->settingsOption('auth', 'pageRole', ['label' => 'Role', 'noRow' => 'true']),
+                $this->settingsOption('select', 'pageMenu', ['label' => 'Menu', 'noRow' => 'true', 'options' => $AvailableMenusSelect]),
+                $this->settingsOption('select', 'pageSubMenu', ['label' => 'Sub Menu', 'noRow' => 'true', 'options' => $AppendNone]),
+                $this->settingsOption('hr'),
+                $this->settingsOption('input', 'pageIcon', ['label' => 'Icon']),
+                $this->settingsOption('select', 'pageImage', ['label' => 'Image', 'attr' => '', 'options' => $this->getAllImagesForSelect()]),
+                $this->settingsOption('input', 'pageId', ['attr' => 'hidden'])
+            )
+        );
+    }
 }

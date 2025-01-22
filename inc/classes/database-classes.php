@@ -177,6 +177,9 @@ class dbHelper {
       ],
       '0.7.6' => [
         "DELETE FROM pages WHERE Url IN ('core/users','core/rbac');"
+      ],
+      '0.7.7' => [
+        "DELETE FROM pages WHERE Url = 'core/pages';"
       ]
     ];
   }

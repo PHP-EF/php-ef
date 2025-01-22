@@ -125,16 +125,12 @@ $app->post('/pages', function ($request, $response, $args) {
 	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
         $data = $phpef->api->getAPIRequestData($request);
-        $Name = $data['name'] ?? exit($phpef->api->setAPIResponse('Error','Name missing from request'));
-        $Title = $data['title'] ?? null;
-        $Type = $data['type'] ?? null;
-		$Url = $data['url'] ?? null;
-        $Menu = $data['menu'] ?? null;
-        $Submenu = $data['submenu'] ?? null;
-		$ACL = $data['acl'] ?? null;
-		$Icon = $data['icon'] ?? null;
-		$LinkType = $data['linktype'] ?? null;
-		$phpef->pages->new($Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon,$LinkType);
+		$Name = $data['pageName'] ?? null;
+		if ($Name) {
+			$phpef->pages->new($data);
+		} else {
+			$phpef->api->setAPIResponse('Error','Name missing from request');
+		}
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
@@ -147,16 +143,7 @@ $app->patch('/page/{id}', function ($request, $response, $args) {
     if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
         if (isset($args['id'])) {
 			$data = $phpef->api->getAPIRequestData($request);
-			$Name = $data['name'] ?? null;
-			$Title = $data['title'] ?? null;
-			$Type = $data['type'] ?? null;
-			$Url = $data['url'] ?? null;
-			$Menu = $data['menu'] ?? null;
-			$Submenu = $data['submenu'] ?? null;
-			$ACL = $data['acl'] ?? null;
-			$Icon = $data['icon'] ?? null;
-			$LinkType = $data['linktype'] ?? null;
-			$phpef->pages->set($args['id'],$Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon,$LinkType);
+			$phpef->pages->set($args['id'],$data);
         } else {
             $phpef->api->setAPIResponse('Error','id missing from request',400);
         }

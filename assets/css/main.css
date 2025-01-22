@@ -511,7 +511,7 @@ body.dark-theme .toast small {
 }
 
 /* Center Icons in Pages table */
-#pagesTable.table td:nth-child(2) {
+#combinedTable.table td:nth-child(2) {
   text-align: center;
 }
 

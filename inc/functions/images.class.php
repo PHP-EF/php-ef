@@ -99,12 +99,25 @@ trait Images {
         }
        
         // Generate HTML options
-        $options = '<option value="">None</option>';
+        $options = [
+            [
+                'name' => 'None',
+                'value' => ''
+            ]
+        ];
         foreach ($allIconsPrep as $image) {
             if ($image['type'] == 'native') {
-                $options .= '<option value="' . htmlspecialchars($image['val']) . '" data-img="' . $image['val'] . '" data-type="native">' . htmlspecialchars($image['name']) . '</option>';
+                $options[] = [
+                    'name' => htmlspecialchars($image['name']),
+                    'value' => htmlspecialchars($image['val']),
+                    'attr' => 'data-type="native" data-img="' . $image['val'] . '"'
+                ];
             } else {
-                $options .= '<option value="' . htmlspecialchars($image['val']) . '" data-img="' . $image['val'] . '" data-type="'.$image['type'].'"> ' . htmlspecialchars($image['name']) . '</option>';
+                $options[] = [
+                    'name' => htmlspecialchars($image['name']),
+                    'value' => htmlspecialchars($image['val']),
+                    'attr' => 'data-type="'.$image['type'].'" data-img="' . $image['val'] . '"'
+                ];
             }
         }
         return $options;
