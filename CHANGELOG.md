@@ -1,3 +1,9 @@
+## v0.7.7
+- Upgrade to Bootstrap 5.3.3
+- Introduce support for BS themes
+- Fix nested nav tabs on mobile
+- Overhaul pages
+
 ## v0.7.6
 - Major overhaul to UX/UI
 
