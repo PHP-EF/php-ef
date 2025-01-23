@@ -287,7 +287,7 @@ function stringValidate(element, min, max, type) {
   }
 }
 
-function loadContent(element = null) {
+function loadContent(element = null, defaultPage = null) {
   $('.mainWindow, .mainFrame').attr('hidden',true);
   // $('.dynamic-plugin-js').remove();
   $('.toggleFrame').removeClass('active');
@@ -304,16 +304,17 @@ function loadContent(element = null) {
       var name = qualifierSplit[1];
       switch (qualifierSplit[0]) {
         case 'page':
-          element = $('a[href="#page='+decodeURI(name)+'"]');
-          element.addClass('active');
+          elements = $('a.toggleFrame[href="#page=' + decodeURI(name) + '"]');
+          element = $('a.toggleFrame[href="#page=' + decodeURI(name) + '"]:not(.link_name)');
+          elements.addClass('active');
           $('.title-text').text(element.data('pageName'));
           expandNav = true;
           break;
       }
     } else {
-      loadMainWindow();
-      initLazyLoad();
-      return;
+      element = $('a.toggleFrame[href="#page=' + decodeURI(defaultPage) + '"]:not(.link_name)');
+      element.addClass('active');
+      expandNav = true;
     }
   }
 
@@ -1703,6 +1704,15 @@ document.addEventListener('DOMContentLoaded', function() {
     return value;
   }
 
+  function booleanTickCrossFormatter(value, row, index) {
+    console.log(value);
+    if (value == 1) {
+      return '<i class="fa-solid fa-circle-check text-center w-100"></i>';
+    } else {
+      return '';
+    }
+  }
+
   // ** TABLE DETAIL FORMATTERS ** //
   function pagesDetailFormatter(index, row, prefix) {
     let html = [];
@@ -2473,6 +2483,7 @@ document.addEventListener('DOMContentLoaded', function() {
       $("[name=pageType]").val("").val(row[0].Type);
       $("[name=pageMenu]").val("").val(row[0].Menu);
       $("[name=pageRole]").val("").val(row[0].ACL);
+      row[0].isDefault ? $("[name=pageDefault]").attr('checked',true) : $("[name=pageDefault]").attr('checked',false);
     }
 
     // Setup Dynamic Image Select
@@ -2758,6 +2769,10 @@ document.addEventListener('DOMContentLoaded', function() {
           field: "LinkType",
           title: "Source"
         },{
+          field: "isDefault",
+          title: "Default",
+          formatter: "booleanTickCrossFormatter"
+        },{
           title: "Actions",
           formatter: "pageActionFormatter",
           events: "pageActionEvents"
@@ -2799,6 +2814,10 @@ document.addEventListener('DOMContentLoaded', function() {
           },{
             field: "LinkType",
             title: "Source"
+          },{
+            field: "isDefault",
+            title: "Default",
+            formatter: "booleanTickCrossFormatter"
           },{
             title: "Actions",
             formatter: "pageActionFormatter",

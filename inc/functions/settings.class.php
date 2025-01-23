@@ -613,6 +613,11 @@ trait Settings {
                 'title' => 'Type'
             ],
             [
+                'field' => 'isDefault',
+                'title' => 'Default',
+                'dataAttributes' => ['width' => '25px', 'formatter' => 'booleanTickCrossFormatter']
+            ],
+            [
                 'title' => 'Actions',
                 'dataAttributes' => ['events' => 'pageActionEvents', 'formatter' => 'pageActionFormatter'],
             ]
@@ -681,6 +686,7 @@ trait Settings {
                 $this->settingsOption('hr'),
                 $this->settingsOption('input', 'pageIcon', ['label' => 'Icon']),
                 $this->settingsOption('select', 'pageImage', ['label' => 'Image', 'attr' => '', 'options' => $this->getAllImagesForSelect()]),
+                $this->settingsOption('checkbox', 'pageDefault', ['label' => 'Default Page']),
                 $this->settingsOption('input', 'pageId', ['attr' => 'hidden'])
             )
         );

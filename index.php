@@ -16,6 +16,10 @@
   }
 
   $navLinks = $phpef->pages->get();
+  $defaultLink = array_filter($navLinks, function($link) {
+    return array_key_exists('isDefault', $link) && $link['isDefault'] == 1;
+  });
+  $defaultLink = reset($defaultLink);
 
   function filterNavLinksByMenu($navLinks, $menuName) {
     return array_filter($navLinks, function($link) use ($menuName) {
@@ -453,7 +457,7 @@ foreach ($navLinks as $navLink) {
 </div>
 
 <script>
-  loadContent();
+  loadContent(null,"<?php echo $defaultLink['Name'] ?? null ?>");
   heartBeat();
 
   function login() {

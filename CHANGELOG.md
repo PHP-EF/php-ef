@@ -2,6 +2,7 @@
 - Add plugin dependency support
 - Add News Feed widget
 - Bugfix to filtering Web Tracking reports
+- Add support for setting default page
 
 ## v0.7.7
 - Upgrade to Bootstrap 5.3.3

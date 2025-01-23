@@ -26,26 +26,27 @@ class Pages {
           Url TEXT,
           LinkType TEXT,
           Icon TEXT,
-          Weight INTEGER
+          Weight INTEGER,
+          isDefault BOOLEAN
         )");
   
         // Insert default nav links if they don't exist
         $navLinks = [
-          ['Home','Home',null,'Link',null,null,'core/default','Native','fa fa-house',1],
-          ['Admin','Admin',null,'Menu',null,null,null,null,'fas fa-user-shield',2],
-          ['Reports','Reports',null,'Menu',null,null,null,null,'fa-solid fa-chart-simple',3],
-          ['Settings','Settings',null,'SubMenu','Admin',null,null,null,'fa fa-cog',1],
-          ['Logs','Logs',null,'SubMenu','Admin',null,null,null,'fa-regular fa-file',2],
-          ['Pages','Pages','ADMIN-PAGES','SubMenuLink','Admin','Settings','core/pages','Native',null,2],
-          ['Configuration','Configuration','ADMIN-CONFIG','SubMenuLink','Admin','Settings','core/configuration','Native',null,3],
-          ['Portal Logs','Portal Logs','ADMIN-LOGS','SubMenuLink','Admin','Logs','core/logs','Native',null,1],
-          ['Web Tracking','Web Tracking',"REPORT-TRACKING",'MenuLink',"Reports",null,"reports/tracking",'Native','fa-solid fa-bullseye',1]
+          ['Home','Home',null,'Link',null,null,'core/default','Native','fa fa-house',1,true],
+          ['Admin','Admin',null,'Menu',null,null,null,null,'fas fa-user-shield',2,false],
+          ['Reports','Reports',null,'Menu',null,null,null,null,'fa-solid fa-chart-simple',3,false],
+          ['Settings','Settings',null,'SubMenu','Admin',null,null,null,'fa fa-cog',1,false],
+          ['Logs','Logs',null,'SubMenu','Admin',null,null,null,'fa-regular fa-file',2],false,
+          ['Pages','Pages','ADMIN-PAGES','SubMenuLink','Admin','Settings','core/pages','Native',null,2,false],
+          ['Configuration','Configuration','ADMIN-CONFIG','SubMenuLink','Admin','Settings','core/configuration','Native',null,3,false],
+          ['Portal Logs','Portal Logs','ADMIN-LOGS','SubMenuLink','Admin','Logs','core/logs','Native',null,1,false],
+          ['Web Tracking','Web Tracking',"REPORT-TRACKING",'MenuLink',"Reports",null,"reports/tracking",'Native','fa-solid fa-bullseye',1,false]
         ];
   
         foreach ($navLinks as $link) {
           if (!$this->pageExists($link[0])) {
-            $stmt = $this->db->prepare("INSERT INTO pages (Name, Title, ACL, Type, Menu, Submenu, Url, LinkType, Icon, Weight) VALUES (:Name, :Title, :ACL, :Type, :Menu, :Submenu, :Url, :LinkType, :Icon, :Weight)");
-            $stmt->execute([':Name' => $link[0],':Title' => $link[1], ':ACL' => $link[2], ':Type' => $link[3], ':Menu' => $link[4], ':Submenu' => $link[5], ':Url' => $link[6], ':LinkType' => $link[7], ':Icon' => $link[8], ':Weight' => $link[9]]);
+            $stmt = $this->db->prepare("INSERT INTO pages (Name, Title, ACL, Type, Menu, Submenu, Url, LinkType, Icon, Weight, isDefault) VALUES (:Name, :Title, :ACL, :Type, :Menu, :Submenu, :Url, :LinkType, :Icon, :Weight, :isDefault)");
+            $stmt->execute([':Name' => $link[0],':Title' => $link[1], ':ACL' => $link[2], ':Type' => $link[3], ':Menu' => $link[4], ':Submenu' => $link[5], ':Url' => $link[6], ':LinkType' => $link[7], ':Icon' => $link[8], ':Weight' => $link[9], ':isDefault' => $link[10]]);
           }
         }
       }
@@ -113,6 +114,13 @@ class Pages {
       if (isset($data['pageLinkType'])) {
         $prepare[] = 'LinkType';
         $execute[':LinkType'] = $data['pageLinkType'];
+      }
+      if (isset($data['pageDefault'])) {
+        $prepare[] = 'isDefault';
+        $execute[':isDefault'] = $data['pageDefault'];
+        if ($data['pageDefault'] == true) {
+          $this->db->query("UPDATE pages SET isDefault = FALSE");
+        }
       }
 
       if (isset($data['pageUrl']) && isset($data['pageLinkType']) && $data['pageLinkType'] == 'Native') {
@@ -204,6 +212,13 @@ class Pages {
         if (isset($data['pageLinkType'])) {
           $prepare[] = 'LinkType = :LinkType';
           $execute[':LinkType'] = $data['pageLinkType'];
+        }
+        if (isset($data['pageDefault'])) {
+          $prepare[] = 'isDefault = :isDefault';
+          $execute[':isDefault'] = $data['pageDefault'];
+          if ($data['pageDefault'] == true) {
+            $this->db->query("UPDATE pages SET isDefault = FALSE");
+          }
         }
 
         if (isset($data['pageUrl']) && isset($data['pageiFrameUrl'])) {
