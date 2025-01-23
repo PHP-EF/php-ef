@@ -120,8 +120,9 @@ $app->post('/config/dashboards', function ($request, $response, $args) {
     if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
         $data = $phpef->api->getAPIRequestData($request);
         if (isset($data['Name'])) {
+            $config = $phpef->config->get();
             // Update the config values with the submitted data
-            $phpef->config->setDashboard($data, $data['Name']);
+            $phpef->config->setDashboard($config, $data, $data['Name']);
             $phpef->api->setAPIResponseMessage('Successfully created dashboard');
         } else {
             $phpef->api->setAPIResponse('Error','Name missing from request');

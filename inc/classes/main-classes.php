@@ -7,6 +7,7 @@ class phpef {
 
     private $configFilePath;
     private $dbPath;
+    private $logPath;
     public $hooks;
     private $core;
     public $api;
@@ -19,6 +20,7 @@ class phpef {
     public $reporting;
     public $plugins;
     public $dashboard;
+    public $notifications;
 
     public function __construct() {
         $this->configFilePath = dirname(__DIR__, 1) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.json';
@@ -34,14 +36,15 @@ class phpef {
         $this->pages = new Pages($this->db,$this->api,$this->core);
         $this->logging = $this->core->logging;
         $this->reporting = new Reporting($this->core,$this->db);
-        $this->plugins = new Plugins($this->api,$this->core,$this->db);
+        $this->plugins = new Plugins($this->api,$this->core,$this->db,$this->getVersion()[0]);
         $this->dashboard = new Dashboard($this->core);
+        $this->notifications = new Notifications($this->core,$this->db,$this->api);
         $this->checkDB();
         $this->checkUUID();
     }
 
     public function getVersion() {
-        return ['0.7.6'];
+        return ['0.7.8'];
     }
 
     // Initiate Database Migration if required

@@ -177,7 +177,6 @@ trait Common {
                         <textarea class="form-control info-field ' . $name . 'Textarea" name="' . $name . '" data-type="textbox" data-label="' . $name . '" hidden></textarea>
                         <div id="' . $sanitized_name . 'Editor" style="height:300px"></div>
                         <script>
-                            console.log(`[name="' . $name .'"]`);
                             var ' . $sanitized_name . ' = ace.edit("' . $sanitized_name . 'Editor");
                             ' . $sanitized_name . '.session.setMode("' . $mode . '");
                             ' . $sanitized_name . '.setTheme("ace/theme/idle_fingers");

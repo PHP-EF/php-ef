@@ -1,3 +1,15 @@
+## v0.7.8
+- Add plugin dependency support
+- Add News Feed widget
+- Bugfix to filtering Web Tracking reports
+- Add support for setting default page
+
+## v0.7.7
+- Upgrade to Bootstrap 5.3.3
+- Introduce support for BS themes
+- Fix nested nav tabs on mobile
+- Overhaul pages
+
 ## v0.7.6
 - Major overhaul to UX/UI
 

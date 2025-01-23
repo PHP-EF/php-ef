@@ -21,10 +21,12 @@ return '
             <ul class="dropdown-menu" aria-labelledby="configTabsDropdown" id="configTabsDropdownMenu">
               <li><a class="dropdown-item nav-link" href="#general" data-bs-toggle="tab">General</a></li>
               <li><a class="dropdown-item nav-link" href="#accesscontrol" data-bs-toggle="tab">Access Control</a></li>
-              <li><a class="dropdown-item nav-link" href="#customisation" data-bs-toggle="tab">Customisation</a></li>
+              <li><a class="dropdown-item nav-link" href="#pages" data-bs-toggle="tab">Pages</a></li>
               <li><a class="dropdown-item nav-link" href="#plugins" data-bs-toggle="tab">Plugins</a></li>
               <li><a class="dropdown-item nav-link" href="#images" data-bs-toggle="tab">Images</a></li>
               <li><a class="dropdown-item nav-link" href="#dashboards" data-bs-toggle="tab">Dashboards</a></li>
+              <li><a class="dropdown-item nav-link" href="#customisation" data-bs-toggle="tab">Customisation</a></li>
+              <li><a class="dropdown-item nav-link" href="#notifications" data-bs-toggle="tab">Notifications</a></li>
             </ul>
           </div>
         </div>
@@ -36,7 +38,7 @@ return '
           <a class="nav-link" id="accesscontrol-tab" data-bs-toggle="tab" href="#accesscontrol" role="tab" aria-controls="accesscontrol" aria-selected="false">Access Control</a>
         </li>
         <li class="nav-item d-none d-lg-flex">
-          <a class="nav-link" id="customisation-tab" data-bs-toggle="tab" href="#customisation" role="tab" aria-controls="customisation" aria-selected="false">Customisation</a>
+          <a class="nav-link" id="pages-tab" data-bs-toggle="tab" href="#pages" role="tab" aria-controls="pages" aria-selected="false">Pages</a>
         </li>
         <li class="nav-item d-none d-lg-flex">
           <a class="nav-link" id="plugins-tab" data-bs-toggle="tab" href="#plugins" role="tab" aria-controls="plugins" aria-selected="false">Plugins</a>
@@ -46,6 +48,12 @@ return '
         </li>
         <li class="nav-item d-none d-lg-flex">
           <a class="nav-link" id="dashboards-tab" data-bs-toggle="tab" href="#dashboards" role="tab" aria-controls="dashboards" aria-selected="false">Dashboards</a>
+        </li>
+        <li class="nav-item d-none d-lg-flex">
+          <a class="nav-link" id="customisation-tab" data-bs-toggle="tab" href="#customisation" role="tab" aria-controls="customisation" aria-selected="false">Customisation</a>
+        </li>
+        <li class="nav-item d-none d-lg-flex">
+          <a class="nav-link" id="notifications-tab" data-bs-toggle="tab" href="#notifications" role="tab" aria-controls="notifications" aria-selected="false">Notifications</a>
         </li>
       </ul>
       <div class="tab-content" id="configTabContent">
@@ -97,6 +105,24 @@ return '
             <div class="card card-rounded border-secondary p-3">
               <div class="dashboards-content">
                 <form id="dashboardsForm"></form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="pages" role="tabpanel" aria-labelledby="pages-tab">
+          <div class="my-4">
+            <div class="card card-rounded border-secondary p-3">
+              <div class="pages-content">
+                <form id="pagesForm"></form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="notifications" role="tabpanel" aria-labelledby="notifications-tab">
+          <div class="my-4">
+            <div class="card card-rounded border-secondary p-3">
+              <div class="notifications-content">
+                <form id="notificationsForm"></form>
               </div>
             </div>
           </div>
@@ -160,8 +186,8 @@ return '
 </div>
 
 <script>
-  const changedSettingsElements = new Set();
-  const changedModalSettingsElements = new Set();
+  var changedSettingsElements = new Set();
+  var changedModalSettingsElements = new Set();
   var imagesLoaded = false;
   var tabsLoaded = [];
   var selectWithTableArr = {};
@@ -445,6 +471,67 @@ return '
       });
     }
   })
+
+  $("#SettingsModal").on("click", "#widgetSelect", function () {
+    const widgetsSelect = $("#widgetSelect");
+    const table = $("#widgetSelectTable");
+    const selectedValues = Array.from(widgetsSelect[0].selectedOptions).map(option => option.value);
+    
+    // Get current table data
+    const currentData = table.bootstrapTable("getData");
+    const sizeMap = {};
+    // Store current sizes
+    currentData.forEach(row => {
+        const selectElement = table.find(`select[data-label="size"]`).filter((index, element) => $(element).closest("tr").find("td").eq(1).text() === row.name);
+        if (selectElement.length) {
+            sizeMap[row.name] = selectElement.val();
+        }
+    });
+    const newData = [];
+    // Add or update rows based on selected options
+    Array.from(widgetsSelect[0].selectedOptions).forEach(option => {
+        if (option.value) {
+            const existingRow = currentData.find(row => row.name === option.text);
+            if (existingRow) {
+                newData.push(existingRow);
+            } else {
+                newData.push({
+                    dragHandle: `<span class="dragHandle" style="font-size:22px;">☰</span>`,
+                    name: option.text,
+                    size: `<select class="form-select" data-label="size">
+                            <option value="col-md-1">1</option>
+                            <option value="col-md-2">2</option>
+                            <option value="col-md-3">3</option>
+                            <option value="col-md-4">4</option>
+                            <option value="col-md-5">5</option>
+                            <option value="col-md-6">6</option>
+                            <option value="col-md-7">7</option>
+                            <option value="col-md-8">8</option>
+                            <option value="col-md-9">9</option>
+                            <option value="col-md-10">10</option>
+                            <option value="col-md-11">11</option>
+                            <option value="col-md-12">12</option>
+                        </select>`
+                });
+            }
+        }
+    });
+    // Remove rows that are no longer selected
+    currentData.forEach(row => {
+        if (!selectedValues.includes(row.name)) {
+            table.bootstrapTable("remove", { field: "name", values: [row.name] });
+        }
+    });
+    // Update table with new data
+    table.bootstrapTable("load", newData);
+    // Restore selected values in the dropdowns
+    newData.forEach(row => {
+        const selectElement = table.find(`select[data-label="size"]`).filter((index, element) => $(element).closest("tr").find("td").eq(1).text() === row.name);
+        if (selectElement.length && sizeMap[row.name]) {
+            selectElement.val(sizeMap[row.name]);
+        }
+    });
+  });
 
   getConfig();
   switchTab("#general");

@@ -31,8 +31,10 @@ $app->get('/page/plugin/{plugin}/js', function ($request, $response, $args) {
 	// Get Custom JS
 	if (file_exists($pluginDir.'/main.js')) {
 		$jsContent = file_get_contents($pluginDir.'/main.js');
-		$phpef->api->setAPIResponseData($jsContent);
-		$response->getBody()->write($GLOBALS['api']['data']);
+		if ($jsContent) {
+			$phpef->api->setAPIResponseData($jsContent);
+			$response->getBody()->write($GLOBALS['api']['data']);
+		}
 	} else {
 		$response->getBody()->write(jsonE($GLOBALS['api']));
 	}
@@ -51,8 +53,10 @@ $app->get('/page/plugin/{plugin}/css', function ($request, $response, $args) {
 	// Get Custom JS
 	if (file_exists($pluginDir.'/styles.css')) {
 		$cssContent = file_get_contents($pluginDir.'/styles.css');
-		$phpef->api->setAPIResponseData($cssContent);
-		$response->getBody()->write($GLOBALS['api']['data']);
+		if ($cssContent) {
+			$phpef->api->setAPIResponseData($cssContent);
+			$response->getBody()->write($GLOBALS['api']['data']);
+		}
 	} else {
 		$response->getBody()->write(jsonE($GLOBALS['api']));
 	}
@@ -125,16 +129,12 @@ $app->post('/pages', function ($request, $response, $args) {
 	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
         $data = $phpef->api->getAPIRequestData($request);
-        $Name = $data['name'] ?? exit($phpef->api->setAPIResponse('Error','Name missing from request'));
-        $Title = $data['title'] ?? null;
-        $Type = $data['type'] ?? null;
-		$Url = $data['url'] ?? null;
-        $Menu = $data['menu'] ?? null;
-        $Submenu = $data['submenu'] ?? null;
-		$ACL = $data['acl'] ?? null;
-		$Icon = $data['icon'] ?? null;
-		$LinkType = $data['linktype'] ?? null;
-		$phpef->pages->new($Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon,$LinkType);
+		$Name = $data['pageName'] ?? null;
+		if ($Name) {
+			$phpef->pages->new($data);
+		} else {
+			$phpef->api->setAPIResponse('Error','Name missing from request');
+		}
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
@@ -147,16 +147,7 @@ $app->patch('/page/{id}', function ($request, $response, $args) {
     if ($phpef->auth->checkAccess("ADMIN-PAGES")) {
         if (isset($args['id'])) {
 			$data = $phpef->api->getAPIRequestData($request);
-			$Name = $data['name'] ?? null;
-			$Title = $data['title'] ?? null;
-			$Type = $data['type'] ?? null;
-			$Url = $data['url'] ?? null;
-			$Menu = $data['menu'] ?? null;
-			$Submenu = $data['submenu'] ?? null;
-			$ACL = $data['acl'] ?? null;
-			$Icon = $data['icon'] ?? null;
-			$LinkType = $data['linktype'] ?? null;
-			$phpef->pages->set($args['id'],$Name,$Title,$Type,$Url,$Menu,$Submenu,$ACL,$Icon,$LinkType);
+			$phpef->pages->set($args['id'],$data);
         } else {
             $phpef->api->setAPIResponse('Error','id missing from request',400);
         }
