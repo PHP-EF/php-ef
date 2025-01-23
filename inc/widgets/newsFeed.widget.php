@@ -3,24 +3,10 @@
 class NewsFeed implements WidgetInterface {
     private $phpef;
     private $widgetConfig;
-    private $db;
 
     public function __construct($phpef) {
         $this->phpef = $phpef;
         $this->buildWidgetConfig();
-        $this->db = $this->phpef->db;
-        $this->initializeDatabase();
-    }
-
-    private function initializeDatabase() {
-        $this->db->exec("
-            CREATE TABLE IF NOT EXISTS news (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT NOT NULL,
-                date TEXT NOT NULL,
-                content TEXT NOT NULL
-            )
-        ");
     }
 
     private function buildWidgetConfig() {
@@ -31,6 +17,7 @@ class NewsFeed implements WidgetInterface {
         $this->widgetConfig['newsHeaderEnabled'] = $this->widgetConfig['newsHeaderEnabled'] ?? true;
         $this->widgetConfig['newsHeader'] = $this->widgetConfig['newsHeader'] ?? 'News & Updates';
         $this->widgetConfig['newsItemsDisplayed'] = $this->widgetConfig['newsItemsDisplayed'] ?? 5;
+        $this->widgetConfig['newsOrderByLastUpdated'] = $this->widgetConfig['newsOrderByLastUpdated'] ?? false;
     }
 
     public function settings() {
@@ -49,6 +36,7 @@ class NewsFeed implements WidgetInterface {
                 $this->phpef->settingsOption('checkbox', 'newsExpandFirst', ['label' => 'Expand the latest news item', 'attr' => 'checked']),
                 $this->phpef->settingsOption('input', 'newsHeader', ['label' => 'The header displayed above the news widget', 'placeholder' => 'News & Updates']),
                 $this->phpef->settingsOption('number', 'newsItemsDisplayed', ['label' => 'Number of news items displayed in the widget']),
+                $this->phpef->settingsOption('checkbox', 'newsOrderByLastUpdated', ['label' => 'Order news items by last updated'])
             ]
         ];
         return $SettingsArr;
@@ -57,7 +45,7 @@ class NewsFeed implements WidgetInterface {
     public function render() {
         if ($this->phpef->auth->checkAccess($this->widgetConfig['auth']) !== false && $this->widgetConfig['enabled']) {
             // Fetch news items from the SQLite database
-            $newsItems = $this->fetchNewsItems($this->widgetConfig['newsItemsDisplayed']);
+            $newsItems = $this->phpef->notifications->getNewsItems($this->widgetConfig['newsItemsDisplayed']);
 
             $output = '';
             if ($this->widgetConfig['newsHeaderEnabled']) {
@@ -76,6 +64,7 @@ class NewsFeed implements WidgetInterface {
             $count = 0;
             foreach ($newsItems as $index => $newsItem) {
                 $expand = ($count == 0 && $this->widgetConfig['newsExpandFirst']);
+                $dateValueToDisplay = $this->widgetConfig['newsOrderByLastUpdated'] ? $newsItem['updated'] : $newsItem['created'];
                 $btnExpand = $expand ? "" : "collapsed";
                 $bodyExpand = $expand ? "" : "collapse";
                 $output .= <<<EOF
@@ -83,7 +72,7 @@ class NewsFeed implements WidgetInterface {
                     <h2 class="accordion-header" id="heading{$index}">
                         <button class="accordion-button {$btnExpand}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{$index}" aria-expanded="true" aria-controls="collapse{$index}">
                             <span>{$newsItem['title']}</span>
-                            <span class="alt-text">{$newsItem['date']}</span>
+                            <span class="alt-text">{$dateValueToDisplay}</span>
                         </button>
                     </h2>
                     <div id="collapse{$index}" class="accordion-collapse {$bodyExpand}" aria-labelledby="heading{$index}" data-bs-parent="#newsAccordion">
@@ -102,13 +91,6 @@ class NewsFeed implements WidgetInterface {
 
             return $output;
         }
-    }
-
-    private function fetchNewsItems($limit) {
-        $stmt = $this->db->prepare("SELECT title, date, content FROM news ORDER BY date DESC LIMIT :limit");
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 

@@ -575,8 +575,6 @@ trait Settings {
             'show-refresh' => 'true',
             'pagination' => 'true',
             'toolbar' => '#toolbar',
-            'sort-name' => 'Name',
-            'sort-order' => 'asc',
             'show-columns' => 'true',
             'page-size' => '25',
             'response-handler' => 'responseHandler',
@@ -594,28 +592,24 @@ trait Settings {
             ],
             [
                 'field' => 'Name',
-                'title' => 'Name',
-                'dataAttributes' => ['sortable' => 'true'],
+                'title' => 'Name'
             ],
             [
                 'field' => 'Title',
-                'title' => 'Title',
-                'dataAttributes' => ['sortable' => 'true'],
+                'title' => 'Title'
             ],
             [
                 'field' => 'Url',
                 'title' => 'URL',
-                'dataAttributes' => ['sortable' => 'true', 'visible' => 'false'],
+                'dataAttributes' => ['visible' => 'false'],
             ],
             [
                 'field' => 'ACL',
-                'title' => 'Role',
-                'dataAttributes' => ['sortable' => 'true'],
+                'title' => 'Role'
             ],
             [
                 'field' => 'LinkType',
-                'title' => 'Type',
-                'dataAttributes' => ['sortable' => 'true'],
+                'title' => 'Type'
             ],
             [
                 'title' => 'Actions',
@@ -689,5 +683,87 @@ trait Settings {
                 $this->settingsOption('input', 'pageId', ['attr' => 'hidden'])
             )
         );
+    }
+
+    public function settingsNotifications() {
+        $TableAttributes = [
+            'data-field' => 'data',
+            'toggle' => 'table',
+            'search' => 'true',
+            'filter-control' => 'true',
+            'show-refresh' => 'true',
+            'pagination' => 'true',
+            'toolbar' => '#toolbar',
+            'sort-name' => 'Name',
+            'sort-order' => 'asc',
+            'show-columns' => 'true',
+            'page-size' => '25',
+            'response-handler' => 'responseHandler',
+        ];
+
+        $NewsTableColumns = [
+            [
+                'field' => 'title',
+                'title' => 'Title'
+            ],
+            [
+                'field' => 'content',
+                'title' => 'Content',
+                'dataAttributes' => ['formatter' => 'readMoreFormatter']
+            ],
+            [
+                'field' => 'created',
+                'title' => 'Created',
+                'dataAttributes' => ['formatter' => 'datetimeFormatter', 'width' => '220px']
+            ],
+            [
+                'field' => 'updated',
+                'title' => 'Updated',
+                'dataAttributes' => ['formatter' => 'datetimeFormatter', 'width' => '220px', 'visible' => 'false']
+            ],
+            [
+                'field' => 'actions',
+                'title' => 'Actions',
+                'dataAttributes' => ['formatter' => 'editAndDeleteActionFormatter', 'events' => 'newsActionEvents']
+            ]
+        ];
+
+        $NewsTableAttributes = $TableAttributes;
+        $NewsTableAttributes['url'] = '/api/notifications/news';
+        $NewsTableAttributes['buttons'] = 'newsTableButtons';
+        $NewsTableAttributes['buttons-order'] = 'btnAddNews';
+
+        return array(
+            'News' => array(
+                $this->settingsOption('bootstrap-table', 'newsTable', ['id' => 'newsTable', 'columns' => $NewsTableColumns, 'dataAttributes' => $NewsTableAttributes, 'override' => '12']),
+            ),
+            'SMTP' => array(
+
+            ),
+            'Webhooks' => array(
+
+            )
+	    );
+    }
+
+    public function settingsNews($id = null) {
+        $newsItem = [
+            'title' => '',
+            'content' => '',
+            'id' => '',
+            'created' => '',
+            'updated' => ''
+        ];
+        if ($id) {
+            $newsItem = $this->notifications->getNewsById($id) ?? '';
+        }
+        return array(
+            'General' => array(
+                $this->settingsOption('input', 'newsTitle', ['label' => 'News Item Title', 'value' => $newsItem['title']]),
+                $this->settingsOption('hr'),
+                $this->settingsOption('codeeditor', 'newsContent', ['label' => 'News Content', 'mode' => 'html', 'value' => $newsItem['content']]),
+                $this->settingsOption('input', 'newsId', ['attr' => 'hidden', 'value' => $newsItem['id']])
+            )
+	    );
     }
 }

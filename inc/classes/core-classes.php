@@ -132,8 +132,8 @@ class Config {
     $this->cacheConfig();
   }
 
-  public function setRepositories(&$config,$list) {
-    $config = $this->get();
+  public function setRepositories($list) {
+    $config = $this->config;
     $config['PluginRepositories'] = $list;
     $this->api->setAPIResponseMessage('Successfully updated repository configuration');
     file_put_contents($this->configFile, json_encode($config, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));

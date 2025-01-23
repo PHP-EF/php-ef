@@ -982,6 +982,13 @@ document.addEventListener('DOMContentLoaded', function() {
     $($(this).attr('href')).addClass('show active');
   });
 
+  // ** COMMON ** //
+  $("body").on('click', '.read-more', function(e) {
+    e.preventDefault();
+    var fullContent = $(this).data('full-content');
+    $(this).closest('td').html(fullContent);
+  });
+
   $(".hover-target").hover(
     function() {
         $(".popover").css({
@@ -1016,7 +1023,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // **************** //
   // ** CLEANED UP ** //
   // **************** //
-
 
   // ** FORM BUILDER ** //
   function buildFormGroup(array, noTabs = false) {
@@ -1537,6 +1543,29 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  window.newsActionEvents = {
+    "click .edit": function (e, value, row, index) {
+      buildNewsSettingsModal(row);
+    },
+    "click .delete": function (e, value, row, index) {
+      if(confirm("Are you sure you want to delete the news item: "+row.title+"? This is irriversible.") == true) {
+        queryAPI("DELETE","/api/notifications/news/"+row.id).done(function(data) {
+          if (data["result"] == "Success") {
+            toast("Success","","Successfully deleted "+row.title+" from News","success");
+            var tableId = `#${$(e.currentTarget).closest("table").attr("id")}`;
+            $(tableId).bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger","30000");
+          } else {
+            toast("Error","","Failed to delete "+row.title+" from News","danger");
+          }
+        }).fail(function() {
+            toast("Error", "", "Failed to remove " + row.title + " from News", "danger");
+        });
+      }
+    }
+  }
+
 
   // ** ACTION FORMATTERS ** //
   function widgetActionFormatter(value, row, index) {
@@ -1665,6 +1694,15 @@ document.addEventListener('DOMContentLoaded', function() {
     return html;
   }
 
+  function readMoreFormatter(value, row, index) {
+    var maxLength = 100; // Adjust the length as needed
+    if (value.length > maxLength) {
+        var truncated = value.substring(0, maxLength) + '... <a href="#" class="read-more" data-full-content="' + value + '">Read more</a>';
+        return truncated;
+    }
+    return value;
+  }
+
   // ** TABLE DETAIL FORMATTERS ** //
   function pagesDetailFormatter(index, row, prefix) {
     let html = [];
@@ -1775,6 +1813,22 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         attributes: {
           title: "Add a new page",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
+  function newsTableButtons() {
+    return {
+      btnAddNews: {
+        text: "Add News Item",
+        icon: "bi-plus-lg",
+        event: function() {
+          buildNewNewsSettingsModal();
+        },
+        attributes: {
+          title: "Add a new news item",
           style: "background-color:#4bbe40;border-color:#4bbe40;"
         }
 	    }
@@ -1924,10 +1978,10 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function submitSettingsModal(type, element = "#modalItemID", isNew = false, apiStub = null, customData = []) {
-    var noneCheckboxSelector = "#SettingsModal input.changed[type!=checkbox], #SettingsModal select.changed";
+    var noneCheckboxSelector = "#SettingsModal input.changed[type!=checkbox], #SettingsModal select.changed, #SettingsModal textarea.changed";
     var checkboxSelector = "#SettingsModal input.changed[type=checkbox]";
     if (isNew) {
-      var noneCheckboxSelector = "#SettingsModal input[type!=checkbox], #SettingsModal select";
+      var noneCheckboxSelector = "#SettingsModal input[type!=checkbox], #SettingsModal select, #SettingsModal textarea";
       var checkboxSelector = "#SettingsModal input[type=checkbox]";
     }
     var serializedArray = $(`${noneCheckboxSelector}`).serializeArray();
@@ -2127,7 +2181,30 @@ document.addEventListener('DOMContentLoaded', function() {
       name: "New Link / Menu",
       saveFunction: `submitPageSettings(true);`,
       labelPrefix: "Page / Menu",
-      callback:  "populatePageSettingsModal()",
+      dataLocation: "data",
+      noTabs: true
+    },'lg');
+  }
+
+  function buildNewsSettingsModal(row) {
+    buildSettingsModal(row, {
+      apiUrl: `/api/settings/news/`+row.id,
+      configUrl: null,
+      name: row.title,
+      saveFunction: `submitNewsSettings();`,
+      labelPrefix: "News",
+      dataLocation: "data",
+      noTabs: true
+    },'lg');
+  }
+
+  function buildNewNewsSettingsModal() {
+    buildSettingsModal([], {
+      apiUrl: `/api/settings/news`,
+      configUrl: null,
+      name: "New News Item",
+      saveFunction: `submitNewsSettings(true);`,
+      labelPrefix: "News",
       dataLocation: "data",
       noTabs: true
     },'lg');
@@ -2238,6 +2315,22 @@ document.addEventListener('DOMContentLoaded', function() {
         $("#combinedTable").bootstrapTable("refresh");
     }).catch((error) => {
         console.error("Error submitting settings:", error);
+    });
+  }
+
+  function submitNewsSettings(isNew = false) {
+    var submitPromise;
+    if (isNew) {
+        submitPromise = submitSettingsModal("news", "[name=newsId]", isNew, "/api/notifications/");
+    } else {
+      submitPromise = submitSettingsModal("news", "[name=newsId]", isNew, "/api/notifications/");
+    }
+
+    submitPromise.then(() => {
+      $("#SettingsModal").modal("hide");
+      $("#newsTable").bootstrapTable("refresh");
+    }).catch((error) => {
+      console.error("Error submitting settings:", error);
     });
   }
 
@@ -2643,34 +2736,27 @@ document.addEventListener('DOMContentLoaded', function() {
         },{
           field: "Icon",
           title: "Icon",
-          formatter: "pageIconFormatter",
-          sortable: true
+          formatter: "pageIconFormatter"
         },{
           field: "Type",
           title: "Type",
-          formatter: "typeFormatter",
-          sortable: true
+          formatter: "typeFormatter"
         },{
           field: "Name",
-          title: "Name",
-          sortable: true
+          title: "Name"
         },{
           field: "Title",
-          title: "Title",
-          sortable: true
+          title: "Title"
         },{
           field: "Url",
           title: "URL",
-          sortable: true,
           visible: false
         },{
           field: "ACL",
-          title: "Role",
-          sortable: true
+          title: "Role"
         },{
           field: "LinkType",
-          title: "Source",
-          sortable: true
+          title: "Source"
         },{
           title: "Actions",
           formatter: "pageActionFormatter",
@@ -2696,29 +2782,23 @@ document.addEventListener('DOMContentLoaded', function() {
           },{
             field: "Type",
             title: "Type",
-            formatter: "typeFormatter",
-            sortable: true
+            formatter: "typeFormatter"
           },{
             field: "Name",
-            title: "Name",
-            sortable: true
+            title: "Name"
           },{
             field: "Title",
-            title: "Title",
-            sortable: true
+            title: "Title"
           },{
             field: "Url",
             title: "URL",
-            sortable: true,
             visible: false
           },{
             field: "ACL",
-            title: "Role",
-            sortable: true
+            title: "Role"
           },{
             field: "LinkType",
-            title: "Source",
-            sortable: true
+            title: "Source"
           },{
             title: "Actions",
             formatter: "pageActionFormatter",

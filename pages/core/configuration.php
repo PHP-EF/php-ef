@@ -21,11 +21,12 @@ return '
             <ul class="dropdown-menu" aria-labelledby="configTabsDropdown" id="configTabsDropdownMenu">
               <li><a class="dropdown-item nav-link" href="#general" data-bs-toggle="tab">General</a></li>
               <li><a class="dropdown-item nav-link" href="#accesscontrol" data-bs-toggle="tab">Access Control</a></li>
-              <li><a class="dropdown-item nav-link" href="#customisation" data-bs-toggle="tab">Customisation</a></li>
+              <li><a class="dropdown-item nav-link" href="#pages" data-bs-toggle="tab">Pages</a></li>
               <li><a class="dropdown-item nav-link" href="#plugins" data-bs-toggle="tab">Plugins</a></li>
               <li><a class="dropdown-item nav-link" href="#images" data-bs-toggle="tab">Images</a></li>
               <li><a class="dropdown-item nav-link" href="#dashboards" data-bs-toggle="tab">Dashboards</a></li>
-              <li><a class="dropdown-item nav-link" href="#pages" data-bs-toggle="tab">Pages</a></li>
+              <li><a class="dropdown-item nav-link" href="#customisation" data-bs-toggle="tab">Customisation</a></li>
+              <li><a class="dropdown-item nav-link" href="#notifications" data-bs-toggle="tab">Notifications</a></li>
             </ul>
           </div>
         </div>
@@ -37,7 +38,7 @@ return '
           <a class="nav-link" id="accesscontrol-tab" data-bs-toggle="tab" href="#accesscontrol" role="tab" aria-controls="accesscontrol" aria-selected="false">Access Control</a>
         </li>
         <li class="nav-item d-none d-lg-flex">
-          <a class="nav-link" id="customisation-tab" data-bs-toggle="tab" href="#customisation" role="tab" aria-controls="customisation" aria-selected="false">Customisation</a>
+          <a class="nav-link" id="pages-tab" data-bs-toggle="tab" href="#pages" role="tab" aria-controls="pages" aria-selected="false">Pages</a>
         </li>
         <li class="nav-item d-none d-lg-flex">
           <a class="nav-link" id="plugins-tab" data-bs-toggle="tab" href="#plugins" role="tab" aria-controls="plugins" aria-selected="false">Plugins</a>
@@ -49,7 +50,10 @@ return '
           <a class="nav-link" id="dashboards-tab" data-bs-toggle="tab" href="#dashboards" role="tab" aria-controls="dashboards" aria-selected="false">Dashboards</a>
         </li>
         <li class="nav-item d-none d-lg-flex">
-          <a class="nav-link" id="pages-tab" data-bs-toggle="tab" href="#pages" role="tab" aria-controls="pages" aria-selected="false">Pages</a>
+          <a class="nav-link" id="customisation-tab" data-bs-toggle="tab" href="#customisation" role="tab" aria-controls="customisation" aria-selected="false">Customisation</a>
+        </li>
+        <li class="nav-item d-none d-lg-flex">
+          <a class="nav-link" id="notifications-tab" data-bs-toggle="tab" href="#notifications" role="tab" aria-controls="notifications" aria-selected="false">Notifications</a>
         </li>
       </ul>
       <div class="tab-content" id="configTabContent">
@@ -110,6 +114,15 @@ return '
             <div class="card card-rounded border-secondary p-3">
               <div class="pages-content">
                 <form id="pagesForm"></form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="notifications" role="tabpanel" aria-labelledby="notifications-tab">
+          <div class="my-4">
+            <div class="card card-rounded border-secondary p-3">
+              <div class="notifications-content">
+                <form id="notificationsForm"></form>
               </div>
             </div>
           </div>
