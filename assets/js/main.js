@@ -2192,6 +2192,7 @@ document.addEventListener('DOMContentLoaded', function() {
       saveFunction: `submitPageSettings(true);`,
       labelPrefix: "Page / Menu",
       dataLocation: "data",
+      callback:  "populatePageSettingsModal()",
       noTabs: true
     },'lg');
   }
@@ -2844,7 +2845,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var linktype = $("[name=pageLinkType]").val();
     switch(type) {
       case "Link":
-        $("[name=pageUrl],[name=pageTitle],[name=pageUrl],[name=pageSubMenu],[name=pageRole],[name=pageLinkType],[name=pageiFrameUrl]").parent().parent().parent().attr("hidden",false);
+        $("[name=pageUrl],[name=pageTitle],[name=pageUrl],[name=pageSubMenu],[name=pageRole],[name=pageLinkType],[name=pageiFrameUrl],[name=pageDefault]").parent().parent().parent().attr("hidden",false);
         if (submenu) {
           $("[name=pageIcon], [name=pageImage]").parent().parent().parent().parent().attr("hidden",true);
           $("[name=pageIcon], [name=pageImage]").val("")
@@ -2863,7 +2864,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         break;
       case "Menu":
-        $("[name=pageUrl],[name=pageTitle],[name=pageUrl],[name=pageSubMenu],[name=pageRole],[name=pageLinkType],[name=pageiFrameUrl]").parent().parent().parent().attr("hidden",true).val("");
+        $("[name=pageUrl],[name=pageTitle],[name=pageUrl],[name=pageSubMenu],[name=pageRole],[name=pageLinkType],[name=pageiFrameUrl],[name=pageDefault]").parent().parent().parent().attr("hidden",true).val("");
         break;
     }
   }
