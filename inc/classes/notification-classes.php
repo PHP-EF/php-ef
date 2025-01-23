@@ -19,7 +19,7 @@ class Notifications {
                 title TEXT NOT NULL,
                 content TEXT NOT NULL,
                 created TEXT NOT NULL,
-                updated TEXT NOT NULL
+                updated TEXT
             )
         ");
     }
