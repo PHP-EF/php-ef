@@ -17,7 +17,7 @@ class Ping {
 
       img.onload = img.onerror = onPingComplete;
       if (timeout) timer = setTimeout(onPingComplete, timeout);
-      img.src = `//${url}/?${+new Date()}`;
+      img.src = `${url}/?${+new Date()}`;
   }
 }
 
@@ -29,6 +29,10 @@ function pad(n, width, z) {
 	z = z || '0';
 	n = n + '';
 	return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}
+
+function createTableHtml(index, prefix) {
+  return `<table class="table table-striped" id="`+prefix+`-table-` + index +`"></table>`;
 }
 
 // Core Functions & Logging
@@ -283,7 +287,7 @@ function stringValidate(element, min, max, type) {
   }
 }
 
-function loadContent(element = null) {
+function loadContent(element = null, defaultPage = null) {
   $('.mainWindow, .mainFrame').attr('hidden',true);
   // $('.dynamic-plugin-js').remove();
   $('.toggleFrame').removeClass('active');
@@ -300,16 +304,17 @@ function loadContent(element = null) {
       var name = qualifierSplit[1];
       switch (qualifierSplit[0]) {
         case 'page':
-          element = $('a[href="#page='+decodeURI(name)+'"]');
-          element.addClass('active');
+          elements = $('a.toggleFrame[href="#page=' + decodeURI(name) + '"]');
+          element = $('a.toggleFrame[href="#page=' + decodeURI(name) + '"]:not(.link_name)');
+          elements.addClass('active');
           $('.title-text').text(element.data('pageName'));
           expandNav = true;
           break;
       }
     } else {
-      loadMainWindow();
-      initLazyLoad();
-      return;
+      element = $('a.toggleFrame[href="#page=' + decodeURI(defaultPage) + '"]:not(.link_name)');
+      element.addClass('active');
+      expandNav = true;
     }
   }
 
@@ -918,10 +923,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   
-  $('.preventDefault').click(function(event){
+  $("body").on("click",".preventDefault", function(event) {
     event.preventDefault();
   });
-
+  
   $("#page-content").on("click", ".addInputEntry", function(elem) {
     var input = $(elem.target).parent().prev();
     if (input.val()) {
@@ -969,6 +974,22 @@ document.addEventListener('DOMContentLoaded', function() {
     $(this).addClass("changed");
   });
 
+  // Custom jQuery to handle nested tabs
+  $("body").on('click', '#configTabContent .nav-tabs .nav-link', function (event) {
+    event.preventDefault();
+    $('#configTabContent .nav-tabs .nav-link').removeClass('active');
+    $('#configTabContent .nav-tabs .nav-link').removeClass('show active');
+    $(this).addClass('active');
+    $($(this).attr('href')).addClass('show active');
+  });
+
+  // ** COMMON ** //
+  $("body").on('click', '.read-more', function(e) {
+    e.preventDefault();
+    var fullContent = $(this).data('full-content');
+    $(this).closest('td').html(fullContent);
+  });
+
   $(".hover-target").hover(
     function() {
         $(".popover").css({
@@ -994,16 +1015,15 @@ document.addEventListener('DOMContentLoaded', function() {
   console.info("%c Web App %c ".concat("DOM Fully loaded", " "), "color: white; background: #AD80FD; font-weight: 700;", "color: #AD80FD; background: white; font-weight: 700;");
 });
 
-// Modal Backdrop Z-Index Fix
-$(document).on('shown.bs.modal', '.modal', function () {
-  $('.modal-backdrop').before($(this));
-});
+  // Modal Backdrop Z-Index Fix
+  $(document).on('shown.bs.modal', '.modal', function () {
+    $('.modal-backdrop').before($(this));
+  });
 
 
   // **************** //
   // ** CLEANED UP ** //
   // **************** //
-
 
   // ** FORM BUILDER ** //
   function buildFormGroup(array, noTabs = false) {
@@ -1023,24 +1043,24 @@ $(document).on('shown.bs.modal', '.modal', function () {
     } else {
       var group = '<div class="tab-content tab-content-sub">';
       var uList = `
-        <ul class="nav flex-column nav-tabs info-nav d-none d-lg-flex">
+        <ul class="nav flex-column nav-tabs info-nav">
+          <div class="d-lg-none tab-sub-dropdown">
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="configSubTabsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                ${first}
+              </button>
+              <ul class="dropdown-menu dropdown-menu-top" aria-labelledby="configSubTabsDropdown">
+                ${Object.keys(array).map((i, index) => {
+                  return `<li><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanClass(i)}" class="nav-link ${active}"><span lang="en">${i}</span></a></li>`;
+                }).join('')}
+              </ul>
+            </div>
+          </div>
           ${Object.keys(array).map((i, index) => {
             active = (index == 0) ? 'active' : '';
-            return `<li role="presentation" class="nav-item"><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanClass(i)}" class="nav-link small text-uppercase ${active}"><span lang="en">${i}</span></a></li>`;
+            return `<li role="presentation" class="nav-item d-none d-lg-flex"><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanClass(i)}" class="nav-link ${active}"><span lang="en">${i}</span></a></li>`;
           }).join('')}
         </ul>
-        <div class="d-lg-none tab-sub-dropdown">
-          <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="configSubTabsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-              ${first}
-            </button>
-            <ul class="dropdown-menu dropdown-menu-top" aria-labelledby="configSubTabsDropdown">
-              ${Object.keys(array).map((i, index) => {
-                return `<li><a href="" data-tab-target="#${ids[i]}${cleanClass(i)}" class="nav-link small text-uppercase"><span lang="en">${i}</span></a></li>`;
-              }).join('')}
-            </ul>
-          </div>
-        </div>
       `;
     }
   
@@ -1066,7 +1086,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
           sectionCount++;
           count++;
   
-          if (count % 2 !== 0) {
+          if (count % 2 !== 0 && !item.noRow) {
             group += '<div class="row start">';
           }
   
@@ -1093,7 +1113,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
   
           group += builtItems;
   
-          if (count % 2 === 0 || sectionCount === total) {
+          if ((count % 2 === 0 || sectionCount === total) && !item.noRow) {
             group += '</div><!--end-->';
           }
         });
@@ -1163,10 +1183,11 @@ $(document).on('shown.bs.modal', '.modal', function () {
         return smallLabel+'<button class="btn btn-sm btn-success btn-rounded waves-effect waves-light b-none'+extraClass+'" '+href+attr+dataAttributes+' type="button"><span class="btn-label"><i class="'+icon+'"></i></span><span lang="en">'+text+'</span></button>';
       case 'blank':
         return '';
+      case 'panel':
+        return '<div class="panel-group'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'  aria-multiselectable="true" role="tablist">'+panelOptions(item.options, item.id)+'</div>';
       case 'accordion':
-        return '<div class="panel-group'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'  aria-multiselectable="true" role="tablist">'+accordionOptions(item.options, item.id)+'</div>';
+        return '<div class="accordion'+extraClass+'"'+id+disabled+name+disabled+type+label+attr+dataAttributes+'>'+accordionOptions(item.options, item.id)+'</div>';
       case 'listgroup':
-        console.log(item);
         return buildListGroup(item.items,id);
       case 'title':
         return '<h4>'+text+'</h4>';
@@ -1201,18 +1222,35 @@ $(document).on('shown.bs.modal', '.modal', function () {
               </table>
           </form>
           `;
-      case 'bootstraptable':
-        return `
-          <table class="table table-bordered table-striped ${extraClass}" ${id} ${name} ${disabled} ${type} ${label} ${attr} ${dataAttributes}>
-            <thead>
-              <tr>
-                ${item.columns.map(column => `<th data-field="${column.field}" ${column.dataAttributes ? Object.keys(column.dataAttributes).map(key => `data-${key}="${column.dataAttributes[key]}"`).join(' ') : ''}>${column.title}</th>`).join('')}
-              </tr>
-            </thead>
-            <tbody>
-            </tbody>
-          </table>
-          <script>$("#${item.id}").bootstrapTable();</script>
+        case 'bootstraptable':
+          var events = item.events ? item.events : {};
+          var tableOptions = {};
+
+          for (const event in events) {
+              if (events.hasOwnProperty(event)) {
+                  tableOptions[event] = events[event];
+              }
+          }
+          return `
+              <table class="table table-bordered table-striped ${extraClass}" ${id} ${name} ${disabled} ${type} ${label} ${attr} ${dataAttributes}>
+                  <thead>
+                      <tr>
+                          ${item.columns.map(column => `
+                              <th data-field="${column.field}" ${column.dataAttributes ? Object.keys(column.dataAttributes).map(key => `data-${key}="${column.dataAttributes[key]}"`).join(' ') : ''}>
+                                  ${column.title ?? ''}
+                              </th>
+                          `).join('')}
+                      </tr>
+                  </thead>
+                  <tbody>
+                  </tbody>
+              </table>
+              <script>
+                $("#${item.id}").bootstrapTable({
+                    onReorderRow: ${events.onReorderRow},
+                    onExpandRow: ${events.onExpandRow}
+                });
+              </script>
           `;
       default:
         return '<span class="text-danger">BuildFormItem Class not setup...';
@@ -1249,6 +1287,45 @@ $(document).on('shown.bs.modal', '.modal', function () {
     return listGroup;
   }
 
+  function panelOptions(options, parentID){
+    var panelOptions = '';
+    $.each(options, function(i,v) {
+      var id = createRandomString(10);
+      var extraClass = (v.class) ? ' '+v.class : '';
+      var header = (i) ? ' '+i : '';
+      if(typeof v == 'object'){
+        var body = '';
+        $.each(v, function(val) {
+          var helpTip = v[val].helpTip ?? '';
+          if (v[val].type == 'title' || v[val].type == 'hr' || v[val].type == 'js') {
+            body += buildFormItem(v[val]);
+          } else {
+            body += `<div class="col-md-6"><label class="control-label"><span lang="en">${v[val].label}</span>${helpTip}</label>`;
+            body += buildFormItem(v[val]);
+            body += `</div>`;
+          }
+        });
+      }else{
+        var body = v.body;
+      }
+      panelOptions += `
+      <div class="panel">
+        <div class="panel-heading" id="`+id+`-heading" role="tab">
+          <a class="panel-title collapsed" data-bs-toggle="collapse" href="#`+id+`-collapse" data-bs-parent="#`+parentID+`" aria-expanded="false" aria-controls="`+id+`-collapse"><span lang="en">`+header+`</span></a>
+        </div>
+        <div class="panel-collapse collapse" id="`+id+`-collapse" aria-labelledby="`+id+`-heading" role="tabpanel" aria-expanded="false" style="height: 0px;">
+          <div class="panel-body px-3">
+            <div class="row pt-2">
+              `+body+`
+            </div>
+          </div>
+        </div>
+      </div>
+      `;
+    });
+    return panelOptions;
+  }
+
   function accordionOptions(options, parentID){
     var accordionOptions = '';
     $.each(options, function(i,v) {
@@ -1271,14 +1348,16 @@ $(document).on('shown.bs.modal', '.modal', function () {
         var body = v.body;
       }
       accordionOptions += `
-      <div class="panel">
-        <div class="panel-heading" id="`+id+`-heading" role="tab">
-          <a class="panel-title collapsed" data-bs-toggle="collapse" href="#`+id+`-collapse" data-bs-parent="#`+parentID+`" aria-expanded="false" aria-controls="`+id+`-collapse"><span lang="en">`+header+`</span></a>
-        </div>
-        <div class="panel-collapse collapse" id="`+id+`-collapse" aria-labelledby="`+id+`-heading" role="tabpanel" aria-expanded="false" style="height: 0px;">
-          <div class="panel-body px-3">
-            <div class="row pt-2">
-              `+body+`
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="`+id+`-heading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#`+id+`-collapse" aria-expanded="false" aria-controls="`+id+`">`+header+`</button>
+        </h2>
+        <div id="`+id+`-collapse" class="accordion-collapse collapse" aria-labelledby="`+id+`-heading" data-bs-parent="#`+id+`">
+          <div class="accordion-body">
+            <div class="card-body">
+              <div class="row">
+                `+body+`
+              </div>
             </div>
           </div>
         </div>
@@ -1321,7 +1400,8 @@ $(document).on('shown.bs.modal', '.modal', function () {
         var selected = (active.toString() == v.value) ? 'selected' : '';
       }
       var disabled = (v.disabled) ? ' disabled' : '';
-      selectOptions += '<option '+selected+disabled+' value="'+v.value+'">'+v.name+'</option>';
+      var attr = (v.attr) ? ' '+v.attr+' ' : '';
+      selectOptions += '<option '+selected+disabled+attr+' value="'+v.value+'">'+v.name+'</option>';
     });
     return selectOptions;
   }
@@ -1441,6 +1521,53 @@ $(document).on('shown.bs.modal', '.modal', function () {
     }
   }
 
+  window.pageActionEvents = {
+    "click .edit": function (e, value, row, index) {
+      buildPageSettingsModal(row);
+    },
+    "click .delete": function (e, value, row, index) {
+      if(confirm("Are you sure you want to delete the page: "+row.Name+"? This is irriversible.") == true) {
+        queryAPI("DELETE","/api/page/"+row.id).done(function(data) {
+          if (data["result"] == "Success") {
+            toast("Success","","Successfully deleted "+row.Name+" from Pages","success");
+            var tableId = `#${$(e.currentTarget).closest("table").attr("id")}`;
+            $(tableId).bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger","30000");
+          } else {
+            toast("Error","","Failed to delete "+row.Name+" from Pages","danger");
+          }
+        }).fail(function() {
+            toast("Error", "", "Failed to remove " + row.Name + " from Pages", "danger");
+        });
+      }
+    }
+  }
+
+  window.newsActionEvents = {
+    "click .edit": function (e, value, row, index) {
+      buildNewsSettingsModal(row);
+    },
+    "click .delete": function (e, value, row, index) {
+      if(confirm("Are you sure you want to delete the news item: "+row.title+"? This is irriversible.") == true) {
+        queryAPI("DELETE","/api/notifications/news/"+row.id).done(function(data) {
+          if (data["result"] == "Success") {
+            toast("Success","","Successfully deleted "+row.title+" from News","success");
+            var tableId = `#${$(e.currentTarget).closest("table").attr("id")}`;
+            $(tableId).bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger","30000");
+          } else {
+            toast("Error","","Failed to delete "+row.title+" from News","danger");
+          }
+        }).fail(function() {
+            toast("Error", "", "Failed to remove " + row.title + " from News", "danger");
+        });
+      }
+    }
+  }
+
+
   // ** ACTION FORMATTERS ** //
   function widgetActionFormatter(value, row, index) {
     var buttons = [
@@ -1455,13 +1582,17 @@ $(document).on('shown.bs.modal', '.modal', function () {
       buttons.push(`<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`);
     }
     if (row.status == "Available") {
-      buttons.push(`<a class="install" title="Install"><i class="fa-solid fa-download"></i></a>&nbsp;`);
+      if (row.requirementsMet) {
+        buttons.push(`<a class="install" title="Install"><i class="fa-solid fa-download"></i></a>&nbsp;`);
+      }
     } else if (row.status == "Installed") {
       buttons.push(`<a class="uninstall" title="Uninstall"><i class="fa-solid fa-trash-can"></i></a>&nbsp;`);
       if (row.version < row.online_version) {
         buttons.push(`<a class="update" title="Update"><i class="fa-solid fa-upload"></i></a>&nbsp;`);      
       } else if (row.source == "Online") {
-        buttons.push(`<a class="reinstall" title="Reinstall"><i class="fa-solid fa-arrow-rotate-right"></i></a>&nbsp;`);
+        if (row.requirementsMet) {
+          buttons.push(`<a class="reinstall" title="Reinstall"><i class="fa-solid fa-arrow-rotate-right"></i></a>&nbsp;`);
+        }
       }
     }
     return buttons.join("");
@@ -1493,6 +1624,14 @@ $(document).on('shown.bs.modal', '.modal', function () {
     return actions
   }
 
+  function pageActionFormatter(value, row, index) {
+    var actions = `<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`
+    if (!row["Protected"]) {
+      actions += `<a class="delete" title="Delete"><i class="fa fa-trash"></i></a>`
+    }
+    return actions
+  }
+
   // ** FORMATTERS ** //
   function dateFormatter(value) {
     const date = new Date(value);
@@ -1513,14 +1652,18 @@ $(document).on('shown.bs.modal', '.modal', function () {
   }
   
   function pluginUpdatesFormatter(value, row, index) {
-    if (row.version < row.online_version) {
-      return `<span class="badge bg-info">Update Available</span>`;
-    } else if (row.source == "Local") {
-      return `<span class="badge bg-secondary">Unknown</span>`;
-    } else if (row.status == "Available") {
-      return `<span class="badge bg-primary">Not Installed</span>`;
+    if (row.requirementsMet) {
+      if (row.version < row.online_version) {
+        return `<span class="badge bg-info">Update Available</span>`;
+      } else if (row.source == "Local") {
+        return `<span class="badge bg-secondary">Unknown</span>`;
+      } else if (row.status == "Available") {
+        return `<span class="badge bg-primary">Not Installed</span>`;
+      } else {
+        return `<span class="badge bg-success">Up to date</span>`;
+      }
     } else {
-      return `<span class="badge bg-success">Up to date</span>`;
+      return `<span class="badge bg-warning" style="text-wrap: auto;">`+row.requirementsReason+`</span>`;
     }
   }
 
@@ -1530,6 +1673,61 @@ $(document).on('shown.bs.modal', '.modal', function () {
       html += `<span class="badge bg-info">`+row.groups[group]+`</span>&nbsp;`;
     });
     return html;
+  }
+
+  function pageIconFormatter(value, row, index) {
+    if (row.Icon && (row.Icon.startsWith("/assets/images/custom") || row.Icon.startsWith("/api/image/plugin"))) {
+      return `<img src="`+value+`" class="navIcon"></img>`
+    } else {
+      return `<i class="navIcon `+value+`"></i>`
+    }
+  }
+
+  function typeFormatter(value, row, index) {
+    return pagesDetermineType(value);
+  }
+
+  function pluginRequirementsFormatter(value, row, index) {
+    var html = ""
+    $(row.requires).each(function (require) {
+      html += `<span class="badge bg-info">`+row.requires[require]+`</span>&nbsp;`;
+    });
+    return html;
+  }
+
+  function readMoreFormatter(value, row, index) {
+    var maxLength = 100; // Adjust the length as needed
+    if (value.length > maxLength) {
+        var truncated = value.substring(0, maxLength) + '... <a href="#" class="read-more" data-full-content="' + value + '">Read more</a>';
+        return truncated;
+    }
+    return value;
+  }
+
+  function booleanTickCrossFormatter(value, row, index) {
+    console.log(value);
+    if (value == 1) {
+      return '<i class="fa-solid fa-circle-check text-center w-100"></i>';
+    } else {
+      return '';
+    }
+  }
+
+  // ** TABLE DETAIL FORMATTERS ** //
+  function pagesDetailFormatter(index, row, prefix) {
+    let html = [];
+    if (row.Type === "Menu" || row.Type === "SubMenu") {
+        html.push(createTableHtml(index, prefix));
+    }
+    return html.join("");
+  }
+
+  function menuDetailFormatter(index,row) {
+    return pagesDetailFormatter(index,row,"menu");
+  }
+
+  function submenuDetailFormatter(index,row) {
+    return pagesDetailFormatter(index,row,"submenu");
   }
 
   // ** TABLE BUTTONS ** //
@@ -1615,6 +1813,38 @@ $(document).on('shown.bs.modal', '.modal', function () {
     }
   }
 
+  function pagesTableButtons() {
+    return {
+      btnAddGroup: {
+        text: "Add Page",
+        icon: "bi-plus-lg",
+        event: function() {
+          buildNewPageSettingsModal();
+        },
+        attributes: {
+          title: "Add a new page",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
+  function newsTableButtons() {
+    return {
+      btnAddNews: {
+        text: "Add News Item",
+        icon: "bi-plus-lg",
+        event: function() {
+          buildNewNewsSettingsModal();
+        },
+        attributes: {
+          title: "Add a new news item",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
   // ** TABLE RESPONSE HANDLER ** //
   function responseHandler(data) {
     if (data.result === "Warning" && Array.isArray(data.message)) {
@@ -1625,6 +1855,16 @@ $(document).on('shown.bs.modal', '.modal', function () {
     return data.data;
   }
 
+  function dragHandlerResponseHandler(data) {
+    // Iterate through each row in the response data
+    data.data.forEach(function(row) {
+        // Append the span to the dragHandle field
+        row.dragHandle = '<span class="dragHandle" style="font-size:22px;">☰</span>';
+    });
+
+    return data;
+}
+
   // ** BUILD / SUBMIT SETTINGS ** //
   function buildSettings(elem, setting, options) {
     // Empty the additional settings array
@@ -1632,7 +1872,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
     const { dataLocation, noTabs } = options;
     id = $(elem).attr("id");
     if (tabsLoaded.includes(setting)) {
-      console.log("tab already loaded: "+setting);
+      // Do Nothing
     } else {
       tabsLoaded.push(setting);
       try {
@@ -1714,7 +1954,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
                   if (element.attr("type") === "checkbox") {
                     element.prop("checked", value);
                   } else if (element.is("input[multiple]")) {
-                    // console.log(element.data("type"));
+                    // Do Nothing
                   } else {
                     if (element.hasClass("encrypted")) {
                       if (value !== "") {
@@ -1747,11 +1987,16 @@ $(document).on('shown.bs.modal', '.modal', function () {
     $("#SettingsModal").modal("show");
   }
 
-  function submitSettingsModal(type, element = "#modalItemID", isNew = false, apiStub = null) {
-    var serializedArray = $("#SettingsModal .changed[type!=checkbox]").serializeArray();
-
+  function submitSettingsModal(type, element = "#modalItemID", isNew = false, apiStub = null, customData = []) {
+    var noneCheckboxSelector = "#SettingsModal input.changed[type!=checkbox], #SettingsModal select.changed, #SettingsModal textarea.changed";
+    var checkboxSelector = "#SettingsModal input.changed[type=checkbox]";
+    if (isNew) {
+      var noneCheckboxSelector = "#SettingsModal input[type!=checkbox], #SettingsModal select, #SettingsModal textarea";
+      var checkboxSelector = "#SettingsModal input[type=checkbox]";
+    }
+    var serializedArray = $(`${noneCheckboxSelector}`).serializeArray();
     // Include unchecked checkboxes in the formData
-    $("#SettingsModal input.changed[type=checkbox]").each(function() {
+    $(`${checkboxSelector}`).each(function() {
         serializedArray.push({ name: this.name, value: this.checked ? true : false });
     });
 
@@ -1795,7 +2040,7 @@ $(document).on('shown.bs.modal', '.modal', function () {
 
     // Append selectWithTableArr to formData
     if (selectWithTableArr) {
-        formData = Object.assign({}, formData, selectWithTableArr);
+        formData = Object.assign({}, formData, selectWithTableArr, customData);
     }
 
     // Return a promise that resolves when all encryption promises and the API call are done
@@ -1927,6 +2172,55 @@ $(document).on('shown.bs.modal', '.modal', function () {
     },'lg');
   }
 
+  function buildPageSettingsModal(row) {
+    buildSettingsModal(row, {
+      apiUrl: `/api/settings/page`,
+      name: row.Name,
+      saveFunction: `submitPageSettings();`,
+      labelPrefix: "Page",
+      dataLocation: "data",
+      callback:  "populatePageSettingsModal(row)",
+      noTabs: true
+    },'lg');
+  }
+
+  function buildNewPageSettingsModal() {
+    buildSettingsModal([], {
+      apiUrl: `/api/settings/page`,
+      configUrl: null,
+      name: "New Link / Menu",
+      saveFunction: `submitPageSettings(true);`,
+      labelPrefix: "Page / Menu",
+      dataLocation: "data",
+      callback:  "populatePageSettingsModal()",
+      noTabs: true
+    },'lg');
+  }
+
+  function buildNewsSettingsModal(row) {
+    buildSettingsModal(row, {
+      apiUrl: `/api/settings/news/`+row.id,
+      configUrl: null,
+      name: row.title,
+      saveFunction: `submitNewsSettings();`,
+      labelPrefix: "News",
+      dataLocation: "data",
+      noTabs: true
+    },'lg');
+  }
+
+  function buildNewNewsSettingsModal() {
+    buildSettingsModal([], {
+      apiUrl: `/api/settings/news`,
+      configUrl: null,
+      name: "New News Item",
+      saveFunction: `submitNewsSettings(true);`,
+      labelPrefix: "News",
+      dataLocation: "data",
+      noTabs: true
+    },'lg');
+  }
+
   function submitDashboardSettings(isNew = false) {
     let tableRows = $("#widgetSelectTable tbody tr");
     tableRows.each((index, row) => {
@@ -2013,6 +2307,44 @@ $(document).on('shown.bs.modal', '.modal', function () {
     });
   }
 
+  function submitPageSettings(isNew = false) {
+    var submitPromise;
+    if (isNew) {
+        submitPromise = submitSettingsModal("pages", "[name=pageId]", isNew, "/api/");
+    } else {
+      var data = {};
+      if (pageImageDynamicSelect.selectedValue != "") {
+        data = {
+          "pageImage": pageImageDynamicSelect.selectedValue
+        }
+      }
+        submitPromise = submitSettingsModal("page", "[name=pageId]", isNew, "/api/", data);
+    }
+
+    submitPromise.then(() => {
+        $("#SettingsModal").modal("hide");
+        $("#combinedTable").bootstrapTable("refresh");
+    }).catch((error) => {
+        console.error("Error submitting settings:", error);
+    });
+  }
+
+  function submitNewsSettings(isNew = false) {
+    var submitPromise;
+    if (isNew) {
+        submitPromise = submitSettingsModal("news", "[name=newsId]", isNew, "/api/notifications/");
+    } else {
+      submitPromise = submitSettingsModal("news", "[name=newsId]", isNew, "/api/notifications/");
+    }
+
+    submitPromise.then(() => {
+      $("#SettingsModal").modal("hide");
+      $("#newsTable").bootstrapTable("refresh");
+    }).catch((error) => {
+      console.error("Error submitting settings:", error);
+    });
+  }
+
   // ** ROLES SETTINGS MODAL ** //
 
   // Callback from `buildRoleSettingsModal`
@@ -2033,8 +2365,6 @@ $(document).on('shown.bs.modal', '.modal', function () {
     if (row[0].PermittedResources) {
       var PermittedResources = row[0].PermittedResources.split(",");
       for (var resource in PermittedResources) {
-        console.log(resource);
-        console.log("#"+PermittedResources[resource]);
         $("#"+PermittedResources[resource]).prop("checked", "true");
       }
     }
@@ -2138,6 +2468,122 @@ $(document).on('shown.bs.modal', '.modal', function () {
         toast("API Error","","Failed to update user groups","danger","30000");
       });
     });
+  }
+
+  // ** PAGES SETTINGS MODAL ** //
+  var pageImageDynamicSelect = '';
+  // Callback from `buildPageSettingsModal`
+  function populatePageSettingsModal(row = {}) {
+    var pageIcon = $("[name=pageIcon]");
+    if (row.length > 0 && row[0] !== undefined) {
+      pageIcon.val("").val(row[0].Icon);
+      $("[name=pageId]").val("").val(row[0].id);
+      $("[name=pageLinkType]").val("").val(row[0].LinkType);
+      $("[name=pageName]").val("").val(row[0].Name);
+      $("[name=pageTitle]").val("").val(row[0].Title);
+      $("[name=pageType]").val("").val(row[0].Type);
+      $("[name=pageMenu]").val("").val(row[0].Menu);
+      $("[name=pageRole]").val("").val(row[0].ACL);
+      row[0].isDefault ? $("[name=pageDefault]").attr('checked',true) : $("[name=pageDefault]").attr('checked',false);
+    }
+
+    // Setup Dynamic Image Select
+    pageImageDynamicSelect = new DynamicSelect(document.querySelector('[name="pageImage"]'), {
+      onChange: (value, text, option) => {
+          pageImageOnChange(value, text, option);
+      }
+    });
+
+    function pageImageOnChange(value, text, option) {
+      if (value !== "") {
+        pageIcon.attr("disabled",true)
+      } else {
+        pageIcon.attr("disabled",false)
+      }
+    }
+
+    pageIcon.on("input", function() {
+      if (this.value !== "") {
+        pageImageDynamicSelect.setDisabled(true)
+      } else {
+        pageImageDynamicSelect.setDisabled(false)
+      }
+    });
+
+    if (row.length > 0 && row[0] !== undefined) {
+      // Setup Icon Options
+      if (row[0].Icon && (row[0].Icon.startsWith("/assets/images/custom") || row[0].Icon.startsWith("/api/image/plugin"))) {
+        pageImageDynamicSelect.setDisabled(false);
+        pageImageDynamicSelect.setSelectedValue(row[0].Icon);
+        pageIcon.val("").attr("disabled",true);
+      } else if (row[0].Icon == "") {
+        pageImageDynamicSelect.setDisabled(false)
+        pageIcon.attr("disabled",false).val("");
+        pageImageDynamicSelect.setSelectedValue("");
+      } else {
+        pageIcon.val(row[0].Icon).attr("disabled",false);
+        pageImageDynamicSelect.setSelectedValue("");
+        pageImageDynamicSelect.setDisabled(true)
+      }
+
+      // Check Link Type and adjust displayed Page/iFrame URL options
+      switch (row[0].LinkType) {
+        case "Native":
+          $("[name=pageStub]").val(row[0].Url ?? '');
+          break;
+        case "iFrame":
+        case "NewWindow":
+          $("[name=pageUrl]").val(row[0].Url ?? '');
+          break;
+      }
+
+      // Disable Submenu if it is a Menu
+      var isMenu = row[0].Type == "Menu";
+      if (isMenu) {
+        $("[name=pageSubMenu]").attr("disabled", true);
+      } else {
+        $("[name=pageSubMenu]").attr("disabled", false);
+      }
+
+      $("[name=pageType]").val(pagesDetermineType(row[0].Type));
+    }
+
+    $("[name=pageSubMenu], [name=pageLinkType]").on("change", function(elem) {
+      pagesHideUnneccessaryInputs();
+    });
+  
+    $("[name=pageType],[name=pageMenu]").on("change", function(elem) {
+      var menuOpt = $("select[name=pageMenu].form-control").find(":selected").val();
+      var isMenu = $("[name=pageType]").val() == "Menu";
+      pagesHideUnneccessaryInputs();
+      if (isMenu) {
+          $("[name=pageSubMenu]").attr("disabled", true);
+      } else {
+          $("[name=pageSubMenu]").attr("disabled", false);
+      }
+      pagesUpdateSubMenus(menuOpt);
+    });
+    var rowMenu = row.Length > 0 && row[0] != null ? row[0].Menu : null;
+    pagesUpdateSubMenus(rowMenu ? rowMenu : "None",row);
+  }
+
+  function pagesUpdateSubMenus(menuOpt,row = {}) {
+    queryAPI("GET","/api/pages/submenus?menu="+menuOpt).done(function(subMenuData) {
+      pageSubMenuContainer = $("[name=pageSubMenu]");
+      pageSubMenuContainer.html("");
+      pageSubMenuContainer.append(`<option value="" selected>None</option>`);
+      $.each(subMenuData.data, function(index, item) {
+          const option = $("<option></option>").val(item.Name).text(item.Name);
+          pageSubMenuContainer.append(option);
+      });
+      if (row.length > 0 && row[0] !== undefined) {
+        pageSubMenuContainer = $("[name=pageSubMenu]");
+        row[0].Submenu ? pageSubMenuContainer.val(row[0].Submenu) : pageSubMenuContainer.val("");
+        row[0].Submenu ? $("[name=pageIcon],[name=pageImage]").parent().parent().parent().parent().attr("hidden",true) : $("[name=pageIcon],[name=pageImage]").parent().parent().parent().parent().attr("hidden",false);        
+      }
+      pagesHideUnneccessaryInputs();
+      return true;
+    })
   }
 
   // ** PLUGINS FUNCTIONS ** //
@@ -2248,5 +2694,180 @@ $(document).on('shown.bs.modal', '.modal', function () {
         let selectElement = $(cells[2]).find("select");
         selectElement.val(row[0].Widgets[widgetName].size);
       });
+    }
+  }
+
+  // ** PAGES FUNCTIONS ** //
+  function pagesRowAttributes(row, index) {
+    return {
+      "id": "row-"+row.id,
+      "data-detail-view": row.Type === "Menu" || row.Type === "SubMenu"
+    }
+  }
+
+  function pagesRowStyle(row, index) {
+    if (row.Type !== "Menu" && row.Type !== "SubMenu") {
+        return {
+            classes: "no-expand"
+        };
+    }
+    return {};
+  }
+
+  function pagesRowOnReorderRow(data,row,oldrow,table) {
+    console.log(row,oldrow,table);
+    var key = data.findIndex(item => item.id === row.id) + 1;
+    queryAPI("PATCH","/api/page/"+row.id+"/weight",{"weight": key}).done(function(data) {
+      if (data["result"] == "Success") {
+          toast(data["result"],"",data["message"],"success");
+      } else if (data["result"] == "Error") {
+          toast(data["result"],"",data["message"],"danger");
+      } else {
+          toast("API Error","","Failed To Edit "+row.Type+" Position","danger","30000");
+      }
+    }).fail(function() {
+      toast("API Error","","Failed To Edit "+row.Type+" Position","danger","30000");
+    });
+  }
+
+  function pagesInitializeMenuTable(index, row, detail) {
+    const childTableId = `#menu-table-${index}`;
+    $(childTableId).bootstrapTable({
+        url: "/api/pages?menu="+row.Name,
+        dataField: "data",
+        detailView: true,
+        detailFormatter: submenuDetailFormatter,
+        onExpandRow: pagesInitializeSubMenuTable,
+        reorderableRows: true,
+        rowAttributes: pagesRowAttributes,
+        rowStyle: pagesRowStyle,
+        onReorderRow: pagesRowOnReorderRow,
+        dragHandle: '>tbody>tr>td:nth-child(2)',
+        responseHandler: 'dragHandlerResponseHandler',
+        columns: [{
+          field: 'dragHandle',
+          width: "25px"
+        },{
+          field: "Icon",
+          title: "Icon",
+          formatter: "pageIconFormatter"
+        },{
+          field: "Type",
+          title: "Type",
+          formatter: "typeFormatter"
+        },{
+          field: "Name",
+          title: "Name"
+        },{
+          field: "Title",
+          title: "Title"
+        },{
+          field: "Url",
+          title: "URL",
+          visible: false
+        },{
+          field: "ACL",
+          title: "Role"
+        },{
+          field: "LinkType",
+          title: "Source"
+        },{
+          field: "isDefault",
+          title: "Default",
+          formatter: "booleanTickCrossFormatter"
+        },{
+          title: "Actions",
+          formatter: "pageActionFormatter",
+          events: "pageActionEvents"
+        }]
+    });
+  }
+
+  function pagesInitializeSubMenuTable(index, row, detail) {
+      const childTableId = `#submenu-table-${index}`;
+      $(childTableId).bootstrapTable({
+          url: "/api/pages?submenu="+row.Name+"&menu="+row.Menu,
+          dataField: "data",
+          reorderableRows: true,
+          rowAttributes: pagesRowAttributes,
+          rowStyle: pagesRowStyle,
+          onReorderRow: pagesRowOnReorderRow,
+          dragHandle: '>tbody>tr>td:nth-child(2)',
+          responseHandler: 'dragHandlerResponseHandler',
+          columns: [{
+            field: 'dragHandler',
+            width: "25px"
+          },{
+            field: "Type",
+            title: "Type",
+            formatter: "typeFormatter"
+          },{
+            field: "Name",
+            title: "Name"
+          },{
+            field: "Title",
+            title: "Title"
+          },{
+            field: "Url",
+            title: "URL",
+            visible: false
+          },{
+            field: "ACL",
+            title: "Role"
+          },{
+            field: "LinkType",
+            title: "Source"
+          },{
+            field: "isDefault",
+            title: "Default",
+            formatter: "booleanTickCrossFormatter"
+          },{
+            title: "Actions",
+            formatter: "pageActionFormatter",
+            events: "pageActionEvents"
+          }]
+      });
+  }
+
+  function pagesDetermineType(type) {
+    switch(type) {
+      case "Link":
+      case "MenuLink":
+      case "SubMenuLink":
+        return "Link";
+      case "Menu":
+      case "SubMenu":
+        return "Menu";
+    }
+  }
+
+  function pagesHideUnneccessaryInputs() {
+    var type = $("[name=pageType]").val();
+    var submenu = $("[name=pageSubMenu]").val();
+    var linktype = $("[name=pageLinkType]").val();
+    switch(type) {
+      case "Link":
+        $("[name=pageStub],[name=pageTitle],[name=pageStub],[name=pageSubMenu],[name=pageRole],[name=pageLinkType],[name=pageUrl],[name=pageDefault]").parent().parent().parent().attr("hidden",false);
+        if (submenu) {
+          $("[name=pageIcon], [name=pageImage]").parent().parent().parent().parent().attr("hidden",true);
+          $("[name=pageIcon], [name=pageImage]").val("")
+        } else {
+          $("[name=pageIcon], [name=pageImage]").parent().parent().parent().parent().attr("hidden",false)
+        }
+        switch(linktype) {
+          case "Native":
+            $("[name=pageStub]").parent().parent().parent().attr("hidden",false).val("");
+            $("[name=pageUrl]").parent().parent().parent().attr("hidden",true).val("");
+            break;
+          case "iFrame":
+          case "NewWindow":
+            $("[name=pageStub]").parent().parent().parent().attr("hidden",true).val("");
+            $("[name=pageUrl]").parent().parent().parent().attr("hidden",false).val("");
+            break;
+        }
+        break;
+      case "Menu":
+        $("[name=pageStub],[name=pageTitle],[name=pageStub],[name=pageSubMenu],[name=pageRole],[name=pageLinkType],[name=pageUrl],[name=pageDefault]").parent().parent().parent().attr("hidden",true).val("");
+        break;
     }
   }

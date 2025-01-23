@@ -16,6 +16,10 @@
   }
 
   $navLinks = $phpef->pages->get();
+  $defaultLink = array_filter($navLinks, function($link) {
+    return array_key_exists('isDefault', $link) && $link['isDefault'] == 1;
+  });
+  $defaultLink = reset($defaultLink);
 
   function filterNavLinksByMenu($navLinks, $menuName) {
     return array_filter($navLinks, function($link) use ($menuName) {
@@ -47,12 +51,12 @@
     <div class="logo-details">
       <?php
       $smLogoPath = $phpef->config->get('Styling', 'logo-sm')['Image'];
-      $smLogoCSS = $phpef->config->get('Styling', 'logo-sm')['CSS'];
+      $smLogoCSS = $phpef->config->get('Styling', 'logo-sm')['CSS'] ?? '';
       $smLogoPath = $smLogoPath ? $smLogoPath : '/assets/images/php-ef-icon.png';
       echo '<img class="logo-sm" src="' . (file_exists(__DIR__ . $smLogoPath) ? $smLogoPath : '/assets/images/php-ef-icon.png') . '" style="'.$smLogoCSS.'"></img>';
 
       $lgLogoPath = $phpef->config->get('Styling', 'logo-lg')['Image'];
-      $lgLogoCSS = $phpef->config->get('Styling', 'logo-lg')['CSS'];
+      $lgLogoCSS = $phpef->config->get('Styling', 'logo-lg')['CSS'] ?? '';
       $lgLogoPath = $lgLogoPath ? $lgLogoPath : '/assets/images/php-ef-icon-text.png';
       echo '<img class="logo-lg" src="' . (file_exists(__DIR__ . $lgLogoPath) ? $lgLogoPath : '/assets/images/php-ef-icon-text.png') . '" style="'.$lgLogoCSS.'"></img>';
       ?>
@@ -66,19 +70,35 @@ foreach ($navLinks as $navLink) {
           // Create Nav Link
           if (!$navLink['ACL'] || $phpef->auth->checkAccess($navLink['ACL'])) {
               $LinkElem = $phpef->getImageOrIcon($navLink['Icon']);
-              $MenuItem .= <<<EOD
-              <li class="menu-item">
-                  <div class="icon-link">
-                      <a href="#page={$navLink['Name']}" class="toggleFrame" data-page-url="{$navLink['Url']}" data-page-type="{$navLink['LinkType']}">
-                          {$LinkElem}
-                          <span class="link_name">{$navLink['Name']}</span>
-                      </a>
-                      <ul class="sub-menu blank">
-                          <li><a class="link_name toggleFrame" href="#page={$navLink['Name']}" data-page-url="{$navLink['Url']}" data-page-type="{$navLink['LinkType']}">{$navLink['Name']}</a></li>
-                      </ul>
-                  </div>
-              </li>
-              EOD;
+              if ($navLink['LinkType'] == 'NewWindow') {
+                  $MenuItem .= <<<EOD
+                  <li class="menu-item">
+                      <div class="icon-link">
+                          <a href="{$navLink['Url']}" target="_blank">
+                              {$LinkElem}
+                              <span class="link_name">{$navLink['Name']}</span>
+                          </a>
+                          <ul class="sub-menu blank">
+                              <li><a class="link_name" href="{$navLink['Url']}" target="_blank">{$navLink['Name']}</a></li>
+                          </ul>
+                      </div>
+                  </li>
+                  EOD;
+              } else {
+                  $MenuItem .= <<<EOD
+                  <li class="menu-item">
+                      <div class="icon-link">
+                          <a href="#page={$navLink['Name']}" class="toggleFrame" data-page-url="{$navLink['Url']}" data-page-type="{$navLink['LinkType']}">
+                              {$LinkElem}
+                              <span class="link_name">{$navLink['Name']}</span>
+                          </a>
+                          <ul class="sub-menu blank">
+                              <li><a class="link_name toggleFrame" href="#page={$navLink['Name']}" data-page-url="{$navLink['Url']}" data-page-type="{$navLink['LinkType']}">{$navLink['Name']}</a></li>
+                          </ul>
+                      </div>
+                  </li>
+                  EOD;
+              }
           }
           break;
       case 'Menu':
@@ -217,15 +237,11 @@ foreach ($navLinks as $navLink) {
       <div class="profile-name-user ms-auto me-3">
         <?php if ($phpef->auth->getAuth()['Authenticated']) { echo '
         <div class="dropdown">
-          <button class="dropbtn">'; echo $phpef->auth->getAuth()['Username']. '
+          <button class="dropbtn">'; echo $phpef->auth->getAuth()['DisplayName']. '
             <i class="bx bxs-chevron-down arrow" ></i>
           </button>
           <div class="dropdown-content">
             <ul>
-              <li class="dropdown-header">
-                <h6>'; echo $phpef->auth->getAuth()['DisplayName'].'</h6>
-                <small>'; echo $phpef->auth->getAuth()['Email'].'</small>
-              </li>
               <li>
                 <hr class="dropdown-divider">
               </li>
@@ -256,8 +272,6 @@ foreach ($navLinks as $navLink) {
     </div>
     <main class="page-content" id="page-content">
       <div class="container-fluid p-0 main-container">
-        <div id="mainWindow" name="mainWindow" class="mainWindow"></div>
-        <iframe id="mainFrame" name="mainFrame" class="mainFrame"></iframe>
       </div>
     </main>
   </section>
@@ -282,19 +296,19 @@ foreach ($navLinks as $navLink) {
                 <!--tabs-->
                 <ul id="tabsJustified" class="nav nav-tabs flex-column info-nav">
                   <li class="nav-item">
-                    <a href="" data-bs-target="#about" data-bs-toggle="tab" class="nav-link small text-uppercase active">About</a>
+                    <a href="" data-bs-target="#about" data-bs-toggle="tab" class="nav-link text-uppercase active">About</a>
                   </li>
                   <li class="nav-item">
-                    <a href="" data-bs-target="#support" data-bs-toggle="tab" class="nav-link small text-uppercase">Support</a>
+                    <a href="" data-bs-target="#support" data-bs-toggle="tab" class="nav-link text-uppercase">Support</a>
                   </li>
                   <li class="nav-item">
-                    <a href="" data-bs-target="#license" data-bs-toggle="tab" class="nav-link small text-uppercase">License</a>
+                    <a href="" data-bs-target="#license" data-bs-toggle="tab" class="nav-link text-uppercase">License</a>
                   </li>
                   <li class="nav-item">
-                    <a href="" data-bs-target="#debugger" data-bs-toggle="tab" class="nav-link small text-uppercase">Debugger</a>
+                    <a href="" data-bs-target="#debugger" data-bs-toggle="tab" class="nav-link text-uppercase">Debugger</a>
                   </li>
                   <li class="nav-item">
-                    <a href="" data-bs-target="#changelog" data-bs-toggle="tab" class="nav-link small text-uppercase">Change Log</a>
+                    <a href="" data-bs-target="#changelog" data-bs-toggle="tab" class="nav-link text-uppercase">Change Log</a>
                   </li>
                 </ul>
                 <!--/tabs-->
@@ -410,7 +424,7 @@ foreach ($navLinks as $navLink) {
             <div class="accordion" id="resetPasswordAccordion">
               <div class="accordion-item">
                 <h2 class="accordion-header" id="resetPasswordHeading">
-                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#resetPassword" aria-expanded="true" aria-controls="resetPassword">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#resetPassword" aria-expanded="true" aria-controls="resetPassword">
                   Reset Password
                   </button>
                 </h2>
@@ -459,7 +473,7 @@ foreach ($navLinks as $navLink) {
 </div>
 
 <script>
-  loadContent();
+  loadContent(null,"<?php echo $defaultLink['Name'] ?? null ?>");
   heartBeat();
 
   function login() {
@@ -499,8 +513,10 @@ foreach ($navLinks as $navLink) {
     var cookie = getCookie('theme');
     let toggle = document.getElementById('themeToggle');
     if (cookie == "dark") {
+      $('html').attr('data-bs-theme',"dark");
       toggle.className = 'fa-regular fa-lightbulb toggleon toggler';
     } else {
+      $('html').attr('data-bs-theme',"light");
       toggle.className = 'fa-solid fa-lightbulb toggleoff toggler';
     }
 
@@ -538,10 +554,6 @@ foreach ($navLinks as $navLink) {
       $('#fontDropdown').toggleClass('show');
     },function() {
       $('#fontDropdown').toggleClass('show');
-    });
-
-    $('.preventDefault').click(function(event){
-      event.preventDefault();
     });
 
     $('.menu-item .menu-item-dropdown').on('click',function(elem) {

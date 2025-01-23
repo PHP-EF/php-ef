@@ -186,6 +186,11 @@ trait Settings {
                 'dataAttributes' => ['sortable' => 'true', 'formatter' => 'pluginUpdatesFormatter'],
             ],
             [
+                'field' => 'requires',
+                'title' => 'Dependencies',
+                'dataAttributes' => ['sortable' => 'false', 'visible' => 'false', 'formatter' => 'pluginRequirementsFormatter'],
+            ],
+            [
                 'title' => 'Actions',
                 'dataAttributes' => ['events' => 'pluginActionEvents', 'formatter' => 'pluginActionFormatter'],
             ]
@@ -495,6 +500,7 @@ trait Settings {
                 $this->settingsOption('hr'),
                 $this->settingsOption('blank'),
                 $this->settingsOption('accordion', 'PasswordReset', ['id' => 'PasswordReset', 'options' => $PasswordSettings, 'override' => '12']),
+                $this->settingsOption('hr'),
                 $this->settingsOption('input', 'userType', ['label' => 'Type', 'attr' => 'disabled readonly']),
                 $this->settingsOption('input', 'userLastLogin', ['label' => 'Last Login', 'attr' => 'disabled readonly']),
                 $this->settingsOption('input', 'userPasswordExpires', ['label' => 'Password Expires', 'attr' => 'disabled readonly']),
@@ -559,5 +565,212 @@ trait Settings {
                 $this->settingsOption('input', 'roleId', ['attr' => 'hidden'])
             )
         );
+    }
+
+    public function settingsPages() {
+        $TableAttributes = [
+            'data-field' => 'data',
+            'toggle' => 'table',
+            'search' => 'true',
+            'filter-control' => 'true',
+            'show-refresh' => 'true',
+            'pagination' => 'true',
+            'toolbar' => '#toolbar',
+            'show-columns' => 'true',
+            'page-size' => '25',
+            'response-handler' => 'responseHandler',
+        ];
+
+        $CombinedTableColumns = [
+            [
+                'field' => 'dragHandle',
+                'dataAttributes' => ['width' => '25px']
+            ],
+            [
+                'field' => 'Icon',
+                'title' => 'Icon',
+                'dataAttributes' => ['formatter' => 'pageIconFormatter']
+            ],
+            [
+                'field' => 'Name',
+                'title' => 'Name'
+            ],
+            [
+                'field' => 'Title',
+                'title' => 'Title'
+            ],
+            [
+                'field' => 'Url',
+                'title' => 'URL',
+                'dataAttributes' => ['visible' => 'false'],
+            ],
+            [
+                'field' => 'ACL',
+                'title' => 'Role'
+            ],
+            [
+                'field' => 'LinkType',
+                'title' => 'Type'
+            ],
+            [
+                'field' => 'isDefault',
+                'title' => 'Default',
+                'dataAttributes' => ['width' => '25px', 'formatter' => 'booleanTickCrossFormatter']
+            ],
+            [
+                'title' => 'Actions',
+                'dataAttributes' => ['events' => 'pageActionEvents', 'formatter' => 'pageActionFormatter'],
+            ]
+        ];
+
+        $CombinedTableAttributes = $TableAttributes;
+        $CombinedTableAttributes['url'] = '/api/pages/root';
+        $CombinedTableAttributes['buttons'] = 'pagesTableButtons';
+        $CombinedTableAttributes['buttons-order'] = 'btnAddPage';
+        $CombinedTableAttributes['detail-formatter'] = 'menuDetailFormatter';
+        $CombinedTableAttributes['detail-view'] = 'true';
+        $CombinedTableAttributes['reorderable-rows'] = 'true';
+        $CombinedTableAttributes['row-attributes'] = 'pagesRowAttributes';
+        $CombinedTableAttributes['row-style'] = 'pagesRowStyle';
+        $CombinedTableAttributes['drag-handle'] = '>tbody>tr>td:nth-child(2)';
+        $CombinedTableAttributes['response-handler'] = 'dragHandlerResponseHandler';
+
+        $CombinedTableEvents = [
+            'onExpandRow' => 'pagesInitializeMenuTable',
+            'onReorderRow' => 'pagesRowOnReorderRow'
+        ];
+
+        return array(
+            'Manage' => array(
+                $this->settingsOption('bootstrap-table', 'combinedTable', ['id' => 'combinedTable', 'columns' => $CombinedTableColumns, 'dataAttributes' => $CombinedTableAttributes, 'events' => $CombinedTableEvents, 'override' => '12']),
+            )
+	    );
+    }
+
+    public function settingsPage() {
+        $AppendNone = array(
+            [
+                "name" => 'None',
+                "value" => ''
+            ]
+        );
+
+        $AvailablePagesSelect = array_merge($AppendNone,array_map(function($item) {
+            $Prefix = $item['plugin'] ? 'Plugin: ' : '';
+            $PageName = $Prefix ? $Prefix . $item['plugin'] . ' / ' . $item['filename'] : $item['directory'] . ' / ' . $item['filename'];
+            $PageValue = $Prefix ? 'plugin/' . $item['directory'] . '/' . $item['filename'] : $item['directory'] . '/' . $item['filename'];
+            return [
+                "name" => $PageName,
+                "value" => $PageValue
+            ];
+        }, $this->pages->getAllAvailablePages()));
+
+        $AvailableMenusSelect = array_merge($AppendNone,array_map(function($item) {
+            return [
+                "name" => $item['Name'],
+                "value" => $item['Name']
+            ];
+        }, $this->pages->getByType('Menu')));
+        
+        return array(
+            "General" => array(
+                $this->settingsOption('select', 'pageType', ['label' => 'Type', 'options' => array(array("name" => 'Link', "value" => 'Link'),array("name" => 'Menu', "value" => 'Menu'))]),
+                $this->settingsOption('select', 'pageLinkType', ['label' => 'Link Type', 'options' => array(array("name" => 'Native', "value" => 'Native'),array("name" => 'iFrame', "value" => 'iFrame'),array("name" => 'New Window', "value" => 'NewWindow')), 'noRow' => 'true']),
+                $this->settingsOption('input', 'pageName', ['label' => 'Name', 'noRow' => 'true']),
+                $this->settingsOption('input', 'pageTitle', ['label' => 'Title', 'noRow' => 'true']),
+                $this->settingsOption('select', 'pageStub', ['label' => 'Page', 'options' => $AvailablePagesSelect, 'noRow' => 'true']),
+                $this->settingsOption('input', 'pageUrl', ['label' => 'URL', 'noRow' => 'true']),
+                $this->settingsOption('auth', 'pageRole', ['label' => 'Role', 'noRow' => 'true']),
+                $this->settingsOption('select', 'pageMenu', ['label' => 'Menu', 'noRow' => 'true', 'options' => $AvailableMenusSelect]),
+                $this->settingsOption('select', 'pageSubMenu', ['label' => 'Sub Menu', 'noRow' => 'true', 'options' => $AppendNone]),
+                $this->settingsOption('hr'),
+                $this->settingsOption('input', 'pageIcon', ['label' => 'Icon']),
+                $this->settingsOption('select', 'pageImage', ['label' => 'Image', 'attr' => '', 'options' => $this->getAllImagesForSelect()]),
+                $this->settingsOption('checkbox', 'pageDefault', ['label' => 'Default Page']),
+                $this->settingsOption('input', 'pageId', ['attr' => 'hidden'])
+            )
+        );
+    }
+
+    public function settingsNotifications() {
+        $TableAttributes = [
+            'data-field' => 'data',
+            'toggle' => 'table',
+            'search' => 'true',
+            'filter-control' => 'true',
+            'show-refresh' => 'true',
+            'pagination' => 'true',
+            'toolbar' => '#toolbar',
+            'sort-name' => 'Name',
+            'sort-order' => 'asc',
+            'show-columns' => 'true',
+            'page-size' => '25',
+            'response-handler' => 'responseHandler',
+        ];
+
+        $NewsTableColumns = [
+            [
+                'field' => 'title',
+                'title' => 'Title'
+            ],
+            [
+                'field' => 'content',
+                'title' => 'Content',
+                'dataAttributes' => ['formatter' => 'readMoreFormatter']
+            ],
+            [
+                'field' => 'created',
+                'title' => 'Created',
+                'dataAttributes' => ['formatter' => 'datetimeFormatter', 'width' => '220px']
+            ],
+            [
+                'field' => 'updated',
+                'title' => 'Updated',
+                'dataAttributes' => ['formatter' => 'datetimeFormatter', 'width' => '220px', 'visible' => 'false']
+            ],
+            [
+                'field' => 'actions',
+                'title' => 'Actions',
+                'dataAttributes' => ['formatter' => 'editAndDeleteActionFormatter', 'events' => 'newsActionEvents']
+            ]
+        ];
+
+        $NewsTableAttributes = $TableAttributes;
+        $NewsTableAttributes['url'] = '/api/notifications/news';
+        $NewsTableAttributes['buttons'] = 'newsTableButtons';
+        $NewsTableAttributes['buttons-order'] = 'btnAddNews';
+
+        return array(
+            'News' => array(
+                $this->settingsOption('bootstrap-table', 'newsTable', ['id' => 'newsTable', 'columns' => $NewsTableColumns, 'dataAttributes' => $NewsTableAttributes, 'override' => '12']),
+            ),
+            'SMTP' => array(
+
+            ),
+            'Webhooks' => array(
+
+            )
+	    );
+    }
+
+    public function settingsNews($id = null) {
+        $newsItem = [
+            'title' => '',
+            'content' => '',
+            'id' => '',
+            'created' => '',
+            'updated' => ''
+        ];
+        if ($id) {
+            $newsItem = $this->notifications->getNewsById($id) ?? '';
+        }
+        return array(
+            'General' => array(
+                $this->settingsOption('input', 'newsTitle', ['label' => 'News Item Title', 'value' => $newsItem['title']]),
+                $this->settingsOption('hr'),
+                $this->settingsOption('codeeditor', 'newsContent', ['label' => 'News Content', 'mode' => 'html', 'value' => $newsItem['content']]),
+                $this->settingsOption('input', 'newsId', ['attr' => 'hidden', 'value' => $newsItem['id']])
+            )
+	    );
     }
 }

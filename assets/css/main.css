@@ -261,6 +261,20 @@ body.light-theme .metric-box .metric-circle {
   color: #353232;
 }
 
+/* Custom Padding / Margin */
+.mt--20 {
+  margin-top: -20px;
+}
+.mt--15 {
+  margin-top: -15px;
+}
+.mt--10 {
+  margin-top: -10px;
+}
+.mt--5 {
+  margin-top: -5px;
+}
+
 /* Nav Tabs */
 .nav.nav-tabs {
   background-color: inherit;
@@ -399,14 +413,6 @@ body .popover {
   margin: 0%!important;
 }
 
-/* Toasts */
-.toast-body {
-  color: #000;
-}
-body.dark-theme .toast small {
-  color: #000;
-}
-
 /* Save Button Show */
 .saveBtnShow {
   left: -25px;
@@ -439,9 +445,16 @@ body.dark-theme .toast small {
   padding: 0.75rem 1rem;
 }
 
+.accordion-header .alt-text {
+  position:absolute;
+  right: 50px;
+  font-size: small;
+  color: gray;
+}
+
 /* Tabs */
 .nav.nav-tabs {
-  min-width: 150px;
+  min-width: 160px;
 }
 .d-flex .nav.nav-tabs {
   border-right: 1px solid #dee2e6;
@@ -461,6 +474,10 @@ body.dark-theme .toast small {
 }
 .nav.nav-tabs .nav-link {
   border-bottom: none;
+}
+.d-flex .nav li.nav-item,
+.nav.nav-tabs .nav-link {
+  width: 100%;
 }
 
 /* Panel */
@@ -511,7 +528,7 @@ body.dark-theme .toast small {
 }
 
 /* Center Icons in Pages table */
-#pagesTable.table td:nth-child(2) {
+#combinedTable.table td:nth-child(3) {
   text-align: center;
 }
 
@@ -1701,8 +1718,14 @@ body .bootstrap-table .fixed-table-container .fixed-table-body {
     width: calc(100% - 300px);
     overflow-x: hidden;
   }
-  .nav.nav-tabs {
+  #configTabs {
+    position: relative;
+    width: 100%;
+  }
+  #configTabContent .nav.nav-tabs {
     min-width: 100px;
+    width: 92%;
+    position: absolute;
   }
   .tab-content {
     padding: 0 10px;
@@ -1715,6 +1738,7 @@ body .bootstrap-table .fixed-table-container .fixed-table-body {
     width: 100%;
     top: 0;
     left: 0;
+    display: block;
   }
   .tab-sub-dropdown .dropdown .dropdown-toggle {
     width: 100%;

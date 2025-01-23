@@ -177,6 +177,12 @@ class dbHelper {
       ],
       '0.7.6' => [
         "DELETE FROM pages WHERE Url IN ('core/users','core/rbac');"
+      ],
+      '0.7.7' => [
+        "DELETE FROM pages WHERE Url = 'core/pages';"
+      ],
+      '0.7.8' => [
+        "ALTER TABLE pages ADD COLUMN isDefault BOOLEAN;"
       ]
     ];
   }
