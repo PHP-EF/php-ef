@@ -7,6 +7,7 @@ class phpef {
 
     private $configFilePath;
     private $dbPath;
+    private $logPath;
     public $hooks;
     private $core;
     public $api;

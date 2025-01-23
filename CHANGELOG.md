@@ -1,6 +1,7 @@
 ## v0.7.8
 - Add plugin dependency support
 - Add News Feed widget
+- Bugfix to filtering Web Tracking reports
 
 ## v0.7.7
 - Upgrade to Bootstrap 5.3.3

@@ -500,6 +500,7 @@ trait Settings {
                 $this->settingsOption('hr'),
                 $this->settingsOption('blank'),
                 $this->settingsOption('accordion', 'PasswordReset', ['id' => 'PasswordReset', 'options' => $PasswordSettings, 'override' => '12']),
+                $this->settingsOption('hr'),
                 $this->settingsOption('input', 'userType', ['label' => 'Type', 'attr' => 'disabled readonly']),
                 $this->settingsOption('input', 'userLastLogin', ['label' => 'Last Login', 'attr' => 'disabled readonly']),
                 $this->settingsOption('input', 'userPasswordExpires', ['label' => 'Password Expires', 'attr' => 'disabled readonly']),

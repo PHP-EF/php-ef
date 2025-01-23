@@ -922,10 +922,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   
-  $('.preventDefault').click(function(event){
+  $("body").on("click",".preventDefault", function(event) {
     event.preventDefault();
   });
-
+  
   $("#page-content").on("click", ".addInputEntry", function(elem) {
     var input = $(elem.target).parent().prev();
     if (input.val()) {

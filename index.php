@@ -47,12 +47,12 @@
     <div class="logo-details">
       <?php
       $smLogoPath = $phpef->config->get('Styling', 'logo-sm')['Image'];
-      $smLogoCSS = $phpef->config->get('Styling', 'logo-sm')['CSS'];
+      $smLogoCSS = $phpef->config->get('Styling', 'logo-sm')['CSS'] ?? '';
       $smLogoPath = $smLogoPath ? $smLogoPath : '/assets/images/php-ef-icon.png';
       echo '<img class="logo-sm" src="' . (file_exists(__DIR__ . $smLogoPath) ? $smLogoPath : '/assets/images/php-ef-icon.png') . '" style="'.$smLogoCSS.'"></img>';
 
       $lgLogoPath = $phpef->config->get('Styling', 'logo-lg')['Image'];
-      $lgLogoCSS = $phpef->config->get('Styling', 'logo-lg')['CSS'];
+      $lgLogoCSS = $phpef->config->get('Styling', 'logo-lg')['CSS'] ?? '';
       $lgLogoPath = $lgLogoPath ? $lgLogoPath : '/assets/images/php-ef-icon-text.png';
       echo '<img class="logo-lg" src="' . (file_exists(__DIR__ . $lgLogoPath) ? $lgLogoPath : '/assets/images/php-ef-icon-text.png') . '" style="'.$lgLogoCSS.'"></img>';
       ?>
@@ -217,15 +217,11 @@ foreach ($navLinks as $navLink) {
       <div class="profile-name-user ms-auto me-3">
         <?php if ($phpef->auth->getAuth()['Authenticated']) { echo '
         <div class="dropdown">
-          <button class="dropbtn">'; echo $phpef->auth->getAuth()['Username']. '
+          <button class="dropbtn">'; echo $phpef->auth->getAuth()['DisplayName']. '
             <i class="bx bxs-chevron-down arrow" ></i>
           </button>
           <div class="dropdown-content">
             <ul>
-              <li class="dropdown-header">
-                <h6>'; echo $phpef->auth->getAuth()['DisplayName'].'</h6>
-                <small>'; echo $phpef->auth->getAuth()['Email'].'</small>
-              </li>
               <li>
                 <hr class="dropdown-divider">
               </li>
@@ -538,10 +534,6 @@ foreach ($navLinks as $navLink) {
       $('#fontDropdown').toggleClass('show');
     },function() {
       $('#fontDropdown').toggleClass('show');
-    });
-
-    $('.preventDefault').click(function(event){
-      event.preventDefault();
     });
 
     $('.menu-item .menu-item-dropdown').on('click',function(elem) {
