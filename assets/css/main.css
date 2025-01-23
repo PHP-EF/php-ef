@@ -261,6 +261,20 @@ body.light-theme .metric-box .metric-circle {
   color: #353232;
 }
 
+/* Custom Padding / Margin */
+.mt--20 {
+  margin-top: -20px;
+}
+.mt--15 {
+  margin-top: -15px;
+}
+.mt--10 {
+  margin-top: -10px;
+}
+.mt--5 {
+  margin-top: -5px;
+}
+
 /* Nav Tabs */
 .nav.nav-tabs {
   background-color: inherit;
