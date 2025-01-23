@@ -2714,6 +2714,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function pagesRowOnReorderRow(data,row,oldrow,table) {
+    console.log(row,oldrow,table);
     var key = data.findIndex(item => item.id === row.id) + 1;
     queryAPI("PATCH","/api/page/"+row.id+"/weight",{"weight": key}).done(function(data) {
       if (data["result"] == "Success") {
@@ -2740,7 +2741,7 @@ document.addEventListener('DOMContentLoaded', function() {
         rowAttributes: pagesRowAttributes,
         rowStyle: pagesRowStyle,
         onReorderRow: pagesRowOnReorderRow,
-        dragHandle: '>tbody>tr>td>span.dragHandle',
+        dragHandle: '>tbody>tr>td:nth-child(2)',
         responseHandler: 'dragHandlerResponseHandler',
         columns: [{
           field: 'dragHandle',
@@ -2790,7 +2791,7 @@ document.addEventListener('DOMContentLoaded', function() {
           rowAttributes: pagesRowAttributes,
           rowStyle: pagesRowStyle,
           onReorderRow: pagesRowOnReorderRow,
-          dragHandle: '>tbody>tr>td>span.dragHandle',
+          dragHandle: '>tbody>tr>td:nth-child(2)',
           responseHandler: 'dragHandlerResponseHandler',
           columns: [{
             field: 'dragHandler',

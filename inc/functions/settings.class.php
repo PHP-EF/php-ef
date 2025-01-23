@@ -632,7 +632,7 @@ trait Settings {
         $CombinedTableAttributes['reorderable-rows'] = 'true';
         $CombinedTableAttributes['row-attributes'] = 'pagesRowAttributes';
         $CombinedTableAttributes['row-style'] = 'pagesRowStyle';
-        $CombinedTableAttributes['drag-handle'] = '>tbody>tr>td>span.dragHandle';
+        $CombinedTableAttributes['drag-handle'] = '>tbody>tr>td:nth-child(2)';
         $CombinedTableAttributes['response-handler'] = 'dragHandlerResponseHandler';
 
         $CombinedTableEvents = [
