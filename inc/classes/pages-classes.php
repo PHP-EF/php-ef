@@ -123,12 +123,12 @@ class Pages {
         }
       }
 
-      if (isset($data['pageUrl']) && isset($data['pageLinkType']) && $data['pageLinkType'] == 'Native') {
+      if (isset($data['pageStub']) && isset($data['pageLinkType']) && $data['pageLinkType'] == 'Native') {
+        $prepare[] = 'Url';
+        $execute[':Url'] = $data['pageStub'];
+      } else if (isset($data['pageUrl']) && isset($data['pageLinkType']) && ($data['pageLinkType'] == 'iFrame' || $data['pageLinkType'] == 'NewWindow')) {
         $prepare[] = 'Url';
         $execute[':Url'] = $data['pageUrl'];
-      } else if (isset($data['pageiFrameUrl']) && isset($data['pageLinkType']) && $data['pageLinkType'] == 'iFrame') {
-        $prepare[] = 'Url';
-        $execute[':Url'] = $data['pageiFrameUrl'];
       } else {
         $this->api->setAPIResponse('Error','Invalid link configuration');
         return false;
@@ -221,24 +221,24 @@ class Pages {
           }
         }
 
-        if (isset($data['pageUrl']) && isset($data['pageiFrameUrl'])) {
+        if (isset($data['pageStub']) && isset($data['pageUrl'])) {
           $this->api->setAPIResponse('Error','Page URL and iFrame URL are mutually exclusive parameters');
           return false;
         }
-        if (isset($data['pageUrl'])) {
+        if (isset($data['pageStub'])) {
           if ((isset($data['pageLinkType']) && $data['pageLinkType'] == 'Native') || $CurrentPage['LinkType'] == 'Native') {
+            $prepare[] = 'Url = :Url';
+            $execute[':Url'] = $data['pageStub'];
+          } else {
+            $this->api->setAPIResponse('Error','pageStub can only be set for Native links');
+            return false;
+          }
+        } else if (isset($data['pageUrl'])) {
+          if ((isset($data['pageLinkType']) && $data['pageLinkType'] == 'iFrame') || $CurrentPage['LinkType'] == 'iFrame') {
             $prepare[] = 'Url = :Url';
             $execute[':Url'] = $data['pageUrl'];
           } else {
-            $this->api->setAPIResponse('Error','pageUrl can only be set for Native links');
-            return false;
-          }
-        } else if (isset($data['pageiFrameUrl'])) {
-          if ((isset($data['pageLinkType']) && $data['pageLinkType'] == 'iFrame') || $CurrentPage['LinkType'] == 'iFrame') {
-            $prepare[] = 'Url = :Url';
-            $execute[':Url'] = $data['pageiFrameUrl'];
-          } else {
-            $this->api->setAPIResponse('Error','pageiFrameUrl can only be set for iFrame links');
+            $this->api->setAPIResponse('Error','pageUrl can only be set for iFrame links');
             return false;
           }
         }

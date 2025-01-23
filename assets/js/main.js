@@ -2529,10 +2529,11 @@ document.addEventListener('DOMContentLoaded', function() {
       // Check Link Type and adjust displayed Page/iFrame URL options
       switch (row[0].LinkType) {
         case "Native":
-          $("[name=pageUrl]").val(row[0].Url ?? '');
+          $("[name=pageStub]").val(row[0].Url ?? '');
           break;
         case "iFrame":
-          $("[name=pageiFrameUrl]").val(row[0].Url ?? '');
+        case "NewWindow":
+          $("[name=pageUrl]").val(row[0].Url ?? '');
           break;
       }
 
@@ -2846,7 +2847,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var linktype = $("[name=pageLinkType]").val();
     switch(type) {
       case "Link":
-        $("[name=pageUrl],[name=pageTitle],[name=pageUrl],[name=pageSubMenu],[name=pageRole],[name=pageLinkType],[name=pageiFrameUrl],[name=pageDefault]").parent().parent().parent().attr("hidden",false);
+        $("[name=pageStub],[name=pageTitle],[name=pageStub],[name=pageSubMenu],[name=pageRole],[name=pageLinkType],[name=pageUrl],[name=pageDefault]").parent().parent().parent().attr("hidden",false);
         if (submenu) {
           $("[name=pageIcon], [name=pageImage]").parent().parent().parent().parent().attr("hidden",true);
           $("[name=pageIcon], [name=pageImage]").val("")
@@ -2855,17 +2856,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         switch(linktype) {
           case "Native":
-            $("[name=pageUrl]").parent().parent().parent().attr("hidden",false).val("");
-            $("[name=pageiFrameUrl]").parent().parent().parent().attr("hidden",true).val("");
+            $("[name=pageStub]").parent().parent().parent().attr("hidden",false).val("");
+            $("[name=pageUrl]").parent().parent().parent().attr("hidden",true).val("");
             break;
           case "iFrame":
-            $("[name=pageUrl]").parent().parent().parent().attr("hidden",true).val("");
-            $("[name=pageiFrameUrl]").parent().parent().parent().attr("hidden",false).val("");
+          case "NewWindow":
+            $("[name=pageStub]").parent().parent().parent().attr("hidden",true).val("");
+            $("[name=pageUrl]").parent().parent().parent().attr("hidden",false).val("");
             break;
         }
         break;
       case "Menu":
-        $("[name=pageUrl],[name=pageTitle],[name=pageUrl],[name=pageSubMenu],[name=pageRole],[name=pageLinkType],[name=pageiFrameUrl],[name=pageDefault]").parent().parent().parent().attr("hidden",true).val("");
+        $("[name=pageStub],[name=pageTitle],[name=pageStub],[name=pageSubMenu],[name=pageRole],[name=pageLinkType],[name=pageUrl],[name=pageDefault]").parent().parent().parent().attr("hidden",true).val("");
         break;
     }
   }

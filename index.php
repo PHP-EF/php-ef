@@ -70,19 +70,35 @@ foreach ($navLinks as $navLink) {
           // Create Nav Link
           if (!$navLink['ACL'] || $phpef->auth->checkAccess($navLink['ACL'])) {
               $LinkElem = $phpef->getImageOrIcon($navLink['Icon']);
-              $MenuItem .= <<<EOD
-              <li class="menu-item">
-                  <div class="icon-link">
-                      <a href="#page={$navLink['Name']}" class="toggleFrame" data-page-url="{$navLink['Url']}" data-page-type="{$navLink['LinkType']}">
-                          {$LinkElem}
-                          <span class="link_name">{$navLink['Name']}</span>
-                      </a>
-                      <ul class="sub-menu blank">
-                          <li><a class="link_name toggleFrame" href="#page={$navLink['Name']}" data-page-url="{$navLink['Url']}" data-page-type="{$navLink['LinkType']}">{$navLink['Name']}</a></li>
-                      </ul>
-                  </div>
-              </li>
-              EOD;
+              if ($navLink['LinkType'] == 'NewWindow') {
+                  $MenuItem .= <<<EOD
+                  <li class="menu-item">
+                      <div class="icon-link">
+                          <a href="{$navLink['Url']}" target="_blank">
+                              {$LinkElem}
+                              <span class="link_name">{$navLink['Name']}</span>
+                          </a>
+                          <ul class="sub-menu blank">
+                              <li><a class="link_name" href="{$navLink['Url']}" target="_blank">{$navLink['Name']}</a></li>
+                          </ul>
+                      </div>
+                  </li>
+                  EOD;
+              } else {
+                  $MenuItem .= <<<EOD
+                  <li class="menu-item">
+                      <div class="icon-link">
+                          <a href="#page={$navLink['Name']}" class="toggleFrame" data-page-url="{$navLink['Url']}" data-page-type="{$navLink['LinkType']}">
+                              {$LinkElem}
+                              <span class="link_name">{$navLink['Name']}</span>
+                          </a>
+                          <ul class="sub-menu blank">
+                              <li><a class="link_name toggleFrame" href="#page={$navLink['Name']}" data-page-url="{$navLink['Url']}" data-page-type="{$navLink['LinkType']}">{$navLink['Name']}</a></li>
+                          </ul>
+                      </div>
+                  </li>
+                  EOD;
+              }
           }
           break;
       case 'Menu':

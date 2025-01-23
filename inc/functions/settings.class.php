@@ -675,11 +675,11 @@ trait Settings {
         return array(
             "General" => array(
                 $this->settingsOption('select', 'pageType', ['label' => 'Type', 'options' => array(array("name" => 'Link', "value" => 'Link'),array("name" => 'Menu', "value" => 'Menu'))]),
-                $this->settingsOption('select', 'pageLinkType', ['label' => 'Link Type', 'options' => array(array("name" => 'Native', "value" => 'Native'),array("name" => 'iFrame', "value" => 'iFrame')), 'noRow' => 'true']),
+                $this->settingsOption('select', 'pageLinkType', ['label' => 'Link Type', 'options' => array(array("name" => 'Native', "value" => 'Native'),array("name" => 'iFrame', "value" => 'iFrame'),array("name" => 'New Window', "value" => 'NewWindow')), 'noRow' => 'true']),
                 $this->settingsOption('input', 'pageName', ['label' => 'Name', 'noRow' => 'true']),
                 $this->settingsOption('input', 'pageTitle', ['label' => 'Title', 'noRow' => 'true']),
-                $this->settingsOption('select', 'pageUrl', ['label' => 'Page', 'options' => $AvailablePagesSelect, 'noRow' => 'true']),
-                $this->settingsOption('input', 'pageiFrameUrl', ['label' => 'URL', 'noRow' => 'true']),
+                $this->settingsOption('select', 'pageStub', ['label' => 'Page', 'options' => $AvailablePagesSelect, 'noRow' => 'true']),
+                $this->settingsOption('input', 'pageUrl', ['label' => 'URL', 'noRow' => 'true']),
                 $this->settingsOption('auth', 'pageRole', ['label' => 'Role', 'noRow' => 'true']),
                 $this->settingsOption('select', 'pageMenu', ['label' => 'Menu', 'noRow' => 'true', 'options' => $AvailableMenusSelect]),
                 $this->settingsOption('select', 'pageSubMenu', ['label' => 'Sub Menu', 'noRow' => 'true', 'options' => $AppendNone]),
