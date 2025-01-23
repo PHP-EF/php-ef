@@ -18,6 +18,7 @@ class NewsFeed implements WidgetInterface {
         $this->widgetConfig['newsHeader'] = $this->widgetConfig['newsHeader'] ?? 'News & Updates';
         $this->widgetConfig['newsItemsDisplayed'] = $this->widgetConfig['newsItemsDisplayed'] ?? 5;
         $this->widgetConfig['newsOrderByLastUpdated'] = $this->widgetConfig['newsOrderByLastUpdated'] ?? false;
+        $this->widgetConfig['newsDisplayDate'] = $this->widgetConfig['newsDisplayDate'] ?? true;
     }
 
     public function settings() {
@@ -36,7 +37,8 @@ class NewsFeed implements WidgetInterface {
                 $this->phpef->settingsOption('input', 'newsHeader', ['label' => 'The header displayed above the news widget', 'placeholder' => 'News & Updates']),
                 $this->phpef->settingsOption('checkbox', 'newsExpandFirst', ['label' => 'Expand the latest news item', 'attr' => 'checked']),
                 $this->phpef->settingsOption('number', 'newsItemsDisplayed', ['label' => 'Number of news items displayed in the widget']),
-                $this->phpef->settingsOption('checkbox', 'newsOrderByLastUpdated', ['label' => 'Order news items by last updated'])
+                $this->phpef->settingsOption('checkbox', 'newsOrderByLastUpdated', ['label' => 'Order news items by last updated']),
+                $this->phpef->settingsOption('checkbox', 'newsDisplayDate', ['label' => 'Display date on news items', 'attr' => 'checked'])
             ]
         ];
         return $SettingsArr;
@@ -64,18 +66,22 @@ class NewsFeed implements WidgetInterface {
             $count = 0;
             foreach ($newsItems as $index => $newsItem) {
                 $expand = ($count == 0 && $this->widgetConfig['newsExpandFirst']);
-                $dateValueToDisplay = $this->widgetConfig['newsOrderByLastUpdated'] ? $newsItem['updated'] : $newsItem['created'];
                 $btnExpand = $expand ? "" : "collapsed";
-                $bodyExpand = $expand ? "" : "collapse";
+                $bodyExpand = $expand ? "show" : "";
+                $ariaExpanded = $expand ? "true" : "false";
+                $dateValue = new DateTime($this->widgetConfig['newsOrderByLastUpdated'] ? $newsItem['updated'] : $newsItem['created']);
+                $lgDate = $dateValue->format('d/m/Y H:i');
+                $smDate = $dateValue->format('d/m/Y');
+                $newsDates = $this->widgetConfig['newsDisplayDate'] ? '<span class="alt-text d-none d-lg-flex">'.$lgDate.'</span><span class="alt-text d-lg-none">'.$smDate.'</span>' : '';
                 $output .= <<<EOF
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="heading{$index}">
-                        <button class="accordion-button {$btnExpand}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{$index}" aria-expanded="true" aria-controls="collapse{$index}">
+                        <button class="accordion-button {$btnExpand}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{$index}" aria-expanded="{$ariaExpanded}" aria-controls="collapse{$index}">
                             <span>{$newsItem['title']}</span>
-                            <span class="alt-text">{$dateValueToDisplay}</span>
+                            {$newsDates}
                         </button>
                     </h2>
-                    <div id="collapse{$index}" class="accordion-collapse {$bodyExpand}" aria-labelledby="heading{$index}" data-bs-parent="#newsAccordion">
+                    <div id="collapse{$index}" class="accordion-collapse collapse {$bodyExpand}" aria-labelledby="heading{$index}" data-bs-parent="#newsAccordion">
                         <div class="accordion-body">
                             {$newsItem['content']}
                         </div>
