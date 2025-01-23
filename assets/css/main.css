@@ -528,7 +528,7 @@ body .popover {
 }
 
 /* Center Icons in Pages table */
-#combinedTable.table td:nth-child(2) {
+#combinedTable.table td:nth-child(3) {
   text-align: center;
 }
 
