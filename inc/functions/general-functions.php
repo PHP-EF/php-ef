@@ -257,12 +257,12 @@ function getSecureHeaders() {
     // X-Frame-Options - Add any iFrame Pages to this to ensure they are permitted
     $XFrameOptions = $phpef->config->get('Security', 'Headers')['X-Frame-Options'] ?? 'SAMEORIGIN';
     $iFrameLinks = $phpef->pages->getiFrameLinks();
-    $AllowList = [];
+    $iFrameAllowList = [];
     if (!empty($iFrameLinks)) {
         foreach ($iFrameLinks as $link) {
             $url = $link['Url'];
             if (isFullyQualifiedUrl($url)) {
-                $AllowList[] = $url;
+                $iFrameAllowList[] = $url;
             }
         }
     }
@@ -297,7 +297,7 @@ function getSecureHeaders() {
         "https://fonts.gstatic.com"
     ]);
 
-    $FrameSource = $phpef->config->get('Security', 'Headers')['CSP']['Frame-Source'] ?? implode(' ',$AllowList);
+    $FrameSource = $phpef->config->get('Security', 'Headers')['CSP']['Frame-Source'] ?? implode(' ',$iFrameAllowList);
     
     $ConnectSourceFromConfig = $phpef->config->get('Security', 'Headers')['CSP']['Connect-Source'] ?? '';
 

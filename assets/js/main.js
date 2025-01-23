@@ -17,7 +17,7 @@ class Ping {
 
       img.onload = img.onerror = onPingComplete;
       if (timeout) timer = setTimeout(onPingComplete, timeout);
-      img.src = `//${url}/?${+new Date()}`;
+      img.src = `${url}/?${+new Date()}`;
   }
 }
 
