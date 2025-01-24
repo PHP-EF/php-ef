@@ -1279,6 +1279,13 @@ body.dark-theme .image-gallery {
 .sidebar.close.expandOnHover:hover .nav-links li .sub-menu {
   opacity: 1;
 }
+.sidebar.close.expandOnHover:hover .sidebar-footer {
+  width: 350px;
+  transition: all 0.5s ease;
+}
+.sidebar.close.expandOnHover:hover .sidebar-footer a {
+  display: block;
+}
 
 /* Sidebar Font Size Dropdown */
 .fontDropBtn {
