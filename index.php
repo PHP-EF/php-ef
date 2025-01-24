@@ -55,10 +55,16 @@
       $smLogoPath = $smLogoPath ? $smLogoPath : '/assets/images/php-ef-icon.png';
       echo '<img class="logo-sm" src="' . (file_exists(__DIR__ . $smLogoPath) ? $smLogoPath : '/assets/images/php-ef-icon.png') . '" style="'.$smLogoCSS.'"></img>';
 
-      $lgLogoPath = $phpef->config->get('Styling', 'logo-lg')['Image'];
-      $lgLogoCSS = $phpef->config->get('Styling', 'logo-lg')['CSS'] ?? '';
-      $lgLogoPath = $lgLogoPath ? $lgLogoPath : '/assets/images/php-ef-icon-text.png';
-      echo '<img class="logo-lg" src="' . (file_exists(__DIR__ . $lgLogoPath) ? $lgLogoPath : '/assets/images/php-ef-icon-text.png') . '" style="'.$lgLogoCSS.'"></img>';
+      if ($phpef->config->get('Styling','websiteTitleNotLogo') ?? false) {
+        $fontSize = $phpef->config->get('Styling','websiteTitleFontSize') ?? "42";
+        echo '<span class="logo-text" style="font-size: '.$fontSize.';">'.$phpef->config->get('Styling','websiteTitle') ?? ''.'</span>';
+      } else {
+        $lgLogoPath = $phpef->config->get('Styling', 'logo-lg')['Image'];
+        $lgLogoCSS = $phpef->config->get('Styling', 'logo-lg')['CSS'] ?? '';
+        $lgLogoPath = $lgLogoPath ? $lgLogoPath : '/assets/images/php-ef-icon-text.png';
+        echo '<img class="logo-lg" src="' . (file_exists(__DIR__ . $lgLogoPath) ? $lgLogoPath : '/assets/images/php-ef-icon-text.png') . '" style="'.$lgLogoCSS.'"></img>';
+      }
+
       ?>
     </div>
     <ul class="nav-links">

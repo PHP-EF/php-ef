@@ -991,7 +991,16 @@ body.dark-theme .image-gallery {
   transition: 0.3s ease;
   transition-delay: 0.1s;
 }
-.sidebar.close .logo-lg {
+.sidebar .logo-text {
+  text-align: center;
+  width: 100%;
+  margin: 10px 25px 0px 5px;
+  transition: 0.3s ease;
+  transition-delay: 0.1s;
+  color: #38ee87;
+}
+.sidebar.close .logo-lg,
+.sidebar.close .logo-text {
   transition-delay: 0s;
   opacity: 0;
   pointer-events: none;
@@ -1324,7 +1333,7 @@ body.dark-theme .image-gallery {
   display: block;
   color: #FFF;
   text-align: center;
-  padding: 14px 16px;
+  padding-right: 14px;
   text-decoration: none;
   font-size: 17px;
 }
@@ -1346,8 +1355,9 @@ body.dark-theme .image-gallery {
   border: none;
   outline: none;
   color: #FFF;
-  padding: 14px 16px;
   background-color: inherit;
+  height: 60px;
+  padding-right: 14px;
   font-family: inherit;
   margin: 0;
 }
@@ -1735,6 +1745,9 @@ body .bootstrap-table .fixed-table-container .fixed-table-body {
   }
   /* Make Navbar Smaller */
   .home-section .nav-bar {
+    height: 40px;
+  }
+  .home-section .nav-bar .dropdown button {
     height: 40px;
   }
   .page-content .container-fluid {

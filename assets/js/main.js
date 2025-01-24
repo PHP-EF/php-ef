@@ -940,20 +940,6 @@ document.addEventListener('DOMContentLoaded', function() {
     $(elem.target).parent().remove();
   });
 
-  $("body").on("click", ".tab-sub-dropdown a", function(event) {
-    event.preventDefault();
-    var targetTab = $(this).data('tabTarget');
-    $(this).parent().parent().prev().text($(this).text());
-    $(this).parent().parent().parent().parent().next().find(".active").removeClass('active');
-    $(this).parent().parent().parent().parent().next().find(targetTab).addClass('active');
-  });
-
-  // Listener to remove active class from dropdown tabs (For mobile)
-  $("#page-content").on("click", ".nav-tabs .d-lg-none .dropdown a", function(event) {
-    event.preventDefault();
-    $(this).parent().parent().find(".active").removeClass('active');
-  });
-
   // Listener to add changed class to main settings elements
   $("#page-content").on('change', '.info-field', function(event) {
       const elementName = $(this).data('label');
@@ -974,11 +960,11 @@ document.addEventListener('DOMContentLoaded', function() {
     $(this).addClass("changed");
   });
 
-  // Custom jQuery to handle nested tabs
-  $("body").on('click', '#configTabContent .nav-tabs .nav-link', function (event) {
+  // Custom jQuery to handle nested tabs for mobile
+  $("body").on('click', '.tab-sub-dropdown .nav-link', function (event) {
     event.preventDefault();
-    $('#configTabContent .nav-tabs .nav-link').removeClass('active');
-    $('#configTabContent .nav-tabs .nav-link').removeClass('show active');
+    $(this).parent().find('.nav-link').removeClass('active');
+    $(this).parent().parent().parent().find('li .nav-link').removeClass('show active');
     $(this).addClass('active');
     $($(this).attr('href')).addClass('show active');
   });
@@ -1031,105 +1017,115 @@ document.addEventListener('DOMContentLoaded', function() {
     var ids = {};
     var active = '';
     var first = Object.keys(array)[0];
-  
+
     // Generate IDs once and store them
     Object.keys(array).forEach((i, index) => {
-      ids[i] = createRandomString(10);
+        ids[i] = createRandomString(10);
     });
-  
+
     if (noTabs) {
-      var group = '';
-      var uList = '';
+        var group = '';
+        var uList = '';
     } else {
-      var group = '<div class="tab-content tab-content-sub">';
-      var uList = `
-        <ul class="nav flex-column nav-tabs info-nav">
-          <div class="d-lg-none tab-sub-dropdown">
-            <div class="dropdown">
-              <button class="btn btn-secondary dropdown-toggle" type="button" id="configSubTabsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                ${first}
-              </button>
-              <ul class="dropdown-menu dropdown-menu-top" aria-labelledby="configSubTabsDropdown">
-                ${Object.keys(array).map((i, index) => {
-                  return `<li><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanClass(i)}" class="nav-link ${active}"><span lang="en">${i}</span></a></li>`;
-                }).join('')}
-              </ul>
-            </div>
-          </div>
-          ${Object.keys(array).map((i, index) => {
-            active = (index == 0) ? 'active' : '';
-            return `<li role="presentation" class="nav-item d-none d-lg-flex"><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanClass(i)}" class="nav-link ${active}"><span lang="en">${i}</span></a></li>`;
-          }).join('')}
-        </ul>
-      `;
-    }
-  
-    $.each(array, function (i, v) {
-      mainCount++;
-      var count = 0;
-      var total = v.length;
-      var active = (mainCount == 1) ? 'active' : '';
-  
-      if (i == 'custom') {
-        group += v;
-      } else {
-        if (!noTabs) {
-          group += `
-            <!-- FORM GROUP -->
-            <div class="tab-pane ${active}" id="${ids[i]}${cleanClass(i)}">
-          `;
-        }
-  
-        var sectionCount = 0;
-        $.each(v, function (j, item) {
-          var override = item.override || '6';
-          sectionCount++;
-          count++;
-  
-          if (count % 2 !== 0 && !item.noRow) {
-            group += '<div class="row start">';
-          }
-  
-          var helpID = `#help-info-${item.name}`;
-          var helpTip = item.help ? `<sup><a class="help-tip" data-toggle="collapse" href="${helpID}" aria-expanded="true"><i class="m-l-5 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>` : '';
-          var builtItems = '';
-  
-          if (item.type == 'title' || item.type == 'hr' || item.type == 'js') {
-            builtItems = `${buildFormItem(item)}`;
-            count = 0; // Reset count
-            group += '</div><!--end--><div class="row start">'; // Close current row and start a new one
-          } else {
-            builtItems = `
-              <div class="col-md-${override} p-b-10">
-                <div class="form-group">
-                  <label class="control-label col-md-12"><span lang="en">${item.label}</span>${helpTip}</label>
-                  <div class="col-md-12">
-                    ${buildFormItem(item)}
-                  </div>
+        var group = '<div class="tab-content tab-content-sub">';
+        var uList = `
+            <ul class="nav flex-column nav-tabs info-nav">
+                <div class="d-lg-none tab-sub-dropdown">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="configSubTabsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            ${first}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-top" aria-labelledby="configSubTabsDropdown">
+                            ${Object.keys(array).map((i, index) => {
+                                return `<li><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanClass(i)}" class="nav-link ${active}"><span lang="en">${i}</span></a></li>`;
+                            }).join('')}
+                        </ul>
+                    </div>
                 </div>
-              </div>
-            `;
-          }
-  
-          group += builtItems;
-  
-          if ((count % 2 === 0 || sectionCount === total) && !item.noRow) {
-            group += '</div><!--end-->';
-          }
-        });
-  
-        if (!noTabs) {
-          group += '</div>';
-        }
-      }
-    });
-  
-    if (noTabs) {
-      var flex = '';
-    } else {
-      var flex = 'd-flex';
+                ${Object.keys(array).map((i, index) => {
+                    active = (index == 0) ? 'active' : '';
+                    return `<li role="presentation" class="nav-item d-none d-lg-flex"><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanClass(i)}" class="nav-link ${active}"><span lang="en">${i}</span></a></li>`;
+                }).join('')}
+            </ul>
+        `;
     }
-  
+
+    $.each(array, function (i, v) {
+        mainCount++;
+        var total = v.length;
+        var active = (mainCount == 1) ? 'active' : '';
+
+        if (i == 'custom') {
+            group += v;
+        } else {
+            if (!noTabs) {
+                group += `
+                    <!-- FORM GROUP -->
+                    <div class="tab-pane ${active}" id="${ids[i]}${cleanClass(i)}">
+                `;
+            }
+
+            var currentRowWidth = 0;
+            var sectionCount = 0;
+
+            $.each(v, function (j, item) {
+                var width = parseInt(item.width) || 6;
+                sectionCount++;
+
+                if (currentRowWidth + width > 12) {
+                    group += '</div><!--end--><div class="row start">';
+                    currentRowWidth = 0;
+                }
+
+                if (currentRowWidth === 0) {
+                    group += '<div class="row start">';
+                }
+
+                var helpID = `#help-info-${item.name}`;
+                var helpTip = item.help ? `<sup><a class="help-tip" data-toggle="collapse" href="${helpID}" aria-expanded="true"><i class="m-l-5 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>` : '';
+                var builtItems = '';
+
+                if (item.type == 'title' || item.type == 'hr' || item.type == 'js') {
+                    builtItems = `${buildFormItem(item)}`;
+                    group += '</div><!--end--><div class="row start">'; // Close current row and start a new one
+                    currentRowWidth = 0; // Reset row width
+                } else {
+                    builtItems = `
+                        <div class="col-md-${width} p-b-10">
+                            <div class="form-group">
+                                <label class="control-label col-md-12"><span lang="en">${item.label}</span>${helpTip}</label>
+                                <div class="col-md-12">
+                                    ${buildFormItem(item)}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                group += builtItems;
+                currentRowWidth += width;
+
+                if (currentRowWidth >= 12) {
+                    group += '</div><!--end-->';
+                    currentRowWidth = 0;
+                }
+            });
+
+            if (currentRowWidth > 0) {
+                group += '</div><!--end-->';
+            }
+
+            if (!noTabs) {
+                group += '</div>';
+            }
+        }
+    });
+
+    if (noTabs) {
+        var flex = '';
+    } else {
+        var flex = 'd-flex';
+    }
     return `<div class="${flex}">` + uList + group + '</div>'; // Wrapped in a flex container for alignment
   }
   

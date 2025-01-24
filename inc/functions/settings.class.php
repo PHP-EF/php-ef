@@ -5,7 +5,8 @@ trait Settings {
         return array(
             'Top Bar' => array(
                 $this->settingsOption('input', 'Styling[websiteTitle]', ['label' => 'Website Title']),
-                $this->settingsOption('blank'),
+                $this->settingsOption('input', 'Styling[websiteTitleFontSize]', ['label' => 'Font size when using title for logo', 'value' => '42px', 'width' => '3']),
+                $this->settingsOption('checkbox', 'Styling[websiteTitleNotLogo]', ['label' => 'Use website title instead of logo', 'width' => '3']),
                 $this->settingsOption('input', 'Styling[logo-sm][Image]', ['label' => 'Logo Image (Small)']),
                 $this->settingsOption('input', 'Styling[logo-sm][CSS]', ['label' => 'Logo CSS (Small)']),
                 $this->settingsOption('input', 'Styling[logo-lg][Image]', ['label' => 'Logo Image (Large)']),
@@ -80,7 +81,7 @@ trait Settings {
                 $this->settingsOption('input', 'System[CURL-ConnectTimeout]', ['label' => 'CURL Timeout on Connect'])
             ),
             'Authentication' => array(
-                $this->settingsOption('accordion', 'AuthProviders', ['id' => 'AuthProviders', 'label' => 'Authentication Providers', 'options' => $AuthSettings, 'override' => '12']),
+                $this->settingsOption('accordion', 'AuthProviders', ['id' => 'AuthProviders', 'label' => 'Authentication Providers', 'options' => $AuthSettings, 'width' => '12']),
             ),
             'Security' => array(
                 $this->settingsOption('password-alt', 'Security[salt]', ['label' => 'Salt']),
@@ -198,7 +199,7 @@ trait Settings {
 
         return array(
             'Manage' => array(
-                $this->settingsOption('bootstrap-table', 'PluginTable', ['id' => 'pluginsTable', 'columns' => $PluginsTableColumns, 'dataAttributes' => $PluginsTableAttributes, 'override' => '12']),
+                $this->settingsOption('bootstrap-table', 'PluginTable', ['id' => 'pluginsTable', 'columns' => $PluginsTableColumns, 'dataAttributes' => $PluginsTableAttributes, 'width' => '12']),
             ),
             'Marketplace' => array(
                 $this->settingsOption('enable', 'PluginMarketplaceEnabled', ['label' => 'Enable Plugin Marketplace'])
@@ -276,10 +277,10 @@ trait Settings {
 
         return array(
             'Tabs' => array(
-                $this->settingsOption('bootstrap-table', 'dashboardsTable', ['id' => 'dashboardsTable', 'columns' => $DashboardsTableColumns, 'dataAttributes' => $DashboardsTableAttributes, 'override' => '12']),
+                $this->settingsOption('bootstrap-table', 'dashboardsTable', ['id' => 'dashboardsTable', 'columns' => $DashboardsTableColumns, 'dataAttributes' => $DashboardsTableAttributes, 'width' => '12']),
             ),
             'Widgets' => array(
-                $this->settingsOption('bootstrap-table', 'widgetsTable', ['id' => 'widgetsTable', 'columns' => $WidgetTableColumns, 'dataAttributes' => $WidgetTableAttributes, 'override' => '12']),
+                $this->settingsOption('bootstrap-table', 'widgetsTable', ['id' => 'widgetsTable', 'columns' => $WidgetTableColumns, 'dataAttributes' => $WidgetTableAttributes, 'width' => '12']),
             ),
 	    );
     }
@@ -306,7 +307,7 @@ trait Settings {
                 $this->settingsOption('enable', 'Enabled')
             ),
             'Widgets' => array(
-                $this->settingsOption('selectwithtable', 'Widgets', ['label' => 'Enabled Widgets', 'options' => $WidgetList, 'class' => 'widgetSelect select-multiple', 'override' => '12', 'id' => 'widgetSelect'])
+                $this->settingsOption('selectwithtable', 'Widgets', ['label' => 'Enabled Widgets', 'options' => $WidgetList, 'class' => 'widgetSelect select-multiple', 'width' => '12', 'id' => 'widgetSelect'])
             )
 	    );
     }
@@ -461,13 +462,13 @@ trait Settings {
 
         return array(
             'Users' => array(
-                $this->settingsOption('bootstrap-table', 'usersTable', ['id' => 'usersTable', 'columns' => $UsersTableColumns, 'dataAttributes' => $UsersTableAttributes, 'override' => '12']),
+                $this->settingsOption('bootstrap-table', 'usersTable', ['id' => 'usersTable', 'columns' => $UsersTableColumns, 'dataAttributes' => $UsersTableAttributes, 'width' => '12']),
             ),
             'Groups' => array(
-                $this->settingsOption('bootstrap-table', 'groupsTable', ['id' => 'groupsTable', 'columns' => $GroupsTableColumns, 'dataAttributes' => $GroupsTableAttributes, 'override' => '12']),
+                $this->settingsOption('bootstrap-table', 'groupsTable', ['id' => 'groupsTable', 'columns' => $GroupsTableColumns, 'dataAttributes' => $GroupsTableAttributes, 'width' => '12']),
             ),
             'Roles' => array(
-                $this->settingsOption('bootstrap-table', 'rolesTable', ['id' => 'rolesTable', 'columns' => $RolesTableColumns, 'dataAttributes' => $RolesTableAttributes, 'override' => '12']),
+                $this->settingsOption('bootstrap-table', 'rolesTable', ['id' => 'rolesTable', 'columns' => $RolesTableColumns, 'dataAttributes' => $RolesTableAttributes, 'width' => '12']),
             ),
 	    );
     }
@@ -499,7 +500,7 @@ trait Settings {
                 $this->settingsOption('input', 'userEmail', ['label' => 'Email']),
                 $this->settingsOption('hr'),
                 $this->settingsOption('blank'),
-                $this->settingsOption('accordion', 'PasswordReset', ['id' => 'PasswordReset', 'options' => $PasswordSettings, 'override' => '12']),
+                $this->settingsOption('accordion', 'PasswordReset', ['id' => 'PasswordReset', 'options' => $PasswordSettings, 'width' => '12']),
                 $this->settingsOption('hr'),
                 $this->settingsOption('input', 'userType', ['label' => 'Type', 'attr' => 'disabled readonly']),
                 $this->settingsOption('input', 'userLastLogin', ['label' => 'Last Login', 'attr' => 'disabled readonly']),
@@ -508,7 +509,7 @@ trait Settings {
                 $this->settingsOption('input', 'userId', ['attr' => 'hidden'])
             ),
             'Groups' => array(
-                $this->settingsOption('listgroup', 'groupList', ['items' => $GroupItems, 'override' => '12'])
+                $this->settingsOption('listgroup', 'groupList', ['items' => $GroupItems, 'width' => '12'])
             )
         );
     }
@@ -547,11 +548,11 @@ trait Settings {
 
         return array(
             "General" => array(
-                $this->settingsOption('input', 'groupName', ['label' => 'Group Name', 'override' => '4']),
-                $this->settingsOption('input', 'groupDescription', ['label' => 'Group Description', 'override' => '8']),
+                $this->settingsOption('input', 'groupName', ['label' => 'Group Name', 'width' => '4']),
+                $this->settingsOption('input', 'groupDescription', ['label' => 'Group Description', 'width' => '8']),
                 $this->settingsOption('hr'),
-                $this->settingsOption('html', 'groupRolesSelectTitle', ['html' => '<h4>Group Roles</h4><p>Enable or Disable the following roles to provide granular control to specific areas of PHP Extensible Framework.</p>', 'override' => '12']),
-                $this->settingsOption('listgroup', 'roleList', ['items' => $RoleItems, 'override' => '12']),
+                $this->settingsOption('html', 'groupRolesSelectTitle', ['html' => '<h4>Group Roles</h4><p>Enable or Disable the following roles to provide granular control to specific areas of PHP Extensible Framework.</p>', 'width' => '12']),
+                $this->settingsOption('listgroup', 'roleList', ['items' => $RoleItems, 'width' => '12']),
                 $this->settingsOption('input', 'groupId', ['attr' => 'hidden'])
             )
         );
@@ -560,8 +561,8 @@ trait Settings {
     public function settingsRole() {
         return array(
             "General" => array(
-                $this->settingsOption('input', 'roleName', ['label' => 'Role Name', 'override' => '12']),
-                $this->settingsOption('input', 'roleDescription', ['label' => 'Role Description', 'override' => '12']),
+                $this->settingsOption('input', 'roleName', ['label' => 'Role Name', 'width' => '12']),
+                $this->settingsOption('input', 'roleDescription', ['label' => 'Role Description', 'width' => '12']),
                 $this->settingsOption('input', 'roleId', ['attr' => 'hidden'])
             )
         );
@@ -642,7 +643,7 @@ trait Settings {
 
         return array(
             'Manage' => array(
-                $this->settingsOption('bootstrap-table', 'combinedTable', ['id' => 'combinedTable', 'columns' => $CombinedTableColumns, 'dataAttributes' => $CombinedTableAttributes, 'events' => $CombinedTableEvents, 'override' => '12']),
+                $this->settingsOption('bootstrap-table', 'combinedTable', ['id' => 'combinedTable', 'columns' => $CombinedTableColumns, 'dataAttributes' => $CombinedTableAttributes, 'events' => $CombinedTableEvents, 'width' => '12']),
             )
 	    );
     }
@@ -742,7 +743,7 @@ trait Settings {
 
         return array(
             'News' => array(
-                $this->settingsOption('bootstrap-table', 'newsTable', ['id' => 'newsTable', 'columns' => $NewsTableColumns, 'dataAttributes' => $NewsTableAttributes, 'override' => '12']),
+                $this->settingsOption('bootstrap-table', 'newsTable', ['id' => 'newsTable', 'columns' => $NewsTableColumns, 'dataAttributes' => $NewsTableAttributes, 'width' => '12']),
             ),
             'SMTP' => array(
 

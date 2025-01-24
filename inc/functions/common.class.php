@@ -97,7 +97,7 @@ trait Common {
             case 'notice':
                 $settingMerge = [
                     'type' => 'html',
-                    'override' => 12,
+                    'width' => 12,
                     'label' => '',
                     'html' => '
                         <div class="row">
@@ -121,7 +121,7 @@ trait Common {
             case 'about':
                 $settingMerge = [
                     'type' => 'html',
-                    'override' => 12,
+                    'width' => 12,
                     'label' => '',
                     'html' => '
                         <div class="panel panel-default">
@@ -171,7 +171,7 @@ trait Common {
                 $value = $extras['value'] ?? '';
                 $settingMerge = [
                     'type' => 'html',
-                    'override' => 12,
+                    'width' => 12,
                     'label' => 'Custom Code',
                     'html' => '
                         <textarea class="form-control info-field ' . $name . 'Textarea" name="' . $name . '" data-type="textbox" data-label="' . $name . '" hidden></textarea>

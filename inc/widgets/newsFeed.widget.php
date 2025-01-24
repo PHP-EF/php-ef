@@ -33,8 +33,8 @@ class NewsFeed implements WidgetInterface {
             'Widget Settings' => [
 				$this->phpef->settingsOption('enable', 'enabled'),
 				$this->phpef->settingsOption('auth', 'auth', ['label' => 'Role Required']),
-                $this->phpef->settingsOption('checkbox', 'newsHeaderEnabled', ['label' => 'Toggle the news header displayed above the news widget', 'attr' => 'checked']),
-                $this->phpef->settingsOption('input', 'newsHeader', ['label' => 'The header displayed above the news widget', 'placeholder' => 'News & Updates']),
+                $this->phpef->settingsOption('checkbox', 'newsHeaderEnabled', ['label' => 'Enable Header', 'attr' => 'checked']),
+                $this->phpef->settingsOption('input', 'newsHeader', ['label' => 'Header Title', 'placeholder' => 'News & Updates']),
                 $this->phpef->settingsOption('checkbox', 'newsExpandFirst', ['label' => 'Expand the latest news item', 'attr' => 'checked']),
                 $this->phpef->settingsOption('number', 'newsItemsDisplayed', ['label' => 'Number of news items displayed in the widget']),
                 $this->phpef->settingsOption('checkbox', 'newsOrderByLastUpdated', ['label' => 'Order news items by last updated']),
