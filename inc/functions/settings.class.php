@@ -12,6 +12,10 @@ trait Settings {
                 $this->settingsOption('input', 'Styling[logo-lg][Image]', ['label' => 'Logo Image (Large)']),
                 $this->settingsOption('input', 'Styling[logo-lg][CSS]', ['label' => 'Logo Image (CSS)'])
             ),
+            'Side Bar' => array(
+                $this->settingsOption('checkbox', 'Styling[sidebar][expandOnHover]', ['label' => 'Expand sidebar on hover']),
+                $this->settingsOption('checkbox', 'Styling[sidebar][collapseByDefault]', ['label' => 'Collapse sidebar by default'])
+            ),
             'Favicon' => array(
                 $this->settingsOption('input', 'Styling[favicon][Image]', ['label' => 'Favicon'])
             ),

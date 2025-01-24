@@ -36,6 +36,10 @@
         return $link['Submenu'] === $linkName && $link['Type'] == 'SubMenuLink';
     });
   }
+
+  $sidebarExpandOnHover = $phpef->config->get('Styling','sidebar')['expandOnHover'] ? ' expandOnHover' : '';
+  $sidebarCollapseByDefault = $phpef->config->get('Styling','sidebar')['collapseByDefault'] ? ' close' : '';
+  $sidebarClasses = $sidebarExpandOnHover.$sidebarCollapseByDefault;
 ?>
 
 <!DOCTYPE html>
@@ -47,7 +51,7 @@
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
   </head>
 <body>
-  <div class="sidebar">
+  <div class="sidebar<?php echo $sidebarClasses ?>">
     <div class="logo-details">
       <?php
       $smLogoPath = $phpef->config->get('Styling', 'logo-sm')['Image'];
