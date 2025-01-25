@@ -10,8 +10,10 @@ trait MultiFactor {
             $Authenticated = true;
         } else {
             $CurrentAuth = $this->getAuth();
-            $Username = $CurrentAuth['Username'];
             $Authenticated = $CurrentAuth['Authenticated'];
+            if ($Authenticated) {
+                $Username = $CurrentAuth['Username'];
+            }
         }
         if ($Authenticated) {
             $CurrentUser = $this->getUserByUsername($Username,true);
