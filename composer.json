@@ -1,17 +1,19 @@
 {
     "require": {
         "rmccue/requests": "^2.0.12",
-        "label305/pptx-extractor": "0.2.*",
-        "phpoffice/phpspreadsheet": "^3.3.0",
         "fastvolt/markdown": "^0.2.1",
         "ramsey/uuid": "^4.7.6",
         "peppeocchi/php-cron-scheduler": "4.*",
-        "remotelyliving/php-dns": "^5.0",
         "monolog/monolog": "^3.0",
         "firebase/php-jwt": "^6.10",
         "predis/predis": "^2.2",
         "onelogin/php-saml": "^4.2.0",
         "slim/slim": "^4.14.0",
-        "czproject/git-php": "^4.3.0"
+        "czproject/git-php": "^4.3.0",
+        "label305/pptx-extractor": "0.2.*",
+        "phpoffice/phpspreadsheet": "^3.3.0",
+        "remotelyliving/php-dns": "^5.0",
+        "spomky-labs/otphp": "^11.3.0",
+        "endroid/qr-code": "^6.0.0"
     }
 }

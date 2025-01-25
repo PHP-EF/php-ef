@@ -183,6 +183,12 @@ class dbHelper {
       ],
       '0.7.8' => [
         "ALTER TABLE pages ADD COLUMN isDefault BOOLEAN;"
+      ],
+      '0.7.9' => [
+        "ALTER TABLE users ADD COLUMN multifactor_enabled BOOLEAN;",
+        "ALTER TABLE users ADD COLUMN multifactor_type TEXT;",
+        "ALTER TABLE users ADD COLUMN totp_secret TEXT;",
+        "ALTER TABLE users ADD COLUMN totp_verified BOOLEAN;"
       ]
     ];
   }
