@@ -15,10 +15,11 @@ class CoreJwt {
     }
 
     // Generate a JWT
-    public function generateToken($UN,$FN,$SN,$EM,$Groups,$Type,$MFA = null) {
+    public function generateToken($UN,$FN,$SN,$EM,$Groups,$Type,$Expiry = null,$MFA = null) {
+        $exp = $Expiry ?? (86400 * 30);
         $payload = [
           'iat' => time(), // Issued at
-          'exp' => time() + (86400 * 30), // Expiration time (30 days)
+          'exp' => time() + $exp, // Expiration time (defaults to 30 days)
           'username' => $UN,
           'firstname' => $FN,
           'surname' => $SN,
@@ -583,7 +584,7 @@ class Auth {
     if ($user['multifactor_enabled']) {
       $mfaArr = array(
         'type' => $user['multifactor_type'],
-        'jwt' => $this->CoreJwt->generateToken($user['username'], $user['firstname'], $user['surname'], $user['email'], explode(',', $user['groups']), $user['type'], false)
+        'jwt' => $this->CoreJwt->generateToken($user['username'], $user['firstname'], $user['surname'], $user['email'], explode(',', $user['groups']), $user['type'], 300, false) // Create temporary short lived token
       );
       $this->api->setAPIResponse('2FA', strtoupper($user['multifactor_type']).' 2FA is required', 200, $mfaArr);
       return false;

@@ -470,8 +470,6 @@ foreach ($navLinks as $navLink) {
                               <label for="mfaType">MFA Type</label>
                               <select class="form-control" id="mfaType" aria-describedby="mfaTypeHelp">
                                 <option value="totp">TOTP</option>
-                                <option value="hotp" disabled>HOTP</option>
-                                <option value="duo" disabled>Duo</option>
                               </select>
                             </div>
                             <div class="col-md-4 mt-4">

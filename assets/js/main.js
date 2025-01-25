@@ -1049,7 +1049,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </ul>
         `;
     }
-
+    // Section
     $.each(array, function (i, v) {
         mainCount++;
         var total = v.length;
@@ -1067,18 +1067,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
             var currentRowWidth = 0;
             var sectionCount = 0;
-
+            
+            // Item
             $.each(v, function (j, item) {
                 var width = parseInt(item.width) || 6;
+
                 sectionCount++;
 
-                if (currentRowWidth + width > 12) {
-                    group += '</div><!--end--><div class="row start">';
-                    currentRowWidth = 0;
+                if (currentRowWidth === 0) {
+                  group += '<div class="row start">';
                 }
 
-                if (currentRowWidth === 0) {
-                    group += '<div class="row start">';
+                if (currentRowWidth + width > 12) {
+                    group += '</div><!--end over 12--><div class="row start">';
+                    currentRowWidth = 0;
                 }
 
                 var helpID = `#help-info-${item.name}`;
@@ -1087,8 +1089,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (item.type == 'title' || item.type == 'hr' || item.type == 'js') {
                     builtItems = `${buildFormItem(item)}`;
-                    group += '</div><!--end--><div class="row start">'; // Close current row and start a new one
+                    group += '</div><!--end for type--><div class="row start">'; // Close current row and start a new one
                     currentRowWidth = 0; // Reset row width
+                    width = 12;
                 } else {
                     builtItems = `
                         <div class="col-md-${width} p-b-10">
@@ -1105,19 +1108,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 group += builtItems;
                 currentRowWidth += width;
 
-                if (currentRowWidth >= 12) {
-                    group += '</div><!--end-->';
+                if (currentRowWidth >= 12 || sectionCount == total) {
+                    group += '</div><!--end over 12 x2-->';
                     currentRowWidth = 0;
                 }
+
             });
 
-            if (currentRowWidth > 0) {
-                group += '</div><!--end-->';
+            if (currentRowWidth > 0 && !noTabs) {
+                group += '</div><!--end noTabs-->';
             }
-
-            if (!noTabs) {
-                group += '</div>';
-            }
+        }
+        
+        if (sectionCount == total) {
+          group += '</div><!--end of section-->';
         }
     });
 
