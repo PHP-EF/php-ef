@@ -19,7 +19,7 @@
   text-transform: none;
   font-family: inherit;
   display: block;
-  width: 100%;
+  /* width: 100%; */
   font-size: 1rem;
   line-height: 1.42857143;
   transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
@@ -355,7 +355,13 @@ input.changed, select.changed, textarea.changed {
 }
 .form-control,
 .input-group-append > button {
-  padding: 0.575rem!important;
+  padding: 0.575rem;
+}
+
+.form-control-color {
+  padding: 2px;
+  width: 100%;
+  height: 38px;
 }
 
 /* Horizontal Rule */

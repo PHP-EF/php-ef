@@ -120,7 +120,7 @@ if (!(isset($SkipCSS))) {
     </head>
 
     <style>
-    '.$customCSS.'
+    '.$phpef->buildCustomStyles() . $customCSS.'
     </style>
     ';
 

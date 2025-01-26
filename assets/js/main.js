@@ -1191,6 +1191,8 @@ document.addEventListener('DOMContentLoaded', function() {
         return smallLabel+'<div class="form-check form-switch"><input class="form-check-input info-field'+extraClass+'" type="checkbox"'+name+value+id+disabled+type+label+attr+dataAttributes+'/></div>';
       case 'button':
         return smallLabel+'<button class="btn btn-sm btn-success btn-rounded waves-effect waves-light b-none'+extraClass+'" '+href+attr+dataAttributes+' type="button"><span class="btn-label"><i class="'+icon+'"></i></span><span lang="en">'+text+'</span></button>';
+      case 'colourpicker':
+        return smallLabel+'<input type="color" class="form-control form-control-color info-field'+extraClass+'"'+value+id+name+disabled+type+label+attr+dataAttributes+'>';
       case 'blank':
         return '';
       case 'panel':

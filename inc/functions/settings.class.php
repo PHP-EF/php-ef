@@ -1,6 +1,5 @@
 <?php
 trait Settings {
-
     public function settingsCustomisation() {
         return array(
             'Top Bar' => array(
@@ -10,11 +9,26 @@ trait Settings {
                 $this->settingsOption('input', 'Styling[logo-sm][Image]', ['label' => 'Logo Image (Small)']),
                 $this->settingsOption('input', 'Styling[logo-sm][CSS]', ['label' => 'Logo CSS (Small)']),
                 $this->settingsOption('input', 'Styling[logo-lg][Image]', ['label' => 'Logo Image (Large)']),
-                $this->settingsOption('input', 'Styling[logo-lg][CSS]', ['label' => 'Logo Image (CSS)'])
+                $this->settingsOption('input', 'Styling[logo-lg][CSS]', ['label' => 'Logo Image (CSS)']),
+                $this->settingsOption('hr'),
+                $this->settingsOption('title','navbarStyleTitle',['text' => 'Top Bar Style']),
+                $this->settingsOption('colourpicker', 'Styling[navbar][mainColour]', ['label' => 'Top Bar Colour', 'width' => '4', 'value' => '#11101d']),
+                $this->settingsOption('colourpicker', 'Styling[navbar][textColour]', ['label' => 'Top Bar Text Colour', 'width' => '4', 'value' => '#FFFFFF']),
+                $this->settingsOption('colourpicker', 'Styling[navbar][submenuColour]', ['label' => 'Top Bar Submenu Colour', 'width' => '4', 'value' => '#1d1b31'])
+
             ),
             'Side Bar' => array(
+                $this->settingsOption('title','sidebarOptionsTitle',['text' => 'Sidebar Options']),
                 $this->settingsOption('checkbox', 'Styling[sidebar][expandOnHover]', ['label' => 'Expand sidebar on hover']),
-                $this->settingsOption('checkbox', 'Styling[sidebar][collapseByDefault]', ['label' => 'Collapse sidebar by default'])
+                $this->settingsOption('checkbox', 'Styling[sidebar][collapseByDefault]', ['label' => 'Collapse sidebar by default']),
+                $this->settingsOption('hr'),
+                $this->settingsOption('title','sidebarStyleTitle',['text' => 'Sidebar Style']),
+                $this->settingsOption('colourpicker', 'Styling[sidebar][mainColour]', ['label' => 'Sidebar Colour', 'width' => '3', 'value' => '#11101d']),
+                $this->settingsOption('colourpicker', 'Styling[sidebar][textColour]', ['label' => 'Sidebar Text Colour', 'width' => '3', 'value' => '#FFFFFF']),
+                $this->settingsOption('colourpicker', 'Styling[sidebar][activeColour]', ['label' => 'Sidebar Active Link Colour', 'width' => '3', 'value' => '#30d22a']),
+                $this->settingsOption('colourpicker', 'Styling[sidebar][submenuColour]', ['label' => 'Sidebar Submenu Colour', 'width' => '3', 'value' => '#1d1b31']),
+                $this->settingsOption('colourpicker', 'Styling[sidebar][hoverColour]', ['label' => 'Sidebar Hover Colour', 'width' => '3', 'value' => '#1d1b31']),
+                $this->settingsOption('colourpicker', 'Styling[sidebar][footerColour]', ['label' => 'Sidebar Footer Colour', 'width' => '3', 'value' => '#11101d'])
             ),
             'Favicon' => array(
                 $this->settingsOption('input', 'Styling[favicon][Image]', ['label' => 'Favicon'])

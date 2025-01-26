@@ -4,7 +4,8 @@ class phpef {
     Use Common,
     Images,
     Settings,
-    Cron;
+    Cron,
+    Style;
 
     private $configFilePath;
     private $dbPath;
