@@ -46,8 +46,10 @@ foreach (glob(__DIR__.'/widgets/*.php') as $widget) {
 getSecureHeaders();
 
 if (!(isset($SkipCSS))) {
-  $faviconPath = $phpef->config->get('Styling', 'favicon')['Image'];
+  $Styling = $phpef->config->get('Styling');
+  $faviconPath = $Styling['favicon']['Image'];
   $faviconPath = $faviconPath ? $faviconPath : '/assets/images/favicon.ico';
+  $customCSS = $Styling['css']['custom'] ?? '';
     echo '
     <head>
       <!-- Required meta tags -->
@@ -116,6 +118,10 @@ if (!(isset($SkipCSS))) {
       <link href="/assets/css/main.css?v'.$phpef->getVersion()[0].'" rel="stylesheet">
 
     </head>
+
+    <style>
+    '.$customCSS.'
+    </style>
     ';
 
     if(!isset($_COOKIE["theme"])) {
