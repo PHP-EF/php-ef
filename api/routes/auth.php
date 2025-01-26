@@ -207,3 +207,14 @@ $app->post('/auth/mfa/totp/verify', function ($request, $response, $args) {
 		->withHeader('Content-Type', 'application/json')
 		->withStatus($GLOBALS['responseCode']);
 });
+
+$app->post('/auth/mfa/reset/{id}', function ($request, $response, $args) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-USERS")) {
+		$reset = $phpef->auth->mfaReset($args['id']);
+    }
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json')
+		->withStatus($GLOBALS['responseCode']);
+});

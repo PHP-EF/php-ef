@@ -4,6 +4,7 @@ use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 
 trait MultiFactor {
+    // Retrieve all user MFA settings
     private function mfaPrivateSettings($decodedJwt = null) {
         try {
             if ($decodedJwt) {
@@ -31,23 +32,45 @@ trait MultiFactor {
                 );
             }
         } catch (Exception $e) {
-            $this->logging->writeLog('MFA', 'Error in mfaPrivateSettings: ' . $e->getMessage(), 'error');
+            $this->logging->writeLog('2FA', 'Error in mfaPrivateSettings: ' . $e->getMessage(), 'error');
             return array(
                 'multifactor_enabled' => false,
             );
         }
     }
 
+    // Retrieve non-sensitive user MFA settings
     public function mfaSettings() {
         try {
             $Settings = $this->mfaPrivateSettings();
             unset($Settings['totp_secret']);
             return $Settings;
         } catch (Exception $e) {
-            $this->logging->writeLog('MFA', 'Error in mfaSettings: ' . $e->getMessage(), 'error');
+            $this->logging->writeLog('2FA', 'Error in mfaSettings: ' . $e->getMessage(), 'error');
             return array(
                 'multifactor_enabled' => false,
             );
+        }
+    }
+
+    // Reset MFA for user
+    public function mfaReset($id) {
+        try {
+            $User = $this->getUserById($id);
+            if ($User) {
+                $stmt = $this->db->prepare('UPDATE users SET multifactor_type = NULL, multifactor_enabled = FALSE WHERE id = :id');
+                if ($stmt->execute(['id' => $id])) {
+                    $this->logging->writeLog('2FA','Successfully reset multifactor authentication for: '.$User['username'],'error');
+                    $this->api->setAPIResponse('Success', 'Successfully reset multifactor authentication for: '.$User['username']);
+                }
+            } else {
+                $this->logging->writeLog('2FA', 'Failed to reset multifactor authentication: user ('.$id.') does not exist', 'error');
+                $this->api->setAPIResponse('Error', 'Failed to reset multifactor authentication: user ('.$id.') does not exist');
+            }
+        } catch (Exception $e) {
+            $this->logging->writeLog('2FA', 'Error in mfaReset: ' . $e->getMessage(), 'error');
+            $this->api->setAPIResponse('Error', $e->getMessage());
+            return null;
         }
     }
 
@@ -55,6 +78,7 @@ trait MultiFactor {
     // ** TOTP ** //
     // ********** //
 
+    // New TOTP user registration
     public function totpNewRegistration() {
         try {
             // Generate a Secret Key
@@ -82,11 +106,12 @@ trait MultiFactor {
             // Output the QR code as an image
             return $result;
         } catch (Exception $e) {
-            $this->logging->writeLog('MFA', 'Error in totpNewRegistration: ' . $e->getMessage(), 'error');
+            $this->logging->writeLog('2FA', 'Error in totpNewRegistration: ' . $e->getMessage(), 'error');
             return null;
         }
     }
 
+    // Verify TOTP user registration
     public function totpVerifyRegistration($otp) {
         try {
             if (!$this->mfaPrivateSettings()['totp_verified']) {
@@ -115,6 +140,7 @@ trait MultiFactor {
         }
     }
 
+    // Verify TOTP code
     public function totpVerifyUser($otp, $jwt) {
         try {
             $decodedJwt = $this->CoreJwt->decodeToken($jwt);
@@ -160,6 +186,7 @@ trait MultiFactor {
         }
     }
 
+    // Store TOTP secret
     private function totpStoreSecret($id, $secret) {
         try {
             $stmt = $this->db->prepare('UPDATE users SET totp_secret = :totp_secret, totp_verified = FALSE, multifactor_type = NULL, multifactor_enabled = FALSE WHERE id = :id');
@@ -174,6 +201,7 @@ trait MultiFactor {
         }
     }
 
+    // Retrieve TOTP secret
     private function totpGetSecret($id) {
         try {
             $stmt = $this->db->prepare("SELECT id, username, totp_secret FROM users WHERE id = :id");

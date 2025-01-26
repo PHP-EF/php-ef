@@ -1336,10 +1336,11 @@ document.addEventListener('DOMContentLoaded', function() {
         var body = '';
         $.each(v, function(val) {
           var helpTip = v[val].helpTip ?? '';
+          var width = v[val].width ?? '6';
           if (v[val].type == 'title' || v[val].type == 'hr' || v[val].type == 'js') {
             body += buildFormItem(v[val]);
           } else {
-            body += `<div class="col-md-6"><label class="control-label"><span lang="en">${v[val].label}</span>${helpTip}</label>`;
+            body += `<div class="col-md-${width}"><label class="control-label"><span lang="en">${v[val].label}</span>${helpTip}</label>`;
             body += buildFormItem(v[val]);
             body += `</div>`;
           }
@@ -2423,6 +2424,22 @@ document.addEventListener('DOMContentLoaded', function() {
       $("[name=userPassword2]").attr("disabled",true);
     }
 
+    if (row['multifactor_enabled']) {
+      $("#mfaUserSettings").html(`
+        <div class="alert alert-info text-center d-grid" role="alert" id="mfaAlert">
+          <h3>${row['multifactor_type'].toUpperCase()}</h3>
+          <span>Multifactor Authentication is configured.</span>
+          <button class="btn btn-danger mt-2" onclick="resetMFA(${row.id});">Reset</button>
+        </div>
+      `);
+    } else {
+      $("#mfaUserSettings").html(`
+        <div class="alert alert-info text-center d-grid" role="alert" id="mfaAlert">
+          <span>Multifactor Authentication is not configured.</span>
+        </div>
+      `);
+    }
+
     var groupsplit = row.groups;
     if (groupsplit[0] != "") {
       for (var group in groupsplit) {
@@ -2869,5 +2886,25 @@ document.addEventListener('DOMContentLoaded', function() {
       case "Menu":
         $("[name=pageStub],[name=pageTitle],[name=pageStub],[name=pageSubMenu],[name=pageRole],[name=pageLinkType],[name=pageUrl],[name=pageDefault]").parent().parent().parent().attr("hidden",true).val("");
         break;
+    }
+  }
+
+  // ** USER FUNCTIONS ** //
+  function resetMFA(userId) {
+    if(confirm("Are you sure you want to reset multi factor authentication?") == true) {
+      queryAPI('POST','/api/auth/mfa/reset/'+userId).done(function(data) {
+        if (data['result'] == 'Success') {
+          toast("Success","","Successfully reset multi factor authentication","success");
+          $("#mfaUserSettings").html(`
+            <div class="alert alert-info text-center d-grid" role="alert" id="mfaAlert">
+              <span>Multifactor Authentication is not configured.</span>
+            </div>
+          `);
+        } else {
+          toast(data['result'],"",data['message'],"danger");
+        }
+      }).fail(function(jqXHR, textStatus, errorThrown) {
+        toast(textStatus,"","Error: "+jqXHR.status+": "+errorThrown,"danger");
+      });
     }
   }

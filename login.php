@@ -229,7 +229,7 @@ function submit2FA(mfaType,jwt) {
     }
   }).fail(function(jqXHR, textStatus, errorThrown) {
     toast(textStatus,"","Error: "+jqXHR.status+": "+errorThrown,"danger");
-  });;
+  });
 }
 
 function reset() {

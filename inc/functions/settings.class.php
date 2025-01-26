@@ -496,6 +496,12 @@ trait Settings {
             )
         );
 
+        $MFASettings = array(
+            "Multi Factor Authentication" => array(
+                $this->settingsOption('html', 'mfaUserSettings', ['html' => '<div id="mfaUserSettings"></div>', 'width' => '12'])
+            )
+        );
+
         return array(
             'General' => array(
                 $this->settingsOption('input', 'userUsername', ['label' => 'Username']),
@@ -503,8 +509,9 @@ trait Settings {
                 $this->settingsOption('input', 'userLastName', ['label' => 'Surname']),
                 $this->settingsOption('input', 'userEmail', ['label' => 'Email']),
                 $this->settingsOption('hr'),
-                $this->settingsOption('blank'),
                 $this->settingsOption('accordion', 'PasswordReset', ['id' => 'PasswordReset', 'options' => $PasswordSettings, 'width' => '12']),
+                $this->settingsOption('hr'),
+                $this->settingsOption('accordion', 'MFASettings', ['id' => 'MFASettings', 'options' => $MFASettings, 'width' => '12']),
                 $this->settingsOption('hr'),
                 $this->settingsOption('input', 'userType', ['label' => 'Type', 'attr' => 'disabled readonly']),
                 $this->settingsOption('input', 'userLastLogin', ['label' => 'Last Login', 'attr' => 'disabled readonly']),

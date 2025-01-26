@@ -256,7 +256,7 @@ foreach ($navLinks as $navLink) {
                 <hr class="dropdown-divider">
               </li>
               <li>
-                <a href="#" class="profile">
+                <a href="#" class="profile preventDefault">
                   <span>Profile</span>
                   <i class="fa fa-user"></i>
                 </a>
