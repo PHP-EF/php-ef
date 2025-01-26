@@ -1012,7 +1012,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // **************** //
 
   // ** FORM BUILDER ** //
-  function buildFormGroup(array, noTabs = false) {
+  function buildFormGroup(array, noTabs = false, noRows = false) {
     var mainCount = 0;
     var ids = {};
     var active = '';
@@ -1068,17 +1068,21 @@ document.addEventListener('DOMContentLoaded', function() {
             var currentRowWidth = 0;
             var sectionCount = 0;
             
+            if (noRows) {
+              group += '<div class="row start">';
+            }
+
             // Item
             $.each(v, function (j, item) {
                 var width = parseInt(item.width) || 6;
 
                 sectionCount++;
 
-                if (currentRowWidth === 0) {
+                if (currentRowWidth === 0 && !noRows) {
                   group += '<div class="row start">';
                 }
 
-                if (currentRowWidth + width > 12) {
+                if (currentRowWidth + width > 12 && !noRows) {
                     group += '</div><!--end over 12--><div class="row start">';
                     currentRowWidth = 0;
                 }
@@ -1089,7 +1093,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (item.type == 'title' || item.type == 'hr' || item.type == 'js') {
                     builtItems = `${buildFormItem(item)}`;
-                    group += '</div><!--end for type--><div class="row start">'; // Close current row and start a new one
+                    if (!noRows) {
+                      group += '</div><!--end for type--><div class="row start">'; // Close current row and start a new one
+                    }
                     currentRowWidth = 0; // Reset row width
                     width = 12;
                 } else {
@@ -1108,7 +1114,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 group += builtItems;
                 currentRowWidth += width;
 
-                if (currentRowWidth >= 12 || sectionCount == total) {
+                if ((currentRowWidth >= 12 || sectionCount == total) && !noRows) {
                     group += '</div><!--end over 12 x2-->';
                     currentRowWidth = 0;
                 }
@@ -1117,6 +1123,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (currentRowWidth > 0 && !noTabs) {
                 group += '</div><!--end noTabs-->';
+            }
+
+            if (noRows) {
+              group += '</div><!--end noRows-->';
             }
         }
         
@@ -1919,7 +1929,7 @@ document.addEventListener('DOMContentLoaded', function() {
     $("#SettingsModal .modal-dialog").removeClass("modal-xs modal-sm modal-md modal-lg modal-xl modal-xxl").addClass(`modal-${size}`);
     // Empty the additional settings array
     selectWithTableArr = {};
-    const { apiUrl, configUrl, name, saveFunction, labelPrefix, dataLocation, callback, noTabs } = options;
+    const { apiUrl, configUrl, name, saveFunction, labelPrefix, dataLocation, callback, noTabs, noRows } = options;
     $("#modalItemID").val(name)
 
     function handleCallback(callback) {
@@ -1939,7 +1949,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
       queryAPI("GET", apiUrl).done(function(settingsResponse) {
         const settingsData = dataLocation ? getNestedProperty(settingsResponse, dataLocation) : settingsResponse.data;
-        $("#SettingsModalBody").html(buildFormGroup(settingsData,noTabs));
+        $("#SettingsModalBody").html(buildFormGroup(settingsData,noTabs,noRows));
         initPasswordToggle();
         $("#SettingsModalSaveBtn").attr("onclick", saveFunction);
         $("#SettingsModalLabel").text(`${labelPrefix} Settings: ${name}`);
@@ -2169,7 +2179,8 @@ document.addEventListener('DOMContentLoaded', function() {
       name: "New User",
       saveFunction: `submitUserSettings(true);`,
       labelPrefix: "User",
-      dataLocation: "data"
+      dataLocation: "data",
+      noTabs: true
     },'lg');
   }
 
@@ -2181,7 +2192,8 @@ document.addEventListener('DOMContentLoaded', function() {
       labelPrefix: "Page",
       dataLocation: "data",
       callback:  "populatePageSettingsModal(row)",
-      noTabs: true
+      noTabs: true,
+      noRows: true
     },'lg');
   }
 
@@ -2194,7 +2206,8 @@ document.addEventListener('DOMContentLoaded', function() {
       labelPrefix: "Page / Menu",
       dataLocation: "data",
       callback:  "populatePageSettingsModal()",
-      noTabs: true
+      noTabs: true,
+      noRows: true
     },'lg');
   }
 
