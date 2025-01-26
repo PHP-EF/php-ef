@@ -132,7 +132,7 @@ trait Settings {
                 $this->settingsOption('input', 'Security[Headers][CSP][Connect-Source]', ['label' => 'Content Security Policy: Connect Source', 'placeholder' => 'self']),
             ),
             'Cron' => array(
-                $this->settingsOption('bootstrap-table', 'cronJobTable', ['id' => 'pluginsTable', 'columns' => $cronJobTableColumns, 'dataAttributes' => $cronJobTableAttributes, 'width' => '12']),
+                $this->settingsOption('bootstrap-table', 'cronJobTable', ['id' => 'cronJobTable', 'columns' => $cronJobTableColumns, 'dataAttributes' => $cronJobTableAttributes, 'width' => '12']),
             )
 	    );
     }
