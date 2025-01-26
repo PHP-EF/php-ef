@@ -32,13 +32,16 @@ trait Settings {
     public function settingsGeneral() {
         $AuthSettings = array(
             "LDAP Configuration" => array(
+                $this->settingsOption('title', 'ldapGeneralSettings', ['text' => 'General']),
+                $this->settingsOption('checkbox', 'LDAP[enabled]', ['label' => 'Enable LDAP']),
+                $this->settingsOption('checkbox', 'LDAP[AutoCreateUsers]', ['label' => 'Auto-Create Users']),
+                $this->settingsOption('hr'),
+                $this->settingsOption('title', 'ldapConnectionSettings', ['text' => 'LDAP Connection']),
                 $this->settingsOption('input', 'LDAP[ldap_server]', ['label' => 'LDAP Server', 'placeholder' => 'ldap://fqdn:389']),
                 $this->settingsOption('input', 'LDAP[service_dn]', ['label' => 'LDAP Bind Username', 'placeholder' => 'cn=read-only-admin,dc=example,dc=com']),
                 $this->settingsOption('password', 'LDAP[service_password]', ['label' => 'LDAP Bind Password', 'placeholder' => '*********']),
                 $this->settingsOption('input', 'LDAP[user_dn]', ['label' => 'User DN', 'placeholder' => 'dc=example,dc=com']),
                 $this->settingsOption('input', 'LDAP[base_dn]', ['label' => 'Base DN', 'placeholder' => 'dc=example,dc=com']),
-                $this->settingsOption('checkbox', 'LDAP[enabled]', ['label' => 'Enable LDAP']),
-                $this->settingsOption('checkbox', 'LDAP[AutoCreateUsers]', ['label' => 'Auto-Create Users']),
                 $this->settingsOption('hr'),
                 $this->settingsOption('title', 'ldapUserAttributeMapping', ['text' => 'User Attribute Mapping']),
                 $this->settingsOption('input', 'LDAP[attributes][Username]', ['label' => 'Username Attribute', 'placeholder' => 'sAMAccountName']),
@@ -78,6 +81,38 @@ trait Settings {
             )
         );
 
+        $cronJobTableAttributes = [
+            'url' => '/api/cron/jobs',
+            'data-field' => 'data',
+            'toggle' => 'table',
+            'sort-name' => 'last_run',
+            'sort-order' => 'asc',
+            'response-handler' => 'responseHandler',
+        ];
+    
+        $cronJobTableColumns = [
+            [
+                'field' => 'source',
+                'title' => 'Source'
+            ],
+            [
+                'field' => 'name',
+                'title' => 'Name'
+            ],
+            [
+                'field' => 'status',
+                'title' => 'Status'
+            ],
+            [
+                'field' => 'message',
+                'title' => 'Message'
+            ],
+            [
+                'field' => 'last_run',
+                'title' => 'Last Ran'
+            ]
+        ];
+
         return array(
             'System' => array(
                 $this->settingsOption('input', 'System[logfilename]', ['label' => 'Log File Name']),
@@ -95,6 +130,9 @@ trait Settings {
                 $this->settingsOption('input', 'Security[Headers][X-Frame-Options]', ['label' => 'X-Frame-Options', 'placeholder' => 'SAMEORIGIN']),
                 $this->settingsOption('input', 'Security[Headers][CSP][Frame-Source]', ['label' => 'Content Security Policy: Frame Source', 'placeholder' => 'self']),
                 $this->settingsOption('input', 'Security[Headers][CSP][Connect-Source]', ['label' => 'Content Security Policy: Connect Source', 'placeholder' => 'self']),
+            ),
+            'Cron' => array(
+                $this->settingsOption('bootstrap-table', 'cronJobTable', ['id' => 'pluginsTable', 'columns' => $cronJobTableColumns, 'dataAttributes' => $cronJobTableAttributes, 'width' => '12']),
             )
 	    );
     }

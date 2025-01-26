@@ -3,7 +3,8 @@ class phpef {
     // Traits //
     Use Common,
     Images,
-    Settings;
+    Settings,
+    Cron;
 
     private $configFilePath;
     private $dbPath;

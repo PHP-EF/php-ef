@@ -1,3 +1,6 @@
+## v0.8.0
+- Add Cron Job Tracking
+
 ## v0.7.9
 - Add 2FA TOTP support
 
