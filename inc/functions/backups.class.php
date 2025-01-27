@@ -64,9 +64,11 @@ trait Backups {
     
             $zip->close();
             $this->logging->writeLog('Backup', 'Backup created successfully: ' . $backupFile, 'Info');
+            if ($manual) {$phpef->updateCronStatus('System','Scheduled Backup', 'success', "Backup Successful");}
             $this->api->setAPIResponseMessage('Backup created successfully: ' . $backupFile);
         } else {
             $this->logging->writeLog('Backup', 'Failed to create backup zip file.', 'Warning');
+            if ($manual) {$phpef->updateCronStatus('System','Scheduled Backup', 'error', "Backup Failed");}
             $this->api->setAPIResponse('Error','Failed to create backup zip file.');
             throw new Exception('Failed to create backup zip file.');
         }
