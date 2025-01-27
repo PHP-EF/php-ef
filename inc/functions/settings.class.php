@@ -734,7 +734,7 @@ trait Settings {
         $AvailablePagesSelect = array_merge($AppendNone,array_map(function($item) {
             $Prefix = $item['plugin'] ? 'Plugin: ' : '';
             $PageName = $Prefix ? $Prefix . $item['plugin'] . ' / ' . $item['filename'] : $item['directory'] . ' / ' . $item['filename'];
-            $PageValue = $Prefix ? 'plugin/' . $item['directory'] . '/' . $item['filename'] : $item['directory'] . '/' . $item['filename'];
+            $PageValue = $Prefix ? 'plugin/' . $item['plugin'] . '/' . $item['filename'] : $item['directory'] . '/' . $item['filename'];
             return [
                 "name" => $PageName,
                 "value" => $PageValue
