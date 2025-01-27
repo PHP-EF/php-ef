@@ -95,6 +95,14 @@ trait Settings {
             )
         );
 
+        $CustomiseHeaders = array(
+            "Headers" => array(
+                $this->settingsOption('input', 'Security[Headers][X-Frame-Options]', ['label' => 'X-Frame-Options', 'placeholder' => 'SAMEORIGIN', 'help' => 'It is strongly advised you do not modify this unless you know what you are doing.']),
+                $this->settingsOption('input', 'Security[Headers][CSP][Frame-Source]', ['label' => 'Content Security Policy: Frame Source', 'placeholder' => 'self', 'help' => 'It is strongly advised you do not modify this unless you know what you are doing.']),
+                $this->settingsOption('input', 'Security[Headers][CSP][Connect-Source]', ['label' => 'Content Security Policy: Connect Source', 'placeholder' => 'self', 'help' => 'It is strongly advised you do not modify this unless you know what you are doing.'])
+            )
+        );
+
         $cronJobTableAttributes = [
             'url' => '/api/cron/jobs',
             'data-field' => 'data',
@@ -139,9 +147,10 @@ trait Settings {
             ),
             'Security' => array(
                 $this->settingsOption('password-alt', 'Security[salt]', ['label' => 'Salt']),
-                $this->settingsOption('input', 'Security[Headers][X-Frame-Options]', ['label' => 'X-Frame-Options', 'placeholder' => 'SAMEORIGIN', 'help' => 'It is strongly advised you do not modify this unless you know what you are doing.']),
-                $this->settingsOption('input', 'Security[Headers][CSP][Frame-Source]', ['label' => 'Content Security Policy: Frame Source', 'placeholder' => 'self', 'help' => 'It is strongly advised you do not modify this unless you know what you are doing.']),
-                $this->settingsOption('input', 'Security[Headers][CSP][Connect-Source]', ['label' => 'Content Security Policy: Connect Source', 'placeholder' => 'self', 'help' => 'It is strongly advised you do not modify this unless you know what you are doing.']),
+                $this->settingsOption('checkbox', 'Security[alwaysRequireLogin]', ['label' => 'Always Require Login', 'help' => 'By default, login is only required to access protected links/applications. If you want to require login to visit even the homepage, check this option.']),
+                $this->settingsOption('hr'),
+                $this->settingsOption('accordion', 'Headers', ['id' => 'Headers', 'label' => 'Customise Headers', 'options' => $CustomiseHeaders, 'width' => '12']),
+                $this->settingsOption('hr')
             ),
             'Backup' => array(
                 $this->settingsOption('html', 'backupNotice', ['html' => '<div class="alert alert-warning">WORK IN PROGRESS</div>', 'width' => '12']),
