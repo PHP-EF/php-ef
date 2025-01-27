@@ -80,7 +80,7 @@ return '
                 <h5 class="card-title">Granularity</span></h5>
                 <div class="d-flex align-items-center">
                   <div class="btn-group">
-                    <button id="granularityBtn" class="btn btn-secondary btn-sm dropdown-toggle" data-granularity="last30Days" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button id="reportingGranularityBtn" class="btn btn-secondary btn-sm dropdown-toggle" data-granularity="last30Days" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                       Last 30 Days
                     </button>
                     <div class="dropdown-menu">
@@ -578,7 +578,7 @@ return '
       updateRecentTracking($(event.currentTarget).data("granularity"),appliedFilters);
     }
     $(".granularity-title").text($(event.currentTarget).text());
-    $("#granularityBtn").text($(event.currentTarget).text()).attr("data-granularity",$(event.currentTarget).data("granularity"));
+    $("#reportingGranularityBtn").text($(event.currentTarget).text()).attr("data-granularity",$(event.currentTarget).data("granularity"));
   });
 
   // Filter Button
@@ -616,7 +616,7 @@ return '
 
   // Filter the chart with custom date/time range
   function chartTimeFilter() {
-    if($("#granularityBtn").attr("data-granularity") == "custom") {
+    if($("#reportingGranularityBtn").attr("data-granularity") == "custom") {
       if(!$("#reportingStartAndEndDate")[0].value){
         toast("Error","Missing Required Fields","The Start & End Date is a required field.","danger","30000");
         return null;
@@ -624,11 +624,11 @@ return '
       const reportingStartAndEndDate = $("#reportingStartAndEndDate")[0].value.split(" to ");
       const startDateTime = (new Date(reportingStartAndEndDate[0])).toISOString();
       const endDateTime = (new Date(reportingStartAndEndDate[1])).toISOString();
-      updateVisitorsChart($("#granularityBtn").attr("data-granularity"),appliedFilters,startDateTime,endDateTime);
-      updateRecentTracking($("#granularityBtn").attr("data-granularity"),appliedFilters,startDateTime,endDateTime);
+      updateVisitorsChart($("#reportingGranularityBtn").attr("data-granularity"),appliedFilters,startDateTime,endDateTime);
+      updateRecentTracking($("#reportingGranularityBtn").attr("data-granularity"),appliedFilters,startDateTime,endDateTime);
     } else {
-      updateVisitorsChart($("#granularityBtn").attr("data-granularity"),appliedFilters);
-      updateRecentTracking($("#granularityBtn").attr("data-granularity"),appliedFilters);
+      updateVisitorsChart($("#reportingGranularityBtn").attr("data-granularity"),appliedFilters);
+      updateRecentTracking($("#reportingGranularityBtn").attr("data-granularity"),appliedFilters);
     }
   }
 

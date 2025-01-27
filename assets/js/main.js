@@ -1438,6 +1438,34 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  window.backupActionEvents = {
+    "click .download": function (e, value, row, index) {
+        var url = '/api/config/backup/'+row.filename;
+        var a = document.createElement("a")
+        a.href = url;
+        a.download = url.split("/").pop()
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+    },
+    "click .delete": function (e, value, row, index) {
+      if(confirm("Are you sure you want to delete the backup: "+row.filename+"? This is irriversible.") == true) {
+        queryAPI("DELETE","/api/config/backup/"+row.filename).done(function(data) {
+          if (data["result"] == "Success") {
+            toast("Success","","Successfully deleted backup: "+row.filename,"success");
+            $("[name=backupsTable]").bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger","30000");
+          } else {
+            toast("Error","","Failed to delete backup: "+row.filename,"danger");
+          }
+        }).fail(function() {
+            toast("Error", "", "Failed to delete backup: "+row.filename, "danger");
+        });
+      }
+    }
+  }
+
   window.widgetActionEvents = {
     "click .edit": function (e, value, row, index) {
       buildWidgetSettingsModal(row);
@@ -1608,6 +1636,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
     }
+    return buttons.join("");
+  }
+
+  function backupActionFormatter(value, row, index) {
+    var buttons = [];
+    buttons.push(`<a class="download" title="Download"><i class="fa-solid fa-download"></i></a>&nbsp;`);
+    buttons.push(`<a class="delete" title="Delete"><i class="fa-solid fa-trash"></i></a>&nbsp;`);
     return buttons.join("");
   }
 
@@ -1804,6 +1839,33 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         attributes: {
           title: "Edit Plugin URL(s)",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
+  function backupTableButtons() {
+    return {
+      btnNewBackup: {
+        text: "New Backup",
+        icon: "bi bi-plus-lg",
+        event: function() {
+          queryAPI("POST","/api/config/backup").done(function(data) {
+            if (data["result"] == "Success") {
+              toast("Success","",data["message"],"success");
+              $(`[name="backupsTable"]`).bootstrapTable("refresh");
+            } else if (data["result"] == "Error") {
+              toast(data["result"],"",data["message"],"danger","30000");
+            } else {
+              toast("Error","","Failed to create backup","danger");
+            }
+          }).fail(function() {
+              toast("Error", "", "Failed to create backup", "danger");
+          });
+        },
+        attributes: {
+          title: "New Backup",
           style: "background-color:#4bbe40;border-color:#4bbe40;"
         }
 	    }

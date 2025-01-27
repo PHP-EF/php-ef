@@ -1,11 +1,19 @@
 {
     "System": {
-        "logfilename": "php-ef",
-        "logdirectory": "logs/",
-        "loglevel": "Info",
-        "logretention": "30",
         "CURL-Timeout": "180",
         "CURL-ConnectTimeout": "90"
+        "logging": {
+            "filename": "",
+            "directory": "",
+            "level": "",
+            "retention": "",
+            "cleanupschedule": ""
+        }
+        "backup": {
+            "includePluginData": true,
+            "enabled": false,
+            "includeImages": false
+        }
     },
     "Styling": {
         "websiteTitle": "PHP-EF",

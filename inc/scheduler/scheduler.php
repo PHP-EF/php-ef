@@ -1,10 +1,21 @@
 <?php
 $SkipCSS = true;
+$NoLogin = true;
 require_once(__DIR__.'/../inc.php');
 use GO\Scheduler;
 // Create a new scheduler
 $scheduler = new Scheduler();
-$scheduler->php(__DIR__.'/jobs/log-cleanup.php')->at('*/30 * * * *');
+
+// Log Cleanup
+$LogCleanupSchedule = !empty($phpef->config->get('System','logcleanup')) ? $phpef->config->get('System','logcleanup') : '*/60 * * * *';
+$scheduler->php(__DIR__.'/jobs/log-cleanup.php')->at($LogCleanupSchedule);
+
+// Scheduled Backups
+$BackupSchedule = !empty($phpef->config->get('System','backup')['schedule']) ? $phpef->config->get('System','backup')['schedule'] : '0 2 * * *';
+$scheduler->call(function() {
+    global $phpef;
+    $phpef->backup();
+})->at($BackupSchedule);
 
 /*
  * Include Plugin Cron Jobs
