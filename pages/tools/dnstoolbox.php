@@ -3,10 +3,6 @@ if ($phpef->auth->checkAccess("DNS-TOOLBOX") == false) {
   $phpef->api->setAPIResponse('Error','Unauthorized',401);
   return false;
 }
-header("Cache-control: no-cache, max-age=0");
-header("Expires: 0");
-header("Expires: Tue, 01 Jan 1980 1:00:00 GMT");
-header("Pragma: no-cache");
 $return = '
 <link href="/assets/css/dnstoolbox-0.3.css" rel="stylesheet">
 
