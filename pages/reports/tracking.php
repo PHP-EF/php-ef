@@ -159,10 +159,10 @@ return '
         <div class="row">
           <!-- Visitors List -->
           <div class="col-12">
-            <div class="card recent-assessments">
+            <div class="card recent-visits">
               <div class="card-body">
                 <h5 class="card-title">Visitors List | <span class="granularity-title">Last 30 Days</span></h5>
-                <table id="assessmentTable" class="table-striped"></table>
+                <table id="visitorsTable" class="table-striped"></table>
               </div>
             </div>
           </div><!-- End Visitors List -->
@@ -200,6 +200,13 @@ return '
 </div>
 
 <script>
+
+  flatpickr("#reportingStartAndEndDate", {
+    mode: "range",
+    enableTime: true,
+    dateFormat: "Y-m-d H:i"
+  });
+
   function dateFormatter(value, row, index) {
     var d = new Date(value) // The 0 there is the key, which sets the date to the epoch
     return d.toGMTString();
@@ -239,8 +246,8 @@ return '
   var updateRecentTracking = (granularity, appliedFilters, start = null, end = null) => {
     queryAPI("GET", "/api/reports/tracking/records?granularity="+granularity+"&filters="+JSON.stringify(appliedFilters)+"&start="+start+"&end="+end).done(function( response, status ) {
       let data = response["data"];
-      $("#assessmentTable").bootstrapTable("destroy");
-      $("#assessmentTable").bootstrapTable({
+      $("#visitorsTable").bootstrapTable("destroy");
+      $("#visitorsTable").bootstrapTable({
         data: data,
         sortable: true,
         pagination: true,

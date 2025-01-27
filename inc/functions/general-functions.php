@@ -35,6 +35,17 @@ function isJson($str) {
     return $json && $str != $json;
 }
 
+function utf8ize($arr){
+    if (is_array($arr)) {
+        foreach ($arr as $k => $v) {
+            $arr[$k] = utf8ize($v);
+        }
+    } else if (is_string ($arr)) {
+        return utf8_encode($arr);
+    }
+    return $arr;
+  }
+
 function stripslashes_deep($value) {
     $value = is_array($value) ?
     array_map('stripslashes_deep', $value) :

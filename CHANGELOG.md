@@ -1,3 +1,11 @@
+## v0.8.0
+- Add Cron Job Tracking
+- Various additions to customisation settings
+- Bugfixes
+
+## v0.7.9
+- Add 2FA TOTP support
+
 ## v0.7.8
 - Add plugin dependency support
 - Add News Feed widget

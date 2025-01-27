@@ -155,3 +155,66 @@ $app->get('/auth/samlMetadata', function ($request, $response, $args) {
 			->withStatus($GLOBALS['responseCode']);
     }
 });
+
+// Multi Factor
+$app->get('/auth/mfa/settings', function ($request, $response, $args) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->auth->getAuth()['Authenticated']) {
+		$phpef->api->setAPIResponseData($phpef->auth->mfaSettings());
+    }
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json')
+		->withStatus($GLOBALS['responseCode']);
+});
+
+$app->post('/auth/mfa/totp/register', function ($request, $response, $args) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->auth->getAuth()['Authenticated']) {
+        $result = $phpef->auth->totpNewRegistration();
+		$phpef->api->setAPIResponseData(base64_encode($result->getString()));
+    }
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json')
+		->withStatus($GLOBALS['responseCode']);
+});
+
+$app->post('/auth/mfa/totp/register/verify', function ($request, $response, $args) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->auth->getAuth()['Authenticated']) {
+		$data = $phpef->api->getAPIRequestData($request);
+		if (isset($data['totp_code'])) {
+			$verify = $phpef->auth->totpVerifyRegistration($data['totp_code']);
+		}
+    }
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json')
+		->withStatus($GLOBALS['responseCode']);
+});
+
+$app->post('/auth/mfa/totp/verify', function ($request, $response, $args) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+	$data = $phpef->api->getAPIRequestData($request);
+	if (isset($data['totp_code']) && isset($data['jwt'])) {
+		$verify = $phpef->auth->totpVerifyUser($data['totp_code'],$data['jwt']);
+	} else {
+		$phpef->api->setAPIResponse('Error','TOTP Code or JWT Missing or Invalid');
+	}
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json')
+		->withStatus($GLOBALS['responseCode']);
+});
+
+$app->post('/auth/mfa/reset/{id}', function ($request, $response, $args) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-USERS")) {
+		$reset = $phpef->auth->mfaReset($args['id']);
+    }
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json')
+		->withStatus($GLOBALS['responseCode']);
+});

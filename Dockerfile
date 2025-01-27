@@ -43,6 +43,8 @@ RUN apk add --no-cache \
 COPY Docker/config/nginx.conf /etc/nginx/nginx.conf
 # Configure nginx - default server
 COPY Docker/config/conf.d /etc/nginx/conf.d/
+# Copy nginx proxy snippet
+COPY Docker/config/proxy.conf /etc/nginx/proxy.conf
 
 # Configure PHP-FPM
 ENV PHP_INI_DIR=/etc/php83

@@ -4,7 +4,7 @@ require_once(__DIR__.'/../inc.php');
 use GO\Scheduler;
 // Create a new scheduler
 $scheduler = new Scheduler();
-$scheduler->php(__DIR__.'/jobs/log-cleanup.php')->at('*/30 * * * *'); ## Every day at 10AM (UTC)
+$scheduler->php(__DIR__.'/jobs/log-cleanup.php')->at('*/30 * * * *');
 
 /*
  * Include Plugin Cron Jobs
