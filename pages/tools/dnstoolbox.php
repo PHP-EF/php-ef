@@ -4,12 +4,6 @@ if ($phpef->auth->checkAccess("DNS-TOOLBOX") == false) {
   return false;
 }
 $return = '
-
-header("Cache-control: no-cache, max-age=0");
-header("Expires: 0");
-header("Expires: Tue, 01 Jan 1980 1:00:00 GMT");
-header("Pragma: no-cache");
-
 <link href="/assets/css/dnstoolbox-0.3.css" rel="stylesheet">
 
 <section class="section">
