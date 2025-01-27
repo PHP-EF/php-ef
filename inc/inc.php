@@ -45,6 +45,16 @@ foreach (glob(__DIR__.'/widgets/*.php') as $widget) {
 // ** Set CSP / Frame Headers ** //
 getSecureHeaders();
 
+// Force login if setting is enabled
+if ($phpef->config->get('Security', 'alwaysRequireLogin')) {
+  if (!$phpef->auth->getAuth()['Authenticated']) {
+    if (basename($_SERVER['PHP_SELF']) !== 'login.php' && $_SERVER['PHP_SELF'] !== '/api/index.php') {
+      header('Location: /login.php');
+      exit;
+    }
+  }
+}
+
 if (!(isset($SkipCSS))) {
   $Styling = $phpef->config->get('Styling');
   $faviconPath = $Styling['favicon']['Image'];
