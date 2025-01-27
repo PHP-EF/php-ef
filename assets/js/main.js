@@ -1088,7 +1088,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 var helpID = `#help-info-${item.name}`;
-                var helpTip = item.help ? `<sup><a class="help-tip" data-toggle="collapse" href="${helpID}" aria-expanded="true"><i class="m-l-5 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>` : '';
+                var helpTip = item.help ? `<sup><a class="help-tip" data-bs-toggle="collapse" href="${helpID}" aria-expanded="true"><i class="ms-1 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>` : '';
                 var builtItems = '';
 
                 if (item.type == 'title' || item.type == 'hr' || item.type == 'js') {
@@ -1100,7 +1100,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     width = 12;
                 } else {
                     builtItems = `
-                        <div class="col-md-${width} p-b-10">
+                        <div class="col-md-${width} pb-2">
                             <div class="form-group">
                                 <label class="control-label col-md-12"><span lang="en">${item.label}</span>${helpTip}</label>
                                 <div class="col-md-12">
@@ -1158,47 +1158,47 @@ document.addEventListener('DOMContentLoaded', function() {
     var attr = (item.attr) ? ' '+item.attr : '';
     var disabled = (item.disabled) ? ' disabled' : '';
     var href = (item.href) ? ' href="'+item.href+'"' : '';
-    var helpInfo = (item.help) ? '<div class="collapse" id="help-info-'+item.name+'"><blockquote lang="en">'+item.help+'</blockquote></div>' : '';
-    var smallLabel = (item.smallLabel) ? '<label><span lang="en">'+item.smallLabel+'</span></label>'+helpInfo : ''+helpInfo;
+    var helpInfo = (item.help) ? '<div class="collapse" id="help-info-'+item.name+'"><div class="card help-info-card"><blockquote lang="en" class="pt-3 ps-3">'+item.help+'</blockquote></div></div>' : '';
+    var smallLabel = (item.smallLabel) ? '<label><span lang="en">'+item.smallLabel+'</span></label>' : '';
     var dataAttributes = (item.dataAttributes) ? Object.keys(item.dataAttributes).map(key => ` data-${key}="${item.dataAttributes[key]}"`).join(' ') : '';
 
     switch (item.type) {
       case 'select-input':
-        return smallLabel + '<input list="'+item.name+'Options" lang="en" type="text" class="form-control info-field' + extraClass + '"' + placeholder + value + id + name + disabled + type + label + attr + dataAttributes + '/><datalist id="'+item.name+'Options">' + selectOptions(item.options, item.value) + '</datalist>';
+        return smallLabel + '<input list="'+item.name+'Options" lang="en" type="text" class="form-control info-field' + extraClass + '"' + placeholder + value + id + name + disabled + type + label + attr + dataAttributes + '/><datalist id="'+item.name+'Options">' + selectOptions(item.options, item.value) + '</datalist>'+helpInfo;
       case 'input':
       case 'text':
-        return smallLabel+'<input lang="en" type="text" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+' />';
+        return smallLabel+'<input lang="en" type="text" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+' />'+helpInfo;
       case 'inputmultiple':
-        return '<div class="input-group mb-3"><input lang="en" type="text" class="form-control info-field'+extraClass+'" multiple '+placeholder+id+name+disabled+type+label+attr+dataAttributes+'/><div class="input-group-append"><button class="btn btn-outline-success addInputEntry" type="button">'+text+'</button></div></div><ul class="list-group mt-3 inputEntries">'+multipleInputArr(item)+'</ul>';
+        return '<div class="input-group mb-3"><input lang="en" type="text" class="form-control info-field'+extraClass+'" multiple '+placeholder+id+name+disabled+type+label+attr+dataAttributes+'/><div class="input-group-append"><button class="btn btn-outline-success addInputEntry" type="button">'+text+'</button></div></div><ul class="list-group mt-3 inputEntries">'+multipleInputArr(item)+'</ul>'+helpInfo;
       case 'number':
-        return smallLabel+'<input lang="en" type="number" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>';
+        return smallLabel+'<input lang="en" type="number" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>'+helpInfo;
       case 'textbox':
-        return smallLabel+'<textarea class="form-control info-field'+extraClass+'"'+placeholder+id+name+disabled+type+label+attr+dataAttributes+' autocomplete="new-password">'+textarea+'</textarea>';
+        return smallLabel+'<textarea class="form-control info-field'+extraClass+'"'+placeholder+id+name+disabled+type+label+attr+dataAttributes+' autocomplete="new-password">'+textarea+'</textarea>'+helpInfo;
       case 'password':
-        return smallLabel+'<input lang="en" type="password" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>';
+        return smallLabel+'<input lang="en" type="password" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>'+helpInfo;
       case 'password-alt':
-        return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/><span class="input-group-btn"> <button class="btn btn-default showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
+        return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/><span class="input-group-btn"> <button class="btn btn-default showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>'+helpInfo;
       case 'password-alt-copy':
-        return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/><span class="input-group-btn"> <button class="btn btn-primary clipboard" type="button" data-clipboard-text="'+item.value+'"><i class="fa icon-docs"></i></button></span><span class="input-group-btn"> <button class="btn btn-inverse showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
+        return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/><span class="input-group-btn"> <button class="btn btn-primary clipboard" type="button" data-clipboard-text="'+item.value+'"><i class="fa icon-docs"></i></button></span><span class="input-group-btn"> <button class="btn btn-inverse showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>'+helpInfo;
       case 'hidden':
-        return '<input lang="en" type="hidden" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>';
+        return '<input lang="en" type="hidden" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>'+helpInfo;
       case 'select':
-        return smallLabel+'<select class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>';
+        return smallLabel+'<select class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>'+helpInfo;
       case 'selectmultiple':
-        return smallLabel+'<select class="form-control info-field'+extraClass+'" multiple '+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>';
+        return smallLabel+'<select class="form-control info-field'+extraClass+'" multiple '+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>'+helpInfo;
       case 'switch':
       case 'checkbox':
-        return smallLabel+'<div class="form-check form-switch"><input class="form-check-input info-field'+extraClass+'" type="checkbox"'+name+value+id+disabled+type+label+attr+dataAttributes+'/></div>';
+        return smallLabel+'<div class="form-check form-switch"><input class="form-check-input info-field'+extraClass+'" type="checkbox"'+name+value+id+disabled+type+label+attr+dataAttributes+'/></div>'+helpInfo;
       case 'button':
-        return smallLabel+'<button class="btn btn-sm btn-success btn-rounded waves-effect waves-light b-none'+extraClass+'" '+href+attr+dataAttributes+' type="button"><span class="btn-label"><i class="'+icon+'"></i></span><span lang="en">'+text+'</span></button>';
+        return smallLabel+'<button class="btn btn-sm btn-success btn-rounded waves-effect waves-light b-none'+extraClass+'" '+href+attr+dataAttributes+' type="button"><span class="btn-label"><i class="'+icon+'"></i></span><span lang="en">'+text+'</span></button>'+helpInfo;
       case 'colourpicker':
-        return smallLabel+'<input type="color" class="form-control form-control-color info-field'+extraClass+'"'+value+id+name+disabled+type+label+attr+dataAttributes+'>';
+        return smallLabel+'<input type="color" class="form-control form-control-color info-field'+extraClass+'"'+value+id+name+disabled+type+label+attr+dataAttributes+'>'+helpInfo;
       case 'blank':
         return '';
       case 'panel':
-        return '<div class="panel-group'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'  aria-multiselectable="true" role="tablist">'+panelOptions(item.options, item.id)+'</div>';
+        return '<div class="panel-group'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'  aria-multiselectable="true" role="tablist">'+panelOptions(item.options, item.id)+'</div>'+helpInfo;
       case 'accordion':
-        return '<div class="accordion'+extraClass+'"'+id+disabled+name+disabled+type+label+attr+dataAttributes+'>'+accordionOptions(item.options, item.id)+'</div>';
+        return '<div class="accordion'+extraClass+'"'+id+disabled+name+disabled+type+label+attr+dataAttributes+'>'+accordionOptions(item.options, item.id)+'</div>'+helpInfo;
       case 'listgroup':
         return buildListGroup(item.items,id);
       case 'title':

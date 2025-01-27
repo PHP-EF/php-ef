@@ -119,6 +119,9 @@ body.dark-theme .card {
   color: #FFF;
   border: none;
 }
+body.dark-theme .help-info-card {
+  background-color: #35404a;
+}
 body.dark-theme .list-group-item {
   background: #36393e;
   color: #FFF;
@@ -223,6 +226,9 @@ body.light-theme .page-content {
 }
 body.light-theme .card {
   background-color: #faf9f6;
+}
+body.light-theme .help-info-card {
+  background-color: #e5e3dd;
 }
 body.light-theme {
   background: #f8f8f6!important;

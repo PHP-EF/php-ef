@@ -34,14 +34,14 @@ trait Common {
                     'class' => 'pull-right',
                     'text' => 'Test',
                     'attr' => 'onclick="testAPI(\'' . $Method . '\',\'' . $name . '\')"',
-                    'help' => 'Remember! Please save before using the test button!'
+                    'help' => 'Remember to save before testing'
                 ];
                 break;
             case 'url':
                 $settingMerge = [
                     'type' => 'input',
                     'label' => 'URL',
-                    'help' => 'Please make sure to use local IP address and port - You also may use local dns name too.',
+                    'help' => 'Use the local IP address / DNS Name and port (if required).',
                     'placeholder' => 'http(s)://hostname:port'
                 ];
                 break;
@@ -49,7 +49,7 @@ trait Common {
                 $settingMerge = [
                     'type' => 'input',
                     'label' => 'Cron Schedule',
-                    // 'help' => 'You may use either Cron format or - @hourly, @daily, @monthly',
+                    'help' => 'You can use <a href="https://crontab.guru/" target="_blank">Crontab Guru</a> if you need assistance with cron scheduling.',
                     'placeholder' => '* * * * *'
                 ];
                 break;

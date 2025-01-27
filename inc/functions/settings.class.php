@@ -128,24 +128,33 @@ trait Settings {
         ];
 
         return array(
-            'System' => array(
+            'Logging' => array(
                 $this->settingsOption('input', 'System[logfilename]', ['label' => 'Log File Name']),
                 $this->settingsOption('input', 'System[logdirectory]', ['label' => 'Log Directory']),
                 $this->settingsOption('select', 'System[loglevel]', ['label' => 'Log Level', 'options' => array(array("name" => 'Debug', "value" => 'Debug'),array("name" => 'Info', "value" => 'Info'),array("name" => 'Warning', "value" => 'Warning'))]),
-                $this->settingsOption('input', 'System[logretention]', ['label' => 'Log Retention']),
-                $this->settingsOption('input', 'System[CURL-Timeout]', ['label' => 'CURL Timeout']),
-                $this->settingsOption('input', 'System[CURL-ConnectTimeout]', ['label' => 'CURL Timeout on Connect'])
+                $this->settingsOption('input', 'System[logretention]', ['label' => 'Log Retention'])
             ),
             'Authentication' => array(
                 $this->settingsOption('accordion', 'AuthProviders', ['id' => 'AuthProviders', 'label' => 'Authentication Providers', 'options' => $AuthSettings, 'width' => '12'])
             ),
             'Security' => array(
                 $this->settingsOption('password-alt', 'Security[salt]', ['label' => 'Salt']),
-                $this->settingsOption('input', 'Security[Headers][X-Frame-Options]', ['label' => 'X-Frame-Options', 'placeholder' => 'SAMEORIGIN']),
-                $this->settingsOption('input', 'Security[Headers][CSP][Frame-Source]', ['label' => 'Content Security Policy: Frame Source', 'placeholder' => 'self']),
-                $this->settingsOption('input', 'Security[Headers][CSP][Connect-Source]', ['label' => 'Content Security Policy: Connect Source', 'placeholder' => 'self']),
+                $this->settingsOption('input', 'Security[Headers][X-Frame-Options]', ['label' => 'X-Frame-Options', 'placeholder' => 'SAMEORIGIN', 'help' => 'It is strongly advised you do not modify this unless you know what you are doing.']),
+                $this->settingsOption('input', 'Security[Headers][CSP][Frame-Source]', ['label' => 'Content Security Policy: Frame Source', 'placeholder' => 'self', 'help' => 'It is strongly advised you do not modify this unless you know what you are doing.']),
+                $this->settingsOption('input', 'Security[Headers][CSP][Connect-Source]', ['label' => 'Content Security Policy: Connect Source', 'placeholder' => 'self', 'help' => 'It is strongly advised you do not modify this unless you know what you are doing.']),
             ),
-            'Cron' => array(
+            'Backup' => array(
+                $this->settingsOption('html', 'backupNotice', ['html' => '<div class="alert alert-warning">WORK IN PROGRESS</div>', 'width' => '12']),
+                $this->settingsOption('cron', 'System[backup][schedule]', ['label' => 'Backup Schedule', 'placeholder' => '0 2 * * *']),
+                $this->settingsOption('enable', 'System[backup][enabled]', ['label' => 'Enable scheduled backups']),
+                $this->settingsOption('enable', 'System[backup][includePluginData]', ['label' => 'Include plugin data in backups']),
+                $this->settingsOption('enable', 'System[backup][includeImages]', ['label' => 'Include custom images in backups']),
+            ),
+            'Other' => array(
+                $this->settingsOption('input', 'System[CURL-Timeout]', ['label' => 'CURL Timeout', 'help' => 'This can be used to extend the CURL timeout for upstream API calls, if they\'re prone to timing out. Use with caution.']),
+                $this->settingsOption('input', 'System[CURL-ConnectTimeout]', ['label' => 'CURL Timeout on Connect'])
+            ),
+            'Cron Status' => array(
                 $this->settingsOption('bootstrap-table', 'cronJobTable', ['id' => 'cronJobTable', 'columns' => $cronJobTableColumns, 'dataAttributes' => $cronJobTableAttributes, 'width' => '12']),
             )
 	    );
@@ -741,19 +750,19 @@ trait Settings {
         
         return array(
             "General" => array(
-                $this->settingsOption('select', 'pageType', ['label' => 'Type', 'options' => array(array("name" => 'Link', "value" => 'Link'),array("name" => 'Menu', "value" => 'Menu'))]),
-                $this->settingsOption('select', 'pageLinkType', ['label' => 'Link Type', 'options' => array(array("name" => 'Native', "value" => 'Native'),array("name" => 'iFrame', "value" => 'iFrame'),array("name" => 'New Window', "value" => 'NewWindow')), 'noRow' => 'true']),
-                $this->settingsOption('input', 'pageName', ['label' => 'Name', 'noRow' => 'true']),
-                $this->settingsOption('input', 'pageTitle', ['label' => 'Title', 'noRow' => 'true']),
-                $this->settingsOption('select', 'pageStub', ['label' => 'Page', 'options' => $AvailablePagesSelect, 'noRow' => 'true']),
-                $this->settingsOption('input', 'pageUrl', ['label' => 'URL', 'noRow' => 'true']),
-                $this->settingsOption('auth', 'pageRole', ['label' => 'Role', 'noRow' => 'true']),
-                $this->settingsOption('select', 'pageMenu', ['label' => 'Menu', 'noRow' => 'true', 'options' => $AvailableMenusSelect]),
-                $this->settingsOption('select', 'pageSubMenu', ['label' => 'Sub Menu', 'noRow' => 'true', 'options' => $AppendNone]),
+                $this->settingsOption('select', 'pageType', ['label' => 'Type', 'options' => array(array("name" => 'Link', "value" => 'Link'),array("name" => 'Menu', "value" => 'Menu')), 'help' => 'The type of page item to create.<br><b>Link:</b> A navigation link<br><b>Menu:</b> A menu or submenu']),
+                $this->settingsOption('select', 'pageLinkType', ['label' => 'Link Type', 'options' => array(array("name" => 'Native', "value" => 'Native'),array("name" => 'iFrame', "value" => 'iFrame'),array("name" => 'New Window', "value" => 'NewWindow')), 'help' => 'The type of link to create.<br><b>Native:</b> A native webpage, included within the framework or installed via a plugin.<br><b>iFrame:</b> Used to embed an external or proxied website.<br><b>New Window:</b> Used to launch an external website in a new window.']),
+                $this->settingsOption('input', 'pageName', ['label' => 'Name', 'help' => 'The Link or Menu name to be displayed in the sidebar.']),
+                $this->settingsOption('input', 'pageTitle', ['label' => 'Title', 'help' => 'The Link or Menu title to be displayed in the top bar.']),
+                $this->settingsOption('select', 'pageStub', ['label' => 'Page', 'options' => $AvailablePagesSelect, 'help' => 'The Native page to display when selecting this link.']),
+                $this->settingsOption('input', 'pageUrl', ['label' => 'URL', 'help' => 'The external or proxied URL to display or launch when selecting this link.']),
+                $this->settingsOption('auth', 'pageRole', ['label' => 'Role', 'help' => 'The role required to view and access this link.']),
+                $this->settingsOption('select', 'pageMenu', ['label' => 'Menu', 'options' => $AvailableMenusSelect, 'help' => 'The menu this link or submenu is to be placed in.']),
+                $this->settingsOption('select', 'pageSubMenu', ['label' => 'Sub Menu', 'options' => $AppendNone, 'help' => 'The submenu to place the link in.']),
                 $this->settingsOption('hr'),
-                $this->settingsOption('input', 'pageIcon', ['label' => 'Icon']),
-                $this->settingsOption('select', 'pageImage', ['label' => 'Image', 'attr' => '', 'options' => $this->getAllImagesForSelect()]),
-                $this->settingsOption('checkbox', 'pageDefault', ['label' => 'Default Page']),
+                $this->settingsOption('input', 'pageIcon', ['label' => 'Icon', 'help' => 'The fontawesome or bootstrap icon to use for this link or menu.']),
+                $this->settingsOption('select', 'pageImage', ['label' => 'Image', 'attr' => '', 'options' => $this->getAllImagesForSelect(), 'help' => 'The image to use for this link or menu.']),
+                $this->settingsOption('checkbox', 'pageDefault', ['label' => 'Default Page', 'help' => 'Set this link as the default page.']),
                 $this->settingsOption('input', 'pageId', ['attr' => 'hidden'])
             )
         );
