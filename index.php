@@ -654,12 +654,22 @@ foreach ($navLinks as $navLink) {
 
     var cookie = getCookie('theme');
     let toggle = document.getElementById('themeToggle');
-    if (cookie == "dark") {
-      $('html').attr('data-bs-theme',"dark");
-      toggle.className = 'fa-regular fa-lightbulb toggleon toggler';
+    if (cookie) {
+      if (cookie == "dark") {
+        $('html').attr('data-bs-theme',"dark");
+        toggle.className = 'fa-regular fa-lightbulb toggleon toggler';
+      } else {
+        $('html').attr('data-bs-theme',"light");
+        toggle.className = 'fa-solid fa-lightbulb toggleoff toggler';
+      }
     } else {
-      $('html').attr('data-bs-theme',"light");
-      toggle.className = 'fa-solid fa-lightbulb toggleoff toggler';
+      var defaultTheme = "<?php echo $phpef->config->get('Styling','theme')['default'] ?? 'dark' ?>";
+      $('html').attr('data-bs-theme',defaultTheme);
+      if (defaultTheme == "dark") {
+        toggle.className = 'fa-regular fa-lightbulb toggleon toggler';
+      } else {
+        toggle.className = 'fa-solid fa-lightbulb toggleoff toggler';
+      }
     }
 
 
