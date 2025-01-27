@@ -15,10 +15,11 @@ class CoreJwt {
     }
 
     // Generate a JWT
-    public function generateToken($UN,$FN,$SN,$EM,$Groups,$Type) {
+    public function generateToken($UN,$FN,$SN,$EM,$Groups,$Type,$Expiry = null,$MFA = null) {
+        $exp = $Expiry ?? (86400 * 30);
         $payload = [
           'iat' => time(), // Issued at
-          'exp' => time() + (86400 * 30), // Expiration time (30 days)
+          'exp' => time() + $exp, // Expiration time (defaults to 30 days)
           'username' => $UN,
           'firstname' => $FN,
           'surname' => $SN,
@@ -27,8 +28,16 @@ class CoreJwt {
           'groups' => $Groups,
           'type' => $Type
         ];
+        if ($MFA !== null) {
+          $payload['mfa'] = $MFA;
+        }
         $this->logging->writeLog("Authentication","Issued JWT token","debug",$payload);
         return JWT::encode($payload, $this->config->get()['Security']['salt'], 'HS256');
+    }
+
+    public function decodeToken($token) {
+      $secretKey = $this->config->get()['Security']['salt']; // Change this to a secure key
+      return JWT::decode($token, new Key($secretKey, 'HS256'));
     }
 
     // Revoke a token
@@ -57,7 +66,8 @@ class CoreJwt {
 
 class Auth {
   // Traits //
-  Use Common;
+  Use Common,
+  MultiFactor;
 
   private $db;
   private $config;
@@ -214,7 +224,7 @@ class Auth {
     if ($AllColumns) {
       $stmt = $this->db->prepare("SELECT * FROM users WHERE id = :id");
     } else {
-      $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires, type FROM users WHERE id = :id");
+      $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires, type, multifactor_enabled, multifactor_type, totp_verified FROM users WHERE id = :id");
     }
     $stmt->execute([':id' => $id]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -229,7 +239,7 @@ class Auth {
     if ($AllColumns) {
       $stmt = $this->db->prepare("SELECT * FROM users WHERE username = :username");
     } else {
-      $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires, type FROM users WHERE username = :username");
+      $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires, type, multifactor_enabled, multifactor_type, totp_verified FROM users WHERE username = :username");
     }
     $stmt->execute([':username' => $username]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -244,7 +254,7 @@ class Auth {
     if ($AllColumns) {
       $stmt = $this->db->prepare("SELECT * FROM users WHERE username = :username OR email = :email");
     } else {
-      $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires, type FROM users WHERE username = :username OR email = :email");
+      $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires, type, multifactor_enabled, multifactor_type, totp_verified FROM users WHERE username = :username OR email = :email");
     }
     $stmt->execute([':username' => $username,':email' => $email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -409,7 +419,7 @@ class Auth {
   }
 
   public function getAllUsers() {
-    $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires, type FROM users");
+    $stmt = $this->db->prepare("SELECT id, username, firstname, surname, email, groups, created, lastlogin, passwordexpires, type, multifactor_enabled, multifactor_type, totp_verified FROM users");
     $stmt->execute();
     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     if (!is_array($users)) {
@@ -423,7 +433,10 @@ class Auth {
           'created' => $users['created'],
           'lastlogin' => $users['lastlogin'],
           'passwordexpires' => $users['passwordexpires'],
-          'type' => $users['type']
+          'type' => $users['type'],
+          'multifactor_enabled' => $users['multifactor_enabled'],
+          'multifactor_type' => $users['multifactor_type'],
+          'totp_verified' => $users['totp_verified']
         );
     } else {
       foreach ($users as $user) {
@@ -437,7 +450,10 @@ class Auth {
           'created' => $user['created'],
           'lastlogin' => $user['lastlogin'],
           'passwordexpires' => $user['passwordexpires'],
-          'type' => $user['type']
+          'type' => $user['type'],
+          'multifactor_enabled' => $user['multifactor_enabled'],
+          'multifactor_type' => $user['multifactor_type'],
+          'totp_verified' => $user['totp_verified']
         );
       }
     }
@@ -564,6 +580,14 @@ class Auth {
     if ($expires < $now) {
         $this->api->setAPIResponse('Expired', 'Password Expired');
         return false;
+    }
+    if ($user['multifactor_enabled']) {
+      $mfaArr = array(
+        'type' => $user['multifactor_type'],
+        'jwt' => $this->CoreJwt->generateToken($user['username'], $user['firstname'], $user['surname'], $user['email'], explode(',', $user['groups']), $user['type'], 300, false) // Create temporary short lived token
+      );
+      $this->api->setAPIResponse('2FA', strtoupper($user['multifactor_type']).' 2FA is required', 200, $mfaArr);
+      return false;
     }
 
     // Update last login
@@ -749,7 +773,6 @@ class Auth {
   public function getAuth() {
     $IPAddress = $this->getUserIP();
     if (isset($_COOKIE['jwt'])) {
-      $secretKey = $this->config->get()['Security']['salt']; // Change this to a secure key
       if ($this->CoreJwt->isRevoked($_COOKIE['jwt']) == true) {
         // Token is invalid
         $AuthResult = array(
@@ -762,12 +785,14 @@ class Auth {
         return $AuthResult;
       } else {
         try {
-          $decodedJWT = JWT::decode($_COOKIE['jwt'], new Key($secretKey, 'HS256'));
+          $decodedJWT = $this->CoreJwt->decodeToken($_COOKIE['jwt']);
+          if (isset($decodedJWT->mfa) && $decodedJWT->mfa == false) {
+            $this->api->setAPIResponse('Error','2FA Not Complete',401);
+            return false;
+          }
         } catch (Exception $e) {
-          return array(
-            'Status' => 'Error',
-            'Message' => $e->getMessage()
-          );
+          $this->api->setAPIResponse('Error',$e->getMessage(),401);
+          return false;
         }
       }
 

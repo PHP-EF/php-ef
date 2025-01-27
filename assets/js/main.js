@@ -940,20 +940,6 @@ document.addEventListener('DOMContentLoaded', function() {
     $(elem.target).parent().remove();
   });
 
-  $("body").on("click", ".tab-sub-dropdown a", function(event) {
-    event.preventDefault();
-    var targetTab = $(this).data('tabTarget');
-    $(this).parent().parent().prev().text($(this).text());
-    $(this).parent().parent().parent().parent().next().find(".active").removeClass('active');
-    $(this).parent().parent().parent().parent().next().find(targetTab).addClass('active');
-  });
-
-  // Listener to remove active class from dropdown tabs (For mobile)
-  $("#page-content").on("click", ".nav-tabs .d-lg-none .dropdown a", function(event) {
-    event.preventDefault();
-    $(this).parent().parent().find(".active").removeClass('active');
-  });
-
   // Listener to add changed class to main settings elements
   $("#page-content").on('change', '.info-field', function(event) {
       const elementName = $(this).data('label');
@@ -974,11 +960,11 @@ document.addEventListener('DOMContentLoaded', function() {
     $(this).addClass("changed");
   });
 
-  // Custom jQuery to handle nested tabs
-  $("body").on('click', '#configTabContent .nav-tabs .nav-link', function (event) {
+  // Custom jQuery to handle nested tabs for mobile
+  $("body").on('click', '.tab-sub-dropdown .nav-link', function (event) {
     event.preventDefault();
-    $('#configTabContent .nav-tabs .nav-link').removeClass('active');
-    $('#configTabContent .nav-tabs .nav-link').removeClass('show active');
+    $(this).parent().find('.nav-link').removeClass('active');
+    $(this).parent().parent().parent().find('li .nav-link').removeClass('show active');
     $(this).addClass('active');
     $($(this).attr('href')).addClass('show active');
   });
@@ -1026,110 +1012,134 @@ document.addEventListener('DOMContentLoaded', function() {
   // **************** //
 
   // ** FORM BUILDER ** //
-  function buildFormGroup(array, noTabs = false) {
+  function buildFormGroup(array, noTabs = false, noRows = false) {
     var mainCount = 0;
     var ids = {};
     var active = '';
     var first = Object.keys(array)[0];
-  
+
     // Generate IDs once and store them
     Object.keys(array).forEach((i, index) => {
-      ids[i] = createRandomString(10);
+        ids[i] = createRandomString(10);
     });
-  
+
     if (noTabs) {
-      var group = '';
-      var uList = '';
+        var group = '';
+        var uList = '';
     } else {
-      var group = '<div class="tab-content tab-content-sub">';
-      var uList = `
-        <ul class="nav flex-column nav-tabs info-nav">
-          <div class="d-lg-none tab-sub-dropdown">
-            <div class="dropdown">
-              <button class="btn btn-secondary dropdown-toggle" type="button" id="configSubTabsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                ${first}
-              </button>
-              <ul class="dropdown-menu dropdown-menu-top" aria-labelledby="configSubTabsDropdown">
-                ${Object.keys(array).map((i, index) => {
-                  return `<li><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanClass(i)}" class="nav-link ${active}"><span lang="en">${i}</span></a></li>`;
-                }).join('')}
-              </ul>
-            </div>
-          </div>
-          ${Object.keys(array).map((i, index) => {
-            active = (index == 0) ? 'active' : '';
-            return `<li role="presentation" class="nav-item d-none d-lg-flex"><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanClass(i)}" class="nav-link ${active}"><span lang="en">${i}</span></a></li>`;
-          }).join('')}
-        </ul>
-      `;
-    }
-  
-    $.each(array, function (i, v) {
-      mainCount++;
-      var count = 0;
-      var total = v.length;
-      var active = (mainCount == 1) ? 'active' : '';
-  
-      if (i == 'custom') {
-        group += v;
-      } else {
-        if (!noTabs) {
-          group += `
-            <!-- FORM GROUP -->
-            <div class="tab-pane ${active}" id="${ids[i]}${cleanClass(i)}">
-          `;
-        }
-  
-        var sectionCount = 0;
-        $.each(v, function (j, item) {
-          var override = item.override || '6';
-          sectionCount++;
-          count++;
-  
-          if (count % 2 !== 0 && !item.noRow) {
-            group += '<div class="row start">';
-          }
-  
-          var helpID = `#help-info-${item.name}`;
-          var helpTip = item.help ? `<sup><a class="help-tip" data-toggle="collapse" href="${helpID}" aria-expanded="true"><i class="m-l-5 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>` : '';
-          var builtItems = '';
-  
-          if (item.type == 'title' || item.type == 'hr' || item.type == 'js') {
-            builtItems = `${buildFormItem(item)}`;
-            count = 0; // Reset count
-            group += '</div><!--end--><div class="row start">'; // Close current row and start a new one
-          } else {
-            builtItems = `
-              <div class="col-md-${override} p-b-10">
-                <div class="form-group">
-                  <label class="control-label col-md-12"><span lang="en">${item.label}</span>${helpTip}</label>
-                  <div class="col-md-12">
-                    ${buildFormItem(item)}
-                  </div>
+        var group = '<div class="tab-content tab-content-sub">';
+        var uList = `
+            <ul class="nav flex-column nav-tabs info-nav">
+                <div class="d-lg-none tab-sub-dropdown">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="configSubTabsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            ${first}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-top" aria-labelledby="configSubTabsDropdown">
+                            ${Object.keys(array).map((i, index) => {
+                                return `<li><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanClass(i)}" class="nav-link ${active}"><span lang="en">${i}</span></a></li>`;
+                            }).join('')}
+                        </ul>
+                    </div>
                 </div>
-              </div>
-            `;
-          }
-  
-          group += builtItems;
-  
-          if ((count % 2 === 0 || sectionCount === total) && !item.noRow) {
-            group += '</div><!--end-->';
-          }
-        });
-  
-        if (!noTabs) {
-          group += '</div>';
-        }
-      }
-    });
-  
-    if (noTabs) {
-      var flex = '';
-    } else {
-      var flex = 'd-flex';
+                ${Object.keys(array).map((i, index) => {
+                    active = (index == 0) ? 'active' : '';
+                    return `<li role="presentation" class="nav-item d-none d-lg-flex"><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanClass(i)}" class="nav-link ${active}"><span lang="en">${i}</span></a></li>`;
+                }).join('')}
+            </ul>
+        `;
     }
-  
+    // Section
+    $.each(array, function (i, v) {
+        mainCount++;
+        var total = v.length;
+        var active = (mainCount == 1) ? 'active' : '';
+
+        if (i == 'custom') {
+            group += v;
+        } else {
+            if (!noTabs) {
+                group += `
+                    <!-- FORM GROUP -->
+                    <div class="tab-pane ${active}" id="${ids[i]}${cleanClass(i)}">
+                `;
+            }
+
+            var currentRowWidth = 0;
+            var sectionCount = 0;
+            
+            if (noRows) {
+              group += '<div class="row start">';
+            }
+
+            // Item
+            $.each(v, function (j, item) {
+                var width = parseInt(item.width) || 6;
+
+                sectionCount++;
+
+                if (currentRowWidth === 0 && !noRows) {
+                  group += '<div class="row start">';
+                }
+
+                if (currentRowWidth + width > 12 && !noRows) {
+                    group += '</div><!--end over 12--><div class="row start">';
+                    currentRowWidth = 0;
+                }
+
+                var helpID = `#help-info-${item.name}`;
+                var helpTip = item.help ? `<sup><a class="help-tip" data-bs-toggle="collapse" href="${helpID}" aria-expanded="true"><i class="ms-1 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>` : '';
+                var builtItems = '';
+
+                if (item.type == 'title' || item.type == 'hr' || item.type == 'js') {
+                    builtItems = `${buildFormItem(item)}`;
+                    if (!noRows) {
+                      group += '</div><!--end for type--><div class="row start">'; // Close current row and start a new one
+                    }
+                    currentRowWidth = 0; // Reset row width
+                    width = 12;
+                } else {
+                    builtItems = `
+                        <div class="col-md-${width} pb-2">
+                            <div class="form-group">
+                                <label class="control-label col-md-12"><span lang="en">${item.label}</span>${helpTip}</label>
+                                <div class="col-md-12">
+                                    ${buildFormItem(item)}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                group += builtItems;
+                currentRowWidth += width;
+
+                if ((currentRowWidth >= 12 || sectionCount == total) && !noRows) {
+                    group += '</div><!--end over 12 x2-->';
+                    currentRowWidth = 0;
+                }
+
+            });
+
+            if (currentRowWidth > 0 && !noTabs) {
+                group += '</div><!--end noTabs-->';
+            }
+
+            if (noRows) {
+              group += '</div><!--end noRows-->';
+            }
+        }
+        
+        if (sectionCount == total) {
+          group += '</div><!--end of section-->';
+        }
+    });
+
+    if (noTabs) {
+        var flex = '';
+    } else {
+        var flex = 'd-flex';
+    }
     return `<div class="${flex}">` + uList + group + '</div>'; // Wrapped in a flex container for alignment
   }
   
@@ -1148,45 +1158,47 @@ document.addEventListener('DOMContentLoaded', function() {
     var attr = (item.attr) ? ' '+item.attr : '';
     var disabled = (item.disabled) ? ' disabled' : '';
     var href = (item.href) ? ' href="'+item.href+'"' : '';
-    var helpInfo = (item.help) ? '<div class="collapse" id="help-info-'+item.name+'"><blockquote lang="en">'+item.help+'</blockquote></div>' : '';
-    var smallLabel = (item.smallLabel) ? '<label><span lang="en">'+item.smallLabel+'</span></label>'+helpInfo : ''+helpInfo;
+    var helpInfo = (item.help) ? '<div class="collapse" id="help-info-'+item.name+'"><div class="card help-info-card"><blockquote lang="en" class="pt-3 ps-3">'+item.help+'</blockquote></div></div>' : '';
+    var smallLabel = (item.smallLabel) ? '<label><span lang="en">'+item.smallLabel+'</span></label>' : '';
     var dataAttributes = (item.dataAttributes) ? Object.keys(item.dataAttributes).map(key => ` data-${key}="${item.dataAttributes[key]}"`).join(' ') : '';
 
     switch (item.type) {
       case 'select-input':
-        return smallLabel + '<input list="'+item.name+'Options" lang="en" type="text" class="form-control info-field' + extraClass + '"' + placeholder + value + id + name + disabled + type + label + attr + dataAttributes + '/><datalist id="'+item.name+'Options">' + selectOptions(item.options, item.value) + '</datalist>';
+        return smallLabel + '<input list="'+item.name+'Options" lang="en" type="text" class="form-control info-field' + extraClass + '"' + placeholder + value + id + name + disabled + type + label + attr + dataAttributes + '/><datalist id="'+item.name+'Options">' + selectOptions(item.options, item.value) + '</datalist>'+helpInfo;
       case 'input':
       case 'text':
-        return smallLabel+'<input lang="en" type="text" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+' />';
+        return smallLabel+'<input lang="en" type="text" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+' />'+helpInfo;
       case 'inputmultiple':
-        return '<div class="input-group mb-3"><input lang="en" type="text" class="form-control info-field'+extraClass+'" multiple '+placeholder+id+name+disabled+type+label+attr+dataAttributes+'/><div class="input-group-append"><button class="btn btn-outline-success addInputEntry" type="button">'+text+'</button></div></div><ul class="list-group mt-3 inputEntries">'+multipleInputArr(item)+'</ul>';
+        return '<div class="input-group mb-3"><input lang="en" type="text" class="form-control info-field'+extraClass+'" multiple '+placeholder+id+name+disabled+type+label+attr+dataAttributes+'/><div class="input-group-append"><button class="btn btn-outline-success addInputEntry" type="button">'+text+'</button></div></div><ul class="list-group mt-3 inputEntries">'+multipleInputArr(item)+'</ul>'+helpInfo;
       case 'number':
-        return smallLabel+'<input lang="en" type="number" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>';
+        return smallLabel+'<input lang="en" type="number" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>'+helpInfo;
       case 'textbox':
-        return smallLabel+'<textarea class="form-control info-field'+extraClass+'"'+placeholder+id+name+disabled+type+label+attr+dataAttributes+' autocomplete="new-password">'+textarea+'</textarea>';
+        return smallLabel+'<textarea class="form-control info-field'+extraClass+'"'+placeholder+id+name+disabled+type+label+attr+dataAttributes+' autocomplete="new-password">'+textarea+'</textarea>'+helpInfo;
       case 'password':
-        return smallLabel+'<input lang="en" type="password" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>';
+        return smallLabel+'<input lang="en" type="password" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>'+helpInfo;
       case 'password-alt':
-        return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/><span class="input-group-btn"> <button class="btn btn-default showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
+        return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/><span class="input-group-btn"> <button class="btn btn-default showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>'+helpInfo;
       case 'password-alt-copy':
-        return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/><span class="input-group-btn"> <button class="btn btn-primary clipboard" type="button" data-clipboard-text="'+item.value+'"><i class="fa icon-docs"></i></button></span><span class="input-group-btn"> <button class="btn btn-inverse showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>';
+        return smallLabel+'<div class="input-group"><input lang="en" type="password" class="password-alt form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/><span class="input-group-btn"> <button class="btn btn-primary clipboard" type="button" data-clipboard-text="'+item.value+'"><i class="fa icon-docs"></i></button></span><span class="input-group-btn"> <button class="btn btn-inverse showPassword" type="button"><i class="fa fa-eye passwordToggle"></i></button></span></div>'+helpInfo;
       case 'hidden':
-        return '<input lang="en" type="hidden" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>';
+        return '<input lang="en" type="hidden" class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'/>'+helpInfo;
       case 'select':
-        return smallLabel+'<select class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>';
+        return smallLabel+'<select class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>'+helpInfo;
       case 'selectmultiple':
-        return smallLabel+'<select class="form-control info-field'+extraClass+'" multiple '+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>';
+        return smallLabel+'<select class="form-control info-field'+extraClass+'" multiple '+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>'+helpInfo;
       case 'switch':
       case 'checkbox':
-        return smallLabel+'<div class="form-check form-switch"><input class="form-check-input info-field'+extraClass+'" type="checkbox"'+name+value+id+disabled+type+label+attr+dataAttributes+'/></div>';
+        return smallLabel+'<div class="form-check form-switch"><input class="form-check-input info-field'+extraClass+'" type="checkbox"'+name+value+id+disabled+type+label+attr+dataAttributes+'/></div>'+helpInfo;
       case 'button':
-        return smallLabel+'<button class="btn btn-sm btn-success btn-rounded waves-effect waves-light b-none'+extraClass+'" '+href+attr+dataAttributes+' type="button"><span class="btn-label"><i class="'+icon+'"></i></span><span lang="en">'+text+'</span></button>';
+        return smallLabel+'<button class="btn btn-sm btn-success btn-rounded waves-effect waves-light b-none'+extraClass+'" '+href+attr+dataAttributes+' type="button"><span class="btn-label"><i class="'+icon+'"></i></span><span lang="en">'+text+'</span></button>'+helpInfo;
+      case 'colourpicker':
+        return smallLabel+'<input type="color" class="form-control form-control-color info-field'+extraClass+'"'+value+id+name+disabled+type+label+attr+dataAttributes+'>'+helpInfo;
       case 'blank':
         return '';
       case 'panel':
-        return '<div class="panel-group'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'  aria-multiselectable="true" role="tablist">'+panelOptions(item.options, item.id)+'</div>';
+        return '<div class="panel-group'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'  aria-multiselectable="true" role="tablist">'+panelOptions(item.options, item.id)+'</div>'+helpInfo;
       case 'accordion':
-        return '<div class="accordion'+extraClass+'"'+id+disabled+name+disabled+type+label+attr+dataAttributes+'>'+accordionOptions(item.options, item.id)+'</div>';
+        return '<div class="accordion'+extraClass+'"'+id+disabled+name+disabled+type+label+attr+dataAttributes+'>'+accordionOptions(item.options, item.id)+'</div>'+helpInfo;
       case 'listgroup':
         return buildListGroup(item.items,id);
       case 'title':
@@ -1336,10 +1348,11 @@ document.addEventListener('DOMContentLoaded', function() {
         var body = '';
         $.each(v, function(val) {
           var helpTip = v[val].helpTip ?? '';
+          var width = v[val].width ?? '6';
           if (v[val].type == 'title' || v[val].type == 'hr' || v[val].type == 'js') {
             body += buildFormItem(v[val]);
           } else {
-            body += `<div class="col-md-6"><label class="control-label"><span lang="en">${v[val].label}</span>${helpTip}</label>`;
+            body += `<div class="col-md-${width}"><label class="control-label"><span lang="en">${v[val].label}</span>${helpTip}</label>`;
             body += buildFormItem(v[val]);
             body += `</div>`;
           }
@@ -1918,7 +1931,7 @@ document.addEventListener('DOMContentLoaded', function() {
     $("#SettingsModal .modal-dialog").removeClass("modal-xs modal-sm modal-md modal-lg modal-xl modal-xxl").addClass(`modal-${size}`);
     // Empty the additional settings array
     selectWithTableArr = {};
-    const { apiUrl, configUrl, name, saveFunction, labelPrefix, dataLocation, callback, noTabs } = options;
+    const { apiUrl, configUrl, name, saveFunction, labelPrefix, dataLocation, callback, noTabs, noRows } = options;
     $("#modalItemID").val(name)
 
     function handleCallback(callback) {
@@ -1938,7 +1951,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
       queryAPI("GET", apiUrl).done(function(settingsResponse) {
         const settingsData = dataLocation ? getNestedProperty(settingsResponse, dataLocation) : settingsResponse.data;
-        $("#SettingsModalBody").html(buildFormGroup(settingsData,noTabs));
+        $("#SettingsModalBody").html(buildFormGroup(settingsData,noTabs,noRows));
         initPasswordToggle();
         $("#SettingsModalSaveBtn").attr("onclick", saveFunction);
         $("#SettingsModalLabel").text(`${labelPrefix} Settings: ${name}`);
@@ -2168,7 +2181,8 @@ document.addEventListener('DOMContentLoaded', function() {
       name: "New User",
       saveFunction: `submitUserSettings(true);`,
       labelPrefix: "User",
-      dataLocation: "data"
+      dataLocation: "data",
+      noTabs: true
     },'lg');
   }
 
@@ -2180,7 +2194,8 @@ document.addEventListener('DOMContentLoaded', function() {
       labelPrefix: "Page",
       dataLocation: "data",
       callback:  "populatePageSettingsModal(row)",
-      noTabs: true
+      noTabs: true,
+      noRows: true
     },'lg');
   }
 
@@ -2193,7 +2208,8 @@ document.addEventListener('DOMContentLoaded', function() {
       labelPrefix: "Page / Menu",
       dataLocation: "data",
       callback:  "populatePageSettingsModal()",
-      noTabs: true
+      noTabs: true,
+      noRows: true
     },'lg');
   }
 
@@ -2421,6 +2437,22 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       $("[name=userPassword]").attr("disabled",true);
       $("[name=userPassword2]").attr("disabled",true);
+    }
+
+    if (row['multifactor_enabled']) {
+      $("#mfaUserSettings").html(`
+        <div class="alert alert-info text-center d-grid" role="alert" id="mfaAlert">
+          <h3>${row['multifactor_type'].toUpperCase()}</h3>
+          <span>Multifactor Authentication is configured.</span>
+          <button class="btn btn-danger mt-2" onclick="resetMFA(${row.id});">Reset</button>
+        </div>
+      `);
+    } else {
+      $("#mfaUserSettings").html(`
+        <div class="alert alert-info text-center d-grid" role="alert" id="mfaAlert">
+          <span>Multifactor Authentication is not configured.</span>
+        </div>
+      `);
     }
 
     var groupsplit = row.groups;
@@ -2869,5 +2901,25 @@ document.addEventListener('DOMContentLoaded', function() {
       case "Menu":
         $("[name=pageStub],[name=pageTitle],[name=pageStub],[name=pageSubMenu],[name=pageRole],[name=pageLinkType],[name=pageUrl],[name=pageDefault]").parent().parent().parent().attr("hidden",true).val("");
         break;
+    }
+  }
+
+  // ** USER FUNCTIONS ** //
+  function resetMFA(userId) {
+    if(confirm("Are you sure you want to reset multi factor authentication?") == true) {
+      queryAPI('POST','/api/auth/mfa/reset/'+userId).done(function(data) {
+        if (data['result'] == 'Success') {
+          toast("Success","","Successfully reset multi factor authentication","success");
+          $("#mfaUserSettings").html(`
+            <div class="alert alert-info text-center d-grid" role="alert" id="mfaAlert">
+              <span>Multifactor Authentication is not configured.</span>
+            </div>
+          `);
+        } else {
+          toast(data['result'],"",data['message'],"danger");
+        }
+      }).fail(function(jqXHR, textStatus, errorThrown) {
+        toast(textStatus,"","Error: "+jqXHR.status+": "+errorThrown,"danger");
+      });
     }
   }

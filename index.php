@@ -36,6 +36,10 @@
         return $link['Submenu'] === $linkName && $link['Type'] == 'SubMenuLink';
     });
   }
+
+  $sidebarExpandOnHover = $phpef->config->get('Styling','sidebar')['expandOnHover'] ? ' expandOnHover' : '';
+  $sidebarCollapseByDefault = $phpef->config->get('Styling','sidebar')['collapseByDefault'] ? ' close' : '';
+  $sidebarClasses = $sidebarExpandOnHover.$sidebarCollapseByDefault;
 ?>
 
 <!DOCTYPE html>
@@ -47,7 +51,7 @@
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
   </head>
 <body>
-  <div class="sidebar">
+  <div class="sidebar<?php echo $sidebarClasses ?>">
     <div class="logo-details">
       <?php
       $smLogoPath = $phpef->config->get('Styling', 'logo-sm')['Image'];
@@ -55,10 +59,16 @@
       $smLogoPath = $smLogoPath ? $smLogoPath : '/assets/images/php-ef-icon.png';
       echo '<img class="logo-sm" src="' . (file_exists(__DIR__ . $smLogoPath) ? $smLogoPath : '/assets/images/php-ef-icon.png') . '" style="'.$smLogoCSS.'"></img>';
 
-      $lgLogoPath = $phpef->config->get('Styling', 'logo-lg')['Image'];
-      $lgLogoCSS = $phpef->config->get('Styling', 'logo-lg')['CSS'] ?? '';
-      $lgLogoPath = $lgLogoPath ? $lgLogoPath : '/assets/images/php-ef-icon-text.png';
-      echo '<img class="logo-lg" src="' . (file_exists(__DIR__ . $lgLogoPath) ? $lgLogoPath : '/assets/images/php-ef-icon-text.png') . '" style="'.$lgLogoCSS.'"></img>';
+      if ($phpef->config->get('Styling','websiteTitleNotLogo') ?? false) {
+        $fontSize = $phpef->config->get('Styling','websiteTitleFontSize') ?? "42";
+        echo '<span class="logo-text" style="font-size: '.$fontSize.';">'.$phpef->config->get('Styling','websiteTitle') ?? ''.'</span>';
+      } else {
+        $lgLogoPath = $phpef->config->get('Styling', 'logo-lg')['Image'];
+        $lgLogoCSS = $phpef->config->get('Styling', 'logo-lg')['CSS'] ?? '';
+        $lgLogoPath = $lgLogoPath ? $lgLogoPath : '/assets/images/php-ef-icon-text.png';
+        echo '<img class="logo-lg" src="' . (file_exists(__DIR__ . $lgLogoPath) ? $lgLogoPath : '/assets/images/php-ef-icon-text.png') . '" style="'.$lgLogoCSS.'"></img>';
+      }
+
       ?>
     </div>
     <ul class="nav-links">
@@ -246,7 +256,7 @@ foreach ($navLinks as $navLink) {
                 <hr class="dropdown-divider">
               </li>
               <li>
-                <a href="#" class="profile">
+                <a href="#" class="profile preventDefault">
                   <span>Profile</span>
                   <i class="fa fa-user"></i>
                 </a>
@@ -421,6 +431,66 @@ foreach ($navLinks as $navLink) {
           </div>
           <hr>
           <div class="row">
+            <div class="accordion" id="mfaAccordion">
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="mfaHeading">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mfa" aria-expanded="true" aria-controls="mfa">
+                  Multi-Factor Authentication
+                  </button>
+                </h2>
+                <div id="mfa" class="accordion-collapse collapse" aria-labelledby="mfaHeading" data-bs-parent="#mfaAccordion">
+                  <div class="accordion-body">
+                    <div class="card-body" id="mfaCard">
+                      <?php
+                        $mfaContent = '';
+                        $mfaSetup = 'flex';
+                        if ($phpef->auth->mfaSettings()['multifactor_enabled']) {
+                          switch($phpef->auth->mfaSettings()['multifactor_type']) {
+                            case 'totp':
+                              $mfaContent .= '
+                              <div class="alert alert-info text-center" role="alert" id="mfaAlert">
+                                <h3>'.strtoupper($phpef->auth->mfaSettings()['multifactor_type']).'</h3>
+                                <span>Multifactor Authentication is configured.</span>
+                                <button class="btn btn-danger mt-2" onclick="reconfigureMFA();">Reconfigure</button>
+                              </div>';
+                              break;
+                            default:
+                              $mfaContent .= '
+                              <div class="alert alert-warning text-center" role="alert" id="mfaAlert">
+                                <h3>'.strtoupper($phpef->auth->mfaSettings()['multifactor_type']).'</h3>
+                                <span>Multifactor Authentication is invalid.</span>
+                                <button class="btn btn-danger mt-2" onclick="reconfigureMFA();">Reconfigure</button>
+                              </div>';
+                          }
+                          $mfaSetup = 'none';
+                        }
+                        $mfaContent .= '
+                          <div class="row" style="display:'.$mfaSetup.'" id="mfaRegister">
+                            <div class="form-group col-md-8">
+                              <label for="mfaType">MFA Type</label>
+                              <select class="form-control" id="mfaType" aria-describedby="mfaTypeHelp">
+                                <option value="totp">TOTP</option>
+                              </select>
+                            </div>
+                            <div class="col-md-4 mt-4">
+                              <button class="btn btn-success w-100" onclick="registerMFA()">Configure</button>
+                            </div>
+                          </div>
+                          <div class="row mt-3" style="display:none" id="mfaSetup">
+                            <img id="qrCodeImage"/>
+                            <div class="mt-2" id="mfaVerification"></div>
+                          </div>
+                        ';
+                        echo $mfaContent;
+                      ?>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr>
+          <div class="row">
             <div class="accordion" id="resetPasswordAccordion">
               <div class="accordion-item">
                 <h2 class="accordion-header" id="resetPasswordHeading">
@@ -431,20 +501,20 @@ foreach ($navLinks as $navLink) {
                 <div id="resetPassword" class="accordion-collapse collapse" aria-labelledby="resetPasswordHeading" data-bs-parent="#resetPasswordAccordion">
                   <div class="accordion-body">
                     <div class="card-body">
-                      <?php if ($phpef->auth->getAuth()['Authenticated'] && $phpef->auth->getAuth()['Type'] == 'SSO') { echo '
+                      <?php if ($phpef->auth->getAuth()['Authenticated'] && $phpef->auth->getAuth()['Type'] != 'Local') { echo '
                         <div class="alert alert-warning" role="alert">
-                        <center>You must reset your password via the Single Sign On provider.</center>
+                        <center>You must reset your password via the external provider ('.$phpef->auth->getAuth()['Type'].').</center>
                         </div>';}
                       ?>
                       <div class="form-group">
                         <label for="userPassword">Password</label>
                         <i class="fa fa-info-circle hover-target" aria-hidden="true"></i>
-                        <input type="password" class="form-control" id="userPassword" aria-describedby="userPasswordHelp" <?php if ($phpef->auth->getAuth()['Authenticated'] && $phpef->auth->getAuth()['Type'] == 'SSO') { echo 'disabled'; } ?> >
+                        <input type="password" class="form-control" id="userPassword" aria-describedby="userPasswordHelp" <?php if ($phpef->auth->getAuth()['Authenticated'] && $phpef->auth->getAuth()['Type'] != 'Local') { echo 'disabled'; } ?> >
                         <small id="userPasswordHelp" class="form-text text-muted">Enter the updated password.</small>
                       </div>
                       <div class="form-group">
                         <label for="userPassword2">Verify Password</label>
-                        <input type="password" class="form-control" id="userPassword2" aria-describedby="userPassword2Help" <?php if ($phpef->auth->getAuth()['Authenticated'] && $phpef->auth->getAuth()['Type'] == 'SSO') { echo 'disabled'; } ?> >
+                        <input type="password" class="form-control" id="userPassword2" aria-describedby="userPassword2Help" <?php if ($phpef->auth->getAuth()['Authenticated'] && $phpef->auth->getAuth()['Type'] != 'Local') { echo 'disabled'; } ?> >
                         <small id="userPassword2Help" class="form-text text-muted">Enter the updated password again.</small>
                       </div>
                       <div id="popover" class="popover" role="alert">
@@ -491,6 +561,78 @@ foreach ($navLinks as $navLink) {
     }).fail(function( data, status ) {
       toast("Error","","Unknown API Error","danger");
     });
+  }
+
+  function registerMFA() {
+    var mfaType = $("#mfaType").find(":selected").val();
+    queryAPI("POST","/api/auth/mfa/"+mfaType+"/register").done(function(data) {
+      if (data['result'] == "Success") {
+
+        switch(mfaType) {
+          case 'totp':
+            // Get & Build QR Code
+            var qrCodeBase64String = "data:image/png;base64,"+data['data'];
+            var qrCodeImage = $("#qrCodeImage");
+            qrCodeImage.attr('src',qrCodeBase64String);
+
+            // Build the verification step
+            var mfaVerification = $("#mfaVerification");
+            mfaVerification.append(`<div class="row"><div class="form-group col-md-8"><label for="totpVerify">Enter Verification Code</label><input class="form-control" id="totpVerify" placeholder="123456"></input></div><div class="col-md-4 mt-4"><button class="btn btn-success w-100" onclick='verifyMFA("totp");'>Verify</button></div></div>`);
+            break;
+          default:
+            toast('Error',"",'Invalid MFA Method','danger','30000');
+            break;
+        }
+        $("#mfaSetup").css('display','flex')
+      } else {
+        toast(data['result'],"",data['message'],'danger','30000');
+      }
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+      toast(textStatus,"","Error: "+jqXHR.status+": "+errorThrown,"danger");
+    });;
+  }
+
+  function verifyMFA(mfaType) {
+    switch(mfaType) {
+      case 'totp':
+        var verificationCode = $("#totpVerify").val();
+        queryAPI("POST","/api/auth/mfa/"+mfaType+"/register/verify",{"totp_code": verificationCode}).done(function(data) {
+          if (data['result'] == "Success") {
+            queryAPI("GET","/api/auth/mfa/settings").done(function(data) {
+              if (data['result'] == "Success" && data['data'][`${mfaType}_verified`]) {
+                $("#mfaCard").append(`
+                <div class="alert alert-info text-center" role="alert" id="mfaAlert">
+                  <h3>${mfaType.toUpperCase()}</h3>
+                  <span>Multifactor Authentication is configured.</span>
+                  <button class="btn btn-danger mt-2" onclick="reconfigureMFA();">Reconfigure</button>
+                </div>
+                `);
+                toast('Successful','','TOTP Successfully Verified','success');
+              } else {
+                toast('Warning','','TOTP was successfully verified, but the verification status failed to update','warning');
+              }
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+              toast(textStatus,"","Error: "+jqXHR.status+": "+errorThrown,"danger");
+            });
+            $("#mfaSetup,#mfaRegister").css('display','none');
+            $("#mfaVerification").css('display','none').html('');
+            $("#qrCodeImage").css('display','none').attr('src','');
+          } else {
+            toast(data['result'],"",data['message'],'danger','30000');
+          }
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+          toast(textStatus,"","Error: "+jqXHR.status+": "+errorThrown,"danger");
+        });
+        break;
+      default:
+        toast('Error',"",'Invalid MFA Method','danger','30000');
+        break;
+    }
+  }
+
+  function reconfigureMFA() {
+    $("#mfaAlert").remove();
+    $("#mfaRegister").css('display','flex');
   }
 
   function setFontSize(fontsize) {

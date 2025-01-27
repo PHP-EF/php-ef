@@ -161,38 +161,75 @@ function login() {
       un: $('#un').val(),
       pw: $('#pw').val()
   }).done(function( data, status ) {
-    if (data['result'] == 'Error') {
-      toast("Authentication Error","",data['message'],"danger","30000");
-    } else if (data['result'] == 'Expired') {
-      toast("Password expired","","You must reset your password before logging in.","danger","30000");
-      var un = $('#un').val()
-      $('.login-wrap').html('');
-      $('.login-wrap').html(`<h2>Password Reset</h2>
-      <div class="form">
-        <input type="text" value="`+un+`" name="un" id="un"/>
-        <input type="password" placeholder="Current Password" name="cpw" id="cpw"/>
-        <input type="password" placeholder="New Password" name="pw" id="pw"/>
-        <input type="password" placeholder="New Password Again" name="pw2" id="pw2"/>
-        <button id="reset" class="btn btn-success reset"> Reset </button>
-      </div>`);
-      $('#reset').click(function() {
-        reset();
-      });
-      $('#un,#cpw,#pw,#pw2').keypress(function(event) {
-        if (event.which == 13) {
-          reset();
-        }
-      });
-      $('#pw, #pw2').on('change', function() {
-        validatePW();
-      });
-    } else if (data['result'] == 'Success') {
+    switch(data['result']) {
+      case 'Success':
         toast("Success!","","Successfully logged in.","success","30000");
         location = "<?php echo $RedirectUri; ?>"
+        break;
+      case 'Error':
+        toast("Authentication Error","",data['message'],"danger","30000");
+        break;
+      case 'Expired':
+        toast("Password expired","","You must reset your password before logging in.","warning","30000");
+        var un = $('#un').val()
+        $('.login-wrap').html('');
+        $('.login-wrap').html(`<h2>Password Reset</h2>
+        <div class="form">
+          <input type="text" value="`+un+`" name="un" id="un"/>
+          <input type="password" placeholder="Current Password" name="cpw" id="cpw"/>
+          <input type="password" placeholder="New Password" name="pw" id="pw"/>
+          <input type="password" placeholder="New Password Again" name="pw2" id="pw2"/>
+          <button id="reset" class="btn btn-success reset"> Reset </button>
+        </div>`);
+        $('#reset').click(function() {
+          reset();
+        });
+        $('#un,#cpw,#pw,#pw2').keypress(function(event) {
+          if (event.which == 13) {
+            reset();
+          }
+        });
+        $('#pw, #pw2').on('change', function() {
+          validatePW();
+        });
+        break;
+      case '2FA':
+        toast("2FA Required","","You must authenticate using your second factor.","info","30000");
+        switch(data['data']['type']) {
+          case 'totp':
+            $('.login-wrap').html('');
+            $('.login-wrap').html(`<h2>2FA</h2>
+            <div class="form">
+              <input type="text" name="totpCode" id="totpCode" placeholder="123456"/>
+              <button onclick='submit2FA("totp","${data['data']['jwt']}")' class="btn btn-success 2fa"> Verify </button>
+            </div>`);
+            break;
+          default:
+            toast("Error","","Unknown 2FA Method Returned","danger","30000");
+        }
+        break;
+      default:
+        toast("API Error","",data['message'],"danger","30000");
+        break;
     }
   }).fail(function( data, status ) {
       toast("Authentication Error","","Unknown Authentication Error","danger","30000");
   })
+}
+
+function submit2FA(mfaType,jwt) {
+  var verificationCode = $("#totpCode").val();
+  queryAPI('POST',"/api/auth/mfa/"+mfaType+"/verify",{"totp_code": verificationCode, "jwt": jwt}).done(function(data) {
+    if (data['result'] == "Success") {
+      toast(data['result'],"",data['message'],'success','3000');
+      toast("Success!","","Successfully logged in.","success","30000");
+      location = "<?php echo $RedirectUri; ?>"
+    } else {
+      toast(data['result'],"",data['message'],'danger','30000');
+    }
+  }).fail(function(jqXHR, textStatus, errorThrown) {
+    toast(textStatus,"","Error: "+jqXHR.status+": "+errorThrown,"danger");
+  });
 }
 
 function reset() {

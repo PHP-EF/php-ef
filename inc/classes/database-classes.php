@@ -11,6 +11,7 @@ class db {
       $this->logging = $core->logging;
       $this->version = $version;
       $this->createOptionsTable();
+      $this->createCronTable();
     }
   
     private function createOptionsTable() {
@@ -23,6 +24,23 @@ class db {
           Value TEXT
         )")) {
           $this->db->exec('INSERT INTO options (key,value) VALUES ("dbVersion","'.$this->version.'");');
+        };
+      }
+    }
+
+    private function createCronTable() {
+      // Create cron table if it doesn't exist
+      $dbHelper = new dbHelper($this->db);
+      if (!$dbHelper->tableExists("cron")) {
+        if ($this->db->query("CREATE TABLE cron (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL UNIQUE,
+          source TEXT NOT NULL,
+          status TEXT NOT NULL,
+          message TEXT,
+          last_run TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          next_run TIMESTAMP
+          )")) {
         };
       }
     }
@@ -183,7 +201,14 @@ class dbHelper {
       ],
       '0.7.8' => [
         "ALTER TABLE pages ADD COLUMN isDefault BOOLEAN;"
-      ]
+      ],
+      '0.7.9' => [
+        "ALTER TABLE users ADD COLUMN multifactor_enabled BOOLEAN;",
+        "ALTER TABLE users ADD COLUMN multifactor_type TEXT;",
+        "ALTER TABLE users ADD COLUMN totp_secret TEXT;",
+        "ALTER TABLE users ADD COLUMN totp_verified BOOLEAN;"
+      ],
+      '0.8.0' => []
     ];
   }
 

@@ -3,7 +3,9 @@ class phpef {
     // Traits //
     Use Common,
     Images,
-    Settings;
+    Settings,
+    Cron,
+    Style;
 
     private $configFilePath;
     private $dbPath;
@@ -44,7 +46,7 @@ class phpef {
     }
 
     public function getVersion() {
-        return ['0.7.8'];
+        return ['0.7.9'];
     }
 
     // Initiate Database Migration if required

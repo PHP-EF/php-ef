@@ -1,15 +1,34 @@
 <?php
 trait Settings {
-
     public function settingsCustomisation() {
         return array(
             'Top Bar' => array(
                 $this->settingsOption('input', 'Styling[websiteTitle]', ['label' => 'Website Title']),
-                $this->settingsOption('blank'),
+                $this->settingsOption('input', 'Styling[websiteTitleFontSize]', ['label' => 'Font size when using title for logo', 'value' => '42px', 'width' => '3']),
+                $this->settingsOption('checkbox', 'Styling[websiteTitleNotLogo]', ['label' => 'Use website title instead of logo', 'width' => '3']),
                 $this->settingsOption('input', 'Styling[logo-sm][Image]', ['label' => 'Logo Image (Small)']),
                 $this->settingsOption('input', 'Styling[logo-sm][CSS]', ['label' => 'Logo CSS (Small)']),
                 $this->settingsOption('input', 'Styling[logo-lg][Image]', ['label' => 'Logo Image (Large)']),
-                $this->settingsOption('input', 'Styling[logo-lg][CSS]', ['label' => 'Logo Image (CSS)'])
+                $this->settingsOption('input', 'Styling[logo-lg][CSS]', ['label' => 'Logo Image (CSS)']),
+                $this->settingsOption('hr'),
+                $this->settingsOption('title','navbarStyleTitle',['text' => 'Top Bar Style']),
+                $this->settingsOption('colourpicker', 'Styling[navbar][mainColour]', ['label' => 'Top Bar Colour', 'width' => '4', 'value' => '#11101d']),
+                $this->settingsOption('colourpicker', 'Styling[navbar][textColour]', ['label' => 'Top Bar Text Colour', 'width' => '4', 'value' => '#FFFFFF']),
+                $this->settingsOption('colourpicker', 'Styling[navbar][submenuColour]', ['label' => 'Top Bar Submenu Colour', 'width' => '4', 'value' => '#1d1b31'])
+
+            ),
+            'Side Bar' => array(
+                $this->settingsOption('title','sidebarOptionsTitle',['text' => 'Sidebar Options']),
+                $this->settingsOption('checkbox', 'Styling[sidebar][expandOnHover]', ['label' => 'Expand sidebar on hover']),
+                $this->settingsOption('checkbox', 'Styling[sidebar][collapseByDefault]', ['label' => 'Collapse sidebar by default']),
+                $this->settingsOption('hr'),
+                $this->settingsOption('title','sidebarStyleTitle',['text' => 'Sidebar Style']),
+                $this->settingsOption('colourpicker', 'Styling[sidebar][mainColour]', ['label' => 'Sidebar Colour', 'width' => '3', 'value' => '#11101d']),
+                $this->settingsOption('colourpicker', 'Styling[sidebar][textColour]', ['label' => 'Sidebar Text Colour', 'width' => '3', 'value' => '#FFFFFF']),
+                $this->settingsOption('colourpicker', 'Styling[sidebar][activeColour]', ['label' => 'Sidebar Active Link Colour', 'width' => '3', 'value' => '#30d22a']),
+                $this->settingsOption('colourpicker', 'Styling[sidebar][submenuColour]', ['label' => 'Sidebar Submenu Colour', 'width' => '3', 'value' => '#1d1b31']),
+                $this->settingsOption('colourpicker', 'Styling[sidebar][hoverColour]', ['label' => 'Sidebar Hover Colour', 'width' => '3', 'value' => '#1d1b31']),
+                $this->settingsOption('colourpicker', 'Styling[sidebar][footerColour]', ['label' => 'Sidebar Footer Colour', 'width' => '3', 'value' => '#11101d'])
             ),
             'Favicon' => array(
                 $this->settingsOption('input', 'Styling[favicon][Image]', ['label' => 'Favicon'])
@@ -17,6 +36,9 @@ trait Settings {
             'Homepage' => array(
 				$this->settingsOption('code-editor', 'Styling[html][homepage]', ['label' => 'Homepage HTML', 'mode' => 'html', 'value' => $this->config->get('Styling', 'html')['homepage']]),
                 $this->settingsOption('code-editor', 'Styling[html][about]', ['label' => 'About HTML', 'mode' => 'html', 'value' => $this->config->get('Styling', 'html')['about']])
+            ),
+            'Custom CSS' => array(
+				$this->settingsOption('code-editor', 'Styling[css][custom]', ['label' => 'Custom CSS', 'mode' => 'css', 'value' => $this->config->get('Styling', 'css')['custom']]),
             )
 	    );
     }
@@ -24,13 +46,16 @@ trait Settings {
     public function settingsGeneral() {
         $AuthSettings = array(
             "LDAP Configuration" => array(
+                $this->settingsOption('title', 'ldapGeneralSettings', ['text' => 'General']),
+                $this->settingsOption('checkbox', 'LDAP[enabled]', ['label' => 'Enable LDAP']),
+                $this->settingsOption('checkbox', 'LDAP[AutoCreateUsers]', ['label' => 'Auto-Create Users']),
+                $this->settingsOption('hr'),
+                $this->settingsOption('title', 'ldapConnectionSettings', ['text' => 'LDAP Connection']),
                 $this->settingsOption('input', 'LDAP[ldap_server]', ['label' => 'LDAP Server', 'placeholder' => 'ldap://fqdn:389']),
                 $this->settingsOption('input', 'LDAP[service_dn]', ['label' => 'LDAP Bind Username', 'placeholder' => 'cn=read-only-admin,dc=example,dc=com']),
                 $this->settingsOption('password', 'LDAP[service_password]', ['label' => 'LDAP Bind Password', 'placeholder' => '*********']),
                 $this->settingsOption('input', 'LDAP[user_dn]', ['label' => 'User DN', 'placeholder' => 'dc=example,dc=com']),
                 $this->settingsOption('input', 'LDAP[base_dn]', ['label' => 'Base DN', 'placeholder' => 'dc=example,dc=com']),
-                $this->settingsOption('checkbox', 'LDAP[enabled]', ['label' => 'Enable LDAP']),
-                $this->settingsOption('checkbox', 'LDAP[AutoCreateUsers]', ['label' => 'Auto-Create Users']),
                 $this->settingsOption('hr'),
                 $this->settingsOption('title', 'ldapUserAttributeMapping', ['text' => 'User Attribute Mapping']),
                 $this->settingsOption('input', 'LDAP[attributes][Username]', ['label' => 'Username Attribute', 'placeholder' => 'sAMAccountName']),
@@ -70,23 +95,67 @@ trait Settings {
             )
         );
 
+        $cronJobTableAttributes = [
+            'url' => '/api/cron/jobs',
+            'data-field' => 'data',
+            'toggle' => 'table',
+            'sort-name' => 'last_run',
+            'sort-order' => 'asc',
+            'response-handler' => 'responseHandler',
+        ];
+    
+        $cronJobTableColumns = [
+            [
+                'field' => 'source',
+                'title' => 'Source'
+            ],
+            [
+                'field' => 'name',
+                'title' => 'Name'
+            ],
+            [
+                'field' => 'status',
+                'title' => 'Status'
+            ],
+            [
+                'field' => 'message',
+                'title' => 'Message'
+            ],
+            [
+                'field' => 'last_run',
+                'title' => 'Last Ran'
+            ]
+        ];
+
         return array(
-            'System' => array(
+            'Logging' => array(
                 $this->settingsOption('input', 'System[logfilename]', ['label' => 'Log File Name']),
                 $this->settingsOption('input', 'System[logdirectory]', ['label' => 'Log Directory']),
                 $this->settingsOption('select', 'System[loglevel]', ['label' => 'Log Level', 'options' => array(array("name" => 'Debug', "value" => 'Debug'),array("name" => 'Info', "value" => 'Info'),array("name" => 'Warning', "value" => 'Warning'))]),
-                $this->settingsOption('input', 'System[logretention]', ['label' => 'Log Retention']),
-                $this->settingsOption('input', 'System[CURL-Timeout]', ['label' => 'CURL Timeout']),
-                $this->settingsOption('input', 'System[CURL-ConnectTimeout]', ['label' => 'CURL Timeout on Connect'])
+                $this->settingsOption('input', 'System[logretention]', ['label' => 'Log Retention'])
             ),
             'Authentication' => array(
-                $this->settingsOption('accordion', 'AuthProviders', ['id' => 'AuthProviders', 'label' => 'Authentication Providers', 'options' => $AuthSettings, 'override' => '12']),
+                $this->settingsOption('accordion', 'AuthProviders', ['id' => 'AuthProviders', 'label' => 'Authentication Providers', 'options' => $AuthSettings, 'width' => '12'])
             ),
             'Security' => array(
                 $this->settingsOption('password-alt', 'Security[salt]', ['label' => 'Salt']),
-                $this->settingsOption('input', 'Security[Headers][X-Frame-Options]', ['label' => 'X-Frame-Options', 'placeholder' => 'SAMEORIGIN']),
-                $this->settingsOption('input', 'Security[Headers][CSP][Frame-Source]', ['label' => 'Content Security Policy: Frame Source', 'placeholder' => 'self']),
-                $this->settingsOption('input', 'Security[Headers][CSP][Connect-Source]', ['label' => 'Content Security Policy: Connect Source', 'placeholder' => 'self']),
+                $this->settingsOption('input', 'Security[Headers][X-Frame-Options]', ['label' => 'X-Frame-Options', 'placeholder' => 'SAMEORIGIN', 'help' => 'It is strongly advised you do not modify this unless you know what you are doing.']),
+                $this->settingsOption('input', 'Security[Headers][CSP][Frame-Source]', ['label' => 'Content Security Policy: Frame Source', 'placeholder' => 'self', 'help' => 'It is strongly advised you do not modify this unless you know what you are doing.']),
+                $this->settingsOption('input', 'Security[Headers][CSP][Connect-Source]', ['label' => 'Content Security Policy: Connect Source', 'placeholder' => 'self', 'help' => 'It is strongly advised you do not modify this unless you know what you are doing.']),
+            ),
+            'Backup' => array(
+                $this->settingsOption('html', 'backupNotice', ['html' => '<div class="alert alert-warning">WORK IN PROGRESS</div>', 'width' => '12']),
+                $this->settingsOption('cron', 'System[backup][schedule]', ['label' => 'Backup Schedule', 'placeholder' => '0 2 * * *']),
+                $this->settingsOption('enable', 'System[backup][enabled]', ['label' => 'Enable scheduled backups']),
+                $this->settingsOption('enable', 'System[backup][includePluginData]', ['label' => 'Include plugin data in backups']),
+                $this->settingsOption('enable', 'System[backup][includeImages]', ['label' => 'Include custom images in backups']),
+            ),
+            'Other' => array(
+                $this->settingsOption('input', 'System[CURL-Timeout]', ['label' => 'CURL Timeout', 'help' => 'This can be used to extend the CURL timeout for upstream API calls, if they\'re prone to timing out. Use with caution.']),
+                $this->settingsOption('input', 'System[CURL-ConnectTimeout]', ['label' => 'CURL Timeout on Connect'])
+            ),
+            'Cron Status' => array(
+                $this->settingsOption('bootstrap-table', 'cronJobTable', ['id' => 'cronJobTable', 'columns' => $cronJobTableColumns, 'dataAttributes' => $cronJobTableAttributes, 'width' => '12']),
             )
 	    );
     }
@@ -198,7 +267,7 @@ trait Settings {
 
         return array(
             'Manage' => array(
-                $this->settingsOption('bootstrap-table', 'PluginTable', ['id' => 'pluginsTable', 'columns' => $PluginsTableColumns, 'dataAttributes' => $PluginsTableAttributes, 'override' => '12']),
+                $this->settingsOption('bootstrap-table', 'PluginTable', ['id' => 'pluginsTable', 'columns' => $PluginsTableColumns, 'dataAttributes' => $PluginsTableAttributes, 'width' => '12']),
             ),
             'Marketplace' => array(
                 $this->settingsOption('enable', 'PluginMarketplaceEnabled', ['label' => 'Enable Plugin Marketplace'])
@@ -276,10 +345,10 @@ trait Settings {
 
         return array(
             'Tabs' => array(
-                $this->settingsOption('bootstrap-table', 'dashboardsTable', ['id' => 'dashboardsTable', 'columns' => $DashboardsTableColumns, 'dataAttributes' => $DashboardsTableAttributes, 'override' => '12']),
+                $this->settingsOption('bootstrap-table', 'dashboardsTable', ['id' => 'dashboardsTable', 'columns' => $DashboardsTableColumns, 'dataAttributes' => $DashboardsTableAttributes, 'width' => '12']),
             ),
             'Widgets' => array(
-                $this->settingsOption('bootstrap-table', 'widgetsTable', ['id' => 'widgetsTable', 'columns' => $WidgetTableColumns, 'dataAttributes' => $WidgetTableAttributes, 'override' => '12']),
+                $this->settingsOption('bootstrap-table', 'widgetsTable', ['id' => 'widgetsTable', 'columns' => $WidgetTableColumns, 'dataAttributes' => $WidgetTableAttributes, 'width' => '12']),
             ),
 	    );
     }
@@ -306,7 +375,7 @@ trait Settings {
                 $this->settingsOption('enable', 'Enabled')
             ),
             'Widgets' => array(
-                $this->settingsOption('selectwithtable', 'Widgets', ['label' => 'Enabled Widgets', 'options' => $WidgetList, 'class' => 'widgetSelect select-multiple', 'override' => '12', 'id' => 'widgetSelect'])
+                $this->settingsOption('selectwithtable', 'Widgets', ['label' => 'Enabled Widgets', 'options' => $WidgetList, 'class' => 'widgetSelect select-multiple', 'width' => '12', 'id' => 'widgetSelect'])
             )
 	    );
     }
@@ -461,13 +530,13 @@ trait Settings {
 
         return array(
             'Users' => array(
-                $this->settingsOption('bootstrap-table', 'usersTable', ['id' => 'usersTable', 'columns' => $UsersTableColumns, 'dataAttributes' => $UsersTableAttributes, 'override' => '12']),
+                $this->settingsOption('bootstrap-table', 'usersTable', ['id' => 'usersTable', 'columns' => $UsersTableColumns, 'dataAttributes' => $UsersTableAttributes, 'width' => '12']),
             ),
             'Groups' => array(
-                $this->settingsOption('bootstrap-table', 'groupsTable', ['id' => 'groupsTable', 'columns' => $GroupsTableColumns, 'dataAttributes' => $GroupsTableAttributes, 'override' => '12']),
+                $this->settingsOption('bootstrap-table', 'groupsTable', ['id' => 'groupsTable', 'columns' => $GroupsTableColumns, 'dataAttributes' => $GroupsTableAttributes, 'width' => '12']),
             ),
             'Roles' => array(
-                $this->settingsOption('bootstrap-table', 'rolesTable', ['id' => 'rolesTable', 'columns' => $RolesTableColumns, 'dataAttributes' => $RolesTableAttributes, 'override' => '12']),
+                $this->settingsOption('bootstrap-table', 'rolesTable', ['id' => 'rolesTable', 'columns' => $RolesTableColumns, 'dataAttributes' => $RolesTableAttributes, 'width' => '12']),
             ),
 	    );
     }
@@ -491,6 +560,12 @@ trait Settings {
             )
         );
 
+        $MFASettings = array(
+            "Multi Factor Authentication" => array(
+                $this->settingsOption('html', 'mfaUserSettings', ['html' => '<div id="mfaUserSettings"></div>', 'width' => '12'])
+            )
+        );
+
         return array(
             'General' => array(
                 $this->settingsOption('input', 'userUsername', ['label' => 'Username']),
@@ -498,8 +573,9 @@ trait Settings {
                 $this->settingsOption('input', 'userLastName', ['label' => 'Surname']),
                 $this->settingsOption('input', 'userEmail', ['label' => 'Email']),
                 $this->settingsOption('hr'),
-                $this->settingsOption('blank'),
-                $this->settingsOption('accordion', 'PasswordReset', ['id' => 'PasswordReset', 'options' => $PasswordSettings, 'override' => '12']),
+                $this->settingsOption('accordion', 'PasswordReset', ['id' => 'PasswordReset', 'options' => $PasswordSettings, 'width' => '12']),
+                $this->settingsOption('hr'),
+                $this->settingsOption('accordion', 'MFASettings', ['id' => 'MFASettings', 'options' => $MFASettings, 'width' => '12']),
                 $this->settingsOption('hr'),
                 $this->settingsOption('input', 'userType', ['label' => 'Type', 'attr' => 'disabled readonly']),
                 $this->settingsOption('input', 'userLastLogin', ['label' => 'Last Login', 'attr' => 'disabled readonly']),
@@ -508,7 +584,7 @@ trait Settings {
                 $this->settingsOption('input', 'userId', ['attr' => 'hidden'])
             ),
             'Groups' => array(
-                $this->settingsOption('listgroup', 'groupList', ['items' => $GroupItems, 'override' => '12'])
+                $this->settingsOption('listgroup', 'groupList', ['items' => $GroupItems, 'width' => '12'])
             )
         );
     }
@@ -547,11 +623,11 @@ trait Settings {
 
         return array(
             "General" => array(
-                $this->settingsOption('input', 'groupName', ['label' => 'Group Name', 'override' => '4']),
-                $this->settingsOption('input', 'groupDescription', ['label' => 'Group Description', 'override' => '8']),
+                $this->settingsOption('input', 'groupName', ['label' => 'Group Name', 'width' => '4']),
+                $this->settingsOption('input', 'groupDescription', ['label' => 'Group Description', 'width' => '8']),
                 $this->settingsOption('hr'),
-                $this->settingsOption('html', 'groupRolesSelectTitle', ['html' => '<h4>Group Roles</h4><p>Enable or Disable the following roles to provide granular control to specific areas of PHP Extensible Framework.</p>', 'override' => '12']),
-                $this->settingsOption('listgroup', 'roleList', ['items' => $RoleItems, 'override' => '12']),
+                $this->settingsOption('html', 'groupRolesSelectTitle', ['html' => '<h4>Group Roles</h4><p>Enable or Disable the following roles to provide granular control to specific areas of PHP Extensible Framework.</p>', 'width' => '12']),
+                $this->settingsOption('listgroup', 'roleList', ['items' => $RoleItems, 'width' => '12']),
                 $this->settingsOption('input', 'groupId', ['attr' => 'hidden'])
             )
         );
@@ -560,8 +636,8 @@ trait Settings {
     public function settingsRole() {
         return array(
             "General" => array(
-                $this->settingsOption('input', 'roleName', ['label' => 'Role Name', 'override' => '12']),
-                $this->settingsOption('input', 'roleDescription', ['label' => 'Role Description', 'override' => '12']),
+                $this->settingsOption('input', 'roleName', ['label' => 'Role Name', 'width' => '12']),
+                $this->settingsOption('input', 'roleDescription', ['label' => 'Role Description', 'width' => '12']),
                 $this->settingsOption('input', 'roleId', ['attr' => 'hidden'])
             )
         );
@@ -642,7 +718,7 @@ trait Settings {
 
         return array(
             'Manage' => array(
-                $this->settingsOption('bootstrap-table', 'combinedTable', ['id' => 'combinedTable', 'columns' => $CombinedTableColumns, 'dataAttributes' => $CombinedTableAttributes, 'events' => $CombinedTableEvents, 'override' => '12']),
+                $this->settingsOption('bootstrap-table', 'combinedTable', ['id' => 'combinedTable', 'columns' => $CombinedTableColumns, 'dataAttributes' => $CombinedTableAttributes, 'events' => $CombinedTableEvents, 'width' => '12']),
             )
 	    );
     }
@@ -658,7 +734,7 @@ trait Settings {
         $AvailablePagesSelect = array_merge($AppendNone,array_map(function($item) {
             $Prefix = $item['plugin'] ? 'Plugin: ' : '';
             $PageName = $Prefix ? $Prefix . $item['plugin'] . ' / ' . $item['filename'] : $item['directory'] . ' / ' . $item['filename'];
-            $PageValue = $Prefix ? 'plugin/' . $item['directory'] . '/' . $item['filename'] : $item['directory'] . '/' . $item['filename'];
+            $PageValue = $Prefix ? 'plugin/' . $item['plugin'] . '/' . $item['filename'] : $item['directory'] . '/' . $item['filename'];
             return [
                 "name" => $PageName,
                 "value" => $PageValue
@@ -674,19 +750,19 @@ trait Settings {
         
         return array(
             "General" => array(
-                $this->settingsOption('select', 'pageType', ['label' => 'Type', 'options' => array(array("name" => 'Link', "value" => 'Link'),array("name" => 'Menu', "value" => 'Menu'))]),
-                $this->settingsOption('select', 'pageLinkType', ['label' => 'Link Type', 'options' => array(array("name" => 'Native', "value" => 'Native'),array("name" => 'iFrame', "value" => 'iFrame'),array("name" => 'New Window', "value" => 'NewWindow')), 'noRow' => 'true']),
-                $this->settingsOption('input', 'pageName', ['label' => 'Name', 'noRow' => 'true']),
-                $this->settingsOption('input', 'pageTitle', ['label' => 'Title', 'noRow' => 'true']),
-                $this->settingsOption('select', 'pageStub', ['label' => 'Page', 'options' => $AvailablePagesSelect, 'noRow' => 'true']),
-                $this->settingsOption('input', 'pageUrl', ['label' => 'URL', 'noRow' => 'true']),
-                $this->settingsOption('auth', 'pageRole', ['label' => 'Role', 'noRow' => 'true']),
-                $this->settingsOption('select', 'pageMenu', ['label' => 'Menu', 'noRow' => 'true', 'options' => $AvailableMenusSelect]),
-                $this->settingsOption('select', 'pageSubMenu', ['label' => 'Sub Menu', 'noRow' => 'true', 'options' => $AppendNone]),
+                $this->settingsOption('select', 'pageType', ['label' => 'Type', 'options' => array(array("name" => 'Link', "value" => 'Link'),array("name" => 'Menu', "value" => 'Menu')), 'help' => 'The type of page item to create.<br><b>Link:</b> A navigation link<br><b>Menu:</b> A menu or submenu']),
+                $this->settingsOption('select', 'pageLinkType', ['label' => 'Link Type', 'options' => array(array("name" => 'Native', "value" => 'Native'),array("name" => 'iFrame', "value" => 'iFrame'),array("name" => 'New Window', "value" => 'NewWindow')), 'help' => 'The type of link to create.<br><b>Native:</b> A native webpage, included within the framework or installed via a plugin.<br><b>iFrame:</b> Used to embed an external or proxied website.<br><b>New Window:</b> Used to launch an external website in a new window.']),
+                $this->settingsOption('input', 'pageName', ['label' => 'Name', 'help' => 'The Link or Menu name to be displayed in the sidebar.']),
+                $this->settingsOption('input', 'pageTitle', ['label' => 'Title', 'help' => 'The Link or Menu title to be displayed in the top bar.']),
+                $this->settingsOption('select', 'pageStub', ['label' => 'Page', 'options' => $AvailablePagesSelect, 'help' => 'The Native page to display when selecting this link.']),
+                $this->settingsOption('input', 'pageUrl', ['label' => 'URL', 'help' => 'The external or proxied URL to display or launch when selecting this link.']),
+                $this->settingsOption('auth', 'pageRole', ['label' => 'Role', 'help' => 'The role required to view and access this link.']),
+                $this->settingsOption('select', 'pageMenu', ['label' => 'Menu', 'options' => $AvailableMenusSelect, 'help' => 'The menu this link or submenu is to be placed in.']),
+                $this->settingsOption('select', 'pageSubMenu', ['label' => 'Sub Menu', 'options' => $AppendNone, 'help' => 'The submenu to place the link in.']),
                 $this->settingsOption('hr'),
-                $this->settingsOption('input', 'pageIcon', ['label' => 'Icon']),
-                $this->settingsOption('select', 'pageImage', ['label' => 'Image', 'attr' => '', 'options' => $this->getAllImagesForSelect()]),
-                $this->settingsOption('checkbox', 'pageDefault', ['label' => 'Default Page']),
+                $this->settingsOption('input', 'pageIcon', ['label' => 'Icon', 'help' => 'The fontawesome or bootstrap icon to use for this link or menu.']),
+                $this->settingsOption('select', 'pageImage', ['label' => 'Image', 'attr' => '', 'options' => $this->getAllImagesForSelect(), 'help' => 'The image to use for this link or menu.']),
+                $this->settingsOption('checkbox', 'pageDefault', ['label' => 'Default Page', 'help' => 'Set this link as the default page.']),
                 $this->settingsOption('input', 'pageId', ['attr' => 'hidden'])
             )
         );
@@ -742,7 +818,7 @@ trait Settings {
 
         return array(
             'News' => array(
-                $this->settingsOption('bootstrap-table', 'newsTable', ['id' => 'newsTable', 'columns' => $NewsTableColumns, 'dataAttributes' => $NewsTableAttributes, 'override' => '12']),
+                $this->settingsOption('bootstrap-table', 'newsTable', ['id' => 'newsTable', 'columns' => $NewsTableColumns, 'dataAttributes' => $NewsTableAttributes, 'width' => '12']),
             ),
             'SMTP' => array(
 
