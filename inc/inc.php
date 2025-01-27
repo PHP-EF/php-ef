@@ -135,7 +135,8 @@ if (!(isset($SkipCSS))) {
     ';
 
     if(!isset($_COOKIE["theme"])) {
-      echo "<body>";
+      $defaultTheme = $phpef->config->get('Styling','theme')['default'] ?? 'dark';
+      echo '<body class="'.$defaultTheme.'-theme">';
     } else {
       if ($_COOKIE["theme"] == "dark") {
         echo '<body class="dark-theme">';
