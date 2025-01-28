@@ -175,7 +175,7 @@ trait Settings {
                 $this->settingsOption('input', 'System[logging][directory]', ['label' => 'Log Directory', 'placeholder' => $this->logging->defaultLogPath]),
                 $this->settingsOption('select', 'System[logging][level]', ['label' => 'Log Level', 'options' => array(array("name" => 'Debug', "value" => 'Debug'),array("name" => 'Info', "value" => 'Info'),array("name" => 'Warning', "value" => 'Warning')), 'value' => 'Info']),
                 $this->settingsOption('number', 'System[logging][retention]', ['label' => 'Log Retention', 'placeholder' => '30']),
-                $this->settingsOption('cron', 'System[logging[cleanupSchedule]', ['label' => 'Log Cleanup Schedule', 'placeholder' => '*/60 * * * *']),
+                $this->settingsOption('cron', 'System[logging][cleanupSchedule]', ['label' => 'Log Cleanup Schedule', 'placeholder' => '0 4 * * *']),
             ),
             'Authentication' => array(
                 $this->settingsOption('accordion', 'AuthProviders', ['id' => 'AuthProviders', 'label' => 'Authentication Providers', 'options' => $AuthSettings, 'width' => '12'])

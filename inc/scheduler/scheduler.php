@@ -7,7 +7,7 @@ use GO\Scheduler;
 $scheduler = new Scheduler();
 
 // Log Cleanup
-$LogCleanupSchedule = !empty($phpef->config->get('System','logcleanup')) ? $phpef->config->get('System','logcleanup') : '*/60 * * * *';
+$LogCleanupSchedule = !empty($phpef->config->get('System','logging')['cleanupSchedule']) ? $phpef->config->get('System','logging')['cleanupSchedule'] : '0 4 * * *';
 $scheduler->php(__DIR__.'/jobs/log-cleanup.php')->at($LogCleanupSchedule);
 
 // Scheduled Backups
