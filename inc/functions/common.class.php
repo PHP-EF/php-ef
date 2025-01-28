@@ -140,6 +140,13 @@ trait Common {
                     'label' => 'Item Limit',
                 ];
                 break;
+            case 'refresh':
+                $settingMerge = [
+                    'type' => 'select',
+                    'label' => 'Refresh Seconds',
+                    'options' => $this->timeOptions()
+                ];
+                break;
             case 'blank':
                 $settingMerge = [
                     'type' => 'blank',
@@ -315,5 +322,51 @@ trait Common {
 		} else {
 			return $ipaddress;
 		}
+	}
+
+	public function timeOptions()
+	{
+		return array(
+			array(
+				'name' => '5s',
+				'value' => '5000'
+			),
+			array(
+				'name' => '10s',
+				'value' => '10000'
+			),
+			array(
+				'name' => '15s',
+				'value' => '15000'
+			),
+			array(
+				'name' => '30s',
+				'value' => '30000'
+			),
+			array(
+				'name' => '60 [1 Minute]',
+				'value' => '60000'
+			),
+			array(
+				'name' => '300 [5 Minutes]',
+				'value' => '300000'
+			),
+			array(
+				'name' => '600 [10 Minutes]',
+				'value' => '600000'
+			),
+			array(
+				'name' => '900 [15 Minutes]',
+				'value' => '900000'
+			),
+			array(
+				'name' => '1800 [30 Minutes]',
+				'value' => '1800000'
+			),
+			array(
+				'name' => '3600 [1 Hour]',
+				'value' => '3600000'
+			),
+		);
 	}
 }

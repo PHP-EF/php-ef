@@ -13,8 +13,10 @@ class Config {
   private $configFile;
   private $api;
   private $config;
+  public $configDir;
 
   public function __construct($conf,$api) {
+    $this->configDir = dirname(__DIR__, 1) . DIRECTORY_SEPARATOR . 'config';
     $this->configFile = $conf;
     $this->api = $api;
     $this->checkConfig();
@@ -23,7 +25,7 @@ class Config {
 
   private function checkConfig() {
     if (!file_exists($this->configFile)) {
-      copy(dirname(__DIR__,1) . DIRECTORY_SEPARATOR . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.json.example',$this->configFile);
+      copy($this->configDir . DIRECTORY_SEPARATOR . 'config.json.example',$this->configFile);
       if ($this->cacheConfig()) {
         $salt = bin2hex(random_bytes(16));
         $this->set($config, array("Security" => array("salt" => $salt)));
@@ -147,18 +149,24 @@ use Monolog\Handler\StreamHandler;
 
 class Logging {
   private $config;
+  public $defaultLogPath;
+  public $logPath;
+  public $logFileName;
 
   public function __construct($config) {
     $this->config = $config;
+    $this->defaultLogPath = dirname(__DIR__, 1) . DIRECTORY_SEPARATOR . 'logs';
+    $this->logPath = !empty($this->config->get('System','logging')['directory']) ? $this->config->get('System','logging')['directory'] : $this->defaultLogPath;
+    $this->logFileName = !empty($this->config->get('System','logging')['filename']) ? $this->config->get('System','logging')['filename'] : "php-ef";
   }
 
   public function writeLog($Logger, $Message, $Level, $Context = [], $LogFile = "") {
     global $phpef;
     $now = date("d-m-Y");
     if ($LogFile == "") {
-      $LogFile = __DIR__.'/../'.$this->config->get("System","logdirectory").$this->config->get("System","logfilename")."-".$now.".log";
+      $LogFile = $this->logPath . DIRECTORY_SEPARATOR . $this->logFileName."-".$now.".log";
     }
-    $LogLevel = $this->config->get("System","loglevel");
+    $LogLevel = $this->config->get("System","logging")["level"] ?? 'Info';
     $Context2 = json_decode(json_encode($Context), true);
     $log = new Logger($Logger);
     $log->pushProcessor(function ($record) {
@@ -207,7 +215,7 @@ class Logging {
 
   public function getLogFiles() {
     global $phpef;
-    $files = array_diff(scandir(__DIR__.'/../'.$this->config->get("System","logdirectory")),array('.', '..','php.error.log'));
+    $files = array_diff(scandir($this->logPath),array('.', '..','php.error.log'));
     return $files;
   }
 
@@ -216,7 +224,7 @@ class Logging {
     if ($date == null) {
       $date = date("d-m-Y");
     }
-    $LogFile = __DIR__.'/../'.$this->config->get("System","logdirectory").$this->config->get("System","logfilename")."-".$date.".log";
+    $LogFile = $this->logPath . DIRECTORY_SEPARATOR . $this->logFileName."-".$date.".log";
     $data = file_get_contents($LogFile);
     preg_match_all('/\[(?<date>.*?)\] (?<logger>\w+).(?<level>\w+): (?<message>[^\[\{]+) (?<context>[\[\{].*[\]\}]) (?<extra>[\[\{].*[\]\}])/',$data, $matches);
     $matchArr = array();
@@ -250,7 +258,7 @@ class Logging {
         "displayname" => $displayname
       );
     }
-    $files = array_diff(scandir(__DIR__.'/../'.$this->config->get("System","logdirectory")),array('.', '..'));
+    $files = array_diff(scandir($this->logPath),array('.', '..'));
     return $matchArr;
   }
 }

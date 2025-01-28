@@ -5,7 +5,8 @@ class phpef {
     Images,
     Settings,
     Cron,
-    Style;
+    Style,
+    Backups;
 
     private $configFilePath;
     private $dbPath;
@@ -27,7 +28,6 @@ class phpef {
     public function __construct() {
         $this->configFilePath = dirname(__DIR__, 1) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.json';
         $this->dbPath = dirname(__DIR__, 1) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'app.db';
-        $this->logPath = dirname(__DIR__, 1) . DIRECTORY_SEPARATOR . 'logs';
         $this->hooks = new hooks();
         $this->core = new core($this->configFilePath,(new api()));
         $this->db = (new db($this->dbPath,$this->core,$this->getVersion()[0]))->db;
@@ -43,10 +43,11 @@ class phpef {
         $this->notifications = new Notifications($this->core,$this->db,$this->api);
         $this->checkDB();
         $this->checkUUID();
+        $this->logPath = $this->core->logging->logPath;
     }
 
     public function getVersion() {
-        return ['0.8.0'];
+        return ['0.8.1'];
     }
 
     // Initiate Database Migration if required

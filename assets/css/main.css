@@ -1748,7 +1748,7 @@ body .bootstrap-table .fixed-table-container .fixed-table-body {
   }
 }
 
-/* Sidebar and home-section adjustments */
+/* Sidebar and home-section adjustments (Mobiles) */
 @media (max-width: 992px) {
   .sidebar {
     width: 300px;
