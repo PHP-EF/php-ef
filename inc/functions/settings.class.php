@@ -563,6 +563,11 @@ trait Settings {
                 'dataAttributes' => ['sortable' => 'true', 'filter-control' => 'input'],
             ],
             [
+                'field' => 'slug',
+                'title' => 'Role Slug',
+                'dataAttributes' => ['sortable' => 'true', 'filter-control' => 'input'],
+            ],
+            [
                 'title' => 'Actions',
                 'dataAttributes' => ['events' => 'rolesActionEvents', 'formatter' => 'roleActionFormatter'],
             ]
@@ -593,6 +598,7 @@ trait Settings {
             return [
                 "id" => $item['id'],
                 "title" => $item['Name'],
+                "name" => $item['Name'],
                 "description" => $item['Description'],
                 "checkbox" => "true"
             ];
@@ -662,6 +668,7 @@ trait Settings {
             return [
                 "id" => $item['id'],
                 "title" => $item['name'],
+                "name" => $item['slug'],
                 "description" => $item['description'],
                 "checkbox" => "true"
             ];
@@ -684,6 +691,7 @@ trait Settings {
             "General" => array(
                 $this->settingsOption('input', 'roleName', ['label' => 'Role Name', 'width' => '12']),
                 $this->settingsOption('input', 'roleDescription', ['label' => 'Role Description', 'width' => '12']),
+                $this->settingsOption('input', 'roleSlug', ['label' => 'Role Slug', 'width' => '12', 'attr' => 'readonly']),
                 $this->settingsOption('input', 'roleId', ['attr' => 'hidden'])
             )
         );

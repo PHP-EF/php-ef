@@ -40,7 +40,7 @@ class Pages {
           ['Pages','Pages','ADMIN-PAGES','SubMenuLink','Admin','Settings','core/pages','Native',null,2,false],
           ['Configuration','Configuration','ADMIN-CONFIG','SubMenuLink','Admin','Settings','core/configuration','Native',null,3,false],
           ['Portal Logs','Portal Logs','ADMIN-LOGS','SubMenuLink','Admin','Logs','core/logs','Native',null,1,false],
-          ['Web Tracking','Web Tracking',"REPORT-TRACKING",'MenuLink',"Reports",null,"reports/tracking",'Native','fa-solid fa-bullseye',1,false]
+          ['Web Tracking','Web Tracking',"ADMIN-REPORTS",'MenuLink',"Reports",null,"reports/tracking",'Native','fa-solid fa-bullseye',1,false]
         ];
   
         foreach ($navLinks as $link) {

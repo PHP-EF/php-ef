@@ -140,6 +140,7 @@ body.dark-theme .dynamic-select .dynamic-select-header {
   -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 body.dark-theme input:disabled,
+body.dark-theme input:read-only,
 body.dark-theme select:disabled,
 body.dark-theme .dynamic-select-disabled .dynamic-select-header {
   background-color: #434343;
@@ -247,6 +248,7 @@ body.light-theme .dynamic-select .dynamic-select-header {
   -webkit-tap-highlight-color: rgba(205, 205, 205, 0);
 }
 body.light-theme input:disabled,
+body.light-theme input:read-only,
 body.light-theme select:disabled,
 body.light-theme .dynamic-select-disabled .dynamic-select-header {
   background-color: #d7d7d7;
@@ -1297,6 +1299,19 @@ body.dark-theme .image-gallery {
 }
 .sidebar.close.expandOnHover:hover .sidebar-footer a {
   display: block;
+}
+.sidebar.close.expandOnHover:hover .sub-menu-item.showMenu .sub-sub-menu {
+  opacity: 1;
+  padding: 0px;
+  display:block;
+}
+.sidebar.close.expandOnHover:hover .sub-menu-item.showMenu li {
+  opacity: 1;
+  padding: 10px 10px 10px 25px;
+}
+.sidebar.close.expandOnHover:hover .sub-menu-item.showMenu li a {
+  opacity: 1;
+  padding: 5px 0px;
 }
 
 /* Sidebar Font Size Dropdown */

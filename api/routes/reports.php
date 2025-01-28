@@ -1,7 +1,7 @@
 <?php
 $app->get('/reports/tracking/records', function ($request, $response, $args) {
 	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
-    if ($phpef->auth->checkAccess("REPORT-TRACKING")) {
+    if ($phpef->auth->checkAccess("ADMIN-REPORTS")) {
         $data = $request->getQueryParams();
         if (isset($data['granularity']) && isset($data['filters'])) {
             $Filters = $data['filters'];
@@ -22,7 +22,7 @@ $app->get('/reports/tracking/records', function ($request, $response, $args) {
 
 $app->get('/reports/tracking/stats', function ($request, $response, $args) {
 	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
-    if ($phpef->auth->checkAccess("REPORT-TRACKING")) {
+    if ($phpef->auth->checkAccess("ADMIN-REPORTS")) {
         $data = $request->getQueryParams();
         if (isset($data['granularity']) && isset($data['filters'])) {
             $Filters = $data['filters'];
@@ -43,7 +43,7 @@ $app->get('/reports/tracking/stats', function ($request, $response, $args) {
 
 $app->get('/reports/tracking/summary', function ($request, $response, $args) {
 	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
-    if ($phpef->auth->checkAccess("REPORT-TRACKING")) {
+    if ($phpef->auth->checkAccess("ADMIN-REPORTS")) {
         $data = $request->getQueryParams();
         $phpef->logging->writeLog("Reporting","Queried Web Tracking Summary","debug");
         $phpef->api->setAPIResponseData($phpef->reporting->getTrackingSummary());
