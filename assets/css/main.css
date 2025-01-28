@@ -1298,6 +1298,19 @@ body.dark-theme .image-gallery {
 .sidebar.close.expandOnHover:hover .sidebar-footer a {
   display: block;
 }
+.sidebar.close.expandOnHover:hover .sub-menu-item.showMenu .sub-sub-menu {
+  opacity: 1;
+  padding: 0px;
+  display:block;
+}
+.sidebar.close.expandOnHover:hover .sub-menu-item.showMenu li {
+  opacity: 1;
+  padding: 10px 10px 10px 25px;
+}
+.sidebar.close.expandOnHover:hover .sub-menu-item.showMenu li a {
+  opacity: 1;
+  padding: 5px 0px;
+}
 
 /* Sidebar Font Size Dropdown */
 .fontDropBtn {
