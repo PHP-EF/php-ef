@@ -93,7 +93,7 @@ return '
                       <a class="dropdown-item granularity-select preventDefault" data-granularity="lastYear" href="#">Last Year</a>
                       <a class="dropdown-item granularity-select preventDefault" data-granularity="custom" href="#">Custom</a>
                     </div>
-                    <button id="clearFilters" class="btn btn-info btn-sm clearFilters" type="button">
+                    <button id="reportingClearFilters" class="btn btn-info btn-sm reportingClearFilters" type="button">
                       Clear Filters
                     </button>
                   </div>
@@ -227,7 +227,7 @@ return '
       browser: "all",
       os: "all"
     };
-    $("#clearFilters").css("display","none");
+    $("#reportingClearFilters").css("display","none");
   }
 
   var updateTrackingSummaryValues = () => {
@@ -582,7 +582,7 @@ return '
   });
 
   // Filter Button
-  $("#clearFilters").on("click", function(event) {
+  $("#reportingClearFilters").on("click", function(event) {
     // Reset Applied Filters
     resetAppliedFilters();
     // Reset Charts
@@ -611,7 +611,7 @@ return '
         break;
     }
     chartTimeFilter();
-    $("#clearFilters").css("display","block");
+    $("#reportingClearFilters").css("display","block");
   }
 
   // Filter the chart with custom date/time range
