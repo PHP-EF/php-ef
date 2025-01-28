@@ -291,6 +291,7 @@ function loadContent(element = null, defaultPage = null) {
   $('.mainWindow, .mainFrame').attr('hidden',true);
   // $('.dynamic-plugin-js').remove();
   $('.toggleFrame').removeClass('active');
+  var invalid = false;
   var expandNav = false;
   var type = 'page';
   if (element != null) {
@@ -310,6 +311,10 @@ function loadContent(element = null, defaultPage = null) {
           $('.title-text').text(element.data('pageName'));
           expandNav = true;
           break;
+        default:
+          console.info("%c Navigation %c ".concat("Failed to load content. Invalid selector: "+qualifierSplit[0], " "), "color: white; background:rgb(249, 0, 0); font-weight: 700;", "color: rgb(249, 0, 0); background: white; font-weight: 700;");
+          invalid = true;
+          break;
       }
     } else {
       element = $('a.toggleFrame[href="#page=' + decodeURI(defaultPage) + '"]:not(.link_name)');
@@ -317,28 +322,29 @@ function loadContent(element = null, defaultPage = null) {
       expandNav = true;
     }
   }
-
-  switch (element.data('pageType')) {
-    case 'Native':
-      loadMainWindow(element,type);
-      break;
-    case 'iFrame':
-      loadiFrame(element);
-      break;
-  }
-
-  if (expandNav) {
-    var doubleParent = element.parent().parent();
-    if (doubleParent.hasClass('sub-sub-menu')) {
-      if (!doubleParent.parent().hasClass('showMenu')) {
-        doubleParent.parent().addClass('showMenu');
-      }
-      if (!doubleParent.parent().parent().parent().hasClass('showMenu')) {
-          doubleParent.parent().parent().parent().addClass('showMenu');
-      }
-    } else if (doubleParent.hasClass('sub-menu') && doubleParent.not('.blank')) {
-      if (!doubleParent.parent().hasClass('showMenu')) {
-        doubleParent.parent().addClass('showMenu');
+  if (!invalid) {
+    switch (element.data('pageType')) {
+      case 'Native':
+        loadMainWindow(element,type);
+        break;
+      case 'iFrame':
+        loadiFrame(element);
+        break;
+    }
+  
+    if (expandNav) {
+      var doubleParent = element.parent().parent();
+      if (doubleParent.hasClass('sub-sub-menu')) {
+        if (!doubleParent.parent().hasClass('showMenu')) {
+          doubleParent.parent().addClass('showMenu');
+        }
+        if (!doubleParent.parent().parent().parent().hasClass('showMenu')) {
+            doubleParent.parent().parent().parent().addClass('showMenu');
+        }
+      } else if (doubleParent.hasClass('sub-menu') && doubleParent.not('.blank')) {
+        if (!doubleParent.parent().hasClass('showMenu')) {
+          doubleParent.parent().addClass('showMenu');
+        }
       }
     }
   }
