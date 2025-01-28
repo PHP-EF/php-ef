@@ -837,7 +837,7 @@ function createRandomString(length) {
   return result;
 }
 
-function cleanClass(string){
+function cleanString(string){
 	return string.replace(/ +/g, "-").replace(/\W+/g, "-");
 }
 
@@ -970,6 +970,10 @@ document.addEventListener('DOMContentLoaded', function() {
     $(this).addClass("changed");
   });
 
+  $("body").on('input', '#SettingsModal [name=roleName]', function(event) {
+    $('[name=roleSlug]').val(cleanString($(this).val())).change();
+  });
+
   // Custom jQuery to handle nested tabs for mobile
   $("body").on('click', '.tab-sub-dropdown .nav-link', function (event) {
     event.preventDefault();
@@ -1048,14 +1052,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         </button>
                         <ul class="dropdown-menu dropdown-menu-top" aria-labelledby="configSubTabsDropdown">
                             ${Object.keys(array).map((i, index) => {
-                                return `<li><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanClass(i)}" class="nav-link ${active}"><span lang="en">${i}</span></a></li>`;
+                                return `<li><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanString(i)}" class="nav-link ${active}"><span lang="en">${i}</span></a></li>`;
                             }).join('')}
                         </ul>
                     </div>
                 </div>
                 ${Object.keys(array).map((i, index) => {
                     active = (index == 0) ? 'active' : '';
-                    return `<li role="presentation" class="nav-item d-none d-lg-flex"><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanClass(i)}" class="nav-link ${active}"><span lang="en">${i}</span></a></li>`;
+                    return `<li role="presentation" class="nav-item d-none d-lg-flex"><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanString(i)}" class="nav-link ${active}"><span lang="en">${i}</span></a></li>`;
                 }).join('')}
             </ul>
         `;
@@ -1072,7 +1076,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!noTabs) {
                 group += `
                     <!-- FORM GROUP -->
-                    <div class="tab-pane ${active}" id="${ids[i]}${cleanClass(i)}">
+                    <div class="tab-pane ${active}" id="${ids[i]}${cleanString(i)}">
                 `;
             }
 
@@ -1287,8 +1291,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const checkbox = item.checkbox ? `
         <div class="col-auto">
           <div class="custom-control custom-switch">
-            <input type="checkbox" class="custom-control-input toggle" id="${item.title}">
-            <label class="custom-control-label" for="${item.title}"></label>
+            <input type="checkbox" class="custom-control-input toggle" id="${item.name}">
+            <label class="custom-control-label" for="${item.name}"></label>
           </div>
         </div>
       ` : '';
@@ -1764,7 +1768,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function booleanTickCrossFormatter(value, row, index) {
-    console.log(value);
     if (value == 1) {
       return '<i class="fa-solid fa-circle-check text-center w-100"></i>';
     } else {
@@ -2440,6 +2443,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function populateRoleSettingsModal(row) {
     $("[name=roleId]").val("").val(row[0].id);
     $("[name=roleName]").val("").val(row[0].name);
+    $("[name=roleSlug]").val("").val(row[0].slug);
     $("[name=roleDescription]").val("").val(row[0].description);
   }
 
@@ -2820,7 +2824,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function pagesRowOnReorderRow(data,row,oldrow,table) {
-    console.log(row,oldrow,table);
     var key = data.findIndex(item => item.id === row.id) + 1;
     queryAPI("PATCH","/api/page/"+row.id+"/weight",{"weight": key}).done(function(data) {
       if (data["result"] == "Success") {

@@ -127,9 +127,9 @@ $app->post('/rbac/roles', function ($request, $response, $args) {
 	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
     if ($phpef->auth->checkAccess("ADMIN-RBAC")) {
         $data = $phpef->api->getAPIRequestData($request);
-        if (isset($data['roleName'])) {
+        if (isset($data['roleName']) && isset($data['roleSlug'])) {
             $Description = $data['roleDescription'] ?? null;
-            $phpef->auth->newRBACRole($data['roleName'],$Description);
+            $phpef->auth->newRBACRole($data['roleName'],$data['roleSlug'],$Description);
         }
     }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -144,8 +144,9 @@ $app->patch('/rbac/role/{id}', function ($request, $response, $args) {
         $data = $phpef->api->getAPIRequestData($request);
         if (isset($args['id'])) {
             $RoleName = $data['roleName'] ?? null;
+            $RoleSlug = $data['roleSlug'] ?? null;
             $RoleDescription = $data['roleDescription'] ?? null;
-            $phpef->auth->updateRBACRole($args['id'],$RoleName,$RoleDescription);
+            $phpef->auth->updateRBACRole($args['id'],$RoleName,$RoleSlug,$RoleDescription);
         } else {
             $phpef->api->setAPIResponse('Error','id missing from request',400);
         }

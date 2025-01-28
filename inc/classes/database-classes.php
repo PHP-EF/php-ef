@@ -209,7 +209,17 @@ class dbHelper {
         "ALTER TABLE users ADD COLUMN totp_verified BOOLEAN;"
       ],
       '0.8.0' => [],
-      '0.8.1' => []
+      '0.8.1' => [],
+      '0.8.2' => [
+        'ALTER TABLE rbac_resources ADD COLUMN slug TEXT UNIQUE;',
+        'UPDATE rbac_resources SET slug = name;',
+        'UPDATE rbac_resources SET name = "Log Admin" WHERE slug = "ADMIN-LOGS";',
+        'UPDATE rbac_resources SET name = "Role Admin" WHERE slug = "ADMIN-RBAC";',
+        'UPDATE rbac_resources SET name = "Configuration Admin" WHERE slug = "ADMIN-CONFIG";',
+        'UPDATE rbac_resources SET name = "User Admin" WHERE slug = "ADMIN-USERS";',
+        'UPDATE rbac_resources SET name = "Page Admin" WHERE slug = "ADMIN-PAGES";',
+        'UPDATE rbac_resources SET name = "Report Admin", slug = "ADMIN-REPORTS" WHERE slug = "ADMIN-REPORTS";'
+      ]
     ];
   }
 
