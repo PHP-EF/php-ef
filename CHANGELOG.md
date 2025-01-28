@@ -1,5 +1,9 @@
 ## v0.8.1
 - Add scheduled backups
+- Various bugfixes
+- Reduce default font size on mobile to 14px
+- Move logging options in configuration file
+- Log Cleanup schedule is now configurable
 
 ## v0.8.0
 - Add Cron Job Tracking
