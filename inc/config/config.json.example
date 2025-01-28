@@ -10,9 +10,10 @@
             "cleanupschedule": ""
         }
         "backup": {
-            "includePluginData": true,
-            "enabled": false,
-            "includeImages": false
+            "enabled": true,
+            "includeOtherData": false,
+            "includeImages": false,
+            "schedule": ""
         }
     },
     "Styling": {
