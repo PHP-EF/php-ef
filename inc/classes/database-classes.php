@@ -211,7 +211,7 @@ class dbHelper {
       '0.8.0' => [],
       '0.8.1' => [],
       '0.8.2' => [
-        'ALTER TABLE rbac_resources ADD COLUMN slug TEXT UNIQUE;',
+        'ALTER TABLE rbac_resources ADD COLUMN slug TEXT;',
         'UPDATE rbac_resources SET slug = name;',
         'UPDATE rbac_resources SET name = "Log Admin" WHERE slug = "ADMIN-LOGS";',
         'UPDATE rbac_resources SET name = "Role Admin" WHERE slug = "ADMIN-RBAC";',
