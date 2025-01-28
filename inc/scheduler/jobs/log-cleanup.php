@@ -1,7 +1,7 @@
 <?php
 $SkipCSS = true;
-require_once(__DIR__.'/../../inc.php');
-
+$NoLogin = true;
+require_once(dirname(__DIR__,2).'/inc.php');
 try {
   $cleaned = false;
   $logFiles = $phpef->logging->getLogFiles();
