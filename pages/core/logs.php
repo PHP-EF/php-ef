@@ -7,7 +7,7 @@
   $LogFiles = array_reverse($phpef->logging->getLogFiles());
   $LogFileArr = array();
     foreach ($LogFiles as $LogFile) {
-      $LogFileShort = explode(".log",explode($phpef->config->get("System","logfilename")."-",$LogFile)[1]);
+      $LogFileShort = explode(".log",explode($phpef->logging->logFileName."-",$LogFile)[1]);
       if ($LogFileShort[0] != null) {
         array_push($LogFileArr,$LogFileShort[0]);
       }

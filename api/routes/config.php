@@ -166,3 +166,66 @@ $app->patch('/config/dashboards/{dashboard}', function ($request, $response, $ar
 		->withHeader('Content-Type', 'application/json;charset=UTF-8')
 		->withStatus($GLOBALS['responseCode']);
 });
+
+// ** BACKUPS ** //
+$app->get('/config/backups', function ($request, $response, $args) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
+        $phpef->getBackups();
+    }
+
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json;charset=UTF-8')
+		->withStatus($GLOBALS['responseCode']);
+});
+
+$app->get('/config/backup/{filename}', function ($request, $response, $args) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
+        $filePath = $phpef->downloadBackup($args['filename']);
+
+        if ($filePath) {
+            $phpef->logging->writeLog('Backup', 'Backup file downloaded: ' . $filePath, 'Info');
+            $response->getBody()->write(file_get_contents($filePath));
+            return $response
+                ->withHeader('Content-Type', 'application/zip')
+                ->withHeader('Cache-Control', 'must-revalidate')
+                ->withHeader('Content-Description', 'File Transfer')
+                ->withHeader('Content-Disposition', 'attachment; filename="' . basename($filePath) . '"')
+                ->withHeader('Content-Length', filesize($filePath))
+                ->withStatus($GLOBALS['responseCode']);
+        } else {
+            $phpef->api->setAPIResponse('Error','Failed to locate backup file');
+        }
+    }
+
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json;charset=UTF-8')
+		->withStatus($GLOBALS['responseCode']);
+});
+
+$app->post('/config/backup', function ($request, $response, $args) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
+        $phpef->backup(true);
+    }
+
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json;charset=UTF-8')
+		->withStatus($GLOBALS['responseCode']);
+});
+
+$app->delete('/config/backup/{filename}', function ($request, $response, $args) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    if ($phpef->auth->checkAccess("ADMIN-CONFIG")) {
+        $phpef->deleteBackup($args['filename']);
+    }
+
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json;charset=UTF-8')
+		->withStatus($GLOBALS['responseCode']);
+});

@@ -1,3 +1,6 @@
+## v0.8.1
+- Add scheduled backups
+
 ## v0.8.0
 - Add Cron Job Tracking
 - Various additions to customisation settings

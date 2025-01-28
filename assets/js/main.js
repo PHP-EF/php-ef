@@ -291,6 +291,7 @@ function loadContent(element = null, defaultPage = null) {
   $('.mainWindow, .mainFrame').attr('hidden',true);
   // $('.dynamic-plugin-js').remove();
   $('.toggleFrame').removeClass('active');
+  var invalid = false;
   var expandNav = false;
   var type = 'page';
   if (element != null) {
@@ -310,6 +311,10 @@ function loadContent(element = null, defaultPage = null) {
           $('.title-text').text(element.data('pageName'));
           expandNav = true;
           break;
+        default:
+          console.info("%c Navigation %c ".concat("Failed to load content. Invalid selector: "+qualifierSplit[0], " "), "color: white; background:rgb(249, 0, 0); font-weight: 700;", "color: rgb(249, 0, 0); background: white; font-weight: 700;");
+          invalid = true;
+          break;
       }
     } else {
       element = $('a.toggleFrame[href="#page=' + decodeURI(defaultPage) + '"]:not(.link_name)');
@@ -317,28 +322,29 @@ function loadContent(element = null, defaultPage = null) {
       expandNav = true;
     }
   }
-
-  switch (element.data('pageType')) {
-    case 'Native':
-      loadMainWindow(element,type);
-      break;
-    case 'iFrame':
-      loadiFrame(element);
-      break;
-  }
-
-  if (expandNav) {
-    var doubleParent = element.parent().parent();
-    if (doubleParent.hasClass('sub-sub-menu')) {
-      if (!doubleParent.parent().hasClass('showMenu')) {
-        doubleParent.parent().addClass('showMenu');
-      }
-      if (!doubleParent.parent().parent().parent().hasClass('showMenu')) {
-          doubleParent.parent().parent().parent().addClass('showMenu');
-      }
-    } else if (doubleParent.hasClass('sub-menu') && doubleParent.not('.blank')) {
-      if (!doubleParent.parent().hasClass('showMenu')) {
-        doubleParent.parent().addClass('showMenu');
+  if (!invalid) {
+    switch (element.data('pageType')) {
+      case 'Native':
+        loadMainWindow(element,type);
+        break;
+      case 'iFrame':
+        loadiFrame(element);
+        break;
+    }
+  
+    if (expandNav) {
+      var doubleParent = element.parent().parent();
+      if (doubleParent.hasClass('sub-sub-menu')) {
+        if (!doubleParent.parent().hasClass('showMenu')) {
+          doubleParent.parent().addClass('showMenu');
+        }
+        if (!doubleParent.parent().parent().parent().hasClass('showMenu')) {
+            doubleParent.parent().parent().parent().addClass('showMenu');
+        }
+      } else if (doubleParent.hasClass('sub-menu') && doubleParent.not('.blank')) {
+        if (!doubleParent.parent().hasClass('showMenu')) {
+          doubleParent.parent().addClass('showMenu');
+        }
       }
     }
   }
@@ -427,6 +433,10 @@ function applyFontSize() {
   var cookie = getCookie('fontSize');
   if (cookie) {
     $('html').css('font-size',cookie);
+  } else {
+    if (isMobile) {
+      $('html').css('font-size','14px');
+    }
   }
 }
 
@@ -966,6 +976,7 @@ document.addEventListener('DOMContentLoaded', function() {
     $(this).parent().find('.nav-link').removeClass('active');
     $(this).parent().parent().parent().find('li .nav-link').removeClass('show active');
     $(this).addClass('active');
+    $("#configSubTabsDropdown").text($($(this).children('span')[0]).text())
     $($(this).attr('href')).addClass('show active');
   });
 
@@ -1438,6 +1449,34 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  window.backupActionEvents = {
+    "click .download": function (e, value, row, index) {
+        var url = '/api/config/backup/'+row.filename;
+        var a = document.createElement("a")
+        a.href = url;
+        a.download = url.split("/").pop()
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+    },
+    "click .delete": function (e, value, row, index) {
+      if(confirm("Are you sure you want to delete the backup: "+row.filename+"? This is irriversible.") == true) {
+        queryAPI("DELETE","/api/config/backup/"+row.filename).done(function(data) {
+          if (data["result"] == "Success") {
+            toast("Success","","Successfully deleted backup: "+row.filename,"success");
+            $("[name=backupsTable]").bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger","30000");
+          } else {
+            toast("Error","","Failed to delete backup: "+row.filename,"danger");
+          }
+        }).fail(function() {
+            toast("Error", "", "Failed to delete backup: "+row.filename, "danger");
+        });
+      }
+    }
+  }
+
   window.widgetActionEvents = {
     "click .edit": function (e, value, row, index) {
       buildWidgetSettingsModal(row);
@@ -1608,6 +1647,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
     }
+    return buttons.join("");
+  }
+
+  function backupActionFormatter(value, row, index) {
+    var buttons = [];
+    buttons.push(`<a class="download" title="Download"><i class="fa-solid fa-download"></i></a>&nbsp;`);
+    buttons.push(`<a class="delete" title="Delete"><i class="fa-solid fa-trash"></i></a>&nbsp;`);
     return buttons.join("");
   }
 
@@ -1804,6 +1850,33 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         attributes: {
           title: "Edit Plugin URL(s)",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
+  function backupTableButtons() {
+    return {
+      btnNewBackup: {
+        text: "New Backup",
+        icon: "bi bi-plus-lg",
+        event: function() {
+          queryAPI("POST","/api/config/backup").done(function(data) {
+            if (data["result"] == "Success") {
+              toast("Success","",data["message"],"success");
+              $(`[name="backupsTable"]`).bootstrapTable("refresh");
+            } else if (data["result"] == "Error") {
+              toast(data["result"],"",data["message"],"danger","30000");
+            } else {
+              toast("Error","","Failed to create backup","danger");
+            }
+          }).fail(function() {
+              toast("Error", "", "Failed to create backup", "danger");
+          });
+        },
+        attributes: {
+          title: "New Backup",
           style: "background-color:#4bbe40;border-color:#4bbe40;"
         }
 	    }
