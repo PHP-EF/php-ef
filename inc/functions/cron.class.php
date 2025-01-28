@@ -39,12 +39,12 @@ trait Cron {
 
                 $placeholders = implode(',', array_fill(0, count($list)+1, '?'));
 
-                $stmt = $this->db->prepare("SELECT * FROM cron WHERE source IN ($placeholders);");
+                $stmt = $this->db->prepare("SELECT * FROM cron WHERE source IN ($placeholders) ORDER BY source = 'System' DESC, last_run DESC;");
                 $stmt->execute($list);
                 $jobs = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 break;
             case 'all':
-                $stmt = $this->db->prepare("SELECT * FROM cron;");
+                $stmt = $this->db->prepare("SELECT * FROM cron ORDER BY source = 'System' DESC, last_run DESC;");
                 $stmt->execute();
                 $jobs = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 break;
