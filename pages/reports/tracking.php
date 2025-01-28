@@ -1,5 +1,5 @@
 <?php
-if ($phpef->auth->checkAccess("REPORT-TRACKING") == false) {
+if ($phpef->auth->checkAccess("ADMIN-REPORTS") == false) {
   $phpef->api->setAPIResponse('Error','Unauthorized',401);
   return false;
 }

@@ -940,18 +940,18 @@ class Auth {
       // Insert roles if they don't exist
       $resources = [
         // Built-In Roles
-        ['ADMIN-RBAC', 'Grants the ability to view and manage Role Based Access', true],
-        ['ADMIN-LOGS', 'Grants access to view Logs', true],
-        ['ADMIN-CONFIG', 'Grants access to manage the PHP-EF Configuration', true],
-        ['ADMIN-USERS', 'Grants access to view and manage users & groups', true],
-        ['ADMIN-PAGES', 'Grants the ability to view and manage Pages', true],
-        ['REPORT-TRACKING', 'Grants the ability to view the Web Tracking Reports', true]
+        ['Role Admin','ADMIN-RBAC', 'Grants the ability to view and manage Role Based Access', true],
+        ['Log Admin','ADMIN-LOGS', 'Grants access to view Logs', true],
+        ['Configuration Admin','ADMIN-CONFIG', 'Grants access to manage the PHP-EF Configuration', true],
+        ['User Admin','ADMIN-USERS', 'Grants access to view and manage users & groups', true],
+        ['Page Admin','ADMIN-PAGES', 'Grants the ability to view and manage Pages', true],
+        ['Report Admin','ADMIN-REPORTS', 'Grants the ability to view the Web Tracking Reports', true]
       ];
 
       foreach ($resources as $resource) {
         if (!$this->resourceExists($this->db, $resource[0])) {
-          $stmt = $this->db->prepare("INSERT INTO rbac_resources (name, description, Protected) VALUES (:Name, :Description, :Protected)");
-          $stmt->execute([':Name' => $resource[0],':Description' => $resource[1], ':Protected' => $resource[2]]);
+          $stmt = $this->db->prepare("INSERT INTO rbac_resources (name, slug, description, Protected) VALUES (:Name, :Slug, :Description, :Protected)");
+          $stmt->execute([':Name' => $resource[0],':Slug' => $resource[1],':Description' => $resource[2], ':Protected' => $resource[3]]);
         }
       }
     }
@@ -1101,12 +1101,18 @@ class Auth {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
-  public function newRBACRole($Name,$Description) {
-    if (!empty($this->getRBACRoleByName($Name))) {
-      $this->api->setAPIResponse('Error','RBAC Role already exists with the name: '.$Name);
+  public function getRBACRoleBySlug($RoleSlug) {
+    $stmt = $this->db->prepare('SELECT * FROM rbac_resources WHERE LOWER(slug) = LOWER(:RoleSlug)');
+    $stmt->execute([':RoleSlug' => $RoleSlug]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
+  public function newRBACRole($Name,$Slug,$Description) {
+    if (!empty($this->getRBACRoleBySlug($Slug))) {
+      $this->api->setAPIResponse('Error','RBAC Role already exists with the slug: '.$Slug);
     } else {
-      $stmt = $this->db->prepare("INSERT INTO rbac_resources (name, description) VALUES (:Name, :Description)");
-      $stmt->execute([':Name' => $Name, ':Description' => $Description]);      
+      $stmt = $this->db->prepare("INSERT INTO rbac_resources (name, slug, description) VALUES (:Name, :Slug, :Description)");
+      $stmt->execute([':Name' => $Name, ':Slug' => $Slug, ':Description' => $Description]);      
       $this->api->setAPIResponseMessage('RBAC Role successfully created: '.$Name);
     }
   }
@@ -1121,6 +1127,10 @@ class Auth {
         if ($roleName !== null) {
           $prepare[] = 'name = :name';
           $execute[':name'] = $roleName;
+        }
+        if ($roleSlug !== null) {
+          $prepare[] = 'slug = :slug';
+          $execute[':slug'] = $roleSlug;
         }
         if ($roleDescription !== null) {
           $prepare[] = 'description = :description';
@@ -1198,7 +1208,7 @@ class Auth {
   }
 
   public function getRBACRolesForMenu() {
-    $roles = array_column($this->getRBACRoles(),'name');
+    $roles = $this->getRBACRoles();
     $roleKeyValuePairs = [];
     $roleKeyValuePairs[] = [
       "name" => "None",
@@ -1206,8 +1216,8 @@ class Auth {
     ];
     $roleKeyValuePairs = array_merge($roleKeyValuePairs,array_map(function($item) {
       return [
-        "name" => $item,
-        "value" => $item
+        "name" => $item['name'],
+        "value" => $item['slug']
       ];
     }, $roles));
     return $roleKeyValuePairs;
