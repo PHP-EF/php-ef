@@ -427,6 +427,10 @@ function applyFontSize() {
   var cookie = getCookie('fontSize');
   if (cookie) {
     $('html').css('font-size',cookie);
+  } else {
+    if (isMobile) {
+      $('html').css('font-size','14px');
+    }
   }
 }
 
@@ -966,6 +970,7 @@ document.addEventListener('DOMContentLoaded', function() {
     $(this).parent().find('.nav-link').removeClass('active');
     $(this).parent().parent().parent().find('li .nav-link').removeClass('show active');
     $(this).addClass('active');
+    $("#configSubTabsDropdown").text($($(this).children('span')[0]).text())
     $($(this).attr('href')).addClass('show active');
   });
 
