@@ -1,3 +1,6 @@
+## v0.8.2
+- Give roles friendly names and replace unique identifier with 'slug'
+
 ## v0.8.1
 - Add scheduled backups
 - Various bugfixes
