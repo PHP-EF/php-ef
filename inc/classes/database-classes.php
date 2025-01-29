@@ -218,7 +218,7 @@ class dbHelper {
         'UPDATE rbac_resources SET name = "Configuration Admin" WHERE slug = "ADMIN-CONFIG";',
         'UPDATE rbac_resources SET name = "User Admin" WHERE slug = "ADMIN-USERS";',
         'UPDATE rbac_resources SET name = "Page Admin" WHERE slug = "ADMIN-PAGES";',
-        'UPDATE rbac_resources SET name = "Report Admin", slug = "ADMIN-REPORTS" WHERE slug = "ADMIN-REPORTS";'
+        'UPDATE rbac_resources SET name = "Report Admin", slug = "ADMIN-REPORTS" WHERE name = "REPORT-TRACKING";'
       ]
     ];
   }
