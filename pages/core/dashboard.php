@@ -1,9 +1,18 @@
 <?php
 $Dashboards = $phpef->dashboard->getDashboards();
-$DashboardCount = count($Dashboards);
+$EnabledAndAllowedDashboards = array_filter($Dashboards, function($dashboard) use ($phpef) {
+    $enabled = $dashboard['Enabled'] ?? false;
+    if ($enabled) {
+        $auth = $dashboard['Auth'] ?? null;
+        return $phpef->auth->checkAccess($auth);
+    } else {
+        return false;
+    }
+});
+$DashboardCount = count($EnabledAndAllowedDashboards);
 
 if ($DashboardCount == 1) {
-    $DashboardKey = array_keys($Dashboards)[0];
+    $DashboardKey = array_keys($EnabledAndAllowedDashboards)[0];
     $Content = '<div class="container-fluid mt--20">';
     $Content .= $phpef->dashboard->buildDashboard($DashboardKey);
     $Content .= '</div>';
@@ -12,7 +21,7 @@ if ($DashboardCount == 1) {
     $TabContent = '<div class="tab-content">';
 
     $DashboardBuiltCount = 0;
-    foreach ($Dashboards as $DashboardKey => $DashboardVal) {
+    foreach ($EnabledAndAllowedDashboards as $DashboardKey => $DashboardVal) {
         if ($DashboardBuiltCount == 0) {
             $active = ' active';
         } else {
