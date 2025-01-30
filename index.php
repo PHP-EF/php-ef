@@ -533,6 +533,9 @@ foreach ($navLinks as $navLink) {
               </div>
             </div>
           </div>
+          <?php
+            $phpef->hooks->executeHook('user_profile_body');
+          ?>
         </div>
       </div>
       <div class="modal-footer">
