@@ -60,7 +60,7 @@
                 <th data-formatter="actionFormatter" data-events="actionEvents">Actions</th>
               </tr>
             </thead>
-            <tbody id="rbacgroups"></tbody>
+            <tbody></tbody>
           </table>
       </div>
     </div>

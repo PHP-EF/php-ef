@@ -841,31 +841,51 @@ function cleanString(string){
 	return string.replace(/ +/g, "-").replace(/\W+/g, "-");
 }
 
-function appendScript(data) {
+function appendScript(src) {
   return new Promise((resolve, reject) => {
-    if (data.src) {
-      if (!document.querySelector(`script[src="${data.src}"]`)) {
-        var script = document.createElement('script');
-        script.src = data.src;
-        script.onload = () => resolve(true);
-        script.onerror = () => reject(new Error('Script load error'));
-        document.head.appendChild(script);
-      } else {
-        resolve(true);
-      }
-    } else if (data.script) {
-      if (!document.querySelector(`script[data-script-id="${data.id}"]`)) {
-        var script = document.createElement('script');
-        script.classList = "dynamic-plugin-js";
-        script.innerHTML = data.script;
-        script.setAttribute('data-script-id', data.id);
-        document.head.appendChild(script);
-        resolve(true);
-      } else {
-        resolve(true);
-      }
+    if (!document.querySelector(`script[src="${src}"]`)) {
+      var script = document.createElement('script');
+      script.src = src;
+      script.onload = () => resolve(true);
+      script.onerror = () => reject(new Error('Script load error'));
+      document.head.appendChild(script);
+    } else {
+      resolve(true);
     }
   });
+}
+
+function appendInlineScript(scriptContent, id) {
+  return new Promise((resolve, reject) => {
+    if (!document.querySelector(`script[data-script-id="${id}"]`)) {
+      var script = document.createElement('script');
+      script.classList = "dynamic-plugin-js";
+      script.innerHTML = scriptContent;
+      script.setAttribute('data-script-id', id);
+      document.head.appendChild(script);
+      resolve(true);
+    } else {
+      resolve(true);
+    }
+  });
+}
+
+async function loadScript(src) {
+  try {
+    await appendScript(src);
+    console.log('Script loaded successfully');
+  } catch (error) {
+    console.error('Failed to load script:', error);
+  }
+}
+
+async function loadInlineScript(scriptContent, id) {
+  try {
+    await appendInlineScript(scriptContent, id);
+    console.log('Inline script loaded successfully');
+  } catch (error) {
+    console.error('Failed to load inline script:', error);
+  }
 }
 
 function humanFileSize(bytes, si) {
@@ -1223,7 +1243,11 @@ document.addEventListener('DOMContentLoaded', function() {
       case 'html':
         return item.html;
       case 'js':
-        appendScript(item);
+        if (item.src) {
+          appendScript(item.src);
+        } else if (item.script) {
+          appendInlineScript(item.script, item.id);
+        }
         return ''; // Return an empty string as the script is already added
       case 'selectwithtable':
         return `
@@ -1291,8 +1315,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const checkbox = item.checkbox ? `
         <div class="col-auto">
           <div class="custom-control custom-switch">
-            <input type="checkbox" class="custom-control-input toggle" id="${item.name}">
-            <label class="custom-control-label" for="${item.name}"></label>
+            <input type="checkbox" class="custom-control-input toggle" id="${item.id}" name="${item.name}">
+            <label class="custom-control-label" for="${item.id}"></label>
           </div>
         </div>
       ` : '';
@@ -1664,6 +1688,13 @@ document.addEventListener('DOMContentLoaded', function() {
   function editAndDeleteActionFormatter(value, row, index) {
     var buttons = [
       `<a class="edit" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;`,
+      `<a class="delete" title="Delete"><i class="fa fa-trash"></i></a>`
+    ];
+    return buttons.join("");
+  }
+
+  function deleteActionFormatter(value, row, index) {
+    var buttons = [
       `<a class="delete" title="Delete"><i class="fa fa-trash"></i></a>`
     ];
     return buttons.join("");
@@ -2458,13 +2489,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (row[0].PermittedResources) {
       var PermittedResources = row[0].PermittedResources.split(",");
       for (var resource in PermittedResources) {
-        $("#"+PermittedResources[resource]).prop("checked", "true");
+        $(`[name="`+PermittedResources[resource]+`"]`).prop("checked", "true");
       }
     }
     $("#SettingsModal .list-group .toggle").on("click", function(event) {
       var groupid = $("[name=groupId]").val();
       var group = $("[name=groupName]").val();
-      var toggle = $("#"+event.target.id).prop("checked") ? "enabled" : "disabled";
+      var role = $(event.target).attr('name');
+      var toggle = $(role).prop("checked") ? "enabled" : "disabled";
       var targetid = event.target.id
       var data = {
         key: targetid,
@@ -2473,22 +2505,22 @@ document.addEventListener('DOMContentLoaded', function() {
       queryAPI("PATCH","/api/rbac/group/"+groupid,data).done(function(data) {
         if (data["result"] == "Success") {
           if (toggle == "enabled") {
-            toast("Success", "", "Successfully added " + targetid + " to " + group, "success");
+            toast("Success", "", "Successfully added " + role + " to " + group, "success");
           } else if (toggle == "disabled") {
-            toast("Success", "", "Successfully removed " + targetid + " to " + group, "success");
+            toast("Success", "", "Successfully removed " + role + " from " + group, "success");
           }
           $("#groupsTable").bootstrapTable("refresh");
         } else if (data["result"] == "Error") {
           toast(data["result"],"",data["message"],"danger","30000");
         } else {
           if (toggle == "enabled") {
-            toast("Error", "", "Failed to add " + targetid + " to " + group, "danger");
+            toast("Error", "", "Failed to add " + role + " to " + group, "danger");
           } else if (toggle == "disabled") {
-            toast("Error", "", "Failed to remove " + targetid + " from " + group, "danger");
+            toast("Error", "", "Failed to remove " + role + " from " + group, "danger");
           }
         }
       }).fail(function() {
-          toast("Error", "", "Failed to remove " + targetid + " from " + group, "danger");
+          toast("Error", "", "Failed to remove " + role + " from " + group, "danger");
       });
     });
   }
@@ -2535,7 +2567,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var groupsplit = row.groups;
     if (groupsplit[0] != "") {
       for (var group in groupsplit) {
-        $("#"+groupsplit[group].replaceAll(" ", "--")).prop("checked", "true");
+        $(`[name="`+groupsplit[group]+`"]`).prop("checked", "true");
       }
     }
 
@@ -2561,7 +2593,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var userid = $("[name=userId]").val().trim();
       var data = {
         groups: $("#SettingsModal .list-group .toggle:checked").map(function() {
-          return this.id.replaceAll("--"," ");
+          return $(this).attr('name').replaceAll("--"," ");
         }).get().join(",")
       }
       queryAPI("PATCH","/api/user/"+userid,data).done(function(data) {

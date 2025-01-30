@@ -82,7 +82,7 @@ $app->get('/page/plugin/{plugin}/{page}', function ($request, $response, $args) 
 		$html .= '
 		<script>
 			var pluginJSSrc = "/api/page/plugin/'.$plugin.'/js";
-			appendScript({ src: pluginJSSrc });
+			appendScript(pluginJSSrc);
 		</script>
 		';
 
