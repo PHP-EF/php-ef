@@ -1360,12 +1360,18 @@ class Auth {
       foreach ($tokens as $token) {
           if (substr($token['token'], -10) === $stub) {
               // Revoke the token using CoreJwt
-              $this->CoreJwt->revokeToken($token['token']);
-              $this->api->setAPIResponseMessage('Token revoked successfully');
-              return true;
+              try {
+                $this->CoreJwt->revokeToken($token['token']);
+                $this->api->setAPIResponseMessage('Token revoked successfully');
+                return true;                
+              } catch (Exception $e) {
+                $this->api->setAPIResponse('Error',$e->getMessage());
+                return false;
+              }
+
           }
       }
-      $this->api->setAPIResponseMessage('Error','Token could not be found');
+      $this->api->setAPIResponse('Error','Token could not be found');
       return false; // Token not found
     } else {
       $this->api->setAPIResponse('Error','Not Authenticated',401);
