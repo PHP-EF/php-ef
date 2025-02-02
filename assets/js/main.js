@@ -2030,17 +2030,30 @@ document.addEventListener('DOMContentLoaded', function() {
   function apiTokenTableButtons() {
     return {
       btnAddNews: {
-        text: "Add API Token",
-        icon: "bi-plus-lg",
-        event: function() {
-          newAPIToken();
+        text: 'Add API Token',
+        icon: 'bi-plus-lg',
+        html: function() {
+          return `
+            <div class="d-flex">
+              <button name="btnAddNews" class="btn btn-success" title="Add a new API Token" style="background-color:#4bbe40;border-color:#4bbe40;height:40px;width:250px;">
+                <i class="bi bi-plus-lg"></i> Add API Token
+              </button>
+              <input type="number" id="daysInput" class="form-control mt-0" placeholder="Days" min="1" max="365" style="max-width: 100px; margin-left: 10px;height:40px;">
+            </div>
+          `;
         },
-        attributes: {
-          title: "Add a new API Token",
-          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        event: {
+          click: function() {
+            const days = document.getElementById('daysInput').value;
+            if (days >= 1 && days <= 365) {
+              newAPIToken(days);
+            } else {
+              alert('Please enter a valid number of days between 1 and 365.');
+            }
+          }
         }
-	    }
-    }
+      }
+    };
   }
 
   // ** TABLE RESPONSE HANDLER ** //
@@ -3111,8 +3124,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ** TOKEN FUNCTIONS ** //
-  function newAPIToken() {
-    queryAPI("POST","/api/auth/tokens/api").done(function(data) {
+  function newAPIToken(days = 90) {
+    queryAPI("POST","/api/auth/tokens/api",{"days":days}).done(function(data) {
       const modal = $(`
         <div class="modal fade" id="newAPITokenModal" tabindex="-1" role="dialog" aria-labelledby="newAPITokenModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-md" role="document">
@@ -3150,5 +3163,7 @@ document.addEventListener('DOMContentLoaded', function() {
           $('#profileModal').modal('show');
           $('#apiTokenTable').bootstrapTable('refresh');
       });
-    })
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+      toast(textStatus,"","Error: "+jqXHR.status+": "+errorThrown,"danger");
+    });
   }

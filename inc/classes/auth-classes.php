@@ -16,15 +16,20 @@ class CoreJwt {
 
   // Generate a JWT
   public function generateToken($data, $Expiry = null) {
-      $exp = $Expiry ?? (86400 * 30);
-      $data['iat'] = time();
-      $data['exp'] = time() + $exp;
-      $token = JWT::encode($data, $this->config->get()['Security']['salt'], 'HS256');
-      $this->redis->set($token, json_encode($data), 'EX', $exp); // Store token with expiration
-      $tokenType = $data['type'] === 'api' ? 'api_tokens' : 'session_tokens';
-      $this->redis->sadd("user:{$data['userid']}:$tokenType", $token); // Add token to user's set
-      $this->logging->writeLog("Authentication", "Issued JWT token", "debug", $data);
-      return $token;
+    try {
+        $exp = $Expiry ?? (86400 * 30);
+        $data['iat'] = time();
+        $data['exp'] = time() + $exp;
+        $token = JWT::encode($data, $this->config->get()['Security']['salt'], 'HS256');
+        $this->redis->set($token, json_encode($data), 'EX', $exp); // Store token with expiration
+        $tokenType = $data['type'] === 'api' ? 'api_tokens' : 'session_tokens';
+        $this->redis->sadd("user:{$data['userid']}:$tokenType", $token); // Add token to user's set
+        $this->logging->writeLog("Authentication", "Issued JWT token", "debug", $data);
+        return $token;
+    } catch (Exception $e) {
+        $this->logging->writeLog("Authentication", "Failed to generate JWT token", "error", ['exception' => $e->getMessage()]);
+        return null;
+    }
   }
 
   public function decodeToken($token) {
@@ -67,16 +72,26 @@ class CoreJwt {
     $tokenDetails = [];
 
     foreach ($tokens as $token) {
-      $expiry = $this->redis->ttl($token);
-      $last10Chars = substr($token, -10);
-      $arr = [
-        'last_10_chars' => $last10Chars,
-        'expiry' => $expiry
-      ];
-      if ($IncludeToken) {
-        $arr['token'] = $token;
-      }
-      $tokenDetails[] = $arr;
+        $expiry = $this->redis->ttl($token);
+        $last10Chars = substr($token, -10);
+        try {
+            $decoded = $this->decodeToken($token);
+            $iat = isset($decoded->iat) ? date('d/m/Y H:i:s', $decoded->iat) : 'N/A';
+            $exp = isset($decoded->exp) ? date('d/m/Y H:i:s', $decoded->exp) : 'N/A';
+        } catch (Exception $e) {
+            $iat = 'N/A';
+            $exp = 'N/A';
+        }
+        $arr = [
+            'last_10_chars' => $last10Chars,
+            'rexp' => $expiry, // Redis Expiry
+            'iat' => $iat, // JWT Creation Time
+            'exp' => $exp // JWT Expiry Time
+        ];
+        if ($IncludeToken) {
+            $arr['token'] = $token;
+        }
+        $tokenDetails[] = $arr;
     }
     return $tokenDetails;
   }

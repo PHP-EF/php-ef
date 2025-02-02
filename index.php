@@ -543,7 +543,7 @@ foreach ($navLinks as $navLink) {
                   </button>
                 </h2>
                 <div id="sessionToken" class="accordion-collapse collapse" aria-labelledby="sessionTokenHeading" data-bs-parent="#sessionTokenAccordion">
-                  <div class="accordion-body">
+                  <div class="accordion-body p-0">
                     <div class="card-body">
                       <table id="sessionTokenTable"></table>
                     </div>
@@ -562,7 +562,7 @@ foreach ($navLinks as $navLink) {
                   </button>
                 </h2>
                 <div id="apiKey" class="accordion-collapse collapse" aria-labelledby="apiKeyHeading" data-bs-parent="#apiKeyAccordion">
-                  <div class="accordion-body">
+                  <div class="accordion-body p-0">
                     <div class="card-body">
                       <table id="apiTokenTable"></table>
                     </div>
@@ -747,7 +747,7 @@ foreach ($navLinks as $navLink) {
         url: '/api/auth/tokens/session',
         dataField: 'data',
         sortable: true,
-        sortName: "expiry",
+        sortName: "exp",
         sortOrder: "desc",
         columns: [{
           field: "last_10_chars",
@@ -755,10 +755,9 @@ foreach ($navLinks as $navLink) {
           sortable: true,
           formatter: appendDotsFormatter
         },{
-          field: "expiry",
+          field: "exp",
           title: "Expiry",
-          sortable: true,
-          formatter: secondsFormatter
+          sortable: true
         },{
           events: tokenActionEvents,
           formatter: deleteActionFormatter
@@ -779,10 +778,9 @@ foreach ($navLinks as $navLink) {
           sortable: true,
           formatter: appendDotsFormatter
         },{
-          field: "expiry",
+          field: "exp",
           title: "Expiry",
-          sortable: true,
-          formatter: secondsFormatter
+          sortable: true
         },{
           events: tokenActionEvents,
           formatter: deleteActionFormatter

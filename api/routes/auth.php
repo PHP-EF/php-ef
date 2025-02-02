@@ -144,7 +144,7 @@ $app->post('/auth/tokens/api', function ($request, $response, $args) {
 	$valid = true;
 	$seconds = null;
 	if (isset($data['days'])) {
-		if ($data['days'] < 365) {
+		if ($data['days'] <= 365) {
 			$seconds = $data['days'] * 24 * 60 * 60;
 		} else {
 			$phpef->api->setAPIResponse('Error','API Keys are valid for a maximum of 1 year.');

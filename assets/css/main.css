@@ -83,9 +83,6 @@ body.dark-theme .bootstrap-table .fixed-table-container .fixed-table-body .fixed
   background: #232323;
   color: #FFF;
 }
-body.dark-theme .alert * {
-  color: #5a5954;
-}
 /* Tables */
 body.dark-theme .table {
   --bs-table-bg: #212529;
