@@ -66,10 +66,20 @@ class CoreJwt {
       return $this->redis->exists("revoked:$token");
   }
 
-  // List all tokens for a user with expiry date/time, encrypted token, and last 6 characters
+  // List all tokens for a user with expiry date/time, encrypted token, and last 10 characters
   public function listTokens($UserID, $Type, $IncludeToken = false) {
     $tokens = $this->redis->smembers("user:$UserID:$Type");
     $tokenDetails = [];
+
+    $Jwt = null;
+    if ($Type == "session_tokens") {
+      $headers = getallheaders();
+      if (isset($headers['X-Phpef-Jwt'])) {
+        $Jwt = $headers['X-Phpef-Jwt'];
+      } else if (isset($_COOKIE['jwt'])) {
+        $Jwt = $_COOKIE['jwt'];
+      }
+    }
 
     foreach ($tokens as $token) {
         $expiry = $this->redis->ttl($token);
@@ -82,6 +92,7 @@ class CoreJwt {
             $iat = 'N/A';
             $exp = 'N/A';
         }
+
         $arr = [
             'last_10_chars' => $last10Chars,
             'rexp' => $expiry, // Redis Expiry
@@ -90,6 +101,9 @@ class CoreJwt {
         ];
         if ($IncludeToken) {
             $arr['token'] = $token;
+        }
+        if ($Jwt && $Jwt == $token) {
+          $arr['active'] = true;
         }
         $tokenDetails[] = $arr;
     }

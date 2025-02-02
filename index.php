@@ -761,7 +761,15 @@ foreach ($navLinks as $navLink) {
         },{
           events: tokenActionEvents,
           formatter: deleteActionFormatter
-        }]
+        }],
+        rowStyle: function(row, index) {
+          if (row.active) {
+            return {
+              classes: 'table-success'
+            };
+          }
+          return {};
+        }
       });
 
       $("#apiTokenTable").bootstrapTable("destroy");

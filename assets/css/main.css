@@ -43,7 +43,7 @@ textarea.form-control {
 }
 
 /* Dark Mode */
-body.dark-theme h1,
+/* body.dark-theme h1,
 body.dark-theme h2,
 body.dark-theme h3,
 body.dark-theme h4,
@@ -63,8 +63,8 @@ body.dark-theme .saveBtn,
 body.dark-theme .dropdown-menu a,
 .panel-heading {
   /* color: #96a2b4; */
-  color: #cfcfcf;
-}
+  /* color: #cfcfcf;
+} */
 body.dark-theme .page-item .page-link,
 body.dark-theme .page-item.page-last-separator .page-link {
   color: #FFF;
@@ -98,9 +98,9 @@ body.dark-theme .table {
 body.dark-theme .text-muted {
   color: #8d99a4!important;
 }
-body.dark-theme a {
+/* body.dark-theme a {
   color: #74acff;
-}
+} */
 body.dark-theme label.dropdown-item,
 body.dark-theme .modal-body .fstlist,
 body.dark-theme .btn i {
