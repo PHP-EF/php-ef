@@ -1285,7 +1285,10 @@ class Auth {
   }
 
   // API Keys / Tokens
-  public function generateAPIToken($Seconds = 2592000) {
+  public function generateAPIToken($Seconds = null) {
+    if (!$Seconds) {
+      $Seconds = 90 * 24 * 60 * 60;
+    }
     $Auth = $this->getAuth();
     if ($Auth['Authenticated']) {
       if ($Auth['Type'] != 'api') {

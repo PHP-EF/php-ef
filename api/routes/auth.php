@@ -142,6 +142,7 @@ $app->post('/auth/tokens/api', function ($request, $response, $args) {
 	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
 	$data = $phpef->api->getAPIRequestData($request);
 	$valid = true;
+	$seconds = null;
 	if (isset($data['days'])) {
 		if ($data['days'] < 365) {
 			$seconds = $data['days'] * 24 * 60 * 60;
@@ -149,8 +150,6 @@ $app->post('/auth/tokens/api', function ($request, $response, $args) {
 			$phpef->api->setAPIResponse('Error','API Keys are valid for a maximum of 1 year.');
 			$valid = false;
 		}
-	} else {
-		$seconds = 30 * 24 * 60 * 60;
 	}
 	if ($valid) {
 		$phpef->api->setAPIResponseData($phpef->auth->generateAPIToken($seconds));
