@@ -200,7 +200,13 @@ function isValidUuid(mixed $uuid): bool
     return is_string($uuid) && preg_match('/^[a-f\d]{8}(-[a-f\d]{4}){4}[a-f\d]{8}$/i', $uuid);
 }
 
-function encrypt($data, $password){
+function encrypt($data, $password = null){
+    global $phpef;
+
+    if (!isset($password)) {
+        $password = $phpef->config->get('Security','salt');
+    }
+
 	$iv = substr(sha1(mt_rand()), 0, 16);
 	$password = sha1($password);
 

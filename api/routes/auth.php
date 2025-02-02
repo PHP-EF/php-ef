@@ -97,6 +97,70 @@ $app->post('/auth/crypt', function ($request, $response, $args) {
 		->withStatus($GLOBALS['responseCode']);
 });
 
+// Used for listing user tokens
+$app->get('/auth/tokens/{type}', function ($request, $response, $args) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+	switch($args['type']) {
+		case 'session':
+			$tokens = $phpef->auth->listSessionTokens();
+			if ($tokens) {
+				$phpef->api->setAPIResponseData($tokens);
+			} else {
+				$GLOBALS['api']['data'] = [];
+			}
+			break;
+		case 'api':
+			$tokens = $phpef->auth->listAPITokens();
+			if ($tokens) {
+				$phpef->api->setAPIResponseData($tokens);
+			} else {
+				$GLOBALS['api']['data'] = [];
+			}
+			break;
+		default:
+			$phpef->api->setAPIResponse('Error','Invalid Token Type');
+			break;
+	}
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json;charset=UTF-8')
+		->withStatus($GLOBALS['responseCode']);
+});
+
+// Used for revoking user tokens
+$app->delete('/auth/tokens/{type}/{stub}', function ($request, $response, $args) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+	$phpef->auth->revokeTokenByStub($args['type'],$args['stub']);
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json;charset=UTF-8')
+		->withStatus($GLOBALS['responseCode']);
+});
+
+// Used for generating user API Keys
+$app->post('/auth/tokens/api', function ($request, $response, $args) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+	$data = $phpef->api->getAPIRequestData($request);
+	$valid = true;
+	if (isset($data['days'])) {
+		if ($data['days'] < 365) {
+			$seconds = $data['days'] * 24 * 60 * 60;
+		} else {
+			$phpef->api->setAPIResponse('Error','API Keys are valid for a maximum of 1 year.');
+			$valid = false;
+		}
+	} else {
+		$seconds = 30 * 24 * 60 * 60;
+	}
+	if ($valid) {
+		$phpef->api->setAPIResponseData($phpef->auth->generateAPIToken($seconds));
+	}
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json;charset=UTF-8')
+		->withStatus($GLOBALS['responseCode']);
+});
+
 // SAML SSO
 $app->get('/auth/sso', function ($request, $response, $args) {
     $phpef = ($request->getAttribute('phpef')) ?? new phpef();

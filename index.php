@@ -533,6 +533,44 @@ foreach ($navLinks as $navLink) {
               </div>
             </div>
           </div>
+          <hr>
+          <div class="row">
+            <div class="accordion" id="sessionTokenAccordion">
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="sessionTokenHeading">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sessionToken" aria-expanded="true" aria-controls="sessionToken">
+                  Session Tokens
+                  </button>
+                </h2>
+                <div id="sessionToken" class="accordion-collapse collapse" aria-labelledby="sessionTokenHeading" data-bs-parent="#sessionTokenAccordion">
+                  <div class="accordion-body">
+                    <div class="card-body">
+                      <table id="sessionTokenTable"></table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="accordion" id="apiKeyAccordion">
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="apiKeyHeading">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apiKey" aria-expanded="true" aria-controls="apiKey">
+                  API Keys
+                  </button>
+                </h2>
+                <div id="apiKey" class="accordion-collapse collapse" aria-labelledby="apiKeyHeading" data-bs-parent="#apiKeyAccordion">
+                  <div class="accordion-body">
+                    <div class="card-body">
+                      <table id="apiTokenTable"></table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <?php
             $phpef->hooks->executeHook('user_profile_body');
           ?>
@@ -689,7 +727,7 @@ foreach ($navLinks as $navLink) {
 
     $('.infoBtn').on('click', function() {
       $('#infoModal').modal('show');
-      $.getJSON('/api/auth/whoami', function(whoami) {
+      queryAPI('GET','/api/auth/whoami').done(function(whoami) {
         if (whoami.data.headers.Cookie != null) {whoami.data.headers.Cookie = whoami.data.headers.Cookie.split('; ')};
         $('#whoami').text(JSON.stringify(whoami.data, null, 2));
       });
@@ -697,11 +735,58 @@ foreach ($navLinks as $navLink) {
 
     $('.profile').on('click', function() {
       $('#profileModal').modal('show');
-      $.getJSON('/api/auth/whoami', function(whoami) {
+      queryAPI('GET','/api/auth/whoami').done(function(whoami) {
         $('#userUsername').val(whoami.data.Username);
         $('#userFirstname').val(whoami.data.Firstname);
         $('#userSurname').val(whoami.data.Surname);
         $('#userEmail').val(whoami.data.Email);
+      });
+
+      $("#sessionTokenTable").bootstrapTable("destroy");
+      $("#sessionTokenTable").bootstrapTable({
+        url: '/api/auth/tokens/session',
+        dataField: 'data',
+        sortable: true,
+        sortName: "expiry",
+        sortOrder: "desc",
+        columns: [{
+          field: "last_10_chars",
+          title: "Token",
+          sortable: true,
+          formatter: appendDotsFormatter
+        },{
+          field: "expiry",
+          title: "Expiry",
+          sortable: true,
+          formatter: secondsFormatter
+        },{
+          events: tokenActionEvents,
+          formatter: deleteActionFormatter
+        }]
+      });
+
+      $("#apiTokenTable").bootstrapTable("destroy");
+      $("#apiTokenTable").bootstrapTable({
+        url: '/api/auth/tokens/api',
+        dataField: 'data',
+        sortable: true,
+        sortName: "expiry",
+        sortOrder: "desc",
+        buttons: apiTokenTableButtons,
+        columns: [{
+          field: "last_10_chars",
+          title: "Token",
+          sortable: true,
+          formatter: appendDotsFormatter
+        },{
+          field: "expiry",
+          title: "Expiry",
+          sortable: true,
+          formatter: secondsFormatter
+        },{
+          events: tokenActionEvents,
+          formatter: deleteActionFormatter
+        }]
       });
     });
 

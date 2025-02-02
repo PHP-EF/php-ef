@@ -1,3 +1,8 @@
+## v0.8.3
+- Refactor way that JWT tokens are created
+- Added ability to generate API Tokens
+- Both JWT Session & API Tokens can be revoked via User Profile menu
+
 ## v0.8.2
 - Give roles friendly names and replace unique identifier with 'slug'
 

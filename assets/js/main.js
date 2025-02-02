@@ -31,6 +31,13 @@ function pad(n, width, z) {
 	return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
 }
 
+function generateAPIKey(elemName) {
+  console.log(elemName);
+  generateSecureToken().then(function(token) {
+      $(`[name='${elemName}']`).val(token).change();
+  });
+}
+
 function createTableHtml(index, prefix) {
   return `<table class="table table-striped" id="`+prefix+`-table-` + index +`"></table>`;
 }
@@ -1647,6 +1654,37 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  window.tokenActionEvents = {
+    "click .delete": function (e, value, row, index) {
+      if(confirm("Are you sure you want to revoke the token: "+row.last_10_chars+"? This is irriversible.") == true) {
+        var tableId = $(e.currentTarget).closest("table").attr("id");
+        var type = null;
+        switch (tableId) {
+          case 'sessionTokenTable':
+            type = 'session_tokens';
+            break;
+          case 'apiTokenTable':
+            type = 'api_tokens';
+            break;
+          default:
+            return;
+        }
+        queryAPI("DELETE","/api/auth/tokens/"+type+"/"+row.last_10_chars).done(function(data) {
+          if (data["result"] == "Success") {
+            toast("Success","","Successfully revoked "+row.last_10_chars+" from Tokens","success");
+            $(`#${tableId}`).bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger","30000");
+          } else {
+            toast("Error","","Failed to delete "+row.last_10_chars+" from Tokens","danger");
+          }
+        }).fail(function() {
+            toast("Error", "", "Failed to remove " + row.last_10_chars + " from Tokens", "danger");
+        });
+      }
+    }
+  }
+
 
   // ** ACTION FORMATTERS ** //
   function widgetActionFormatter(value, row, index) {
@@ -1806,6 +1844,30 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  function appendDotsFormatter(value, row, index) {
+    return '...'+value;
+  }
+
+  function secondsFormatter(value, row, index) {
+    const units = [
+        { label: 'month', seconds: 2628000 }, // Approximate value for a month (30.44 days)
+        { label: 'week', seconds: 604800 },
+        { label: 'day', seconds: 86400 },
+        { label: 'hour', seconds: 3600 },
+        { label: 'minute', seconds: 60 },
+        { label: 'second', seconds: 1 }
+    ];
+
+    for (let unit of units) {
+        if (value >= unit.seconds) {
+            const count = Math.floor(value / unit.seconds);
+            return `${count} ${unit.label}${count > 1 ? 's' : ''}`;
+        }
+    }
+    return '0 seconds';
+  }
+
+
   // ** TABLE DETAIL FORMATTERS ** //
   function pagesDetailFormatter(index, row, prefix) {
     let html = [];
@@ -1959,6 +2021,22 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         attributes: {
           title: "Add a new news item",
+          style: "background-color:#4bbe40;border-color:#4bbe40;"
+        }
+	    }
+    }
+  }
+
+  function apiTokenTableButtons() {
+    return {
+      btnAddNews: {
+        text: "Add API Token",
+        icon: "bi-plus-lg",
+        event: function() {
+          newAPIToken();
+        },
+        attributes: {
+          title: "Add a new API Token",
           style: "background-color:#4bbe40;border-color:#4bbe40;"
         }
 	    }
@@ -3030,4 +3108,47 @@ document.addEventListener('DOMContentLoaded', function() {
         toast(textStatus,"","Error: "+jqXHR.status+": "+errorThrown,"danger");
       });
     }
+  }
+
+  // ** TOKEN FUNCTIONS ** //
+  function newAPIToken() {
+    queryAPI("POST","/api/auth/tokens/api").done(function(data) {
+      const modal = $(`
+        <div class="modal fade" id="newAPITokenModal" tabindex="-1" role="dialog" aria-labelledby="newAPITokenModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="newAPITokenModalLabel">New API Token</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true"></span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div class="alert alert-warning">
+                  <p>This API Token will only be displayed once. Please save it and keep it safe.</p>
+                  <code>${data.data}</code>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `);
+
+      // Append modal to body
+      $('body').append(modal);
+
+      // Show the modal
+      $('#newAPITokenModal').modal('show');
+      $('#profileModal').modal('hide');
+
+      // Remove modal from DOM when hidden
+      $('#newAPITokenModal').on('hidden.bs.modal', function () {
+          $(this).modal('hide').remove();
+          $('#profileModal').modal('show');
+          $('#apiTokenTable').bootstrapTable('refresh');
+      });
+    })
   }
