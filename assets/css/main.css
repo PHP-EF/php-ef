@@ -1371,7 +1371,7 @@ body.dark-theme .image-gallery {
 /* Home Section */
 .home-section{
   position: relative;
-  height: 100vh;
+  height: 100%;
   transition: all 0.5s ease;
   z-index: 500;
   overflow-y: hidden;
