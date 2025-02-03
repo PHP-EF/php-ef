@@ -54,21 +54,20 @@
   <div class="sidebar<?php echo $sidebarClasses ?>">
     <div class="logo-details">
       <?php
-      $smLogoPath = $phpef->config->get('Styling', 'logo-sm')['Image'];
+      $smLogoPath = $phpef->config->get('Styling', 'logo-sm')['Image'] ?? '';
+      $smLogoPath = $smLogoPath !== '' ? $smLogoPath : '/assets/images/php-ef-icon.png';
       $smLogoCSS = $phpef->config->get('Styling', 'logo-sm')['CSS'] ?? '';
-      $smLogoPath = $smLogoPath ? $smLogoPath : '/assets/images/php-ef-icon.png';
-      echo '<img class="logo-sm" src="' . (file_exists(__DIR__ . $smLogoPath) ? $smLogoPath : '/assets/images/php-ef-icon.png') . '" style="'.$smLogoCSS.'"></img>';
+      echo '<img class="logo-sm" src="' . $smLogoPath . '" style="'.$smLogoCSS.'"></img>';
 
-      if ($phpef->config->get('Styling','websiteTitleNotLogo') ?? false) {
-        $fontSize = $phpef->config->get('Styling','websiteTitleFontSize') ?? "42";
-        echo '<span class="logo-text" style="font-size: '.$fontSize.';">'.$phpef->config->get('Styling','websiteTitle') ?? ''.'</span>';
+      if ($phpef->config->get('Styling', 'websiteTitleNotLogo') ?? false) {
+          $fontSize = $phpef->config->get('Styling', 'websiteTitleFontSize') ?? "42";
+          echo '<span class="logo-text" style="font-size: '.$fontSize.';">'.$phpef->config->get('Styling', 'websiteTitle') ?? ''.'</span>';
       } else {
-        $lgLogoPath = $phpef->config->get('Styling', 'logo-lg')['Image'];
-        $lgLogoCSS = $phpef->config->get('Styling', 'logo-lg')['CSS'] ?? '';
-        $lgLogoPath = $lgLogoPath ? $lgLogoPath : '/assets/images/php-ef-icon-text.png';
-        echo '<img class="logo-lg" src="' . (file_exists(__DIR__ . $lgLogoPath) ? $lgLogoPath : '/assets/images/php-ef-icon-text.png') . '" style="'.$lgLogoCSS.'"></img>';
+          $lgLogoPath = $phpef->config->get('Styling', 'logo-lg')['Image'] ?? '';
+          $lgLogoPath = $lgLogoPath !== '' ? $lgLogoPath : '/assets/images/php-ef-icon-text.png';
+          $lgLogoCSS = $phpef->config->get('Styling', 'logo-lg')['CSS'] ?? '';
+          echo '<img class="logo-lg" src="' . $lgLogoPath . '" style="'.$lgLogoCSS.'"></img>';
       }
-
       ?>
     </div>
     <ul class="nav-links">
