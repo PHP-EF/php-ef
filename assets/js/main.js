@@ -978,11 +978,13 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Listener to add changed class to main settings elements
-  $("#page-content").on('change', '.info-field', function(event) {
+  $("#page-content").on('change', '.info-field, .dynamic-select-input', function(event) {
       const elementName = $(this).data('label');
-      if (!changedSettingsElements.has(elementName)) {
-          toast("Configuration", "", elementName + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
-          changedSettingsElements.add(elementName);
+      const controlLabel = $($(this).parents().eq(2).prev('.control-label')[0]).text();
+      const label = elementName || controlLabel;
+      if (!changedSettingsElements.has(label)) {
+          toast("Configuration", "", label + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
+          changedSettingsElements.add(label);
       }
       $(this).addClass("changed");
   });
@@ -1228,6 +1230,16 @@ document.addEventListener('DOMContentLoaded', function() {
         return smallLabel+'<select class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>'+helpInfo;
       case 'selectmultiple':
         return smallLabel+'<select class="form-control info-field'+extraClass+'" multiple '+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>'+helpInfo;
+      case 'imageselect':
+        var ret = smallLabel+'<select class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>'+helpInfo;
+        console.log(item);
+        if (item.initialize == 'true') {
+          ret += `<script>
+          var dynSelect = new DynamicSelect(document.querySelector('[${name}]'));
+          dynSelect.setSelectedValue(${value});
+          </script>`;
+        }
+        return ret;
       case 'switch':
       case 'checkbox':
         return smallLabel+'<div class="form-check form-switch"><input class="form-check-input info-field'+extraClass+'" type="checkbox"'+name+value+id+disabled+type+label+attr+dataAttributes+'/></div>'+helpInfo;
@@ -2642,7 +2654,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (row['multifactor_enabled']) {
       $("#mfaUserSettings").html(`
         <div class="alert alert-info text-center d-grid" role="alert" id="mfaAlert">
-          <h3>${row['multifactor_type'].toUpperCase()}</h3>
+          <span class="h3">${row['multifactor_type'].toUpperCase()}</span>
           <span>Multifactor Authentication is configured.</span>
           <button class="btn btn-danger mt-2" onclick="resetMFA(${row.id});">Reset</button>
         </div>

@@ -319,6 +319,11 @@ return '
         formData.push({ name: this.name, value: this.checked });
     });
 
+    // Include dynamic image selects in the formData
+    $("input.dynamic-select-input.changed").each(function() {
+        formData.push({ name: this.name, value: this.value });
+    });
+
     var configData = {};
     var encryptionPromises = [];
 

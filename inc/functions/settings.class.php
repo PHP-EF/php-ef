@@ -6,9 +6,9 @@ trait Settings {
                 $this->settingsOption('input', 'Styling[websiteTitle]', ['label' => 'Website Title']),
                 $this->settingsOption('input', 'Styling[websiteTitleFontSize]', ['label' => 'Font size when using title for logo', 'value' => '42px', 'width' => '3']),
                 $this->settingsOption('checkbox', 'Styling[websiteTitleNotLogo]', ['label' => 'Use website title instead of logo', 'width' => '3']),
-                $this->settingsOption('input', 'Styling[logo-sm][Image]', ['label' => 'Logo Image (Small)']),
+                $this->settingsOption('imageselect', 'Styling[logo-sm][Image]', ['label' => 'Logo Image (Small)', 'help' => 'The small logo image used in the sidebar', 'value' => $this->config->get('Styling', 'logo-sm')['Image']]),
                 $this->settingsOption('input', 'Styling[logo-sm][CSS]', ['label' => 'Logo CSS (Small)']),
-                $this->settingsOption('input', 'Styling[logo-lg][Image]', ['label' => 'Logo Image (Large)']),
+                $this->settingsOption('imageselect', 'Styling[logo-lg][Image]', ['label' => 'Logo Image (Large)', 'help' => 'The large logo image used in the sidebar', 'value' => $this->config->get('Styling', 'logo-lg')['Image']]),
                 $this->settingsOption('input', 'Styling[logo-lg][CSS]', ['label' => 'Logo Image (CSS)']),
                 $this->settingsOption('hr'),
                 $this->settingsOption('title','navbarStyleTitle',['text' => 'Top Bar Style']),
@@ -31,7 +31,7 @@ trait Settings {
                 $this->settingsOption('colourpicker', 'Styling[sidebar][footerColour]', ['label' => 'Sidebar Footer Colour', 'width' => '3', 'value' => '#11101d'])
             ),
             'Favicon' => array(
-                $this->settingsOption('input', 'Styling[favicon][Image]', ['label' => 'Favicon'])
+                $this->settingsOption('imageselect', 'Styling[favicon][Image]', ['label' => 'Favicon', 'help' => 'The website Favicon', 'value' => $this->config->get('Styling', 'favicon')['Image']]),
             ),
             'Homepage' => array(
 				$this->settingsOption('code-editor', 'Styling[html][homepage]', ['label' => 'Homepage HTML', 'mode' => 'html', 'value' => $this->config->get('Styling', 'html')['homepage']]),
@@ -815,7 +815,7 @@ trait Settings {
                 $this->settingsOption('select', 'pageSubMenu', ['label' => 'Sub Menu', 'options' => $AppendNone, 'help' => 'The submenu to place the link in.']),
                 $this->settingsOption('hr'),
                 $this->settingsOption('input', 'pageIcon', ['label' => 'Icon', 'help' => 'The fontawesome or bootstrap icon to use for this link or menu.']),
-                $this->settingsOption('select', 'pageImage', ['label' => 'Image', 'attr' => '', 'options' => $this->getAllImagesForSelect(), 'help' => 'The image to use for this link or menu.']),
+                $this->settingsOption('imageselect', 'pageImage', ['label' => 'Image', 'attr' => '', 'help' => 'The image to use for this link or menu.', 'initialize' => 'false']),
                 $this->settingsOption('checkbox', 'pageDefault', ['label' => 'Default Page', 'help' => 'Set this link as the default page.']),
                 $this->settingsOption('input', 'pageId', ['attr' => 'hidden'])
             )

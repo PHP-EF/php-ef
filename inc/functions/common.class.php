@@ -160,6 +160,13 @@ trait Common {
                     'label' => '',
                 ];
                 break;
+            case 'imageselect':
+                $settingMerge = [
+                    'type' => 'imageselect',
+                    'options' => $this->getAllImagesForSelect(),
+                    'initialize' => 'true'
+                ];
+                break;
             case 'codeeditor':
                 $mode = strtolower($extras['mode'] ?? 'css');
                 switch ($mode) {

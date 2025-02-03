@@ -64,7 +64,7 @@ class DynamicSelect {
         }
         let template = `
             <div class="dynamic-select ${this.name}${this.isDisabled ? ' dynamic-select-disabled' : ''}"${this.selectElement.id ? ' id="' + this.selectElement.id + '"' : ''} style="${this.width ? 'width:' + this.width + ';' : ''}${this.height ? 'height:' + this.height + ';' : ''}">
-                <input type="hidden" name="${this.name}" value="${this.selectedValue}">
+                <input type="hidden" name="${this.name}" value="${this.selectedValue}" class="dynamic-select-input">
                 <div class="dynamic-select-header" style="${this.width ? 'width:' + this.width + ';' : ''}${this.height ? 'height:' + this.height + ';' : ''}"><span class="dynamic-select-header-placeholder">${this.placeholder}</span></div>
                 <div class="dynamic-select-options" style="${this.options.dropdownWidth ? 'width:' + this.options.dropdownWidth + ';' : ''}${this.options.dropdownHeight ? 'height:' + this.options.dropdownHeight + ';' : ''}">${optionsHTML}</div>
             </div>
@@ -78,14 +78,31 @@ class DynamicSelect {
         if (!this.isDisabled) {
             this.element.querySelectorAll('.dynamic-select-option').forEach(option => {
                 option.onclick = () => {
-                    this.element.querySelectorAll('.dynamic-select-selected').forEach(selected => selected.classList.remove('dynamic-select-selected'));
-                    option.classList.add('dynamic-select-selected');
-                    this.element.querySelector('.dynamic-select-header').innerHTML = option.innerHTML;
-                    this.element.querySelector('input').value = option.getAttribute('data-value');
+                    // Remove the 'dynamic-select-selected' class from all selected elements
+                    $(this.element).find('.dynamic-select-selected').removeClass('dynamic-select-selected');
+
+                    // Add the 'dynamic-select-selected' class to the selected option
+                    $(option).addClass('dynamic-select-selected');
+
+                    // Update the header with the selected option's inner HTML
+                    $(this.element).find('.dynamic-select-header').html($(option).html());
+
+                    // Update the input value and trigger the 'input' event
+                    $(this.element).find('input').val($(option).data('value')).trigger('change');
+
+                    // Update the data array to mark the selected option
                     this.data.forEach(data => data.selected = false);
-                    this.data.filter(data => data.value == option.getAttribute('data-value'))[0].selected = true;
-                    this.element.querySelector('.dynamic-select-header').classList.remove('dynamic-select-header-active');
-                    this.options.onChange(option.getAttribute('data-value'), option.querySelector('.dynamic-select-option-text') ? option.querySelector('.dynamic-select-option-text').innerHTML : '', option);
+                    this.data.filter(data => data.value == $(option).data('value'))[0].selected = true;
+
+                    // Remove the 'dynamic-select-header-active' class from the header
+                    $(this.element).find('.dynamic-select-header').removeClass('dynamic-select-header-active');
+
+                    // Call the onChange callback with the selected option's value and text
+                    this.options.onChange(
+                        $(option).data('value'),
+                        $(option).find('.dynamic-select-option-text').length ? $(option).find('.dynamic-select-option-text').html() : '',
+                        option
+                    );
                 };
             });
             this.element.querySelector('.dynamic-select-header').onclick = () => {
@@ -97,7 +114,8 @@ class DynamicSelect {
                 };
             }
             document.addEventListener('click', event => {
-                if (!event.target.closest('.' + this.name) && !event.target.closest('label[for="' + this.selectElement.id + '"]')) {
+                var escapedName = this.name.replace(/([[\]])/g, '\\$1');
+                if (!event.target.closest('.' + escapedName) && !event.target.closest('label[for="' + this.selectElement.id + '"]')) {
                     this.element.querySelector('.dynamic-select-header').classList.remove('dynamic-select-header-active');
                 }
             });
