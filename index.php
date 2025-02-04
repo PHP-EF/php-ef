@@ -54,21 +54,20 @@
   <div class="sidebar<?php echo $sidebarClasses ?>">
     <div class="logo-details">
       <?php
-      $smLogoPath = $phpef->config->get('Styling', 'logo-sm')['Image'];
+      $smLogoPath = $phpef->config->get('Styling', 'logo-sm')['Image'] ?? '';
+      $smLogoPath = $smLogoPath !== '' ? $smLogoPath : '/assets/images/php-ef-icon.png';
       $smLogoCSS = $phpef->config->get('Styling', 'logo-sm')['CSS'] ?? '';
-      $smLogoPath = $smLogoPath ? $smLogoPath : '/assets/images/php-ef-icon.png';
-      echo '<img class="logo-sm" src="' . (file_exists(__DIR__ . $smLogoPath) ? $smLogoPath : '/assets/images/php-ef-icon.png') . '" style="'.$smLogoCSS.'"></img>';
+      echo '<img class="logo-sm" src="' . $smLogoPath . '" style="'.$smLogoCSS.'"></img>';
 
-      if ($phpef->config->get('Styling','websiteTitleNotLogo') ?? false) {
-        $fontSize = $phpef->config->get('Styling','websiteTitleFontSize') ?? "42";
-        echo '<span class="logo-text" style="font-size: '.$fontSize.';">'.$phpef->config->get('Styling','websiteTitle') ?? ''.'</span>';
+      if ($phpef->config->get('Styling', 'websiteTitleNotLogo') ?? false) {
+          $fontSize = $phpef->config->get('Styling', 'websiteTitleFontSize') ?? "42";
+          echo '<span class="logo-text" style="font-size: '.$fontSize.';">'.$phpef->config->get('Styling', 'websiteTitle') ?? ''.'</span>';
       } else {
-        $lgLogoPath = $phpef->config->get('Styling', 'logo-lg')['Image'];
-        $lgLogoCSS = $phpef->config->get('Styling', 'logo-lg')['CSS'] ?? '';
-        $lgLogoPath = $lgLogoPath ? $lgLogoPath : '/assets/images/php-ef-icon-text.png';
-        echo '<img class="logo-lg" src="' . (file_exists(__DIR__ . $lgLogoPath) ? $lgLogoPath : '/assets/images/php-ef-icon-text.png') . '" style="'.$lgLogoCSS.'"></img>';
+          $lgLogoPath = $phpef->config->get('Styling', 'logo-lg')['Image'] ?? '';
+          $lgLogoPath = $lgLogoPath !== '' ? $lgLogoPath : '/assets/images/php-ef-icon-text.png';
+          $lgLogoCSS = $phpef->config->get('Styling', 'logo-lg')['CSS'] ?? '';
+          echo '<img class="logo-lg" src="' . $lgLogoPath . '" style="'.$lgLogoCSS.'"></img>';
       }
-
       ?>
     </div>
     <ul class="nav-links">
@@ -533,6 +532,44 @@ foreach ($navLinks as $navLink) {
               </div>
             </div>
           </div>
+          <hr>
+          <div class="row">
+            <div class="accordion" id="sessionTokenAccordion">
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="sessionTokenHeading">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sessionToken" aria-expanded="true" aria-controls="sessionToken">
+                  Session Tokens
+                  </button>
+                </h2>
+                <div id="sessionToken" class="accordion-collapse collapse" aria-labelledby="sessionTokenHeading" data-bs-parent="#sessionTokenAccordion">
+                  <div class="accordion-body p-0">
+                    <div class="card-body">
+                      <table id="sessionTokenTable"></table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="accordion" id="apiKeyAccordion">
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="apiKeyHeading">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apiKey" aria-expanded="true" aria-controls="apiKey">
+                  API Keys
+                  </button>
+                </h2>
+                <div id="apiKey" class="accordion-collapse collapse" aria-labelledby="apiKeyHeading" data-bs-parent="#apiKeyAccordion">
+                  <div class="accordion-body p-0">
+                    <div class="card-body">
+                      <table id="apiTokenTable"></table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <?php
             $phpef->hooks->executeHook('user_profile_body');
           ?>
@@ -689,7 +726,7 @@ foreach ($navLinks as $navLink) {
 
     $('.infoBtn').on('click', function() {
       $('#infoModal').modal('show');
-      $.getJSON('/api/auth/whoami', function(whoami) {
+      queryAPI('GET','/api/auth/whoami').done(function(whoami) {
         if (whoami.data.headers.Cookie != null) {whoami.data.headers.Cookie = whoami.data.headers.Cookie.split('; ')};
         $('#whoami').text(JSON.stringify(whoami.data, null, 2));
       });
@@ -697,11 +734,64 @@ foreach ($navLinks as $navLink) {
 
     $('.profile').on('click', function() {
       $('#profileModal').modal('show');
-      $.getJSON('/api/auth/whoami', function(whoami) {
+      queryAPI('GET','/api/auth/whoami').done(function(whoami) {
         $('#userUsername').val(whoami.data.Username);
         $('#userFirstname').val(whoami.data.Firstname);
         $('#userSurname').val(whoami.data.Surname);
         $('#userEmail').val(whoami.data.Email);
+      });
+
+      $("#sessionTokenTable").bootstrapTable("destroy");
+      $("#sessionTokenTable").bootstrapTable({
+        url: '/api/auth/tokens/session',
+        dataField: 'data',
+        sortable: true,
+        sortName: "exp",
+        sortOrder: "desc",
+        columns: [{
+          field: "last_10_chars",
+          title: "Token",
+          sortable: true,
+          formatter: appendDotsFormatter
+        },{
+          field: "exp",
+          title: "Expiry",
+          sortable: true
+        },{
+          events: tokenActionEvents,
+          formatter: deleteActionFormatter
+        }],
+        rowStyle: function(row, index) {
+          if (row.active) {
+            return {
+              classes: 'table-success'
+            };
+          }
+          return {};
+        }
+      });
+
+      $("#apiTokenTable").bootstrapTable("destroy");
+      $("#apiTokenTable").bootstrapTable({
+        url: '/api/auth/tokens/api',
+        dataField: 'data',
+        sortable: true,
+        sortName: "expiry",
+        sortOrder: "desc",
+        buttons: apiTokenTableButtons,
+        columns: [{
+          field: "last_10_chars",
+          title: "Token",
+          sortable: true,
+          formatter: appendDotsFormatter
+        },{
+          field: "exp",
+          title: "Expiry",
+          sortable: true
+        },{
+          events: tokenActionEvents,
+          formatter: deleteActionFormatter
+        }]
       });
     });
 

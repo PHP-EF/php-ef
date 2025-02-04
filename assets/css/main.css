@@ -65,6 +65,10 @@ body.dark-theme .dropdown-menu a,
   /* color: #96a2b4; */
   color: #cfcfcf;
 }
+body.dark-theme * tr[class^="table-"] td,
+body.dark-theme * tr[class^="table-"] td i {
+  color: #000;
+}
 body.dark-theme .page-item .page-link,
 body.dark-theme .page-item.page-last-separator .page-link {
   color: #FFF;
@@ -83,9 +87,6 @@ body.dark-theme .bootstrap-table .fixed-table-container .fixed-table-body .fixed
   background: #232323;
   color: #FFF;
 }
-body.dark-theme .alert * {
-  color: #5a5954;
-}
 /* Tables */
 body.dark-theme .table {
   --bs-table-bg: #212529;
@@ -101,9 +102,9 @@ body.dark-theme .table {
 body.dark-theme .text-muted {
   color: #8d99a4!important;
 }
-body.dark-theme a {
+/* body.dark-theme a {
   color: #74acff;
-}
+} */
 body.dark-theme label.dropdown-item,
 body.dark-theme .modal-body .fstlist,
 body.dark-theme .btn i {
@@ -1374,7 +1375,7 @@ body.dark-theme .image-gallery {
 /* Home Section */
 .home-section{
   position: relative;
-  height: 100vh;
+  height: 100%;
   transition: all 0.5s ease;
   z-index: 500;
   overflow-y: hidden;

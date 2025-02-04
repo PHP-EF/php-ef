@@ -4,64 +4,111 @@ use Firebase\JWT\Key;
 use Predis\Client;
 
 class CoreJwt {
-    private $redis;
-    private $config;
-    private $logging;
+  private $redis;
+  private $config;
+  private $logging;
 
-    public function __construct($core) {
-        $this->redis = new Client(); // Connect to Redis
-        $this->config = $core->config;
-        $this->logging = $core->logging;
-    }
-
-    // Generate a JWT
-    public function generateToken($UN,$FN,$SN,$EM,$Groups,$Type,$Expiry = null,$MFA = null) {
-        $exp = $Expiry ?? (86400 * 30);
-        $payload = [
-          'iat' => time(), // Issued at
-          'exp' => time() + $exp, // Expiration time (defaults to 30 days)
-          'username' => $UN,
-          'firstname' => $FN,
-          'surname' => $SN,
-          'email' => $EM,
-          'fullname' => $FN.' '.$SN,
-          'groups' => $Groups,
-          'type' => $Type
-        ];
-        if ($MFA !== null) {
-          $payload['mfa'] = $MFA;
-        }
-        $this->logging->writeLog("Authentication","Issued JWT token","debug",$payload);
-        return JWT::encode($payload, $this->config->get()['Security']['salt'], 'HS256');
-    }
-
-    public function decodeToken($token) {
-      $secretKey = $this->config->get()['Security']['salt']; // Change this to a secure key
-      return JWT::decode($token, new Key($secretKey, 'HS256'));
-    }
-
-    // Revoke a token
-    public function revokeToken($token) {
-        $decoded = JWT::decode($token, new Key($this->config->get()['Security']['salt'], 'HS256'));
-        $this->redis->set($token, json_encode($decoded), 'EX', (86400 * 30)); // Store token with expiration
-        $this->logging->writeLog("Authentication","Revoked JWT token","debug",$decoded);
-    }
-
-    // Revoke a SAML Assertion
-    public function revokeAssertion($assertion,$userid,$seconds) {
-      $this->redis->set($assertion, $userid, 'EX', $seconds); // Store assertion with expiration
-      $RevokeArr = array(
-        'assertion' => $assertion,
-        'userid' => $userid,
-        'seconds' => $seconds
-      );
-      $this->logging->writeLog("Authentication","Revoked SAML Assertion","debug",$RevokeArr);
+  public function __construct($core) {
+      $this->redis = new Client(); // Connect to Redis
+      $this->config = $core->config;
+      $this->logging = $core->logging;
   }
 
-    // Check if a token is revoked
-    public function isRevoked($token) {
-        return $this->redis->exists($token);
+  // Generate a JWT
+  public function generateToken($data, $Expiry = null) {
+    try {
+        $exp = $Expiry ?? (86400 * 30);
+        $data['iat'] = time();
+        $data['exp'] = time() + $exp;
+        $token = JWT::encode($data, $this->config->get()['Security']['salt'], 'HS256');
+        $this->redis->set($token, json_encode($data), 'EX', $exp); // Store token with expiration
+        $tokenType = $data['type'] === 'api' ? 'api_tokens' : 'session_tokens';
+        $this->redis->sadd("user:{$data['userid']}:$tokenType", $token); // Add token to user's set
+        $this->logging->writeLog("Authentication", "Issued JWT token", "debug", $data);
+        return $token;
+    } catch (Exception $e) {
+        $this->logging->writeLog("Authentication", "Failed to generate JWT token", "error", ['exception' => $e->getMessage()]);
+        return null;
     }
+  }
+
+  public function decodeToken($token) {
+      $secretKey = $this->config->get()['Security']['salt']; // Change this to a secure key
+      return JWT::decode($token, new Key($secretKey, 'HS256'));
+  }
+
+  // Revoke a token
+  public function revokeToken($token) {
+    try {
+        $decoded = JWT::decode($token, new Key($this->config->get()['Security']['salt'], 'HS256'));
+        $this->redis->set("revoked:$token", json_encode($decoded), 'EX', (86400 * 30)); // Store revoked token with expiration
+        $tokenType = $decoded->type === 'api' ? 'api_tokens' : 'session_tokens';
+        $this->redis->srem("user:{$decoded->userid}:$tokenType", $token); // Remove token from user's set
+        $this->logging->writeLog("Authentication", "Revoked JWT token from: $tokenType", "debug", $decoded);
+    } catch (Exception $e) {
+        $this->logging->writeLog("Authentication", "Failed to revoke JWT token", "error", ['exception' => $e->getMessage()]);
+    }
+  }
+
+  // Revoke a SAML Assertion
+  public function revokeAssertion($assertion, $userid, $seconds) {
+      $this->redis->set($assertion, $userid, 'EX', $seconds); // Store assertion with expiration
+      $RevokeArr = array(
+          'assertion' => $assertion,
+          'userid' => $userid,
+          'seconds' => $seconds
+      );
+      $this->logging->writeLog("Authentication", "Revoked SAML Assertion", "debug", $RevokeArr);
+  }
+
+  // Check if a token is revoked
+  public function isRevoked($token) {
+      return $this->redis->exists("revoked:$token");
+  }
+
+  // List all tokens for a user with expiry date/time, encrypted token, and last 10 characters
+  public function listTokens($UserID, $Type, $IncludeToken = false) {
+    $tokens = $this->redis->smembers("user:$UserID:$Type");
+    $tokenDetails = [];
+
+    $Jwt = null;
+    if ($Type == "session_tokens") {
+      $headers = getallheaders();
+      if (isset($headers['X-Phpef-Jwt'])) {
+        $Jwt = $headers['X-Phpef-Jwt'];
+      } else if (isset($_COOKIE['jwt'])) {
+        $Jwt = $_COOKIE['jwt'];
+      }
+    }
+
+    foreach ($tokens as $token) {
+        $expiry = $this->redis->ttl($token);
+        $last10Chars = substr($token, -10);
+        try {
+            $decoded = $this->decodeToken($token);
+            $iat = isset($decoded->iat) ? date('d/m/Y H:i:s', $decoded->iat) : 'N/A';
+            $exp = isset($decoded->exp) ? date('d/m/Y H:i:s', $decoded->exp) : 'N/A';
+        } catch (Exception $e) {
+            $iat = 'N/A';
+            $exp = 'N/A';
+        }
+
+        $arr = [
+            'last_10_chars' => $last10Chars,
+            'rexp' => $expiry, // Redis Expiry
+            'iat' => $iat, // JWT Creation Time
+            'exp' => $exp // JWT Expiry Time
+        ];
+        if ($IncludeToken) {
+            $arr['token'] = $token;
+        }
+        if ($Jwt && $Jwt == $token) {
+          $arr['active'] = true;
+        }
+        $tokenDetails[] = $arr;
+    }
+    return $tokenDetails;
+  }
 }
 
 class Auth {
@@ -332,7 +379,6 @@ class Auth {
     }
   }
 
-
   public function resetExpiredPassword($username,$currentPassword,$newPassword) {
     $user = $this->getUserByUsernameOrEmail($username,$username,true);
     if ($user && password_verify($user['salt'].$currentPassword, $user['password'])) { // Login Successful
@@ -575,6 +621,17 @@ class Auth {
   }
 
   private function handleSuccessfulLogin($user) {
+    $generateJwt = [
+      'userid' => $user['id'],
+      'username' => $user['username'],
+      'firstname' => $user['firstname'],
+      'surname' => $user['surname'],
+      'email' => $user['email'],
+      'groups' => explode(',', $user['groups']),
+      'fullname' => $user['firstname'].' '.$user['surname'],
+      'type' => $user['type']
+    ];
+
     $now = new DateTime();
     $expires = new DateTime($user['passwordexpires']);
     if ($expires < $now) {
@@ -582,9 +639,10 @@ class Auth {
         return false;
     }
     if ($user['multifactor_enabled']) {
+      $generateJwt['mfa'] = false;
       $mfaArr = array(
         'type' => $user['multifactor_type'],
-        'jwt' => $this->CoreJwt->generateToken($user['username'], $user['firstname'], $user['surname'], $user['email'], explode(',', $user['groups']), $user['type'], 300, false) // Create temporary short lived token
+        'jwt' => $this->CoreJwt->generateToken($generateJwt, 300) // Create temporary short lived token
       );
       $this->api->setAPIResponse('2FA', strtoupper($user['multifactor_type']).' 2FA is required', 200, $mfaArr);
       return false;
@@ -594,7 +652,7 @@ class Auth {
     $this->updateLastLogin($user['id']);
 
     // Generate JWT token
-    $jwt = $this->CoreJwt->generateToken($user['username'], $user['firstname'], $user['surname'], $user['email'], explode(',', $user['groups']), $user['type']);
+    $jwt = $this->CoreJwt->generateToken($generateJwt);
     // Set JWT as a cookie
     $this->cookie('set','jwt', $jwt, 30); // 30 days
 
@@ -652,17 +710,19 @@ class Auth {
         $Username = $userinfo['username'];
       }
 
-      $LoginArr = array(
-        'Username' => $Username,
-        'FirstName' => $userinfo['firstname'],
-        'LastName' => $userinfo['surname'],
-        'Email' => $userinfo['email'],
-        'Groups' => explode(',',$userinfo['groups']),
-        'Type' => $userinfo['type']
-      );
+      $LoginArr = [
+        'userid' => $userinfo['id'],
+        'username' => $Username,
+        'firstname' => $userinfo['firstname'],
+        'surname' => $userinfo['surname'],
+        'email' => $userinfo['email'],
+        'groups' => explode(',',$userinfo['groups']),
+        'fullname' => $user['firstname'].' '.$user['surname'],
+        'type' => $userinfo['type']
+      ];
 
       // Generate JWT token
-      $jwt = $this->CoreJwt->generateToken($LoginArr['Username'],$LoginArr['FirstName'],$LoginArr['LastName'],$LoginArr['Email'],$LoginArr['Groups'],$LoginArr['Type']);
+      $jwt = $this->CoreJwt->generateToken($LoginArr);
       // Set JWT as a cookie
       $this->cookie('set','jwt', $jwt, 30); // 30 days
       $this->api->setAPIResponseMessage('Successfully logged in');
@@ -772,8 +832,15 @@ class Auth {
 
   public function getAuth() {
     $IPAddress = $this->getUserIP();
-    if (isset($_COOKIE['jwt'])) {
-      if ($this->CoreJwt->isRevoked($_COOKIE['jwt']) == true) {
+    $headers = getallheaders();
+    if (isset($headers['X-Phpef-Jwt'])) {
+      $Jwt = $headers['X-Phpef-Jwt'];
+    } else {
+      $Jwt = $_COOKIE['jwt'] ?? null;
+    }
+
+    if (isset($Jwt)) {
+      if ($this->CoreJwt->isRevoked($Jwt) == true) {
         // Token is invalid
         $AuthResult = array(
           'Authenticated' => false,
@@ -785,7 +852,7 @@ class Auth {
         return $AuthResult;
       } else {
         try {
-          $decodedJWT = $this->CoreJwt->decodeToken($_COOKIE['jwt']);
+          $decodedJWT = $this->CoreJwt->decodeToken($Jwt);
           if (isset($decodedJWT->mfa) && $decodedJWT->mfa == false) {
             $this->api->setAPIResponse('Error','2FA Not Complete',401);
             return false;
@@ -797,6 +864,12 @@ class Auth {
       }
 
       if ($decodedJWT) {
+        if (isset($decodedJWT->userid)) {
+          $UserID = $decodedJWT->userid;
+        } else {
+          $UserID = null;
+        }
+
         if (isset($decodedJWT->username)) {
           $Username = $decodedJWT->username;
         } else {
@@ -851,6 +924,7 @@ class Auth {
 
         $AuthResult = array(
           'Authenticated' => true,
+          'UserID' => $UserID,
           'Username' => $Username,
           'Firstname' => $Firstname,
           'Surname' => $Surname,
@@ -1237,5 +1311,85 @@ class Auth {
       ];
     }, $groups));
     return $groupKeyValuePairs;
+  }
+
+  // API Keys / Tokens
+  public function generateAPIToken($Seconds = null) {
+    if (!$Seconds) {
+      $Seconds = 90 * 24 * 60 * 60;
+    }
+    $Auth = $this->getAuth();
+    if ($Auth['Authenticated']) {
+      if ($Auth['Type'] != 'api') {
+        $generateJwt = [
+          'userid' => $Auth['UserID'],
+          'username' => $Auth['Username'],
+          'groups' => $Auth['Groups'],
+          'type' => 'api'
+        ];
+        $jwt = $this->CoreJwt->generateToken($generateJwt, $Seconds);
+        $this->logging->writeLog("API Token","Successfully generated API Token","info");
+        return $jwt;
+
+      } else {
+        $this->logging->writeLog("API Token","Failed to generate API Token.","debug",['You cannot generate a token using another token']);
+        $this->api->setAPIResponse('Error','Failed to generate API Token. You cannot generate a token using another token');
+      }
+    } else {
+      $this->logging->writeLog("API Token","Failed to generate API Token.","debug",['Unauthenticated']);
+      $this->api->setAPIResponse('Error','Unauthorized',401);
+    }
+  }
+
+  // List all session tokens for a user
+  public function listSessionTokens() {
+    $Auth = $this->getAuth();
+    if ($Auth['Authenticated']) {
+      $UserID = $Auth['UserID'];
+      return $this->CoreJwt->listTokens($UserID,"session_tokens");
+    } else {
+      $this->api->setAPIResponse('Error','Not Authenticated',401);
+      return false;
+    }
+  }
+
+  // List all session tokens for a user
+  public function listAPITokens() {
+    $Auth = $this->getAuth();
+    if ($Auth['Authenticated']) {
+      $UserID = $Auth['UserID'];
+      return $this->CoreJwt->listTokens($UserID,"api_tokens");
+    } else {
+      $this->api->setAPIResponse('Error','Not Authenticated',401);
+      return false;
+    }
+  }
+
+  // Revoke a token by token stub
+  public function revokeTokenByStub($Type, $stub) {
+    $Auth = $this->getAuth();
+    if ($Auth['Authenticated']) {
+      $UserID = $Auth['UserID'];
+      $tokens = $this->CoreJwt->listTokens($UserID, $Type, true);
+      foreach ($tokens as $token) {
+          if (substr($token['token'], -10) === $stub) {
+              // Revoke the token using CoreJwt
+              try {
+                $this->CoreJwt->revokeToken($token['token']);
+                $this->api->setAPIResponseMessage('Token revoked successfully');
+                return true;                
+              } catch (Exception $e) {
+                $this->api->setAPIResponse('Error',$e->getMessage());
+                return false;
+              }
+
+          }
+      }
+      $this->api->setAPIResponse('Error','Token could not be found');
+      return false; // Token not found
+    } else {
+      $this->api->setAPIResponse('Error','Not Authenticated',401);
+      return false;
+    }
   }
 }

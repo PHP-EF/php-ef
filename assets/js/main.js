@@ -31,6 +31,13 @@ function pad(n, width, z) {
 	return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
 }
 
+function generateAPIKey(elemName) {
+  console.log(elemName);
+  generateSecureToken().then(function(token) {
+      $(`[name='${elemName}']`).val(token).change();
+  });
+}
+
 function createTableHtml(index, prefix) {
   return `<table class="table table-striped" id="`+prefix+`-table-` + index +`"></table>`;
 }
@@ -971,11 +978,13 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Listener to add changed class to main settings elements
-  $("#page-content").on('change', '.info-field', function(event) {
+  $("#page-content").on('change', '.info-field, .dynamic-select-input', function(event) {
       const elementName = $(this).data('label');
-      if (!changedSettingsElements.has(elementName)) {
-          toast("Configuration", "", elementName + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
-          changedSettingsElements.add(elementName);
+      const controlLabel = $($(this).parents().eq(2).prev('.control-label')[0]).text();
+      const label = elementName || controlLabel;
+      if (!changedSettingsElements.has(label)) {
+          toast("Configuration", "", label + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
+          changedSettingsElements.add(label);
       }
       $(this).addClass("changed");
   });
@@ -1221,6 +1230,16 @@ document.addEventListener('DOMContentLoaded', function() {
         return smallLabel+'<select class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>'+helpInfo;
       case 'selectmultiple':
         return smallLabel+'<select class="form-control info-field'+extraClass+'" multiple '+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>'+helpInfo;
+      case 'imageselect':
+        var ret = smallLabel+'<select class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>'+helpInfo;
+        console.log(item);
+        if (item.initialize == 'true') {
+          ret += `<script>
+          var dynSelect = new DynamicSelect(document.querySelector('[${name}]'));
+          dynSelect.setSelectedValue(${value});
+          </script>`;
+        }
+        return ret;
       case 'switch':
       case 'checkbox':
         return smallLabel+'<div class="form-check form-switch"><input class="form-check-input info-field'+extraClass+'" type="checkbox"'+name+value+id+disabled+type+label+attr+dataAttributes+'/></div>'+helpInfo;
@@ -1647,6 +1666,37 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  window.tokenActionEvents = {
+    "click .delete": function (e, value, row, index) {
+      if(confirm("Are you sure you want to revoke the token: "+row.last_10_chars+"? This is irriversible.") == true) {
+        var tableId = $(e.currentTarget).closest("table").attr("id");
+        var type = null;
+        switch (tableId) {
+          case 'sessionTokenTable':
+            type = 'session_tokens';
+            break;
+          case 'apiTokenTable':
+            type = 'api_tokens';
+            break;
+          default:
+            return;
+        }
+        queryAPI("DELETE","/api/auth/tokens/"+type+"/"+row.last_10_chars).done(function(data) {
+          if (data["result"] == "Success") {
+            toast("Success","","Successfully revoked "+row.last_10_chars+" from Tokens","success");
+            $(`#${tableId}`).bootstrapTable("refresh");
+          } else if (data["result"] == "Error") {
+            toast(data["result"],"",data["message"],"danger","30000");
+          } else {
+            toast("Error","","Failed to delete "+row.last_10_chars+" from Tokens","danger");
+          }
+        }).fail(function() {
+            toast("Error", "", "Failed to remove " + row.last_10_chars + " from Tokens", "danger");
+        });
+      }
+    }
+  }
+
 
   // ** ACTION FORMATTERS ** //
   function widgetActionFormatter(value, row, index) {
@@ -1806,6 +1856,30 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  function appendDotsFormatter(value, row, index) {
+    return '...'+value;
+  }
+
+  function secondsFormatter(value, row, index) {
+    const units = [
+        { label: 'month', seconds: 2628000 }, // Approximate value for a month (30.44 days)
+        { label: 'week', seconds: 604800 },
+        { label: 'day', seconds: 86400 },
+        { label: 'hour', seconds: 3600 },
+        { label: 'minute', seconds: 60 },
+        { label: 'second', seconds: 1 }
+    ];
+
+    for (let unit of units) {
+        if (value >= unit.seconds) {
+            const count = Math.floor(value / unit.seconds);
+            return `${count} ${unit.label}${count > 1 ? 's' : ''}`;
+        }
+    }
+    return '0 seconds';
+  }
+
+
   // ** TABLE DETAIL FORMATTERS ** //
   function pagesDetailFormatter(index, row, prefix) {
     let html = [];
@@ -1963,6 +2037,35 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 	    }
     }
+  }
+
+  function apiTokenTableButtons() {
+    return {
+      btnAddNews: {
+        text: 'Add API Token',
+        icon: 'bi-plus-lg',
+        html: function() {
+          return `
+            <div class="d-flex">
+              <button name="btnAddNews" class="btn btn-success" title="Add a new API Token" style="background-color:#4bbe40;border-color:#4bbe40;height:40px;width:250px;">
+                <i class="bi bi-plus-lg"></i> Add API Token
+              </button>
+              <input type="number" id="daysInput" class="form-control mt-0" placeholder="Days" min="1" max="365" style="max-width: 100px; margin-left: 10px;height:40px;">
+            </div>
+          `;
+        },
+        event: {
+          click: function() {
+            const days = document.getElementById('daysInput').value;
+            if (days >= 1 && days <= 365) {
+              newAPIToken(days);
+            } else {
+              alert('Please enter a valid number of days between 1 and 365.');
+            }
+          }
+        }
+      }
+    };
   }
 
   // ** TABLE RESPONSE HANDLER ** //
@@ -2551,7 +2654,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (row['multifactor_enabled']) {
       $("#mfaUserSettings").html(`
         <div class="alert alert-info text-center d-grid" role="alert" id="mfaAlert">
-          <h3>${row['multifactor_type'].toUpperCase()}</h3>
+          <span class="h3">${row['multifactor_type'].toUpperCase()}</span>
           <span>Multifactor Authentication is configured.</span>
           <button class="btn btn-danger mt-2" onclick="resetMFA(${row.id});">Reset</button>
         </div>
@@ -3030,4 +3133,49 @@ document.addEventListener('DOMContentLoaded', function() {
         toast(textStatus,"","Error: "+jqXHR.status+": "+errorThrown,"danger");
       });
     }
+  }
+
+  // ** TOKEN FUNCTIONS ** //
+  function newAPIToken(days = 90) {
+    queryAPI("POST","/api/auth/tokens/api",{"days":days}).done(function(data) {
+      const modal = $(`
+        <div class="modal fade" id="newAPITokenModal" tabindex="-1" role="dialog" aria-labelledby="newAPITokenModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="newAPITokenModalLabel">New API Token</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true"></span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div class="alert alert-warning">
+                  <p>This API Token will only be displayed once. Please save it and keep it safe.</p>
+                  <code>${data.data}</code>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `);
+
+      // Append modal to body
+      $('body').append(modal);
+
+      // Show the modal
+      $('#newAPITokenModal').modal('show');
+      $('#profileModal').modal('hide');
+
+      // Remove modal from DOM when hidden
+      $('#newAPITokenModal').on('hidden.bs.modal', function () {
+          $(this).modal('hide').remove();
+          $('#profileModal').modal('show');
+          $('#apiTokenTable').bootstrapTable('refresh');
+      });
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+      toast(textStatus,"","Error: "+jqXHR.status+": "+errorThrown,"danger");
+    });
   }

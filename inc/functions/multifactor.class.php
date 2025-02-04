@@ -149,8 +149,9 @@ trait MultiFactor {
                     if ($this->mfaPrivateSettings($decodedJwt)['totp_verified']) {
                         $verify = $this->totpVerify($otp, $decodedJwt);
                         if ($verify) {
+                            $decodedJwt->mfa = true;
                             $this->CoreJwt->revokeToken($jwt); // Revoke Temporary Token
-                            $newJwt = $this->CoreJwt->generateToken($decodedJwt->username, $decodedJwt->firstname, $decodedJwt->surname, $decodedJwt->email, $decodedJwt->groups, $decodedJwt->type); // Issue new token
+                            $newJwt = $this->CoreJwt->generateToken((array)$decodedJwt); // Issue new token
                             $this->cookie('set', 'jwt', $newJwt, 30); // Set the jwt cookie
                             $this->logging->writeLog('2FA', 'TOTP successfully verified', 'debug');
                             $this->api->setAPIResponse('Success', 'Successfully Verified TOTP');
