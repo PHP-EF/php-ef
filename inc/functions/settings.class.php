@@ -39,6 +39,7 @@ trait Settings {
             ),
             'Theme' => array(
                 $this->settingsOption('select', 'Styling[theme][default]', ['label' => 'Default Theme', 'options' => array(array('name' => 'Dark', 'value' => 'dark'),array('name' => 'Light','value' => 'light')), 'value' => 'dark']),
+                // $this->settingsOption('select2', 'Styling[theme][default2]', ['label' => 'Default Theme', 'options' => array(array('name' => 'Dark', 'value' => 'dark'),array('name' => 'Light','value' => 'light')), 'value' => 'dark', 'settings' => '{tags: true, selectOnClose: true, closeOnSelect: true, allowClear: true, width: "100%"}'])
             ),
             'Custom CSS' => array(
 				$this->settingsOption('code-editor', 'Styling[css][custom]', ['label' => 'Custom CSS', 'mode' => 'css', 'value' => $this->config->get('Styling', 'css')['custom']]),
