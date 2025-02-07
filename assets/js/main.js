@@ -1467,7 +1467,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return values;
   }
 
-  function selectOptions(options, active){
+  function selectOptions(options, active = []){
     var selectOptions = '';
     var activeTest = [];
     if (active) {
