@@ -1469,6 +1469,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function selectOptions(options, active){
     var selectOptions = '';
+    var activeTest = [];
     if (active) {
       activeTest = active.split(',');
     }
