@@ -1467,7 +1467,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return values;
   }
 
-  function selectOptions(options, active = []){
+  function selectOptions(options, active){
     var selectOptions = '';
     var activeTest = [];
     if (active) {
@@ -1478,7 +1478,9 @@ document.addEventListener('DOMContentLoaded', function() {
       if(activeTest.length > 1) {
         var selected = (arrayContains(v.value, activeTest)) ? 'selected' : '';
       } else {
-        var selected = (active.toString() == v.value) ? 'selected' : '';
+        if (active != null) {
+          var selected = (active.toString() == v.value) ? 'selected' : '';
+        }
       }
       var disabled = (v.disabled) ? ' disabled' : '';
       var attr = (v.attr) ? ' '+v.attr+' ' : '';
