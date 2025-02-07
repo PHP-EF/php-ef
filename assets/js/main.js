@@ -1469,13 +1469,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function selectOptions(options, active){
     var selectOptions = '';
+    console.log('a',active);
+    activeTest = active.split(',');
+    console.log('at',activeTest);
+    
     $.each(options, function(i,v) {
-      console.log('a',active);
-      activeTest = active.split(',');
-      console.log('at',activeTest);
-      if(activeTest.length > 1){
+      if(activeTest.length > 1) {
         var selected = (arrayContains(v.value, activeTest)) ? 'selected' : '';
-      }else{
+      } else {
         var selected = (active.toString() == v.value) ? 'selected' : '';
       }
       var disabled = (v.disabled) ? ' disabled' : '';
