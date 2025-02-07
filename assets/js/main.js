@@ -31,6 +31,13 @@ function pad(n, width, z) {
 	return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
 }
 
+function convertArrayToCSV(value) {
+  if (Array.isArray(value)) {
+      return value.join(',');
+  }
+  return value;
+}
+
 function generateAPIKey(elemName) {
   generateSecureToken().then(function(token) {
       $(`[name='${elemName}']`).val(token).change();
@@ -2249,7 +2256,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             // Check if the element is a select with the multiple attribute
             if (element.is("select[multiple]")) {
-                formData[item.name] = item.value !== "" ? [item.value] : item.value;
+              formData[item.name] = item.value !== "" ? [convertArrayToCSV([item.value])] : item.value;
             } else if (element.is("input[multiple]")) {
                 formData[item.name] = getInputMultipleEntries(element);
             } else if (element.hasClass("encrypted") && item.value !== "") {
