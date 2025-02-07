@@ -32,7 +32,6 @@ function pad(n, width, z) {
 }
 
 function generateAPIKey(elemName) {
-  console.log(elemName);
   generateSecureToken().then(function(token) {
       $(`[name='${elemName}']`).val(token).change();
   });
@@ -172,6 +171,10 @@ function newPopup(url, title, w, h) {
       newWindow.focus();
   }
   return newWindow;
+}
+
+function arrayContains(needle, arrhaystack){
+  return (arrhaystack.indexOf(needle) > -1);
 }
 
 function setCookie(cName, cValue, expDays) {
@@ -1233,10 +1236,9 @@ document.addEventListener('DOMContentLoaded', function() {
       case 'select2':
         var select2ID = (item.id) ? '#'+item.id : '[name=\''+item.name+'\']';
         let settings = (item.settings) ? item.settings : '{}';
-        return smallLabel+'<select class="m-b-10 '+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' multiple="multiple" data-placeholder="">'+selectOptions(item.options, item.value)+'</select><script>$("'+select2ID+'").select2('+settings+').on("select2:unselecting", function() { $(this).data("unselecting", true); }).on("select2:opening", function(e) { if ($(this).data("unselecting")) { $(this).removeData("unselecting");  e.preventDefault(); } });</script>';
+        return smallLabel+'<select class="m-b-10 info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' multiple="multiple" data-placeholder="">'+selectOptions(item.options, item.value)+'</select><script>$("'+select2ID+'").select2('+settings+').on("select2:unselecting", function() { $(this).data("unselecting", true); }).on("select2:opening", function(e) { if ($(this).data("unselecting")) { $(this).removeData("unselecting");  e.preventDefault(); } });</script>';
       case 'imageselect':
         var ret = smallLabel+'<select class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>'+helpInfo;
-        console.log(item);
         if (item.initialize == 'true') {
           ret += `<script>
           var dynSelect = new DynamicSelect(document.querySelector('[${name}]'));
