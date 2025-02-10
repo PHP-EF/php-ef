@@ -161,7 +161,9 @@ class query {
 	public function delete($Url,$Data,$Headers = null,$Options = null,$raw = false) {
 		$OptionsArr = $this->buildOptions($Options);
 		$HeadersArr = $this->buildHeaders($Headers);
-		$Result = WpOrg\Requests\Requests::delete($Url, $HeadersArr, $OptionsArr);
+		$Data = $this->prepareData($Data, $HeadersArr);
+		$OptionsArr['data_format'] = 'body';
+		$Result = WpOrg\Requests\Requests::request($Url, $HeadersArr, $Data, 'DELETE', $OptionsArr);
 		return $this->decodeResponse($Result,$raw);
 	}
 }

@@ -327,28 +327,31 @@ return '
     var configData = {};
     var encryptionPromises = [];
 
-    formData.forEach(function(item) { 
-        var keys = item.name.split("[").map(function(key) {
-            return key.replace("]", "");
-        });
-        var temp = configData;
-        keys.forEach(function(key, index) {
-            if (index === keys.length - 1) {
-                var inputElement = $("[name=\'" + item.name + "\']");
-                if (inputElement.hasClass("encrypted") && item.value !== "") {
-                    // Encrypt sensitive data
-                    var promise = encryptData(item.name, item.value).done(function(encryptedValue) {
-                        temp[key] = encryptedValue.data;
-                    });
-                    encryptionPromises.push(promise);
-                } else {
-                    temp[key] = item.value;
-                }
+    formData.forEach(function(item) {
+      var keys = item.name.split("[").map(function(key) {
+          return key.replace("]", "");
+      });
+      var temp = configData;
+      keys.forEach(function(key, index) {
+        if (index === keys.length - 1) {
+            var inputElement = $(`[name="${item.name}"]`);
+            if (inputElement.is("select[multiple]")) {
+                // Handle multi-select inputs
+                temp[key] = inputElement.val() !== "" ? convertArrayToCSV(inputElement.val()) : "";
+            } else if (inputElement.hasClass("encrypted") && item.value !== "") {
+                // Encrypt sensitive data
+                var promise = encryptData(item.name, item.value).done(function(encryptedValue) {
+                    temp[key] = encryptedValue.data;
+                });
+                encryptionPromises.push(promise);
             } else {
-                temp[key] = temp[key] || {};
-                temp = temp[key];
+                temp[key] = item.value;
             }
-        });
+        } else {
+            temp[key] = temp[key] || {};
+            temp = temp[key];
+        }
+      });
     });
 
     // Wait for all encryption promises to resolve

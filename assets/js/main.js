@@ -31,8 +31,14 @@ function pad(n, width, z) {
 	return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
 }
 
+function convertArrayToCSV(value) {
+  if (Array.isArray(value)) {
+      return value.join(',');
+  }
+  return value;
+}
+
 function generateAPIKey(elemName) {
-  console.log(elemName);
   generateSecureToken().then(function(token) {
       $(`[name='${elemName}']`).val(token).change();
   });
@@ -172,6 +178,10 @@ function newPopup(url, title, w, h) {
       newWindow.focus();
   }
   return newWindow;
+}
+
+function arrayContains(needle, arrhaystack){
+  return (arrhaystack.indexOf(needle) > -1);
 }
 
 function setCookie(cName, cValue, expDays) {
@@ -1230,9 +1240,12 @@ document.addEventListener('DOMContentLoaded', function() {
         return smallLabel+'<select class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>'+helpInfo;
       case 'selectmultiple':
         return smallLabel+'<select class="form-control info-field'+extraClass+'" multiple '+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>'+helpInfo;
+      case 'select2':
+        var select2ID = (item.id) ? '#'+item.id : '[name=\''+item.name+'\']';
+        let settings = (item.settings) ? item.settings : '{}';
+        return smallLabel+'<select class="m-b-10 info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+' multiple="multiple" data-placeholder="">'+selectOptions(item.options, item.value)+'</select><script>$("'+select2ID+'").select2('+settings+').on("select2:unselecting", function() { $(this).data("unselecting", true); }).on("select2:opening", function(e) { if ($(this).data("unselecting")) { $(this).removeData("unselecting");  e.preventDefault(); } });</script>';
       case 'imageselect':
         var ret = smallLabel+'<select class="form-control info-field'+extraClass+'"'+placeholder+value+id+name+disabled+type+label+attr+dataAttributes+'>'+selectOptions(item.options, item.value)+'</select>'+helpInfo;
-        console.log(item);
         if (item.initialize == 'true') {
           ret += `<script>
           var dynSelect = new DynamicSelect(document.querySelector('[${name}]'));
@@ -1463,12 +1476,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function selectOptions(options, active){
     var selectOptions = '';
-    $.each(options, function(i,v) {
+    var activeTest = [];
+    if (active) {
       activeTest = active.split(',');
-      if(activeTest.length > 1){
+    }
+    
+    $.each(options, function(i,v) {
+      if(activeTest.length > 1) {
         var selected = (arrayContains(v.value, activeTest)) ? 'selected' : '';
-      }else{
-        var selected = (active.toString() == v.value) ? 'selected' : '';
+      } else {
+        if (active != null) {
+          var selected = (active.toString() == v.value) ? 'selected' : '';
+        }
       }
       var disabled = (v.disabled) ? ' disabled' : '';
       var attr = (v.attr) ? ' '+v.attr+' ' : '';
@@ -2237,7 +2256,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             // Check if the element is a select with the multiple attribute
             if (element.is("select[multiple]")) {
-                formData[item.name] = item.value !== "" ? [item.value] : item.value;
+              formData[item.name] = item.value !== "" ? [convertArrayToCSV([item.value])] : item.value;
             } else if (element.is("input[multiple]")) {
                 formData[item.name] = getInputMultipleEntries(element);
             } else if (element.hasClass("encrypted") && item.value !== "") {

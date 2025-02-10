@@ -38,7 +38,7 @@ trait Settings {
                 $this->settingsOption('code-editor', 'Styling[html][about]', ['label' => 'About HTML', 'mode' => 'html', 'value' => $this->config->get('Styling', 'html')['about']])
             ),
             'Theme' => array(
-                $this->settingsOption('select', 'Styling[theme][default]', ['label' => 'Default Theme', 'options' => array(array('name' => 'Dark', 'value' => 'dark'),array('name' => 'Light','value' => 'light')), 'value' => 'dark']),
+                $this->settingsOption('select', 'Styling[theme][default]', ['label' => 'Default Theme', 'options' => array(array('name' => 'Dark', 'value' => 'dark'),array('name' => 'Light','value' => 'light')), 'placeholder' => 'dark'])
             ),
             'Custom CSS' => array(
 				$this->settingsOption('code-editor', 'Styling[css][custom]', ['label' => 'Custom CSS', 'mode' => 'css', 'value' => $this->config->get('Styling', 'css')['custom']]),
