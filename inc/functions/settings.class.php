@@ -216,7 +216,7 @@ trait Settings {
             'show-refresh' => 'true',
             'pagination' => 'true',
             'toolbar' => '#toolbar',
-            'sort-name' => 'Name',
+            'sort-name' => 'name',
             'sort-order' => 'asc',
             'show-columns' => 'true',
             'page-size' => '25',
