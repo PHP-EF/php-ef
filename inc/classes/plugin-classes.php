@@ -147,8 +147,11 @@ class Plugins {
             }
         }
 
-        // Convert back to a list
+        // Convert back to a list & sort alphabetically
         $result = array_values($uniquePlugins);
+        usort($result, function($a, $b) {
+            return strcmp(strtolower($a['name']), strtolower($b['name']));
+        });
     
         return [
             "results" => $result,
