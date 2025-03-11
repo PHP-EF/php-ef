@@ -47,7 +47,7 @@ class phpef {
     }
 
     public function getVersion() {
-        return ['0.8.3'];
+        return ['0.8.4'];
     }
 
     // Initiate Database Migration if required
