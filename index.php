@@ -874,5 +874,10 @@ foreach ($navLinks as $navLink) {
     $('.toggleFrame').click(function(element) {
       loadContent(element);
     });
+
+    <?php
+      $customJS = $Styling['js']['custom'] ?? '';
+      echo $customJS;
+    ?>
   });
 </script>
