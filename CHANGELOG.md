@@ -1,3 +1,6 @@
+## v0.8.4
+- Add support for custom javascript
+
 ## v0.8.3
 - Refactor way that JWT tokens are created
 - Added ability to generate API Tokens
