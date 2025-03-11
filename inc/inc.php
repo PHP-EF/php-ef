@@ -151,6 +151,5 @@ if (!(isset($SkipCSS))) {
 
     echo '
     <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999999" id="toastContainer">
-    </div>
-    ';
+    </div>';
 }

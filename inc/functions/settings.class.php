@@ -42,6 +42,9 @@ trait Settings {
             ),
             'Custom CSS' => array(
 				$this->settingsOption('code-editor', 'Styling[css][custom]', ['label' => 'Custom CSS', 'mode' => 'css', 'value' => $this->config->get('Styling', 'css')['custom']]),
+            ),
+            'Custom JS' => array(
+				$this->settingsOption('code-editor', 'Styling[js][custom]', ['label' => 'Custom JS', 'mode' => 'js', 'value' => $this->config->get('Styling', 'js')['custom']]),
             )
 	    );
     }
