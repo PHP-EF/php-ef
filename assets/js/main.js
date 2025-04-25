@@ -2611,14 +2611,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (row[0].PermittedResources) {
       var PermittedResources = row[0].PermittedResources.split(",");
       for (var resource in PermittedResources) {
-        $(`[name="`+PermittedResources[resource]+`"]`).prop("checked", "true");
+        $(`[id="`+PermittedResources[resource]+`"]`).prop("checked", "true");
       }
     }
     $("#SettingsModal .list-group .toggle").on("click", function(event) {
       var groupid = $("[name=groupId]").val();
       var group = $("[name=groupName]").val();
       var role = $(event.target).attr('name');
-      var toggle = $(role).prop("checked") ? "enabled" : "disabled";
+      var toggle = $(event.target).prop("checked") ? "enabled" : "disabled";
       var targetid = event.target.id
       var data = {
         key: targetid,

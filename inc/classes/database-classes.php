@@ -221,7 +221,8 @@ class dbHelper {
         'UPDATE rbac_resources SET name = "Report Admin", slug = "ADMIN-REPORTS" WHERE name = "REPORT-TRACKING";'
       ],
       '0.8.3' => [],
-      '0.8.4' => []
+      '0.8.4' => [],
+      '0.8.5' => []
     ];
   }
 
