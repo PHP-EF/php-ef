@@ -1,3 +1,6 @@
+## v0.8.5
+- Bug fixes for adding/removing RBAC Roles from Groups
+
 ## v0.8.4
 - Add support for custom javascript
 
