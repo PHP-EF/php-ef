@@ -461,7 +461,7 @@ applyFontSize();
 
 let seconds = 0;
 
-function startTimer() {
+function startTimer(elem) {
     let timer;
     seconds = 0;
     timer = setInterval(() => {
@@ -469,9 +469,9 @@ function startTimer() {
         if (seconds > 60) {
           const minutes = Math.floor(seconds / 60);
           const remainingSeconds = seconds % 60;
-          $('#elapsed').text(`Elapsed: ${minutes}m ${remainingSeconds}s`);
+          $(elem).text(`Elapsed: ${minutes}m ${remainingSeconds}s`);
         } else {
-          $('#elapsed').text(`Elapsed: ${seconds}s`);
+          $(elem).text(`Elapsed: ${seconds}s`);
         }
     }, 1000);
     return timer;
@@ -2617,11 +2617,11 @@ document.addEventListener('DOMContentLoaded', function() {
     $("#SettingsModal .list-group .toggle").on("click", function(event) {
       var groupid = $("[name=groupId]").val();
       var group = $("[name=groupName]").val();
-      var role = $(event.target).attr('name');
-      var toggle = $(role).prop("checked") ? "enabled" : "disabled";
+      var role = $(event.target).prop("name");
+      var toggle = $(event.target).prop("checked") ? "enabled" : "disabled";
       var targetid = event.target.id
       var data = {
-        key: targetid,
+        key: role,
         value: toggle
       }
       queryAPI("PATCH","/api/rbac/group/"+groupid,data).done(function(data) {
