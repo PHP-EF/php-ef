@@ -461,7 +461,7 @@ applyFontSize();
 
 let seconds = 0;
 
-function startTimer() {
+function startTimer(elem) {
     let timer;
     seconds = 0;
     timer = setInterval(() => {
@@ -471,7 +471,7 @@ function startTimer() {
           const remainingSeconds = seconds % 60;
           $('#elapsed').text(`Elapsed: ${minutes}m ${remainingSeconds}s`);
         } else {
-          $('#elapsed').text(`Elapsed: ${seconds}s`);
+          $(elem).text(`Elapsed: ${seconds}s`);
         }
     }, 1000);
     return timer;
