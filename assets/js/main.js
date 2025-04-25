@@ -469,7 +469,7 @@ function startTimer(elem) {
         if (seconds > 60) {
           const minutes = Math.floor(seconds / 60);
           const remainingSeconds = seconds % 60;
-          $('#elapsed').text(`Elapsed: ${minutes}m ${remainingSeconds}s`);
+          $(elem).text(`Elapsed: ${minutes}m ${remainingSeconds}s`);
         } else {
           $(elem).text(`Elapsed: ${seconds}s`);
         }
