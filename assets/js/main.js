@@ -2611,17 +2611,17 @@ document.addEventListener('DOMContentLoaded', function() {
     if (row[0].PermittedResources) {
       var PermittedResources = row[0].PermittedResources.split(",");
       for (var resource in PermittedResources) {
-        $(`[id="`+PermittedResources[resource]+`"]`).prop("checked", "true");
+        $(`[name="`+PermittedResources[resource]+`"]`).prop("checked", "true");
       }
     }
     $("#SettingsModal .list-group .toggle").on("click", function(event) {
       var groupid = $("[name=groupId]").val();
       var group = $("[name=groupName]").val();
-      var role = $(event.target).attr('name');
+      var role = $(event.target).prop("name");
       var toggle = $(event.target).prop("checked") ? "enabled" : "disabled";
       var targetid = event.target.id
       var data = {
-        key: targetid,
+        key: role,
         value: toggle
       }
       queryAPI("PATCH","/api/rbac/group/"+groupid,data).done(function(data) {
