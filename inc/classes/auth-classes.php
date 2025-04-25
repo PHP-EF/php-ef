@@ -1077,7 +1077,7 @@ class Auth {
       if ($rbac['Name'] != 'Administrators') {
         if ($Role != null) {
           // Check if role exists in definitions
-          if (in_array($Role, array_column($roles, 'id'))) {
+          if (in_array($Role, array_column($roles, 'slug'))) {
             if ($rbac['PermittedResources'] != "") {
               $PermittedResources = explode(',',$rbac['PermittedResources']);
             } else {
