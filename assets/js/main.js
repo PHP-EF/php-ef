@@ -3107,14 +3107,17 @@ document.addEventListener('DOMContentLoaded', function() {
     var type = $("[name=pageType]").val();
     var submenu = $("[name=pageSubMenu]").val();
     var linktype = $("[name=pageLinkType]").val();
+    console.log(type,submenu,linktype);
     switch(type) {
       case "Link":
         $("[name=pageStub],[name=pageTitle],[name=pageStub],[name=pageSubMenu],[name=pageRole],[name=pageLinkType],[name=pageUrl],[name=pageDefault]").parent().parent().parent().attr("hidden",false);
         if (submenu) {
-          $("[name=pageIcon], [name=pageImage]").parent().parent().parent().parent().attr("hidden",true);
-          $("[name=pageIcon], [name=pageImage]").val("")
+          $("[name=pageIcon]").parent().parent().parent().attr("hidden",true);
+          $("[name=pageImage]").parent().parent().parent().parent().parent().attr("hidden",true);
+          $("[name=pageIcon], [name=pageImage]").val("");
         } else {
-          $("[name=pageIcon], [name=pageImage]").parent().parent().parent().parent().attr("hidden",false)
+          $("[name=pageIcon]").parent().parent().parent().attr("hidden",false);
+          $("[name=pageImage]").parent().parent().parent().parent().parent().attr("hidden",false);
         }
         switch(linktype) {
           case "Native":
