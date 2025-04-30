@@ -1893,7 +1893,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var title = row.changelog.title ?? 'Change Log'
     switch (row.changelog.type) {
       case "url":
-        html += `<a href="`+row.changelog.url+`" target="_blank">`+changelog+`</a>`;
+        html += `<a href="`+row.changelog.url+`" target="_blank">`+title+`</a>`;
         break;
       case "data":
         var fullContent = "";
