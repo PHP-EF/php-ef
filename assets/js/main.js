@@ -1030,6 +1030,36 @@ document.addEventListener('DOMContentLoaded', function() {
     $(this).closest('td').html(fullContent);
   });
 
+  // Read More Popup
+  $("body").on('click', '.read-more-popup', function(e) {
+    e.preventDefault();
+    var fullContent = $(this).data('full-content');
+    var title = $(this).data('title');
+    var modal = `
+      <div class="modal fade" id="readMoreModal" tabindex="-1" aria-labelledby="readMoreModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="readMoreModalLabel">${title}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="read-more-content">${fullContent}</div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    $("body").append(modal);
+    $("#readMoreModal").modal('show');
+    $("#readMoreModal").on('hidden.bs.modal', function () {
+      $(this).remove();
+    });
+  });
+
   $(".hover-target").hover(
     function() {
         $(".popover").css({
@@ -1855,6 +1885,31 @@ document.addEventListener('DOMContentLoaded', function() {
     $(row.requires).each(function (require) {
       html += `<span class="badge bg-info">`+row.requires[require]+`</span>&nbsp;`;
     });
+    return html;
+  }
+
+  function pluginChangeLogFormatter(value, row, index) {
+    var html = ""
+    var title = row.changelog.title ?? 'Change Log'
+    switch (row.changelog.type) {
+      case "url":
+        html += `<a href="`+row.changelog.url+`" target="_blank">`+changelog+`</a>`;
+        break;
+      case "data":
+        var fullContent = "";
+        if (row.changelog.data) {
+          row.changelog.data.forEach(function (item) {
+            fullContent += `<h2>v`+item.version+`</h2>`;
+            fullContent += `<ul>`;
+            item.changes.forEach(function (change) {
+              fullContent += `<li>`+change+`</li>`;
+            });
+            fullContent += `</ul>`;
+          });
+        }
+        html += `<a href="#" class="read-more-popup" data-full-content="`+fullContent+`" data-title="`+title+`">`+title+`</a>`;
+        break;
+    }
     return html;
   }
 
