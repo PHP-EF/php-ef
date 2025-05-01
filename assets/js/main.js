@@ -1895,9 +1895,9 @@ document.addEventListener('DOMContentLoaded', function() {
       case "url":
         html += `<a href="`+row.changelog.url+`" target="_blank">`+title+`</a>`;
         break;
-      case "data":
+      case "builtin":
         var fullContent = "";
-        if (row.changelog.data) {
+        if (row.changelog.data && Array.isArray(row.changelog.data)) {
           row.changelog.data.forEach(function (item) {
             fullContent += `<h2>v`+item.version+`</h2>`;
             fullContent += `<ul>`;
