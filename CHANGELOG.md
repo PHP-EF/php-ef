@@ -1,3 +1,6 @@
+## v0.8.6
+- Remove DNS Toolbox from Core Framework
+
 ## v0.8.5
 - Bug fixes for adding/removing RBAC Roles from Groups
 

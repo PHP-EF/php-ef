@@ -145,6 +145,29 @@ class Plugins {
                     $uniquePlugin['requirementsReason'] = 'PHP-EF version too low.<br>Requires: '.$uniquePlugin['minimum_php-ef_version'].'<br>Installed: '.$this->version;
                 }
             }
+
+            if (isset($uniquePlugin['changelog'])) {
+                if (isset($uniquePlugin['changelog']['type'])) {
+                    switch($uniquePlugin['changelog']['type']) {
+                        case 'url':
+                            if (isset($uniquePlugin['changelog']['url'])) {
+                                if (filter_var($uniquePlugin['changelog']['url'], FILTER_VALIDATE_URL) === false) {
+                                    $uniquePlugin['changelog']['url'] = 'Invalid URL';
+                                }
+                            } else {
+                                $uniquePlugin['changelog']['url'] = 'No changelog available';
+                            }
+                            break;
+                        case 'builtin':
+                            // Do nothing, as the changelog is already in the plugin data
+                            break;
+                        default:
+                            $uniquePlugin['changelog']['data'] = 'Invalid changelog type';
+                    }
+                }
+            } else {
+                $uniquePlugin['changelog'] = [];
+            }
         }
 
         // Convert back to a list & sort alphabetically

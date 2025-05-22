@@ -308,6 +308,10 @@ trait Settings {
                 'title' => 'Dependencies',
                 'dataAttributes' => ['sortable' => 'false', 'visible' => 'false', 'formatter' => 'pluginRequirementsFormatter'],
             ],
+            [   'field' => 'changelog',
+                'title' => 'Change Log',
+                'dataAttributes' => ['sortable' => 'false', 'visible' => 'false', 'formatter' => 'pluginChangeLogFormatter'],
+            ],
             [
                 'title' => 'Actions',
                 'dataAttributes' => ['events' => 'pluginActionEvents', 'formatter' => 'pluginActionFormatter'],
