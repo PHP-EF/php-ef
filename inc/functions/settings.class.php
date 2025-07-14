@@ -1,6 +1,42 @@
 <?php
 trait Settings {
     public function settingsCustomisation() {
+        #List of bootstrap colours to use in the colour picker
+        $bsColours = array(
+            array(
+                'name' => 'Grey',
+                'value' => 'secondary'
+            ),
+            array(
+                'name' => 'Green',
+                'value' => 'success'
+            ),
+            array(
+                'name' => 'Red',
+                'value' => 'danger'
+            ),
+            array(
+                'name' => 'Yellow',
+                'value' => 'warning'
+            ),
+            array(
+                'name' => 'Blue',
+                'value' => 'info'
+            ),
+            array(
+                'name' => 'White',
+                'value' => 'light'
+            ),
+            array(
+                'name' => 'Dark Blue',
+                'value' => 'primary'
+            ),
+            array(
+                'name' => 'Dark Grey',
+                'value' => 'dark'
+            )
+            );
+
         return array(
             'Top Bar' => array(
                 $this->settingsOption('input', 'Styling[websiteTitle]', ['label' => 'Website Title']),
@@ -36,6 +72,10 @@ trait Settings {
             'Homepage' => array(
 				$this->settingsOption('code-editor', 'Styling[html][homepage]', ['label' => 'Homepage HTML', 'mode' => 'html', 'value' => $this->config->get('Styling', 'html')['homepage']]),
                 $this->settingsOption('code-editor', 'Styling[html][about]', ['label' => 'About HTML', 'mode' => 'html', 'value' => $this->config->get('Styling', 'html')['about']])
+            ),
+            'Login Page' => array(
+				$this->settingsOption('input', 'Styling[loginpage][noticeMsg]', ['label' => 'Custom notice message to display on the login page', 'placeholder' => 'This is a custom notice message.']),
+                $this->settingsOption('select', 'Styling[loginpage][noticeColour]', ['label' => 'Colour of the notice to be displayed on the login page', 'options' => $bsColours])
             ),
             'Theme' => array(
                 $this->settingsOption('select', 'Styling[theme][default]', ['label' => 'Default Theme', 'options' => array(array('name' => 'Dark', 'value' => 'dark'),array('name' => 'Light','value' => 'light')), 'placeholder' => 'dark'])

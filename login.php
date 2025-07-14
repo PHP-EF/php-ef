@@ -25,6 +25,12 @@ html {
     padding: 15px;
     -ms-transform: translateY(50%);
     transform: translateY(50%);
+    
+
+    .noticeWrap p {
+      text-align: center;
+      color: #34495e;
+    }
 
     h2 {
       text-align: center;
@@ -32,11 +38,11 @@ html {
       font-size: 2em;
       margin-top: 10px;
       color: #34495e;
+      padding-bottom: 10px;
     }
 
     .form {
-      padding-top: 20px;
-
+      padding-top: 10px;
       input[type="text"],
       input[type="password"],
       button {
@@ -128,15 +134,27 @@ html {
       background:-moz-linear-gradient(left, #FDDD00 0%, #34C33D 25%, #00BD4D 50%, #00CD93 75%, #00E1E6 100%);
       height: 5px;
       border-radius: 5px 5px 0 0;
-  }
+    }
 
   }
-
+  @media (max-width: 992px) {
+    .login-wrap {
+      -ms-transform: translateY(25%);
+      transform: translateY(25%);
+    }
+  }
 }
 </style>
 
 <div class="login-wrap">
   <h2>Login</h2>
+  <?php
+    $NoticeMsg = $phpef->config->get('Styling','loginpage')['noticeMsg'] ?? '';
+    $NoticeColour = $phpef->config->get('Styling','loginpage')['noticeColour'] ?? 'info';
+    if ($NoticeMsg) {
+      echo '<div class="noticeWrap alert alert-'.$NoticeColour.'" role="alert"><p class="mb-0">'.$NoticeMsg.'</p></div>';
+    }
+  ?>
   <div class="form">
     <input type="text" placeholder="Username" name="un" id="un"/>
     <input type="password" placeholder="Password" name="pw" id="pw"/>
