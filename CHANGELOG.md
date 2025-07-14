@@ -1,3 +1,6 @@
+## v0.8.7
+- Add support for custom notice on login page
+
 ## v0.8.6
 - Remove DNS Toolbox from Core Framework
 
