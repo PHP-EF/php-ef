@@ -917,7 +917,16 @@ trait Settings {
                 $this->settingsOption('bootstrap-table', 'newsTable', ['id' => 'newsTable', 'columns' => $NewsTableColumns, 'dataAttributes' => $NewsTableAttributes, 'width' => '12']),
             ),
             'SMTP' => array(
-
+                $this->settingsOption('input', 'SMTP[host]', ['label' => 'SMTP Host', 'placeholder' => 'smtp.example.com']),
+                $this->settingsOption('input', 'SMTP[port]', ['label' => 'SMTP Port', 'placeholder' => '587']),
+                $this->settingsOption('input', 'SMTP[from_email]', ['label' => 'From Email', 'placeholder' => 'phpef@example.com']),
+                $this->settingsOption('input', 'SMTP[to_email]', ['label' => 'To Email', 'placeholder' => 'admin@example.com']),
+                $this->settingsOption('input', 'SMTP[from_name]', ['label' => 'From Name', 'placeholder' => 'PHP Extensible Framework']),
+                $this->settingsOption('select', 'SMTP[encryption]', ['label' => 'Encryption', 'options' => [['name' => 'None', 'value' => ''], ['name' => 'SSL', 'value' => 'ssl'], ['name' => 'TLS', 'value' => 'tls']], 'placeholder' => 'Select Encryption']),
+                $this->settingsOption('select', 'SMTP[auth]', ['label' => 'Authentication', 'options' => [['name' => 'None', 'value' => ''], ['name' => 'Plain', 'value' => 'plain']]]),
+                $this->settingsOption('input', 'SMTP[username]', ['label' => 'SMTP Username']),
+                $this->settingsOption('password-alt', 'SMTP[password]', ['label' => 'SMTP Password']),
+                $this->settingsOption('checkbox', 'SMTP[enabled]', ['label' => 'Enable SMTP for notifications'])
             ),
             'Webhooks' => array(
 
