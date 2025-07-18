@@ -38,12 +38,12 @@
             data-show-refresh="true"
             data-show-columns="true"
             data-pagination="true"
-            data-toolbar="#toolbar"
+            data-toolbar="#logsToolbar"
             data-query-params="queryParams"
             class="table table-striped"
             id="logTable">
 
-            <div id="toolbar" class="select">
+            <div id="logsToolbar" class="select">
               <select class="form-select" id="logDate">
               '.implode('',$logOptions).'
               </select>
