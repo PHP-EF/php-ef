@@ -180,6 +180,15 @@ function newPopup(url, title, w, h) {
   return newWindow;
 }
 
+function escapeHTML(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function arrayContains(needle, arrhaystack){
   return (arrhaystack.indexOf(needle) > -1);
 }
