@@ -427,23 +427,26 @@ function loadMainWindow(element,type = "page") {
   }
 }
 
-function toast(title,note,body,theme,delay = "8000") {
-  $('#toastContainer').append(`
-      <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="`+delay+`">
-        <div class="toast-header">
-          <img class="bg-`+theme+` p-2 rounded-2">&nbsp;
-          <strong class="me-auto">`+title+`</strong>
-          <small class="text-muted">`+note+`</small>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-          `+body+`
-        </div>
+
+function toast(title, note, body, theme = "primary", delay = 8000) {
+  const formattedBody = body.replace(/\n/g, "<br>");
+  const toastHTML = `
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="${delay}">
+      <div class="toast-header">
+        <span class="bg-${theme} p-2 rounded-2 me-2 d-inline-block" style="width: 20px; height: 20px;"></span>
+        <strong class="me-auto">${title}</strong>
+        <small class="text-muted">${note}</small>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
-  `);
-  $('.toast').toast('show').on('hidden.bs.toast', function (elem) {
-    $(elem.target).remove();
-  })
+      <div class="toast-body">
+        ${formattedBody}
+      </div>
+    </div>
+  `;
+  const $toast = $(toastHTML).appendTo('#toastContainer');
+  $toast.toast('show').on('hidden.bs.toast', function () {
+    $(this).remove();
+  });
 };
 
 function applyFontSize() {

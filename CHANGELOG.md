@@ -1,3 +1,6 @@
+## v0.8.8
+- Minor refactor to toast function
+
 ## v0.8.7
 - Add support for custom notice on login page
 
