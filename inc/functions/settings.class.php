@@ -937,7 +937,7 @@ trait Settings {
                 $this->settingsOption('input', 'Pushover[UserKey]', ['label' => 'Pushover User Key', 'placeholder' => 'Your Pushover User Key']),
                 $this->settingsOption('input', 'Pushover[ApiToken]', ['label' => 'Pushover API Token', 'placeholder' => 'Your Pushover API Token'])
             ),
-            'Webhooks' => array(
+            'Webhooks (Not Implemented)' => array(
 
             )
 	    );
