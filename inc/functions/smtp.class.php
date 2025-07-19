@@ -1,5 +1,5 @@
 <?php
-use PHPMailer\PHPMailer\PHPMailer as PHPMailer;
+use PHPMailer\PHPMailer\PHPMailer;
 trait SMTP {
     private $smtpConfig;
 

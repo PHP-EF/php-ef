@@ -239,6 +239,12 @@ trait Settings {
                 $this->settingsOption('hr'),
                 $this->settingsOption('bootstrap-table', 'backupsTable', ['id' => 'backupsTable', 'columns' => $backupsTableColumns, 'dataAttributes' => $backupsTableAttributes, 'width' => '12']),
             ),
+            'System' => array(
+                $this->settingsOption('input', 'System[websiteURL]', ['label' => 'Website URL', 'placeholder' => 'https://example.com']),
+                // $this->settingsOption('hr'),
+                // $this->settingsOption('input', 'System[maintenanceMessage]', ['label' => 'Maintenance Message', 'placeholder' => 'The website is currently undergoing maintenance.']),
+                // $this->settingsOption('checkbox', 'System[enableMaintenanceMode]', ['label' => 'Enable Maintenance Mode'])
+            ),
             'Other' => array(
                 $this->settingsOption('input', 'System[CURL-Timeout]', ['label' => 'CURL Timeout', 'help' => 'This can be used to extend the CURL timeout for upstream API calls, if they\'re prone to timing out. Use with caution.']),
                 $this->settingsOption('input', 'System[CURL-ConnectTimeout]', ['label' => 'CURL Timeout on Connect'])
