@@ -1460,7 +1460,8 @@ document.addEventListener('DOMContentLoaded', function() {
       if(typeof v == 'object'){
         var body = '';
         $.each(v, function(val) {
-          var helpTip = v[val].helpTip ?? '';
+          var helpID = `#help-info-${v[val].name}`;
+          var helpTip = v[val].help ? `<sup><a class="help-tip" data-bs-toggle="collapse" href="${helpID}" aria-expanded="true"><i class="ms-1 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>` : '';
           var width = v[val].width ?? '6';
           if (v[val].type == 'title' || v[val].type == 'hr' || v[val].type == 'js') {
             body += buildFormItem(v[val]);

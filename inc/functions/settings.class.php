@@ -931,8 +931,11 @@ trait Settings {
                 $this->settingsOption('select', 'SMTP[encryption]', ['label' => 'Encryption', 'options' => [['name' => 'None', 'value' => ''], ['name' => 'SSL', 'value' => 'ssl'], ['name' => 'TLS', 'value' => 'tls']], 'placeholder' => 'Select Encryption']),
                 $this->settingsOption('select', 'SMTP[auth]', ['label' => 'Authentication', 'options' => [['name' => 'None', 'value' => ''], ['name' => 'Plain', 'value' => 'plain']]]),
                 $this->settingsOption('input', 'SMTP[username]', ['label' => 'SMTP Username']),
-                $this->settingsOption('password-alt', 'SMTP[password]', ['label' => 'SMTP Password']),
-                $this->settingsOption('checkbox', 'SMTP[enabled]', ['label' => 'Enable SMTP for notifications'])
+                $this->settingsOption('password-alt', 'SMTP[password]', ['label' => 'SMTP Password'])
+            ),
+            'Pushover' => array(
+                $this->settingsOption('input', 'Pushover[UserKey]', ['label' => 'Pushover User Key', 'placeholder' => 'Your Pushover User Key']),
+                $this->settingsOption('input', 'Pushover[ApiToken]', ['label' => 'Pushover API Token', 'placeholder' => 'Your Pushover API Token'])
             ),
             'Webhooks' => array(
 
