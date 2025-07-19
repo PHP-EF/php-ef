@@ -923,19 +923,19 @@ trait Settings {
                 $this->settingsOption('bootstrap-table', 'newsTable', ['id' => 'newsTable', 'columns' => $NewsTableColumns, 'dataAttributes' => $NewsTableAttributes, 'width' => '12']),
             ),
             'SMTP' => array(
-                $this->settingsOption('input', 'SMTP[host]', ['label' => 'SMTP Host', 'placeholder' => 'smtp.example.com']),
-                $this->settingsOption('input', 'SMTP[port]', ['label' => 'SMTP Port', 'placeholder' => '587']),
-                $this->settingsOption('input', 'SMTP[from_email]', ['label' => 'From Email', 'placeholder' => 'phpef@example.com']),
-                $this->settingsOption('input', 'SMTP[to_email]', ['label' => 'To Email', 'placeholder' => 'admin@example.com']),
-                $this->settingsOption('input', 'SMTP[from_name]', ['label' => 'From Name', 'placeholder' => 'PHP Extensible Framework']),
-                $this->settingsOption('select', 'SMTP[encryption]', ['label' => 'Encryption', 'options' => [['name' => 'None', 'value' => ''], ['name' => 'SSL', 'value' => 'ssl'], ['name' => 'TLS', 'value' => 'tls']], 'placeholder' => 'Select Encryption']),
-                $this->settingsOption('select', 'SMTP[auth]', ['label' => 'Authentication', 'options' => [['name' => 'None', 'value' => ''], ['name' => 'Plain', 'value' => 'plain']]]),
-                $this->settingsOption('input', 'SMTP[username]', ['label' => 'SMTP Username']),
-                $this->settingsOption('password-alt', 'SMTP[password]', ['label' => 'SMTP Password'])
+                $this->settingsOption('input', 'SMTP[host]', ['label' => 'SMTP Host', 'placeholder' => 'smtp.example.com', 'help' => 'The SMTP server to use for sending emails.']),
+                $this->settingsOption('input', 'SMTP[port]', ['label' => 'SMTP Port', 'placeholder' => '587', 'help' => 'The SMTP port to use for sending emails.']),
+                $this->settingsOption('input', 'SMTP[from_email]', ['label' => 'From Email', 'placeholder' => 'phpef@example.com', 'help' => 'The email address to use as the sender for outgoing emails.']),
+                $this->settingsOption('input', 'SMTP[to_email]', ['label' => 'To Email', 'placeholder' => 'admin@example.com', 'help' => 'The email address to send notifications to.']),
+                $this->settingsOption('input', 'SMTP[from_name]', ['label' => 'From Name', 'placeholder' => 'PHP Extensible Framework', 'help' => 'The name to use as the sender for outgoing emails.']),
+                $this->settingsOption('select', 'SMTP[encryption]', ['label' => 'Encryption', 'options' => [['name' => 'None', 'value' => ''], ['name' => 'SSL', 'value' => 'ssl'], ['name' => 'TLS', 'value' => 'tls']], 'help' => 'The encryption method to use for the SMTP connection.']),
+                $this->settingsOption('select', 'SMTP[auth]', ['label' => 'Authentication', 'options' => [['name' => 'None', 'value' => ''], ['name' => 'Plain', 'value' => 'plain']], 'help' => 'The authentication method to use for the SMTP connection.']),
+                $this->settingsOption('input', 'SMTP[username]', ['label' => 'SMTP Username', 'help' => 'The username to use for SMTP authentication.']),
+                $this->settingsOption('password-alt', 'SMTP[password]', ['label' => 'SMTP Password', 'help' => 'The password to use for SMTP authentication.'])
             ),
             'Pushover' => array(
-                $this->settingsOption('input', 'Pushover[UserKey]', ['label' => 'Pushover User Key', 'placeholder' => 'Your Pushover User Key']),
-                $this->settingsOption('input', 'Pushover[ApiToken]', ['label' => 'Pushover API Token', 'placeholder' => 'Your Pushover API Token'])
+                $this->settingsOption('input', 'Pushover[UserKey]', ['label' => 'Pushover User Key', 'placeholder' => 'Your Pushover User Key', 'help' => '(Global) The User Key for your Pushover account. This is used to send notifications to your Pushover account.']),
+                $this->settingsOption('input', 'Pushover[ApiToken]', ['label' => 'Pushover API Token', 'placeholder' => 'Your Pushover API Token', 'help' => '(Global) The API Token for your Pushover application. This is used to send notifications to your Pushover account.']),
             ),
             'Webhooks (Not Implemented)' => array(
 
