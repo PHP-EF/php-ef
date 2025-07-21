@@ -12,6 +12,7 @@
         "czproject/git-php": "^4.3.0",
         "spomky-labs/otphp": "^11.3.0",
         "endroid/qr-code": "^6.0.0",
+        "phpmailer/phpmailer": "^6.10.0",
         "label305/pptx-extractor": "0.2.*",
         "phpoffice/phpspreadsheet": "^3.3.0",
         "remotelyliving/php-dns": "^5.0"

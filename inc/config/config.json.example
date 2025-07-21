@@ -1,7 +1,7 @@
 {
     "System": {
-        "CURL-Timeout": "180",
-        "CURL-ConnectTimeout": "90"
+        "CURL-Timeout": "90",
+        "CURL-ConnectTimeout": "30",
         "logging": {
             "filename": "",
             "directory": "",

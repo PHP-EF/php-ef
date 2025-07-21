@@ -180,6 +180,15 @@ function newPopup(url, title, w, h) {
   return newWindow;
 }
 
+function escapeHTML(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function arrayContains(needle, arrhaystack){
   return (arrhaystack.indexOf(needle) > -1);
 }
@@ -427,23 +436,26 @@ function loadMainWindow(element,type = "page") {
   }
 }
 
-function toast(title,note,body,theme,delay = "8000") {
-  $('#toastContainer').append(`
-      <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="`+delay+`">
-        <div class="toast-header">
-          <img class="bg-`+theme+` p-2 rounded-2">&nbsp;
-          <strong class="me-auto">`+title+`</strong>
-          <small class="text-muted">`+note+`</small>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-          `+body+`
-        </div>
+
+function toast(title, note, body, theme = "primary", delay = 8000) {
+  const formattedBody = body.replace(/\n/g, "<br>");
+  const toastHTML = `
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="${delay}">
+      <div class="toast-header">
+        <span class="bg-${theme} p-2 rounded-2 me-2 d-inline-block" style="width: 20px; height: 20px;"></span>
+        <strong class="me-auto">${title}</strong>
+        <small class="text-muted">${note}</small>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
-  `);
-  $('.toast').toast('show').on('hidden.bs.toast', function (elem) {
-    $(elem.target).remove();
-  })
+      <div class="toast-body">
+        ${formattedBody}
+      </div>
+    </div>
+  `;
+  const $toast = $(toastHTML).appendTo('#toastContainer');
+  $toast.toast('show').on('hidden.bs.toast', function () {
+    $(this).remove();
+  });
 };
 
 function applyFontSize() {
@@ -1448,7 +1460,8 @@ document.addEventListener('DOMContentLoaded', function() {
       if(typeof v == 'object'){
         var body = '';
         $.each(v, function(val) {
-          var helpTip = v[val].helpTip ?? '';
+          var helpID = `#help-info-${v[val].name}`;
+          var helpTip = v[val].help ? `<sup><a class="help-tip" data-bs-toggle="collapse" href="${helpID}" aria-expanded="true"><i class="ms-1 fa fa-question-circle text-info" title="Help" data-toggle="tooltip"></i></a></sup>` : '';
           var width = v[val].width ?? '6';
           if (v[val].type == 'title' || v[val].type == 'hr' || v[val].type == 'js') {
             body += buildFormItem(v[val]);
