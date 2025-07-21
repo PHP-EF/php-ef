@@ -54,7 +54,7 @@ function queryAPI(type,path,data=null,contentType="application/json",asyncValue=
 	if (contentType == 'application/json' && data != null) {
     data = JSON.stringify(data);
   }
-  let timeout = 10000;
+  let timeout = 60000;
 	switch (type) {
 		case 'get':
 		case 'GET':
