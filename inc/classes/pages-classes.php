@@ -64,6 +64,12 @@ class Pages {
       $stmt->execute([':id' => $pageId]);
       return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function getPageByUrl($pageUrl) {
+      $stmt = $this->db->prepare("SELECT * FROM pages WHERE Url = :Url");
+      $stmt->execute([':Url' => $pageUrl]);
+      return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
   
     public function getiFrameLinks() {
       $stmt = $this->db->prepare("SELECT * FROM pages WHERE LinkType = 'iFrame'");

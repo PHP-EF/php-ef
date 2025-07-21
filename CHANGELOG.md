@@ -1,3 +1,6 @@
+## v0.8.9
+- Add internal function to query page by Url
+
 ## v0.8.8
 - Minor refactor to toast function
 - Minor bugfixes
