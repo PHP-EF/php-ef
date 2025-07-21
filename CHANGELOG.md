@@ -1,3 +1,10 @@
+## v0.8.8
+- Minor refactor to toast function
+- Minor bugfixes
+- Add SMTP notification support for core & plugins
+- Add Pushover notification support for core & plugins
+- Add Website URL configuration option
+
 ## v0.8.7
 - Add support for custom notice on login page
 
