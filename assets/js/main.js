@@ -1301,9 +1301,9 @@ document.addEventListener('DOMContentLoaded', function() {
       case 'listgroup':
         return buildListGroup(item.items,id);
       case 'title':
-        return '<h4>'+text+'</h4>';
+        return '<h4'+id+'">'+text+'</h4>';
       case 'hr':
-        return '<hr class="mt-3">';
+        return '<hr class="mt-3"'+id+'>';
       case 'html':
         return item.html;
       case 'js':
@@ -1953,6 +1953,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     return '0 seconds';
+  }
+
+  function githubLinkFormatter(value, row, index) {
+    return `<a href="${value}" target="_blank" class="text-decoration-none">Github&nbsp;<i class="fa-solid fa-external-link-alt"></i></a>`;
   }
 
 

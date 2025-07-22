@@ -50,6 +50,20 @@ class CoreJwt {
     }
   }
 
+  // Clean up expired tokens for a user's redis set
+  // These tokens are already invalid due to Redis expiration, but we can remove them from the user's set to avoid them being listed under the user profile.
+  public function cleanExpiredTokens($userId) {
+      foreach (['session_tokens', 'api_tokens'] as $type) {
+          $setKey = "user:{$userId}:{$type}";
+          $tokens = $this->redis->smembers($setKey);
+          foreach ($tokens as $token) {
+              if (!$this->redis->exists($token)) {
+                  $this->redis->srem($setKey, $token);
+              }
+          }
+      }
+  }
+
   // Revoke a SAML Assertion
   public function revokeAssertion($assertion, $userid, $seconds) {
       $this->redis->set($assertion, $userid, 'EX', $seconds); // Store assertion with expiration
@@ -1346,6 +1360,7 @@ class Auth {
     $Auth = $this->getAuth();
     if ($Auth['Authenticated']) {
       $UserID = $Auth['UserID'];
+      $this->CoreJwt->cleanExpiredTokens($UserID);
       return $this->CoreJwt->listTokens($UserID,"session_tokens");
     } else {
       $this->api->setAPIResponse('Error','Not Authenticated',401);
@@ -1372,17 +1387,16 @@ class Auth {
       $UserID = $Auth['UserID'];
       $tokens = $this->CoreJwt->listTokens($UserID, $Type, true);
       foreach ($tokens as $token) {
-          if (substr($token['token'], -10) === $stub) {
-              // Revoke the token using CoreJwt
-              try {
-                $this->CoreJwt->revokeToken($token['token']);
-                $this->api->setAPIResponseMessage('Token revoked successfully');
-                return true;                
-              } catch (Exception $e) {
-                $this->api->setAPIResponse('Error',$e->getMessage());
-                return false;
-              }
-
+          // Revoke the token using CoreJwt
+          try {
+            if (substr($token['token'], -10) === $stub) {
+              $this->CoreJwt->revokeToken($token['token']);
+              $this->api->setAPIResponseMessage('Token revoked successfully');
+              return true;
+            }
+          } catch (Exception $e) {
+            $this->api->setAPIResponse('Error',$e->getMessage());
+            return false;
           }
       }
       $this->api->setAPIResponse('Error','Token could not be found');
