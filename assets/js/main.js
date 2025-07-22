@@ -2211,7 +2211,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // ** BUILD / SUBMIT SETTINGS MODALS ** //
   function createSettingsModal(row, options, size = "xxl") {
     const { apiUrl, configUrl, name, id, saveFunction, labelPrefix, dataLocation, callback, noTabs, noRows, NoDestroyOnClose } = options;
-    const sanitizedLabelPrefix = labelPrefix.replace(/\s+/g, '_');
+    // Sanitize any special characters in the labelPrefix to create valid IDs
+    const sanitizedLabelPrefix = labelPrefix.replace(/[^a-zA-Z0-9_]/g, '_');
     const modalId = `SettingsModal_${sanitizedLabelPrefix}`;
     const modalLabelId = `SettingsModalLabel_${sanitizedLabelPrefix}`;
     const modalBodyId = `SettingsModalBody_${sanitizedLabelPrefix}`;
@@ -2331,11 +2332,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Listener to add changed class to modal settings elements
-    $("body").on('change', `#${modalId} .info-field`, function(event) {
+    $("body").on('change', `#${modalId} .info-field, .dynamic-select-input`, function(event) {
       const elementName = $(this).data('label');
-      if (!changedModalSettingsElements.has(elementName)) {
-          toast("Configuration", "", elementName + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
-          changedModalSettingsElements.add(elementName);
+      const controlLabel = $($(this).parents().eq(2).prev('.control-label')[0]).text();
+      const label = elementName || controlLabel;
+      if (!changedModalSettingsElements.has(label)) {
+          toast("Configuration", "", label + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
+          changedModalSettingsElements.add(label);
       }
       $(this).addClass("changed");
     });
@@ -2553,7 +2556,7 @@ document.addEventListener('DOMContentLoaded', function() {
       name: row.Name,
       id: row.id,
       saveFunction: `submitPageSettings();`,
-      labelPrefix: "Page",
+      labelPrefix: "Page / Menu",
       dataLocation: "data",
       callback:  "populatePageSettingsModal(row)",
       noTabs: true,
@@ -2685,7 +2688,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function submitPageSettings(isNew = false) {
     var submitPromise;
     if (isNew) {
-        submitPromise = submitSettingsModal("pages", "Page", isNew, "/api/");
+        submitPromise = submitSettingsModal("pages", "Page___Menu", isNew, "/api/");
     } else {
       var data = {};
       if (pageImageDynamicSelect.selectedValue != "") {
@@ -2693,7 +2696,7 @@ document.addEventListener('DOMContentLoaded', function() {
           "pageImage": pageImageDynamicSelect.selectedValue
         }
       }
-        submitPromise = submitSettingsModal("page", "Page", isNew, "/api/", data);
+        submitPromise = submitSettingsModal("page", "Page___Menu", isNew, "/api/", data);
     }
 
     submitPromise.then(() => {
@@ -2954,7 +2957,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       pagesUpdateSubMenus(menuOpt);
     });
-    var rowMenu = row.Length > 0 && row[0] != null ? row[0].Menu : null;
+    var rowMenu = row.length > 0 && row[0] != null ? row[0].Menu : null;
     pagesUpdateSubMenus(rowMenu ? rowMenu : "None",row);
   }
 
@@ -2970,7 +2973,8 @@ document.addEventListener('DOMContentLoaded', function() {
       if (row.length > 0 && row[0] !== undefined) {
         pageSubMenuContainer = $("[name=pageSubMenu]");
         row[0].Submenu ? pageSubMenuContainer.val(row[0].Submenu) : pageSubMenuContainer.val("");
-        row[0].Submenu ? $("[name=pageIcon],[name=pageImage]").parent().parent().parent().parent().attr("hidden",true) : $("[name=pageIcon],[name=pageImage]").parent().parent().parent().parent().attr("hidden",false);        
+        row[0].Submenu ? $("[name=pageIcon]").parent().parent().parent().attr("hidden",true) : $("[name=pageIcon]").parent().parent().parent().attr("hidden",false);
+        row[0].Submenu ? $("[name=pageImage]").parent().parent().parent().parent().parent().attr("hidden",true) : $("[name=pageImage]").parent().parent().parent().parent().parent().attr("hidden",false);
       }
       pagesHideUnneccessaryInputs();
       return true;
