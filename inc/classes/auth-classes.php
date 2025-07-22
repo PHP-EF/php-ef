@@ -52,7 +52,7 @@ class CoreJwt {
 
   // Clean up expired tokens for a user's redis set
   // These tokens are already invalid due to Redis expiration, but we can remove them from the user's set to avoid them being listed under the user profile.
-  private function cleanExpiredTokens($userId) {
+  public function cleanExpiredTokens($userId) {
       foreach (['session_tokens', 'api_tokens'] as $type) {
           $setKey = "user:{$userId}:{$type}";
           $tokens = $this->redis->smembers($setKey);
@@ -1360,7 +1360,7 @@ class Auth {
     $Auth = $this->getAuth();
     if ($Auth['Authenticated']) {
       $UserID = $Auth['UserID'];
-      $this->cleanExpiredTokens($UserID);
+      $this->CoreJwt->cleanExpiredTokens($UserID);
       return $this->CoreJwt->listTokens($UserID,"session_tokens");
     } else {
       $this->api->setAPIResponse('Error','Not Authenticated',401);
