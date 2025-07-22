@@ -438,7 +438,7 @@ function loadMainWindow(element,type = "page") {
 
 
 function toast(title, note, body, theme = "primary", delay = 8000) {
-  const formattedBody = body.replace(/\n/g, "<br>");
+  const formattedBody = (body != null) ? body.replace(/\n/g, "<br>") : "";
   const toastHTML = `
     <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="${delay}">
       <div class="toast-header">
@@ -1011,17 +1011,7 @@ document.addEventListener('DOMContentLoaded', function() {
       $(this).addClass("changed");
   });
 
-  // Listener to add changed class to modal settings elements
-  $("body").on('change', '#SettingsModal .info-field', function(event) {
-    const elementName = $(this).data('label');
-    if (!changedModalSettingsElements.has(elementName)) {
-        toast("Configuration", "", elementName + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
-        changedModalSettingsElements.add(elementName);
-    }
-    $(this).addClass("changed");
-  });
-
-  $("body").on('input', '#SettingsModal [name=roleName]', function(event) {
+  $("body").on('input', '#SettingsModal_Role [name=roleName]', function(event) {
     $('[name=roleSlug]').val(cleanString($(this).val())).change();
   });
 
@@ -1617,7 +1607,6 @@ document.addEventListener('DOMContentLoaded', function() {
   window.userActionEvents = {
     "click .edit": function (e, value, row, index) {
       buildUserSettingsModal(row);
-      $("#SettingsModal").modal("show");
     },
     "click .delete": function (e, value, row, index) {
       if(confirm("Are you sure you want to delete "+row.username+" from the list of Users? This is irriversible.") == true) {
@@ -2220,16 +2209,52 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ** BUILD / SUBMIT SETTINGS MODALS ** //
+  function createSettingsModal(row, options, size = "xxl") {
+    const { apiUrl, configUrl, name, id, saveFunction, labelPrefix, dataLocation, callback, noTabs, noRows, NoDestroyOnClose } = options;
+    // Sanitize any special characters in the labelPrefix to create valid IDs
+    const sanitizedLabelPrefix = labelPrefix.replace(/[^a-zA-Z0-9_]/g, '_');
+    const modalId = `SettingsModal_${sanitizedLabelPrefix}`;
+    const modalLabelId = `SettingsModalLabel_${sanitizedLabelPrefix}`;
+    const modalBodyId = `SettingsModalBody_${sanitizedLabelPrefix}`;
+    const saveBtnId = `SettingsModalSaveBtn_${sanitizedLabelPrefix}`;
+    const itemIdInputId = `modalItemID_${sanitizedLabelPrefix}`;
 
-  function buildSettingsModal(row, options, size = "xxl") {
-    // Clear Modal Content
+    // Destroy on re-open instead
+    if (NoDestroyOnClose) {
+      if (document.getElementById(modalId)) {
+        (document.getElementById(modalId)).remove();
+      }
+    }
+
+    const modalHTML = `
+      <div class="modal fade" id="${modalId}" tabindex="-1" role="dialog" aria-labelledby="${modalLabelId}" aria-hidden="true">
+        <div class="modal-dialog modal-${size}" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="${modalLabelId}">Settings</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <input id="${itemIdInputId}" hidden />
+            </div>
+            <div class="modal-body" id="${modalBodyId}">
+              <!-- Dynamic content goes here -->
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-primary" id="${saveBtnId}">Save</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
     changedModalSettingsElements.clear();
-    $("#SettingsModalBody").html("");
-    $("#SettingsModal .modal-dialog").removeClass("modal-xs modal-sm modal-md modal-lg modal-xl modal-xxl").addClass(`modal-${size}`);
-    // Empty the additional settings array
     selectWithTableArr = {};
-    const { apiUrl, configUrl, name, saveFunction, labelPrefix, dataLocation, callback, noTabs, noRows } = options;
-    $("#modalItemID").val(name)
+
+    if (id) {
+      $(`#${itemIdInputId}`).val(id);
+    }
 
     function handleCallback(callback) {
       if (callback) {
@@ -2248,10 +2273,10 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
       queryAPI("GET", apiUrl).done(function(settingsResponse) {
         const settingsData = dataLocation ? getNestedProperty(settingsResponse, dataLocation) : settingsResponse.data;
-        $("#SettingsModalBody").html(buildFormGroup(settingsData,noTabs,noRows));
+        $(`#${modalBodyId}`).html(buildFormGroup(settingsData,noTabs,noRows));
         initPasswordToggle();
-        $("#SettingsModalSaveBtn").attr("onclick", saveFunction);
-        $("#SettingsModalLabel").text(`${labelPrefix} Settings: ${name}`);
+        $(`#${saveBtnId}`).attr("onclick", saveFunction);
+        $(`#${modalLabelId}`).text(`${labelPrefix} Settings: ${name}`);
 
         if (configUrl) {
           try {
@@ -2260,7 +2285,7 @@ document.addEventListener('DOMContentLoaded', function() {
               for (const key in data) {
                 if (data.hasOwnProperty(key)) {
                   const value = data[key];
-                  const element = $(`#SettingsModal [name="${key}"]`);
+                  const element = $(`#${modalId} [name="${key}"]`);
                   if (element.attr("type") === "checkbox") {
                     element.prop("checked", value);
                   } else if (element.is("input[multiple]")) {
@@ -2293,16 +2318,47 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (e) {
       logConsole("Error", e, "error");
     }
-    // Show Modal
-    $("#SettingsModal").modal("show");
+
+    const modalElement = document.getElementById(modalId);
+
+    if (modalElement) {
+      if (!NoDestroyOnClose) {
+        modalElement.addEventListener('hidden.bs.modal', () => {
+          modalElement.remove();
+        });
+      }
+      const bootstrapModal = new bootstrap.Modal(modalElement);
+      bootstrapModal.show();
+    }
+
+    // Listener to add changed class to modal settings elements
+    $("body").on('change', `#${modalId} .info-field, .dynamic-select-input`, function(event) {
+      const elementName = $(this).data('label');
+      const controlLabel = $($(this).parents().eq(2).prev('.control-label')[0]).text();
+      const label = elementName || controlLabel;
+      if (!changedModalSettingsElements.has(label)) {
+          toast("Configuration", "", label + " has changed.<br><small>Save configuration to apply changes.</small>", "warning");
+          changedModalSettingsElements.add(label);
+      }
+      $(this).addClass("changed");
+    });
+
+    return {
+      modalId,
+      modalLabelId,
+      modalBodyId,
+      saveBtnId,
+      itemIdInputId
+    };
   }
 
-  function submitSettingsModal(type, element = "#modalItemID", isNew = false, apiStub = null, customData = []) {
-    var noneCheckboxSelector = "#SettingsModal input.changed[type!=checkbox], #SettingsModal select.changed, #SettingsModal textarea.changed";
-    var checkboxSelector = "#SettingsModal input.changed[type=checkbox]";
+  function submitSettingsModal(type, labelPrefix, isNew = false, apiStub = null, customData = [], closeOnSubmit = true) {
+    const sanitizedLabelPrefix = labelPrefix.replace(/\s+/g, '_');
+    var noneCheckboxSelector = `#SettingsModal_${sanitizedLabelPrefix} input.changed[type!=checkbox], #SettingsModal_${sanitizedLabelPrefix} select.changed, #SettingsModal_${sanitizedLabelPrefix} textarea.changed`;
+    var checkboxSelector = `#SettingsModal_${sanitizedLabelPrefix} input.changed[type=checkbox]`;
     if (isNew) {
-      var noneCheckboxSelector = "#SettingsModal input[type!=checkbox], #SettingsModal select, #SettingsModal textarea";
-      var checkboxSelector = "#SettingsModal input[type=checkbox]";
+      var noneCheckboxSelector = `#SettingsModal_${sanitizedLabelPrefix} input[type!=checkbox], #SettingsModal_${sanitizedLabelPrefix} select, #SettingsModal_${sanitizedLabelPrefix} textarea`;
+      var checkboxSelector = `#SettingsModal_${sanitizedLabelPrefix} input[type=checkbox]`;
     }
     var serializedArray = $(`${noneCheckboxSelector}`).serializeArray();
     // Include unchecked checkboxes in the formData
@@ -2344,7 +2400,8 @@ document.addEventListener('DOMContentLoaded', function() {
         var api = `${apiStub}${type}`;
         var method = "POST";
     } else {
-        var api = `${apiStub}${type}/` + $(element).val();
+        idElement = `#modalItemID_${sanitizedLabelPrefix}`;
+        var api = `${apiStub}${type}/` + $(idElement).val();
         var method = "PATCH";
     }
 
@@ -2358,8 +2415,11 @@ document.addEventListener('DOMContentLoaded', function() {
         return queryAPI(method, api, formData).then(function(data) {
             if (data.result === "Success") {
                 toast(data.result, "", data.message, "success");
-                $("#SettingsModal .changed").removeClass("changed");
+                $(`#SettingsModal_${sanitizedLabelPrefix} .changed`).removeClass("changed");
                 changedModalSettingsElements.clear();
+                if (closeOnSubmit) {
+                  $(`#SettingsModal_${sanitizedLabelPrefix}`).modal("hide");
+                }
             } else {
                 toast(data.result === "Error" ? data.result : "API Error", "", data.message || "Failed to save configuration", "danger", "30000");
             }
@@ -2368,32 +2428,36 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function buildPluginSettingsModal(row) {
-    buildSettingsModal(row, {
+    createSettingsModal(row, {
       apiUrl: row.api,
       configUrl: `/api/config/plugins/${row.name}`,
       name: row.name,
-      saveFunction: `submitSettingsModal("plugins");`,
+      id: row.name,
+      saveFunction: `submitSettingsModal("plugins","Plugin",false,null,[],false);`,
       labelPrefix: "Plugin",
-      dataLocation: "data"
+      dataLocation: "data",
+      NoDestroyOnClose: true
     },'xxl');
   }
 
   function buildWidgetSettingsModal(row) {
-    buildSettingsModal(row, {
+    createSettingsModal(row, {
       apiUrl: `/api/settings/widgets/${row.info.name}`,
       configUrl: `/api/config/widgets/${row.info.name}`,
       name: row.info.name,
-      saveFunction: `submitSettingsModal("widgets");`,
+      id: row.info.name,
+      saveFunction: `submitSettingsModal("widgets","Widget");`,
       labelPrefix: "Widget",
       dataLocation: "data.Settings"
     },'xl');
   }
 
   function buildDashboardSettingsModal(row) {
-    buildSettingsModal(row, {
+    createSettingsModal(row, {
       apiUrl: `/api/settings/dashboard`,
       configUrl: `/api/config/dashboards/${row.Name}`,
       name: row.Name,
+      id: row.Name,
       saveFunction: `submitDashboardSettings();`,
       labelPrefix: "Dashboard",
       dataLocation: "data",
@@ -2402,7 +2466,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function buildNewDashboardSettingsModal() {
-    buildSettingsModal([], {
+    createSettingsModal([], {
       apiUrl: `/api/settings/dashboard`,
       configUrl: null,
       name: "New Dashboard",
@@ -2413,9 +2477,10 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function buildRoleSettingsModal(row) {
-      buildSettingsModal(row, {
+      createSettingsModal(row, {
       apiUrl: `/api/settings/role`,
       name: row.name,
+      id: row.id,
       saveFunction: `submitRoleSettings();`,
       labelPrefix: "Role",
       dataLocation: "data",
@@ -2425,7 +2490,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function buildNewRoleSettingsModal() {
-    buildSettingsModal([], {
+    createSettingsModal([], {
       apiUrl: `/api/settings/role`,
       configUrl: null,
       name: "New Role",
@@ -2437,9 +2502,10 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function buildGroupSettingsModal(row) {
-    buildSettingsModal(row, {
+    createSettingsModal(row, {
     apiUrl: `/api/settings/group`,
     name: row.Name,
+    id: row.id,
     saveFunction: `submitGroupSettings();`,
     labelPrefix: "Group",
     dataLocation: "data",
@@ -2449,7 +2515,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function buildNewGroupSettingsModal() {
-    buildSettingsModal([], {
+    createSettingsModal([], {
       apiUrl: `/api/settings/group`,
       configUrl: null,
       name: "New Group",
@@ -2461,9 +2527,10 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function buildUserSettingsModal(row) {
-    buildSettingsModal(row, {
+    createSettingsModal(row, {
       apiUrl: `/api/settings/user`,
       name: row.username,
+      id: row.id,
       saveFunction: `submitUserSettings();`,
       labelPrefix: "User",
       dataLocation: "data",
@@ -2472,7 +2539,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function buildNewUserSettingsModal() {
-    buildSettingsModal([], {
+    createSettingsModal([], {
       apiUrl: `/api/settings/newuser`,
       configUrl: null,
       name: "New User",
@@ -2484,11 +2551,12 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function buildPageSettingsModal(row) {
-    buildSettingsModal(row, {
+    createSettingsModal(row, {
       apiUrl: `/api/settings/page`,
       name: row.Name,
+      id: row.id,
       saveFunction: `submitPageSettings();`,
-      labelPrefix: "Page",
+      labelPrefix: "Page / Menu",
       dataLocation: "data",
       callback:  "populatePageSettingsModal(row)",
       noTabs: true,
@@ -2497,7 +2565,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function buildNewPageSettingsModal() {
-    buildSettingsModal([], {
+    createSettingsModal([], {
       apiUrl: `/api/settings/page`,
       configUrl: null,
       name: "New Link / Menu",
@@ -2511,10 +2579,11 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function buildNewsSettingsModal(row) {
-    buildSettingsModal(row, {
+    createSettingsModal(row, {
       apiUrl: `/api/settings/news/`+row.id,
       configUrl: null,
       name: row.title,
+      id: row.id,
       saveFunction: `submitNewsSettings();`,
       labelPrefix: "News",
       dataLocation: "data",
@@ -2523,7 +2592,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function buildNewNewsSettingsModal() {
-    buildSettingsModal([], {
+    createSettingsModal([], {
       apiUrl: `/api/settings/news`,
       configUrl: null,
       name: "New News Item",
@@ -2559,13 +2628,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var submitPromise;
     if (isNew) {
-        submitPromise = submitSettingsModal("dashboards", `[name="Name"]`, isNew);
+        submitPromise = submitSettingsModal("dashboards", 'Dashboard', isNew);
     } else {
-        submitPromise = submitSettingsModal("dashboards");
+        submitPromise = submitSettingsModal("dashboards", 'Dashboard');
     }
 
     submitPromise.then(() => {
-        $("#SettingsModal").modal("hide");
         $("#dashboardsTable").bootstrapTable("refresh");
     }).catch((error) => {
         console.error("Error submitting settings:", error);
@@ -2575,13 +2643,12 @@ document.addEventListener('DOMContentLoaded', function() {
   function submitUserSettings(isNew = false) {
     var submitPromise;
     if (isNew) {
-        submitPromise = submitSettingsModal("users", "[name=userId]", isNew, "/api/");
+        submitPromise = submitSettingsModal("users", "User", isNew, "/api/");
     } else {
-        submitPromise = submitSettingsModal("user", "[name=userId]", isNew, "/api/");
+        submitPromise = submitSettingsModal("user", "User", isNew, "/api/");
     }
 
     submitPromise.then(() => {
-        $("#SettingsModal").modal("hide");
         $("#usersTable").bootstrapTable("refresh");
     }).catch((error) => {
         console.error("Error submitting settings:", error);
@@ -2591,13 +2658,12 @@ document.addEventListener('DOMContentLoaded', function() {
   function submitGroupSettings(isNew = false) {
     var submitPromise;
     if (isNew) {
-        submitPromise = submitSettingsModal("groups", "[name=groupId]", isNew, "/api/rbac/");
+        submitPromise = submitSettingsModal("groups", "Group", isNew, "/api/rbac/");
     } else {
-        submitPromise = submitSettingsModal("group", "[name=groupId]", isNew, "/api/rbac/");
+        submitPromise = submitSettingsModal("group", "Group", isNew, "/api/rbac/");
     }
 
     submitPromise.then(() => {
-        $("#SettingsModal").modal("hide");
         $("#groupsTable").bootstrapTable("refresh");
     }).catch((error) => {
         console.error("Error submitting settings:", error);
@@ -2607,13 +2673,12 @@ document.addEventListener('DOMContentLoaded', function() {
   function submitRoleSettings(isNew = false) {
     var submitPromise;
     if (isNew) {
-        submitPromise = submitSettingsModal("roles", "[name=roleId]", isNew, "/api/rbac/");
+        submitPromise = submitSettingsModal("roles", "Role", isNew, "/api/rbac/");
     } else {
-        submitPromise = submitSettingsModal("role", "[name=roleId]", isNew, "/api/rbac/");
+        submitPromise = submitSettingsModal("role", "Role", isNew, "/api/rbac/");
     }
 
     submitPromise.then(() => {
-        $("#SettingsModal").modal("hide");
         $("#rolesTable").bootstrapTable("refresh");
     }).catch((error) => {
         console.error("Error submitting settings:", error);
@@ -2623,7 +2688,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function submitPageSettings(isNew = false) {
     var submitPromise;
     if (isNew) {
-        submitPromise = submitSettingsModal("pages", "[name=pageId]", isNew, "/api/");
+        submitPromise = submitSettingsModal("pages", "Page___Menu", isNew, "/api/");
     } else {
       var data = {};
       if (pageImageDynamicSelect.selectedValue != "") {
@@ -2631,11 +2696,10 @@ document.addEventListener('DOMContentLoaded', function() {
           "pageImage": pageImageDynamicSelect.selectedValue
         }
       }
-        submitPromise = submitSettingsModal("page", "[name=pageId]", isNew, "/api/", data);
+        submitPromise = submitSettingsModal("page", "Page___Menu", isNew, "/api/", data);
     }
 
     submitPromise.then(() => {
-        $("#SettingsModal").modal("hide");
         $("#combinedTable").bootstrapTable("refresh");
     }).catch((error) => {
         console.error("Error submitting settings:", error);
@@ -2645,13 +2709,12 @@ document.addEventListener('DOMContentLoaded', function() {
   function submitNewsSettings(isNew = false) {
     var submitPromise;
     if (isNew) {
-        submitPromise = submitSettingsModal("news", "[name=newsId]", isNew, "/api/notifications/");
+        submitPromise = submitSettingsModal("news", "News", isNew, "/api/notifications/");
     } else {
-      submitPromise = submitSettingsModal("news", "[name=newsId]", isNew, "/api/notifications/");
+      submitPromise = submitSettingsModal("news", "News", isNew, "/api/notifications/");
     }
 
     submitPromise.then(() => {
-      $("#SettingsModal").modal("hide");
       $("#newsTable").bootstrapTable("refresh");
     }).catch((error) => {
       console.error("Error submitting settings:", error);
@@ -2682,7 +2745,7 @@ document.addEventListener('DOMContentLoaded', function() {
         $(`[name="`+PermittedResources[resource]+`"]`).prop("checked", "true");
       }
     }
-    $("#SettingsModal .list-group .toggle").on("click", function(event) {
+    $("#SettingsModal_Group .list-group .toggle").on("click", function(event) {
       var groupid = $("[name=groupId]").val();
       var group = $("[name=groupName]").val();
       var role = $(event.target).prop("name");
@@ -2779,10 +2842,10 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
 
-    $("#SettingsModal .list-group .toggle").on("click", function(event) {
+    $("#SettingsModal_User .list-group .toggle").on("click", function(event) {
       var userid = $("[name=userId]").val().trim();
       var data = {
-        groups: $("#SettingsModal .list-group .toggle:checked").map(function() {
+        groups: $("#SettingsModal_User .list-group .toggle:checked").map(function() {
           return $(this).attr('name').replaceAll("--"," ");
         }).get().join(",")
       }
@@ -2894,7 +2957,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       pagesUpdateSubMenus(menuOpt);
     });
-    var rowMenu = row.Length > 0 && row[0] != null ? row[0].Menu : null;
+    var rowMenu = row.length > 0 && row[0] != null ? row[0].Menu : null;
     pagesUpdateSubMenus(rowMenu ? rowMenu : "None",row);
   }
 
@@ -2910,7 +2973,8 @@ document.addEventListener('DOMContentLoaded', function() {
       if (row.length > 0 && row[0] !== undefined) {
         pageSubMenuContainer = $("[name=pageSubMenu]");
         row[0].Submenu ? pageSubMenuContainer.val(row[0].Submenu) : pageSubMenuContainer.val("");
-        row[0].Submenu ? $("[name=pageIcon],[name=pageImage]").parent().parent().parent().parent().attr("hidden",true) : $("[name=pageIcon],[name=pageImage]").parent().parent().parent().parent().attr("hidden",false);        
+        row[0].Submenu ? $("[name=pageIcon]").parent().parent().parent().attr("hidden",true) : $("[name=pageIcon]").parent().parent().parent().attr("hidden",false);
+        row[0].Submenu ? $("[name=pageImage]").parent().parent().parent().parent().parent().attr("hidden",true) : $("[name=pageImage]").parent().parent().parent().parent().parent().attr("hidden",false);
       }
       pagesHideUnneccessaryInputs();
       return true;
@@ -3175,7 +3239,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var type = $("[name=pageType]").val();
     var submenu = $("[name=pageSubMenu]").val();
     var linktype = $("[name=pageLinkType]").val();
-    console.log(type,submenu,linktype);
     switch(type) {
       case "Link":
         $("[name=pageStub],[name=pageTitle],[name=pageStub],[name=pageSubMenu],[name=pageRole],[name=pageLinkType],[name=pageUrl],[name=pageDefault]").parent().parent().parent().attr("hidden",false);

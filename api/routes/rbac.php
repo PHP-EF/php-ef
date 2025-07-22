@@ -146,7 +146,7 @@ $app->patch('/rbac/role/{id}', function ($request, $response, $args) {
             $RoleName = $data['roleName'] ?? null;
             $RoleSlug = $data['roleSlug'] ?? null;
             $RoleDescription = $data['roleDescription'] ?? null;
-            $phpef->auth->updateRBACRole($args['id'],$RoleName,$RoleSlug,$RoleDescription);
+            $phpef->auth->updateRBACRole($args['id'],$RoleName,$RoleDescription);
         } else {
             $phpef->api->setAPIResponse('Error','id missing from request',400);
         }

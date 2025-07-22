@@ -1,3 +1,8 @@
+## v0.9.0
+- Rewrite settings modal to be dynamically generated to ensure flexibility
+- Fix bug when saving Role descriptions
+- Fix bug with toasts in some instances
+
 ## v0.8.9
 - Add internal function to query page by Url
 
