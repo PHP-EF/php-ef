@@ -311,7 +311,7 @@ trait Settings {
             [
                 'field' => 'link',
                 'title' => 'Link',
-                'dataAttributes' => ['sortable' => 'true'],
+                'dataAttributes' => ['sortable' => 'true', 'formatter' => 'githubLinkFormatter'],
             ],
             [
                 'field' => 'status',
