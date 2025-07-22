@@ -480,7 +480,7 @@ return '
     }
   })
 
-  $("#SettingsModal").on("click", "#widgetSelect", function () {
+  $("body").on("click", "#widgetSelect", function () {
     const widgetsSelect = $("#widgetSelect");
     const table = $("#widgetSelectTable");
     const selectedValues = Array.from(widgetsSelect[0].selectedOptions).map(option => option.value);
