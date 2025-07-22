@@ -135,27 +135,6 @@ return '
   </div>
 </div>
 
-<!-- Settings Modal -->
-<div class="modal fade" id="SettingsModal" tabindex="-1" role="dialog" aria-labelledby="SettingsModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="SettingsModalLabel"></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true"></span>
-        </button>
-        <input id="modalItemID" hidden></input>
-      </div>
-      <div class="modal-body" id="SettingsModalBody">
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-primary" id="SettingsModalSaveBtn">Save</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- Online Plugins Modal -->
 <div class="modal fade" id="onlinePluginsModal" tabindex="-1" role="dialog" aria-labelledby="onlinePluginsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
