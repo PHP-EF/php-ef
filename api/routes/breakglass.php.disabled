@@ -1,0 +1,16 @@
+<?php
+$app->get('/breakglass/{id}', function ($request, $response, $args) {
+	$phpef = ($request->getAttribute('phpef')) ?? new phpef();
+    $data = $phpef->api->getAPIRequestData($request);
+    if (isset($args['id'])) {
+        $PW = bin2hex(random_bytes(16));
+        $phpef->auth->updateUser($args['id'],null,$PW,null,null,null,null);
+        $phpef->api->setAPIResponse('Success',$PW,200);
+    } else {
+        $phpef->api->setAPIResponse('Error','id missing from request',400);
+    }
+	$response->getBody()->write(jsonE($GLOBALS['api']));
+	return $response
+		->withHeader('Content-Type', 'application/json;charset=UTF-8')
+		->withStatus($GLOBALS['responseCode']);
+});
