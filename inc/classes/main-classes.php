@@ -61,13 +61,13 @@ class phpef {
 
     private function checkUUID() {
         if (!$this->config->get('System','uuid')) {
-        $config = $this->config->get();
-        $uuid = array(
-            'System' => array(
-            'uuid' => \Ramsey\Uuid\Uuid::uuid4()
-            )
-        );
-        $this->config->set($config,$uuid);
+            $config = $this->config->get();
+            $uuid = array(
+                'System' => array(
+                'uuid' => \Ramsey\Uuid\Uuid::uuid4()
+                )
+            );
+            $this->config->set($config,$uuid);
         }
     }
 
