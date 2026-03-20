@@ -92,7 +92,7 @@ function extractZip(string $filePath, string $tempPath) {
     $zip = new ZipArchive;
     $opened = $zip->open($filePath);
     if ($opened !== TRUE) {
-        throw new PptxFileException( 'Could not open zip archive ' . $filePath . '[' . $opened . ']' );
+        throw new Exception( 'Could not open zip archive ' . $filePath . '[' . $opened . ']' );
     }
     $zip->extractTo($tempPath);
     $zip->close();
@@ -104,7 +104,7 @@ function compressZip(string $saveLocation, string $archiveLocation) {
 
     $opened = $zip->open($saveLocation, ZIPARCHIVE::CREATE | ZipArchive::OVERWRITE);
     if ($opened !== true) {
-        throw new PptxFileException( 'Cannot open zip: ' . $saveLocation . ' [' . $opened . ']' );
+        throw new Exception( 'Cannot open zip: ' . $saveLocation . ' [' . $opened . ']' );
     }
 
     // Create recursive directory iterator
@@ -116,19 +116,19 @@ function compressZip(string $saveLocation, string $archiveLocation) {
             continue;
         }
         if (!file_exists($filePath)) {
-            throw new PptxFileException( 'File does not exists: ' . $file->getPathname() );
+            throw new Exception( 'File does not exists: ' . $file->getPathname() );
         } else {
             if (!is_readable($filePath)) {
-                throw new PptxFileException( 'File is not readable: ' . $file->getPathname() );
+                throw new Exception( 'File is not readable: ' . $file->getPathname() );
             } else {
                 if (!$zip->addFile($filePath, substr($file->getPathname(), strlen($archiveLocation) + 1))) {
-                    throw new PptxFileException( 'Error adding file: ' . $file->getPathname() );
+                    throw new Exception( 'Error adding file: ' . $file->getPathname() );
                 }
             }
         }
     }
     if (!$zip->close()) {
-        throw new PptxFileException( 'Could not create zip file' );
+        throw new Exception( 'Could not create zip file' );
     }
 }
 
