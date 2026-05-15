@@ -130,7 +130,7 @@ class Reporting {
   }
 
   public function getTrackingSummary() {
-    $stmt = $this->db->prepare('SELECT "Total" AS type, SUM(CASE WHEN DATE(dateTime) = DATE("now") THEN 1 ELSE 0 END) AS count_today, SUM(CASE WHEN strftime("%Y-%m", dateTime) = strftime("%Y-%m", "now") THEN 1 ELSE 0 END) AS count_this_month, SUM(CASE WHEN strftime("%Y", dateTime) = strftime("%Y", "now") THEN 1 ELSE 0 END) AS count_this_year, COUNT(DISTINCT CASE WHEN DATE(dateTime) = DATE("now") THEN tId ELSE NULL END) AS unique_visitors_today, COUNT(DISTINCT CASE WHEN strftime("%Y-%m", dateTime) = strftime("%Y-%m", "now") THEN tId ELSE NULL END) AS unique_visitors_this_month, COUNT(DISTINCT CASE WHEN strftime("%Y", dateTime) = strftime("%Y", "now") THEN tId ELSE NULL END) AS unique_visitors_this_year FROM reporting_tracking;');
+    $stmt = $this->db->prepare('SELECT "Total" AS type, SUM(CASE WHEN DATE(dateTime) = DATE("now") THEN 1 ELSE 0 END) AS count_today, SUM(CASE WHEN strftime("%Y-%m", dateTime) = strftime("%Y-%m", "now") THEN 1 ELSE 0 END) AS count_this_month, SUM(CASE WHEN strftime("%Y", dateTime) = strftime("%Y", "now") THEN 1 ELSE 0 END) AS count_this_year, COUNT(DISTINCT CASE WHEN DATE(dateTime) = DATE("now") THEN tId ELSE NULL END) AS unique_visitors_today, COUNT(DISTINCT CASE WHEN strftime("%Y-%m", dateTime) = strftime("%Y-%m", "now") THEN tId ELSE NULL END) AS unique_visitors_this_month, COUNT(DISTINCT CASE WHEN strftime("%Y", dateTime) = strftime("%Y", "now") THEN tId ELSE NULL END) AS unique_visitors_this_year, COUNT(*) AS count_all_time, COUNT(DISTINCT tId) AS unique_visitors_all_time FROM reporting_tracking;');
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
@@ -211,6 +211,9 @@ class Reporting {
         break;
       case 'lastYear':
         $Select = 'SELECT * FROM '.$table.' WHERE strftime("%Y", '.$dateField.') = strftime("%Y", date("now", "-1 year"))';
+        break;
+      case 'allTime':
+        $Select = 'SELECT * FROM '.$table.' WHERE '.$dateField.' >= date("1970-01-01")';
         break;
       case 'custom':
         if ($start != null && $end != null) {

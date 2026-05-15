@@ -1,3 +1,10 @@
+## v0.9.2
+- Add allTime as a selectable view for reports
+
+## v0.9.1
+- Minor changes to form generation
+- Add breakglass api route which can be renamed to reset passwords in break glass scenarios
+
 ## v0.9.0
 - Rewrite settings modal to be dynamically generated to ensure flexibility
 - Fix bug when saving Role descriptions
