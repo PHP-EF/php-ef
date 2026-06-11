@@ -5,7 +5,7 @@
         "ramsey/uuid": "^4.7.6",
         "peppeocchi/php-cron-scheduler": "4.*",
         "monolog/monolog": "^3.0",
-        "firebase/php-jwt": "^6.10",
+        "firebase/php-jwt": "^7.0.0",
         "predis/predis": "^2.2",
         "onelogin/php-saml": "^4.2.0",
         "slim/slim": "^4.14.0",
