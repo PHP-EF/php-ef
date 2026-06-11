@@ -527,6 +527,12 @@ body .popover {
   width: 100%;
 }
 
+@media (min-width: 992px) {
+    .d-lg-flex {
+        display: block !important;
+    }
+}
+
 /* Panel */
 .panel-heading {
   -webkit-text-size-adjust: 100%;
