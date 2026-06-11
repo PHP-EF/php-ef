@@ -11,7 +11,7 @@ return '
       <div class="col-lg-12">
         <div class="row">
           <!-- Visits Today Card -->
-          <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+          <div class="col-lg-2 col-md-4 col-sm-6 col-12">
             <div class="card info-card visits-today-card">
               <div class="card-body">
                 <h5 class="card-title">Visits <span>| Today</span></h5>
@@ -32,7 +32,7 @@ return '
           </div><!-- Visits Today Card -->
 
           <!-- Visits This Month Card -->
-          <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+          <div class="col-lg-2 col-md-4 col-sm-6 col-12">
             <div class="card info-card visits-month-card">
               <div class="card-body">
                 <h5 class="card-title">Visits <span>| This Month</span></h5>
@@ -53,7 +53,7 @@ return '
           </div><!-- Visits This Month Card -->
 
           <!-- Visits This Year Card -->
-          <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+          <div class="col-lg-2 col-md-4 col-sm-6 col-12">
             <div class="card info-card visits-year-card">
               <div class="card-body">
                 <h5 class="card-title">Visits <span>| This Year</span></h5>
@@ -73,8 +73,29 @@ return '
             </div>
           </div><!-- Visits This Year Card -->
 
+          <!-- Visits All Time Card -->
+          <div class="col-lg-2 col-md-4 col-sm-6 col-12">
+            <div class="card info-card visits-all-time-card">
+              <div class="card-body">
+                <h5 class="card-title">Visits <span>| All Time</span></h5>
+                <div class="d-flex align-items-center">
+                  <!-- <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                    <i class="bi bi-people"></i>
+                  </div> -->
+                  <div class="pt-1 ps-3">
+                    <h6 id="visitsAllTimeVal" class="metric-circle border-5"></h6>
+                  </div>
+                  <div class="p-2 pt-2 ps-4">
+                    <!-- <span id="customersAllTimeVal" class="ib-green small pt-1 mt-1 fw-bold"></span> -->
+                    <span id="uniqueVisitorsAllTimeVal" class="ib-black small pt-1 mt-1 fw-bold" style="display:flex;"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- Visits All Time Card -->
+
           <!-- Granularity Card -->
-          <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+          <div class="col-lg-4 col-md-4 col-sm-6 col-12">
             <div class="card info-card granularity-card">
               <div class="card-body">
                 <h5 class="card-title">Granularity</span></h5>
@@ -91,6 +112,7 @@ return '
                       <a class="dropdown-item granularity-select preventDefault" data-granularity="thisYear" href="#">This Year</a>
                       <a class="dropdown-item granularity-select preventDefault" data-granularity="lastMonth" href="#">Last Month</a>
                       <a class="dropdown-item granularity-select preventDefault" data-granularity="lastYear" href="#">Last Year</a>
+                      <a class="dropdown-item granularity-select preventDefault" data-granularity="allTime" href="#">All Time</a>
                       <a class="dropdown-item granularity-select preventDefault" data-granularity="custom" href="#">Custom</a>
                     </div>
                     <button id="reportingClearFilters" class="btn btn-info btn-sm reportingClearFilters" type="button">
@@ -240,6 +262,8 @@ return '
       $("#uniqueVisitorsThisMonthVal").text(total["unique_visitors_this_month"]+" Unique Visitors");
       $("#visitsThisYearVal").text(total["count_this_year"]);
       $("#uniqueVisitorsThisYearVal").text(total["unique_visitors_this_year"]+" Unique Visitors");
+      $("#visitsAllTimeVal").text(total["count_all_time"]);
+      $("#uniqueVisitorsAllTimeVal").text(total["unique_visitors_all_time"]+" Unique Visitors");
     });
   };
 

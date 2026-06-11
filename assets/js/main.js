@@ -1128,10 +1128,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         </ul>
                     </div>
                 </div>
+                <div class="d-none d-lg-flex">
                 ${Object.keys(array).map((i, index) => {
                     active = (index == 0) ? 'active' : '';
                     return `<li role="presentation" class="nav-item d-none d-lg-flex"><a href="" data-bs-toggle="tab" data-bs-target="#${ids[i]}${cleanString(i)}" class="nav-link ${active}"><span lang="en">${i}</span></a></li>`;
                 }).join('')}
+                </div>
             </ul>
         `;
     }
