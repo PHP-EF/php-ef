@@ -1,4 +1,4 @@
-ARG ALPINE_VERSION=3.20
+ARG ALPINE_VERSION=3.24
 FROM alpine:${ALPINE_VERSION}
 LABEL maintainer="TehMuffinMoo" \
       description="PHP and NGINX Dockerfile to support PHP-EF."
@@ -10,30 +10,29 @@ RUN apk add --no-cache \
   curl \
   composer \
   nginx \
-  php83 \
-  php83-ldap \
-  php83-ctype \
-  php83-sqlite3 \
-  php83-pdo \
-  php83-pdo_sqlite \
-  php83-curl \
-  php83-dom \
-  php83-fileinfo \
-  php83-fpm \
-  php83-gd \
-  php83-intl \
-  php83-mbstring \
-  php83-mysqli \
-  php83-opcache \
-  php83-openssl \
-  php83-phar \
-  php83-session \
-  php83-tokenizer \
-  php83-xml \
-  php83-xmlreader \
-  php83-xmlwriter \
-  php83-simplexml \
-  php83-posix \
+  php85 \
+  php85-ldap \
+  php85-ctype \
+  php85-sqlite3 \
+  php85-pdo \
+  php85-pdo_sqlite \
+  php85-curl \
+  php85-dom \
+  php85-fileinfo \
+  php85-fpm \
+  php85-gd \
+  php85-intl \
+  php85-mbstring \
+  php85-mysqli \
+  php85-openssl \
+  php85-phar \
+  php85-session \
+  php85-tokenizer \
+  php85-xml \
+  php85-xmlreader \
+  php85-xmlwriter \
+  php85-simplexml \
+  php85-posix \
   supervisor \
   redis \
   git \
@@ -47,7 +46,7 @@ COPY Docker/config/conf.d /etc/nginx/conf.d/
 COPY Docker/config/proxy.conf /etc/nginx/proxy.conf
 
 # Configure PHP-FPM
-ENV PHP_INI_DIR=/etc/php83
+ENV PHP_INI_DIR=/etc/php85
 COPY Docker/config/fpm-pool.conf ${PHP_INI_DIR}/php-fpm.d/www.conf
 COPY Docker/config/php.ini ${PHP_INI_DIR}/conf.d/custom.ini
 
